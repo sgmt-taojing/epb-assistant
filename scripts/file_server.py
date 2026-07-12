@@ -1975,8 +1975,8 @@ def _count_api_endpoints():
 def run(port=None):
     if port is None:
         port = _config.get('server', {}).get('port', 8899)
-    server = HTTPServer(('127.0.0.1', port), EPBHandler)
-    print(f'🌿 环保执法助手服务已启动: http://127.0.0.1:{port}')
+    server = HTTPServer(('0.0.0.0', port), EPBHandler)
+    print(f'🌿 环保执法助手服务已启动: http://0.0.0.0:{port}')
     print(f'   POST /api/upload        — 文件上传')
     print(f'   POST /api/generate_doc  — 文书生成（docx/pdf/ppt）')
     print(f'   POST /api/search_cases  — 案例查询')
