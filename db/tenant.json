@@ -1,0 +1,175 @@
+{
+  "version": "2.0",
+  "updated": "2026-06-29",
+  "description": "平台租户配置 — 部署时注入本单位/本地区信息，快速形成本地化服务",
+  "deployment": {
+    "platform_name": "环保智慧执法平台",
+    "platform_version": "2.0",
+    "deploy_mode": "standalone",
+    "note": "平台本身是通用智能体基座，不含区域数据。部署时填写下方配置即可形成本地化服务。"
+  },
+  "tenant": {
+    "tenant_id": "",
+    "tenant_name": "",
+    "tenant_type": "",
+    "tenant_level": "",
+    "region": {
+      "province": "",
+      "city": "",
+      "district": "",
+      "admin_area_code": ""
+    },
+    "supervisor": "",
+    "contact": {
+      "address": "",
+      "phone": "",
+      "email": ""
+    }
+  },
+  "tenant_types": {
+    "province_dept": {
+      "name": "省级生态环境厅",
+      "level": "省",
+      "scope": "全省域环保监管",
+      "example": "山东省生态环境厅"
+    },
+    "city_bureau": {
+      "name": "市级生态环境局",
+      "level": "市",
+      "scope": "全市域环保监管",
+      "example": "济南市生态环境局"
+    },
+    "district_bureau": {
+      "name": "区县级生态环境分局",
+      "level": "区县",
+      "scope": "本区县环保监管",
+      "example": "济南市历下区生态环境分局"
+    },
+    "enterprise_group": {
+      "name": "企业集团",
+      "level": "企业",
+      "scope": "集团下属企业环保管理",
+      "example": "某化工集团"
+    },
+    "industrial_park": {
+      "name": "工业园区管委会",
+      "level": "园区",
+      "scope": "园区内企业环保监管",
+      "example": "某工业园区管委会"
+    },
+    "third_party_org": {
+      "name": "第三方机构",
+      "level": "机构",
+      "scope": "受委托开展督查/检测/评估",
+      "example": "某环境检测技术有限公司"
+    }
+  },
+  "data_config": {
+    "local_laws": {
+      "enabled": true,
+      "description": "本地法规文件，部署时导入本地地方法规",
+      "file": "db/law_index.json",
+      "national_laws_included": true,
+      "local_laws_to_add": []
+    },
+    "local_cases": {
+      "enabled": true,
+      "description": "本地案例文件，部署时导入本地执法案例",
+      "file": "db/cases.json",
+      "platform_cases_included": true,
+      "local_cases_to_add": []
+    },
+    "enterprises": {
+      "enabled": true,
+      "description": "辖区企业名录，部署时导入本地企业信息",
+      "file": "db/enterprises.json",
+      "template": {
+        "id": "",
+        "name": "",
+        "type": "",
+        "address": "",
+        "lng": 0,
+        "lat": 0,
+        "permit_no": "",
+        "pollutants": [],
+        "monitoring_points": [],
+        "contact_person": "",
+        "contact_phone": "",
+        "credit_level": ""
+      }
+    },
+    "monitoring_stations": {
+      "enabled": true,
+      "description": "监测站点配置，部署时导入本地监测点位",
+      "file": "db/stations.json",
+      "template": {
+        "id": "",
+        "name": "",
+        "type": "",
+        "enterprise_id": "",
+        "location": "",
+        "lng": 0,
+        "lat": 0,
+        "indicators": [],
+        "device_model": "",
+        "status": "offline"
+      }
+    },
+    "org_structure": {
+      "enabled": true,
+      "description": "组织架构配置，部署时导入本单位科室和人员",
+      "file": "db/orgs.json",
+      "template": {
+        "org_id": "",
+        "org_name": "",
+        "parent_org": "",
+        "departments": []
+      }
+    }
+  },
+  "initialization": {
+    "steps": [
+      "1. 安装平台基座（21页面+28API+6角色体系）",
+      "2. 填写 tenant 配置（单位名称/类型/区域）",
+      "3. 导入本地法规（地方法规加入 law_index.json）",
+      "4. 导入本地案例（本地执法案例加入 cases.json）",
+      "5. 导入辖区企业名录（enterprises.json）",
+      "6. 配置监测站点（stations.json）",
+      "7. 配置组织架构和用户（orgs.json + users.json）",
+      "8. 启动服务，各角色登录即看到本地化工作台"
+    ],
+    "estimated_time": "2-4小时（数据准备充分的情况下）",
+    "auto_discovery": {
+      "description": "平台启动后可自动采集补充本地知识",
+      "features": [
+        "爬虫定时采集省级/市级生态环境部门官网最新法规和案例",
+        "AI联网搜索补充最新环保政策和标准",
+        "在线监测设备自动注册和数据接入",
+        "企业自行注册并填报基本信息"
+      ]
+    }
+  },
+  "multi_tenant": {
+    "supported": true,
+    "isolation": "data-level",
+    "description": "支持省→市→区县三级部署，数据逐级汇聚",
+    "hierarchy": {
+      "province": {
+        "scope": "全省数据汇总",
+        "data_sources": ["各市局上报", "省级直属监测站", "省级督查组"],
+        "functions": ["全省态势感知", "跨市协调督办", "省级政策下发"]
+      },
+      "city": {
+        "scope": "全市数据汇总",
+        "data_sources": ["各区县分局上报", "市级监测站", "市级执法大队"],
+        "functions": ["全市执法调度", "区县考核评价", "市级任务下达"]
+      },
+      "district": {
+        "scope": "本区县数据",
+        "data_sources": ["辖区企业上报", "区级监测站", "群众举报"],
+        "functions": ["日常执法检查", "企业监管", "举报受理处置"]
+      }
+    },
+    "data_flow": "区县分局采集 → 市局汇总分析 → 省厅态势感知（逐级汇聚，不可逆向查看）"
+  }
+}

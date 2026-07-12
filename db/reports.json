@@ -1,0 +1,122 @@
+[
+  {
+    "id": "RPT-20260624-001",
+    "reporter": {
+      "name": "张三",
+      "phone": "13800000000",
+      "anonymous": false
+    },
+    "target": {
+      "company": "某化工厂",
+      "address": "某市某区"
+    },
+    "type": "水污染",
+    "description": "某工厂偷排废水",
+    "location": {
+      "province": "山东",
+      "city": "济南",
+      "district": "历下区",
+      "detail": "工业南路"
+    },
+    "images": [],
+    "status": "pending",
+    "created_at": "2026-06-24 14:05:07",
+    "updated_at": "2026-06-24 14:05:07"
+  },
+  {
+    "id": "RPT-20260624-002",
+    "reporter": {
+      "name": "移动端测试",
+      "phone": "13900000000",
+      "anonymous": false
+    },
+    "target": {
+      "company": "测试化工厂",
+      "address": "测试地址"
+    },
+    "type": "水污染",
+    "description": "移动端举报测试：工厂偷排废水",
+    "location": {
+      "province": "山东",
+      "city": "济南",
+      "district": "历下区",
+      "detail": "工业南路123号"
+    },
+    "images": [],
+    "status": "accepted",
+    "created_at": "2026-06-24 15:24:14",
+    "updated_at": "2026-06-24 18:07:25"
+  },
+  {
+    "id": "RPT-20260624-003",
+    "reporter": {
+      "name": "E2E测试",
+      "phone": "13700000000",
+      "anonymous": false
+    },
+    "target": {
+      "company": "E2E测试化工厂",
+      "address": "测试地址100号"
+    },
+    "type": "水污染",
+    "description": "E2E测试：工厂通过暗管偷排含重金属废水",
+    "location": {
+      "province": "山东",
+      "city": "济南",
+      "district": "历城区",
+      "detail": "工业北路100号"
+    },
+    "images": [],
+    "status": "pending",
+    "created_at": "2026-06-24 18:07:25",
+    "updated_at": "2026-06-24 18:07:25"
+  },
+  {
+    "id": "RPT-20260624-004",
+    "reporter": {
+      "name": "测试",
+      "phone": "13600000000",
+      "anonymous": false
+    },
+    "target": {
+      "company": "测试",
+      "address": ""
+    },
+    "type": "水污染",
+    "description": "测试",
+    "location": {
+      "province": "",
+      "city": "",
+      "district": "",
+      "detail": "测试"
+    },
+    "images": [],
+    "status": "pending",
+    "created_at": "2026-06-24 18:08:54",
+    "updated_at": "2026-06-24 18:08:54"
+  },
+  {
+    "id": "RPT-20260629-001",
+    "reporter": {
+      "name": "市民王先生",
+      "phone": "13777777777",
+      "anonymous": false
+    },
+    "target": {
+      "company": "临沂某化工厂",
+      "address": "临沂市河东区工业路88号"
+    },
+    "type": "水污染",
+    "description": "该厂夜间通过暗管向沂河支流排放红色废水，有明显的刺鼻气味，河水变色持续约3小时",
+    "location": {
+      "province": "山东",
+      "city": "临沂",
+      "district": "河东区",
+      "detail": "工业路88号东侧河道"
+    },
+    "images": [],
+    "status": "accepted",
+    "created_at": "2026-06-29 13:02:22",
+    "updated_at": "2026-06-29 13:02:22"
+  }
+]

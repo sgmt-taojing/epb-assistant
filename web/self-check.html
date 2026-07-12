@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>企业自查 — 环保智能体</title>
+<style>
+:root{--green:#1B4332;--green-mid:#2D6A4F;--green-light:#52B788;--green-pale:#D8E8DC;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#777;--red:#C0392B;--amber:#E67E22;--radius:14px;--shadow:0 2px 12px rgba(27,67,50,.1)}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text)}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100}
+.top-bar h1{font-size:17px;font-weight:600}.top-bar .sub{font-size:11px;opacity:.75}
+.container{padding:12px;max-width:800px;margin:0 auto}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px;border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:700;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.check-item{display:flex;align-items:flex-start;gap:8px;padding:10px;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-item input[type=checkbox]{margin-top:2px;flex-shrink:0;width:18px;height:18px}
+.check-content{flex:1}.check-name{font-size:13px;font-weight:600}.check-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.check-status{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600}
+.status-pass{background:#D5F5E3;color:var(--green)}.status-fail{background:#FDEDEC;color:var(--red)}.status-na{background:#EBF5FB;color:var(--blue)}
+.industry-select{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:12px}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}.btn-primary{background:var(--green);color:#fff}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.result-box{text-align:center;padding:14px;border-radius:10px}.result-box.pass{background:#D5F5E3}.result-box.fail{background:#FDEDEC}.result-box.total{background:var(--green-pale)}
+.result-box .num{font-size:28px;font-weight:700}.result-box .label{font-size:11px;color:var(--muted);margin-top:2px}
+textarea{width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;min-height:60px;resize:vertical;font-family:inherit}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.back-link{display:block;text-align:center;padding:16px;color:var(--green);font-size:13px;text-decoration:none}
+</style>
+<script src="/auth-guard.js"></script>
+</head>
+<body>
+<div class="top-bar">
+  <h1>🏢 企业环保自查</h1>
+  <div class="sub">环保智能体 · 企业合规自检平台</div>
+</div>
+<div class="container">
+  <div class="card">
+    <div class="card-title">📋 自查配置</div>
+    <select class="industry-select" id="industry" onchange="loadChecklist()">
+      <option value="">请选择行业</option>
+      <option value="manufacturing">制造业</option>
+      <option value="chemical">化工行业</option>
+      <option value="mining">采矿行业</option>
+      <option value="food">食品加工</option>
+      <option value="textile">纺织印染</option>
+      <option value="construction">建筑施工</option>
+      <option value="catering">餐饮服务</option>
+    </select>
+  </div>
+  <div class="card" id="checklistCard" style="display:none">
+    <div class="card-title">✅ 自查清单</div>
+    <div id="checklist"></div>
+  </div>
+  <div class="card" id="resultCard" style="display:none">
+    <div class="card-title">📊 自查结果</div>
+    <div class="result-grid">
+      <div class="result-box pass"><div class="num" id="passCount">0</div><div class="label">合格项</div></div>
+      <div class="result-box fail"><div class="num" id="failCount">0</div><div class="label">不合格项</div></div>
+      <div class="result-box total"><div class="num" id="totalCount">0</div><div class="label">总检查项</div></div>
+    </div>
+    <div style="margin-top:12px">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">整改计划</label>
+      <textarea id="rectificationPlan" placeholder="针对不合格项，请填写整改计划和完成时限..."></textarea>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="submitSelfCheck()">提交自查报告</button>
+  </div>
+  <a href="index.html" class="back-link">← 返回首页</a>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var CHECKLISTS={
+  manufacturing:[
+    {name:'排污许可证',desc:'持有效的排污许可证，在许可范围内排污'},
+    {name:'废气治理设施',desc:'治污设施正常运行，台账记录完整'},
+    {name:'废水处理设施',desc:'污水处理设施正常运行，出水达标'},
+    {name:'在线监测设备',desc:'在线监测设备正常运行，数据联网传输'},
+    {name:'危废贮存',desc:'危废贮存间符合规范，标识清晰，台账完整'},
+    {name:'危废转移',desc:'危废转移联单齐全，交有资质单位处置'},
+    {name:'噪声防治',desc:'厂界噪声达标，防治设施完好'},
+    {name:'环境应急预案',desc:'已编制应急预案并备案，定期演练'},
+    {name:'环评手续',desc:'环评批复齐全，无未批先建项目'},
+    {name:'自行监测',desc:'按排污许可证要求开展自行监测'}
+  ],
+  chemical:[
+    {name:'排污许可证',desc:'持有效排污许可证'},
+    {name:'VOCs治理',desc:'VOCs收集处理设施正常运行'},
+    {name:'废水处理',desc:'含特定污染物废水专项处理'},
+    {name:'危废管理',desc:'危废分类贮存、台账完整、转移规范'},
+    {name:'环境风险防范',desc:'事故应急池、围堰、报警系统完好'},
+    {name:'有毒有害气体监测',desc:'厂界有毒气体监测系统运行正常'},
+    {name:'管道设备密封',desc:'LDAR检测达标，无泄漏'},
+    {name:'环境应急预案',desc:'应急预案备案，演练记录完整'},
+    {name:'环评及三同时',desc:'环评批复齐全，三同时竣工验收'},
+    {name:'自行监测',desc:'按证开展自行监测，数据公开'}
+  ],
+  mining:[
+    {name:'采矿许可证',desc:'持有效采矿许可证'},
+    {name:'粉尘控制',desc:'采场、运输道路洒水降尘措施到位'},
+    {name:'废水处理',desc:'矿井水处理设施运行正常，达标排放'},
+    {name:'尾矿库安全',desc:'尾矿库渗滤液收集处理，坝体稳定'},
+    {name:'生态修复',desc:'矿山地质环境保护与治理方案落实'},
+    {name:'噪声控制',desc:'破碎、筛分设备降噪措施到位'},
+    {name:'危废管理',desc:'废机油等危废规范贮存处置'},
+    {name:'环境监测',desc:'按方案开展环境监测'},
+    {name:'水土保持',desc:'水土保持措施落实'},
+    {name:'闭矿方案',desc:'已编制闭矿生态环境恢复方案'}
+  ],
+  food:[
+    {name:'排污许可证',desc:'持有效排污许可证'},
+    {name:'废水处理',desc:'污水处理设施运行正常，COD/BOD达标'},
+    {name:'废气治理',desc:'异味治理设施运行正常'},
+    {name:'噪声控制',desc:'设备降噪措施到位，厂界噪声达标'},
+    {name:'固废处置',desc:'废渣、污泥规范处置'},
+    {name:'在线监测',desc:'在线监测设备运行正常（如适用）'},
+    {name:'环境应急预案',desc:'应急预案备案'},
+    {name:'环评手续',desc:'环评批复齐全'},
+    {name:'自行监测',desc:'按证开展自行监测'},
+    {name:'清洁生产',desc:'清洁生产审核报告'}
+  ],
+  textile:[
+    {name:'排污许可证',desc:'持有效排污许可证'},
+    {name:'废水处理',desc:'印染废水处理设施运行正常，达标排放'},
+    {name:'废气治理',desc:'定型机废气治理设施运行正常'},
+    {name:'危废管理',desc:'废染料桶、废机油等危废规范管理'},
+    {name:'污泥处置',desc:'污水处理污泥规范处置'},
+    {name:'噪声控制',desc:'织机、风机降噪措施到位'},
+    {name:'在线监测',desc:'在线监测设备运行正常'},
+    {name:'环境应急预案',desc:'应急预案备案'},
+    {name:'环评手续',desc:'环评批复齐全'},
+    {name:'清洁生产',desc:'清洁生产审核完成'}
+  ],
+  construction:[
+    {name:'施工许可',desc:'持有效施工许可证'},
+    {name:'扬尘控制',desc:'围挡、覆盖、洒水等措施到位'},
+    {name:'噪声控制',desc:'施工噪声达标，夜间施工手续齐全'},
+    {name:'废水处理',desc:'施工废水沉淀处理，不外排'},
+    {name:'固废处置',desc:'建筑垃圾规范清运'},
+    {name:'危废管理',desc:'废油漆桶等危废规范处置'},
+    {name:'环境监测',desc:'扬尘、噪声监测设备安装运行'},
+    {name:'环保承诺',desc:'施工环保承诺书公示'},
+    {name:'渣土运输',desc:'渣土车密闭运输，手续齐全'},
+    {name:'完工恢复',desc:'完工后场地恢复到位'}
+  ],
+  catering:[
+    {name:'油烟净化',desc:'油烟净化器安装并正常运行，定期清洗'},
+    {name:'油水分离',desc:'油水分离器安装并正常运行'},
+    {name:'噪声控制',desc:'风机、排烟管道降噪措施到位'},
+    {name:'垃圾处理',desc:'餐厨垃圾交有资质单位收运'},
+    {name:'废气排放',desc:'油烟排放口位置合规，不影响周边居民'},
+    {name:'清洗记录',desc:'油烟净化器清洗维护记录完整'},
+    {name:'环评手续',desc:'环评登记或备案完成'},
+    {name:'排污许可',desc:'排污许可登记完成'},
+    {name:'检测报告',desc:'油烟、噪声检测报告有效'},
+    {name:'环保承诺',desc:'环保承诺书公示'}
+  ]
+};
+var currentChecks=[];
+function loadChecklist(){
+  var ind=document.getElementById('industry').value;
+  if(!ind){document.getElementById('checklistCard').style.display='none';return;}
+  currentChecks=CHECKLISTS[ind]||[];
+  var html=currentChecks.map(function(c,i){
+    return '<div class="check-item"><input type="checkbox" id="chk-'+i+'" onchange="updateResult()">'+
+      '<div class="check-content"><div class="check-name">'+(i+1)+'. '+c.name+'</div>'+
+      '<div class="check-desc">'+c.desc+'</div></div></div>';
+  }).join('');
+  document.getElementById('checklist').innerHTML=html;
+  document.getElementById('checklistCard').style.display='block';
+  document.getElementById('resultCard').style.display='block';
+  updateResult();
+}
+function updateResult(){
+  var pass=0,fail=0;
+  currentChecks.forEach(function(c,i){
+    var cb=document.getElementById('chk-'+i);
+    if(cb&&cb.checked)pass++;else fail++;
+  });
+  document.getElementById('passCount').textContent=pass;
+  document.getElementById('failCount').textContent=fail;
+  document.getElementById('totalCount').textContent=currentChecks.length;
+}
+function submitSelfCheck(){
+  var ind=document.getElementById('industry').value;
+  var pass=0,fail=0;
+  currentChecks.forEach(function(c,i){if(document.getElementById('chk-'+i).checked)pass++;else fail++;});
+  var plan=document.getElementById('rectificationPlan').value;
+  if(fail>0&&!plan){showToast('请填写整改计划');return;}
+  var report={industry:ind,pass:pass,fail:fail,total:currentChecks.length,plan:plan,date:new Date().toISOString()};
+  fetch('/api/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'self_check',title:'企业自查报告 — '+ind,source:'企业自查',content:JSON.stringify(report),priority:fail>3?'high':'medium'})}).then(function(r){return r.json();}).then(function(){
+    showToast('自查报告已提交');setTimeout(function(){location.href='index.html';},1500);
+  }).catch(function(){showToast('提交失败，请检查服务');});
+}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2500);}
+</script>
+</body>
+</html>

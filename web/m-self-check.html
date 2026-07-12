@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🏢 企业自查 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 8px rgba(27,67,50,.06);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px;flex-shrink:0}
+.top-bar h1{font-size:16px;font-weight:600;flex:1}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin:12px;padding:16px}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:12px}
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:12px;color:var(--g);margin-bottom:4px;font-weight:600}
+.form-input,.form-select{width:100%;background:var(--gbg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--gl);background:#fff}
+.industry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.industry-chip{padding:10px 4px;text-align:center;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--gbg);cursor:pointer}
+.industry-chip:active{background:var(--gp)}
+.industry-chip.selected{background:var(--gm);color:#fff;border-color:var(--gm)}
+.industry-chip .icon{display:block;font-size:20px;margin-bottom:2px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-icon{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .15s;margin-top:1px}
+.check-icon.pass{background:#27ae60;border-color:#27ae60;color:#fff}
+.check-icon.fail{background:var(--red);border-color:var(--red);color:#fff}
+.check-icon.na{background:#bbb;border-color:#bbb;color:#fff}
+.check-content{flex:1}
+.check-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.check-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.check-actions{display:flex;gap:4px;margin-top:4px}
+.check-action{padding:3px 10px;border:1px solid var(--border);border-radius:12px;font-size:11px;background:var(--gbg);cursor:pointer}
+.check-action:active{background:var(--gp)}
+.check-action.active-pass{background:#27ae60;color:#fff;border-color:#27ae60}
+.check-action.active-fail{background:var(--red);color:#fff;border-color:var(--red)}
+.check-action.active-na{background:#bbb;color:#fff;border-color:#bbb}
+.result-card{text-align:center}
+.result-score{font-size:40px;font-weight:900;color:var(--g);margin:10px 0}
+.result-status{font-size:14px;font-weight:600;padding:6px 16px;border-radius:20px;display:inline-block}
+.status-pass{background:#D5F5E3;color:#27ae60}
+.status-warn{background:#FFF3E0;color:#E67E22}
+.status-fail{background:#FDEDEC;color:#E74C3C}
+.result-detail{margin-top:12px;font-size:12px;color:var(--muted)}
+.btn{width:100%;padding:14px;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-primary{background:linear-gradient(135deg,var(--gm),var(--g));color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--gm);color:var(--gm)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;display:none}
+#toast.show{display:block}
+.footer{text-align:center;padding:16px;color:var(--muted);font-size:11px}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/wechat-h5.html" class="back-btn">‹</a>
+  <h1>🏢 企业自查</h1>
+</div>
+
+<div id="setup-page">
+  <div class="card">
+    <div class="card-title">📋 企业信息</div>
+    <div class="form-group">
+      <label class="form-label">企业名称</label>
+      <input type="text" class="form-input" id="company-name" placeholder="如：某某化工有限公司">
+    </div>
+    <div class="form-group">
+      <label class="form-label">所属行业</label>
+      <div class="industry-grid" id="industry-grid">
+        <div class="industry-chip" data-val="" style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;cursor:default;background:transparent">行业列表加载中...</div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:0 12px 20px">
+    <button class="btn btn-primary" onclick="startCheck()">开始合规自查</button>
+  </div>
+  <div class="card">
+    <div class="card-title">💡 自查说明</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.6">
+      本自查工具根据企业所属行业自动生成检查清单，涵盖环保手续、污染防治设施、排放监测、危废管理等方面。每项可选择「合规」「不合规」「不适用」，系统将自动评分并给出建议。
+    </div>
+  </div>
+</div>
+
+<div id="check-page" style="display:none">
+  <div class="card">
+    <div class="card-title">🔍 合规检查清单</div>
+    <div id="check-list"></div>
+  </div>
+  <div style="padding:0 12px 20px">
+    <button class="btn btn-primary" onclick="generateReport()">生成自查报告</button>
+  </div>
+</div>
+
+<div id="result-page" style="display:none">
+  <div class="card result-card">
+    <div class="card-title">📊 自查结果</div>
+    <div id="result-company" style="font-size:14px;font-weight:600;margin-bottom:8px"></div>
+    <div class="result-score" id="result-score">--</div>
+    <div class="result-status" id="result-status">--</div>
+    <div class="result-detail" id="result-detail"></div>
+  </div>
+  <div class="card" id="result-issues" style="display:none">
+    <div class="card-title">⚠️ 发现问题</div>
+    <div id="issue-list"></div>
+  </div>
+  <div style="padding:0 12px 20px">
+    <button class="btn btn-outline" onclick="location.reload()">重新自查</button>
+    <a href="/wechat-h5.html" class="btn btn-primary" style="display:block;text-align:center;text-decoration:none;line-height:48px">返回首页</a>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="footer">© 2026 环保智慧执法平台 · AI辅助企业合规自检</div>
+
+<script>
+var selectedIndustry='';
+var checkItems=[];
+
+document.querySelectorAll('.industry-chip').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.industry-chip').forEach(function(c){c.classList.remove('selected')});
+    el.classList.add('selected');
+    selectedIndustry=el.dataset.val;
+  });
+});
+
+// Check item templates by industry
+var CHECK_TEMPLATES={
+  '化工':[
+    {name:'环境影响评价手续',desc:'已取得环评批复并完成竣工验收'},
+    {name:'排污许可证',desc:'已取得排污许可证且在有效期内'},
+    {name:'废水处理设施',desc:'污水处理设施正常运行，出水达标排放'},
+    {name:'废气处理设施',desc:'废气收集处理设施正常运行，排放达标'},
+    {name:'危废规范化管理',desc:'危废贮存场所规范，台账完整，转移联单齐全'},
+    {name:'在线监测系统',desc:'在线监测设备正常运行，数据联网传输'},
+    {name:'环境应急预案',desc:'已编制环境应急预案并备案，定期演练'},
+    {name:'排污许可执行报告',desc:'按期提交执行报告和监测数据'}
+  ],
+  'default':[
+    {name:'环境影响评价手续',desc:'已取得环评批复并完成竣工验收'},
+    {name:'排污许可证',desc:'已取得排污许可证且在有效期内'},
+    {name:'废水排放合规',desc:'废水排放符合标准，处理设施正常运行'},
+    {name:'废气排放合规',desc:'废气排放符合标准，处理设施正常运行'},
+    {name:'固废规范化处置',desc:'固废分类收集、规范贮存、合法处置'},
+    {name:'噪声排放达标',desc:'厂界噪声符合排放标准'},
+    {name:'环境管理台账',desc:'环境管理台账记录完整规范'},
+    {name:'环境应急预案',desc:'已编制环境应急预案并备案'}
+  ]
+};
+
+
+// ===== 配置加载（可覆盖，部署时修改 config.json）=====
+var CONFIG_LOADED=false;
+fetch('/api/config').then(r=>r.json()).then(cfg=>{
+  CONFIG_LOADED=true;
+  var templates=cfg.checklist_templates||{};
+  for(var k in templates){CHECK_TEMPLATES[k]=templates[k];}
+}).catch(function(){});
+
+function startCheck(){
+  var company=document.getElementById('company-name').value.trim();
+  if(!company){showToast('请输入企业名称');return;}
+  if(!selectedIndustry){showToast('请选择所属行业');return;}
+  var template=CHECK_TEMPLATES[selectedIndustry]||CHECK_TEMPLATES['default'];
+  checkItems=template.map(function(item){
+    return {name:item.name,desc:item.desc,status:null};
+  });
+  renderCheckList();
+  document.getElementById('setup-page').style.display='none';
+  document.getElementById('check-page').style.display='block';
+}
+
+function renderCheckList(){
+  var html=checkItems.map(function(item,idx){
+    return '<div class="check-item">'+
+      '<div class="check-content"><div class="check-name">'+item.name+'</div><div class="check-desc">'+item.desc+'</div>'+
+      '<div class="check-actions">'+
+      '<span class="check-action '+(item.status==='pass'?'active-pass':'')+'" onclick="setStatus('+idx+',\'pass\')">✓ 合规</span>'+
+      '<span class="check-action '+(item.status==='fail'?'active-fail':'')+'" onclick="setStatus('+idx+',\'fail\')">✗ 不合规</span>'+
+      '<span class="check-action '+(item.status==='na'?'active-na':'')+'" onclick="setStatus('+idx+',\'na\')">— 不适用</span>'+
+      '</div></div></div>';
+  }).join('');
+  document.getElementById('check-list').innerHTML=html;
+}
+
+function setStatus(idx,status){
+  checkItems[idx].status=status;
+  renderCheckList();
+}
+
+function generateReport(){
+  var answered=checkItems.filter(function(i){return i.status;});
+  if(answered.length<checkItems.length){showToast('请完成所有检查项');return;}
+  var pass=checkItems.filter(function(i){return i.status==='pass';}).length;
+  var fail=checkItems.filter(function(i){return i.status==='fail';}).length;
+  var na=checkItems.filter(function(i){return i.status==='na';}).length;
+  var total=checkItems.length-na;
+  var score=total>0?Math.round(pass/total*100):100;
+  var status,statusCls;
+  if(score>=80){status='合规良好';statusCls='status-pass';}
+  else if(score>=60){status='存在风险';statusCls='status-warn';}
+  else{status='合规风险高';statusCls='status-fail';}
+  document.getElementById('result-company').textContent=document.getElementById('company-name').value;
+  document.getElementById('result-score').textContent=score+'分';
+  document.getElementById('result-status').className='result-status '+statusCls;
+  document.getElementById('result-status').textContent=status;
+  document.getElementById('result-detail').innerHTML='合规 '+pass+' 项 | 不合规 '+fail+' 项 | 不适用 '+na+' 项';
+  // Show issues
+  var issues=checkItems.filter(function(i){return i.status==='fail';});
+  if(issues.length>0){
+    var html=issues.map(function(i){return '<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-weight:600;font-size:13px;color:var(--red)">✗ '+i.name+'</div><div style="font-size:11px;color:var(--muted)">'+i.desc+'</div></div>';}).join('');
+    document.getElementById('issue-list').innerHTML=html;
+    document.getElementById('result-issues').style.display='block';
+  }
+  document.getElementById('check-page').style.display='none';
+  document.getElementById('result-page').style.display='block';
+  // 提交自查报告到服务器
+  var company=document.getElementById('company-name').value;
+  var report={company:company,industry:selectedIndustry,score:score,pass:pass,fail:fail,na:na,status:status,issues:issues.map(function(i){return i.name;}),items:checkItems};
+  fetch('/api/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'self_check',title:'企业自查报告 — '+company,source:'企业自查',content:JSON.stringify(report),priority:fail>3?'high':'medium'})}).then(function(){}).catch(function(){});
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='show';
+  setTimeout(function(){t.className='';},2000);
+}
+</script>
+</body>
+</html>

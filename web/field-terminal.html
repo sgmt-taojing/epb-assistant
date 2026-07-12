@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🚔 现场执法终端</title>
+<style>
+:root {
+  --green: #1B4332; --green-mid: #2D6A4F; --green-light: #52B788;
+  --green-pale: #D8E8DC; --green-bg: #F2F8F4;
+  --red: #C0392B; --red-pale: #FDEDEC;
+  --amber: #E67E22; --amber-pale: #FEF5E7;
+  --blue: #2471A3; --blue-pale: #EBF5FB;
+  --purple: #7D3C98; --purple-pale: #F4ECF7;
+  --bg: #F0F2F0; --card: #FFFFFF; --border: #D0E0D4;
+  --text: #1A1A1A; --text-muted: #777;
+  --shadow: 0 2px 12px rgba(27,67,50,0.1);
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* === 顶栏 === */
+.top-bar {
+  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+  color: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
+}
+.top-bar h1 { font-size: 17px; font-weight: 600; }
+.top-bar .sub { font-size: 11px; opacity: 0.75; }
+.top-bar .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.rec-dot { width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; animation: pulse 1.2s infinite; }
+.rec-dot.off { background: #52B788; animation: none; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+.top-badge { font-size: 10px; background: rgba(255,255,255,0.18); padding: 3px 8px; border-radius: 12px; }
+
+/* === 主体 === */
+.container { padding: 12px 12px 80px; max-width: 520px; margin: 0 auto; }
+
+/* === 卡片 === */
+.card {
+  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 14px; margin-bottom: 12px; border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px;
+  margin-bottom: 10px; color: var(--green);
+}
+.card-title .icon { font-size: 18px; }
+
+/* === 步骤指引 === */
+.step-guide { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: flex; gap: 10px; padding: 10px 0; position: relative;
+}
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
+  background: var(--green-pale); color: var(--green); border: 2px solid var(--green-light);
+}
+.step-num.done { background: var(--green); color: white; border-color: var(--green); }
+.step-num.active { background: var(--amber); color: white; border-color: var(--amber); animation: pulse 1.5s infinite; }
+.step-body { flex: 1; }
+.step-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.step-line {
+  position: absolute; left: 13px; top: 38px; width: 2px; height: calc(100% - 28px);
+  background: var(--border);
+}
+.step:last-child .step-line { display: none; }
+.step-line.done { background: var(--green); }
+.step-line.active { background: var(--amber); }
+
+/* === 采集按钮组 === */
+.collect-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+.collect-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 14px 6px 10px; border: 2px solid var(--border); border-radius: 12px;
+  background: white; cursor: pointer; transition: all 0.2s; position: relative;
+}
+.collect-btn:hover { border-color: var(--green-light); background: var(--green-pale); }
+.collect-btn:active { transform: scale(0.97); }
+.collect-btn .emoji { font-size: 28px; }
+.collect-btn .label { font-size: 12px; font-weight: 600; color: var(--text); }
+.collect-btn .hint { font-size: 10px; color: var(--text-muted); }
+.collect-btn .badge-count {
+  position: absolute; top: -6px; right: -6px; background: var(--red); color: white;
+  font-size: 10px; min-width: 18px; height: 18px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+  display: none;
+}
+.collect-btn.has-data .badge-count { display: flex; }
+.collect-btn.recording { border-color: var(--red); background: var(--red-pale); animation: borderPulse 1s infinite; }
+@keyframes borderPulse { 0%,100%{border-color:var(--red)} 50%{border-color:rgba(192,57,43,0.3)} }
+
+/* === 语音录制 === */
+.voice-area { margin-top: 8px; }
+.voice-btn {
+  width: 100%; padding: 16px; border: 2px solid var(--red); border-radius: 12px;
+  background: var(--red-pale); color: var(--red); font-size: 15px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.voice-btn:active { background: var(--red); color: white; }
+.voice-btn.recording { background: var(--red); color: white; animation: pulse 1s infinite; }
+.voice-timer { font-size: 22px; font-variant-numeric: tabular-nums; }
+
+/* === 已采集证据列表 === */
+.evidence-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.evidence-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--green-bg);
+}
+.evidence-item .ev-icon { font-size: 20px; }
+.evidence-item .ev-info { flex: 1; }
+.evidence-item .ev-name { font-size: 12px; font-weight: 600; }
+.evidence-item .ev-meta { font-size: 10px; color: var(--text-muted); }
+.evidence-item .ev-del {
+  background: none; border: none; color: var(--red); font-size: 16px; cursor: pointer;
+  padding: 4px; border-radius: 4px;
+}
+.evidence-item .ev-del:hover { background: var(--red-pale); }
+
+/* === 知识库查询 === */
+.kb-search {
+  display: flex; gap: 6px; margin-bottom: 8px;
+}
+.kb-search input {
+  flex: 1; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 14px; outline: none; background: var(--green-bg);
+}
+.kb-search input:focus { border-color: var(--green-light); }
+.kb-search button {
+  padding: 10px 16px; background: var(--green); color: white; border: none;
+  border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.kb-result {
+  padding: 10px; background: var(--green-bg); border-radius: 8px; font-size: 13px;
+  line-height: 1.6; border-left: 3px solid var(--green-light); margin-top: 6px;
+  display: none;
+}
+.kb-result.show { display: block; }
+
+/* === 智能指导 === */
+.guide-panel {
+  padding: 12px; background: linear-gradient(135deg, var(--amber-pale), #FFF9E6);
+  border-radius: 10px; border: 1px solid #F5CBA7; margin-top: 8px;
+}
+.guide-panel .guide-title {
+  font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 4px;
+}
+.guide-panel .guide-text { font-size: 12px; line-height: 1.7; color: #6D4C00; }
+.guide-panel .guide-text b { color: var(--red); }
+.guide-panel .guide-text .tip { 
+  display: inline-block; background: #FFF3CD; padding: 1px 6px; border-radius: 4px;
+  font-size: 11px; color: #856404; margin-left: 2px;
+}
+
+/* === 风险标签 === */
+.risk-tag {
+  display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px;
+  border-radius: 6px; font-size: 11px; font-weight: 700;
+}
+.risk-high { background: var(--red-pale); color: var(--red); }
+.risk-mid { background: var(--amber-pale); color: var(--amber); }
+.risk-low { background: #D5F5E3; color: var(--green); }
+
+/* === 电子证据采集 === */
+.e-evidence-section { margin-top: 8px; }
+.e-evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.e-ev-btn {
+  display: flex; align-items: center; gap: 6px; padding: 10px;
+  border: 1.5px dashed var(--blue); border-radius: 8px; background: var(--blue-pale);
+  cursor: pointer; font-size: 12px; color: var(--blue); font-weight: 600;
+  transition: all 0.2s;
+}
+.e-ev-btn:hover { background: #D6EAF8; border-style: solid; }
+.e-ev-btn:active { transform: scale(0.97); }
+.e-ev-btn.collected { border-style: solid; background: #D5F5E3; border-color: var(--green-light); color: var(--green); }
+
+/* === 提交区 === */
+.submit-area { margin-top: 10px; text-align: center; }
+.submit-btn {
+  width: 100%; padding: 14px; background: var(--green); color: white; border: none;
+  border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+}
+.submit-btn:hover { background: var(--green-mid); }
+.submit-btn:active { transform: scale(0.98); }
+.submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+.submit-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+/* === Toast === */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: rgba(27,67,50,0.92); color: white; padding: 10px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; z-index: 9999; transition: transform 0.3s;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* === 案情输入 === */
+.case-input {
+  width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 13px; min-height: 60px; resize: vertical; outline: none;
+  font-family: inherit; line-height: 1.5;
+}
+.case-input:focus { border-color: var(--green-light); }
+
+/* === 违法类型选择 === */
+.vtype-grid { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.vtype-chip {
+  padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 16px;
+  font-size: 11px; cursor: pointer; background: white; transition: all 0.2s;
+}
+.vtype-chip.active { background: var(--green); color: white; border-color: var(--green); }
+.vtype-chip:hover:not(.active) { border-color: var(--green-light); }
+
+/* === 图片预览 === */
+.photo-preview {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.photo-preview .thumb {
+  width: 60px; height: 60px; border-radius: 6px; object-fit: cover;
+  border: 2px solid var(--border); cursor: pointer;
+}
+.photo-preview .thumb:hover { border-color: var(--green-light); }
+
+/* === 底部返回 === */
+.back-link {
+  display: block; text-align: center; padding: 16px; color: var(--green);
+  font-size: 13px; text-decoration: none; font-weight: 500;
+}
+
+/* === 场景智能识别 === */
+#sceneAnalysisCard .guide-panel {
+  background: linear-gradient(135deg, #EBF5FB, #D6EAF8);
+  border-color: #85C1E9;
+}
+#sceneAnalysisCard .guide-title { color: var(--blue); }
+
+.scene-image-preview {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--green-bg);
+  border-radius: 8px;
+  text-align: center;
+}
+.scene-image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+}
+
+#sceneEvidenceGuide .evidence-guide-item {
+  padding: 8px 10px;
+  margin: 4px 0;
+  background: var(--card);
+  border-left: 3px solid var(--green-light);
+  border-radius: 4px;
+  font-size: 12px;
+}
+#sceneEvidenceGuide .evidence-guide-item .priority {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+#sceneEvidenceGuide .evidence-guide-item .priority.high {
+  background: var(--red-pale);
+  color: var(--red);
+}
+#sceneEvidenceGuide .evidence-guide-item .priority.mid {
+  background: var(--amber-pale);
+  color: var(--amber);
+}
+
+/* === 响应式 === */
+@media (min-width: 768px) {
+  .container { max-width: 600px; }
+}
+
+/* === 快捷工具栏 === */
+.quick-bar {
+  display: flex; gap: 6px; padding: 8px 12px; background: #fff;
+  border-bottom: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.quick-bar::-webkit-scrollbar { display: none; }
+.qb-btn {
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  background: var(--green-pale); color: var(--green); border: 1px solid var(--green-light);
+  cursor: pointer; white-space: nowrap; transition: all .15s;
+}
+.qb-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+.qb-btn.active { background: var(--green); color: #fff; }
+
+/* === API状态指示器 === */
+.api-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+.api-dot.ok { background: #52B788; }
+.api-dot.warn { background: #e67e22; animation: pulse 1s infinite; }
+.api-dot.err { background: #e74c3c; animation: pulse 0.8s infinite; }
+
+/* === 案件模板 === */
+.template-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.tpl-chip {
+  padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer;
+  background: var(--green-pale); color: var(--green); border: 1px dashed var(--green-light);
+  transition: all .15s;
+}
+.tpl-chip:hover { background: var(--green); color: #fff; border-style: solid; }
+
+/* === 全局搜索浮层 === */
+#ft-search-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 500;
+  display: none; align-items: flex-start; justify-content: center; padding-top: 60px;
+}
+#ft-search-overlay.show { display: flex; }
+.ft-search-box {
+  background: #fff; border-radius: 16px; width: 560px; max-width: 95vw;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.ft-search-input-wrap { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); gap: 8px; }
+.ft-si-icon { font-size: 18px; color: var(--text-muted); }
+#ft-search-input { flex: 1; border: none; outline: none; font-size: 15px; color: var(--text); background: transparent; }
+.ft-search-results { max-height: 350px; overflow-y: auto; }
+.ft-sr-item {
+  padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid #f5f5f5; transition: background .15s;
+}
+.ft-sr-item:hover { background: var(--green-pale); }
+.ft-sr-icon { font-size: 20px; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ft-sr-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.ft-sr-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.ft-sr-tag { font-size: 10px; padding: 2px 8px; border-radius: 4px; margin-left: auto; white-space: nowrap; }
+.ft-search-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.ft-search-footer { padding: 8px 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); }
+.ft-search-footer kbd { background: #f0f0f0; border: 1px solid #d0d0d0; border-radius: 4px; padding: 1px 5px; font-size: 10px; font-family: monospace; }
+
+/* === 浮动快捷面板 === */
+#ft-float-panel { position: fixed; bottom: 80px; right: 16px; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.ft-float-toggle {
+  width: 52px; height: 52px; border-radius: 50%; background: var(--green); border: none;
+  color: #fff; font-size: 24px; cursor: pointer; box-shadow: 0 4px 16px rgba(27,67,50,.4);
+  transition: all .25s; display: flex; align-items: center; justify-content: center;
+}
+.ft-float-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(27,67,50,.5); }
+.ft-float-toggle.open { transform: rotate(45deg); }
+.ft-float-menu { display: none; flex-direction: column; gap: 6px; align-items: flex-end; }
+.ft-float-menu.show { display: flex; animation: fadeInUp .2s ease; }
+.ft-float-item {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 8px 14px; font-size: 13px; color: var(--text); cursor: pointer;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: all .15s; font-weight: 500;
+}
+.ft-float-item:hover { background: var(--green-pale); border-color: var(--green-light); transform: translateX(-2px); }
+
+/* === 底部快捷Tab === */
+.ft-bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+  border-top: 1px solid var(--border); display: flex; z-index: 150;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.ft-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 8px 4px 6px; cursor: pointer; color: var(--text-muted); font-size: 10px;
+  gap: 2px; transition: all .15s; border: none; background: none;
+}
+.ft-tab:hover, .ft-tab.active { color: var(--green); }
+.ft-tab .ft-tab-icon { font-size: 22px; }
+.ft-tab.active .ft-tab-icon { transform: scale(1.1); }
+
+/* === 快捷键提示 === */
+.kbd-hint {
+  font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 4px;
+  display: flex; gap: 6px; justify-content: flex-end;
+}
+.kbd-hint kbd { background: #f0f0f0; border: 1px solid #d0d0d0; border-radius: 3px; padding: 0 4px; font-size: 9px; font-family: monospace; }
+
+@keyframes fadeInUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+</style>
+<script src="/auth-guard.js"></script>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<div class="top-bar">
+  <span style="font-size:24px">🚔</span>
+  <div>
+    <h1>现场执法终端</h1>
+    <div class="sub" id="missionInfo">准备就绪 · 实时连线知识库</div>
+  </div>
+  <div class="right">
+    <div class="top-badge" id="missionTime">--:--</div>
+    <!-- API状态指示器 -->
+    <div class="api-dot ok" id="apiDot" title="API状态" onclick="ftCheckAPI()"></div>
+    <!-- 搜索按钮 -->
+    <button class="top-badge" style="cursor:pointer;border:none;font-size:16px;padding:2px 6px" onclick="ftOpenSearch()" title="Ctrl+K 搜索">🔍</button>
+    <!-- 快速立案 -->
+    <button class="top-badge" style="cursor:pointer;border:none;background:var(--green-mid)" onclick="ftNewCase()" title="Ctrl+N 新案">📋</button>
+    <div class="rec-dot off" id="statusDot"></div>
+  </div>
+</div>
+
+<!-- 快捷工具栏 -->
+<div class="quick-bar">
+  <button class="qb-btn active" onclick="ftScrollTo('caseInputCard',this)"><span>📝</span>案情录入</button>
+  <button class="qb-btn" onclick="ftScrollTo('guideCard',this)"><span>🧭</span>执法指引</button>
+  <button class="qb-btn" onclick="ftScrollTo('collectCard',this)"><span>📷</span>证据采集</button>
+  <button class="qb-btn" onclick="ftScrollTo('sceneAnalysisCard',this)"><span>🤖</span>场景识别</button>
+  <button class="qb-btn" onclick="ftScrollTo('submitCard',this)"><span>📤</span>提交记录</button>
+  <a href="/" class="qb-btn"><span>🏠</span>返回首页</a>
+</div>
+
+<!-- 全局搜索浮层 -->
+<div id="ft-search-overlay" onclick="if(event.target===this)ftCloseSearch()">
+  <div class="ft-search-box">
+    <div class="ft-search-input-wrap">
+      <span class="ft-si-icon">🔍</span>
+      <input id="ft-search-input" placeholder="搜索法条/案例/企业/功能…" autocomplete="off" oninput="ftDoSearch(this.value)" onkeydown="if(event.key==='Escape')ftCloseSearch()">
+    </div>
+    <div class="ft-search-results" id="ft-search-results"></div>
+    <div class="ft-search-footer"><kbd>↑↓</kbd> 导航 &nbsp; <kbd>Enter</kbd> 跳转 &nbsp; <kbd>Esc</kbd> 关闭</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- === 1. 案情快速录入 === -->
+  <div class="card" id="caseInputCard">
+    <div class="card-title"><span class="icon">📝</span> 案情快速录入</div>
+    <textarea class="case-input" id="caseText" placeholder="描述现场发现的违法情况，如：发现某化工厂私设暗管排放含重金属废水..." oninput="state.caseText=this.value"></textarea>
+    
+    <!-- 快捷模板 -->
+    <div style="margin-top:6px">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">📋 快捷模板（双击应用）：</div>
+      <div class="template-chips">
+        <span class="tpl-chip" onclick="ftApplyTemplate('超标排放')">💧 超标排放</span>
+        <span class="tpl-chip" onclick="ftApplyTemplate('私设暗管')">🔧 私设暗管</span>
+        <span class="tpl-chip" onclick="ftApplyTemplate('危废非法倾倒')">🗑 危废倾倒</span>
+        <span class="tpl-chip" onclick="ftApplyTemplate('数据造假')">📡 数据造假</span>
+        <span class="tpl-chip" onclick="ftApplyTemplate('无组织排放')">🌬 无组织排放</span>
+      </div>
+    </div>
+    
+    <div style="margin-top:8px">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">违法类型：</div>
+      <div class="vtype-grid" id="vtypeGrid">
+        <span class="vtype-chip" data-type="水污染类">💧 水污染</span>
+        <span class="vtype-chip" data-type="大气污染类">🌫 大气污染</span>
+        <span class="vtype-chip" data-type="固体废物类">🗑 固废污染</span>
+        <span class="vtype-chip" data-type="环评类">📋 环评违法</span>
+        <span class="vtype-chip" data-type="排污许可类">📄 排污许可</span>
+        <span class="vtype-chip" data-type="自动监控类">📡 自动监控</span>
+        <span class="vtype-chip" data-type="噪声污染类">🔊 噪声污染</span>
+        <span class="vtype-chip" data-type="移动源监管类">🚛 移动源</span>
+      </div>
+    </div>
+
+    <button class="submit-btn" style="margin-top:10px" onclick="startAnalysis()">
+      🔍 智能分析 · 获取执法指引
+    </button>
+  </div>
+
+  <!-- === 2. 智能执法指引（分析后显示） === -->
+  <div class="card" id="guideCard" style="display:none">
+    <div class="card-title"><span class="icon">🧭</span> 执法指引</div>
+    
+    <!-- 风险等级 -->
+    <div id="riskDisplay" style="margin-bottom:10px"></div>
+
+    <!-- 步骤指引 -->
+    <div class="step-guide" id="stepGuide"></div>
+
+    <!-- 智能指导面板 -->
+    <div class="guide-panel" id="smartGuide" style="display:none">
+      <div class="guide-title">💡 智能采集指导</div>
+      <div class="guide-text" id="smartGuideText"></div>
+    </div>
+  </div>
+
+  <!-- === 3. 现场证据采集 === -->
+  <div class="card" id="collectCard">
+    <div class="card-title"><span class="icon">📷</span> 现场证据采集</div>
+
+    <div class="collect-grid">
+      <!-- 设备配置区 -->
+      <div class="collect-btn" onclick="showDeviceConfig()" id="btnDevConfig" style="border:2px dashed var(--blue);background:rgba(41,128,185,.05)">
+        <span class="emoji">⚙️</span>
+        <span class="label" id="devConfigLabel">设备配置</span>
+        <span class="hint" id="devConfigHint">连接设备</span>
+        <span class="badge-count" id="countDev">0</span>
+      </div>
+      <div class="collect-btn" onclick="takePhoto()" id="btnPhoto">
+        <span class="emoji">📸</span>
+        <span class="label">拍照取证</span>
+        <span class="hint">现场照片</span>
+        <span class="badge-count" id="countPhoto">0</span>
+      </div>
+      <div class="collect-btn" onclick="recordVideo()" id="btnVideo">
+        <span class="emoji">🎥</span>
+        <span class="label">视频取证</span>
+        <span class="hint">现场视频</span>
+        <span class="badge-count" id="countVideo">0</span>
+      </div>
+      <div class="collect-btn" onclick="toggleVoiceRecord()" id="btnVoice">
+        <span class="emoji">🎙</span>
+        <span class="label">语音记录</span>
+        <span class="hint">口述/询问</span>
+        <span class="badge-count" id="countVoice">0</span>
+      </div>
+      <div class="collect-btn" onclick="pickDocument()" id="btnDoc">
+        <span class="emoji">📎</span>
+        <span class="label">文档采集</span>
+        <span class="hint">台账/报告</span>
+        <span class="badge-count" id="countDoc">0</span>
+      </div>
+    </div>
+
+    <!-- 语音录制区域 -->
+    <div class="voice-area" id="voiceArea" style="display:none">
+      <div id="micStatus" style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-align:center"></div>
+      <button class="voice-btn" id="voiceBtn" onclick="toggleRecording()">
+        <span id="voiceIcon">🎙</span>
+        <span id="voiceLabel">点击开始录音</span>
+      </button>
+      <div style="text-align:center;margin-top:6px">
+        <span class="voice-timer" id="voiceTimer" style="display:none">00:00</span>
+      </div>
+    </div>
+
+    <!-- 图片预览 -->
+    <div class="photo-preview" id="photoPreview"></div>
+
+    <!-- 已采集证据列表 -->
+    <div class="evidence-list" id="evidenceList"></div>
+  </div>
+
+  <!-- === 3.5 场景智能识别（新增）=== -->
+  <div class="card" id="sceneAnalysisCard">
+    <div class="card-title"><span class="icon">🤖</span> 场景智能识别</div>
+    
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+      上传现场照片或描述场景，AI自动识别违法类型并生成证据采集指导
+    </div>
+
+    <!-- 场景图片上传 -->
+    <div style="margin-bottom:12px">
+      <input type="file" id="sceneImageInput" accept="image/*" capture="environment" style="display:none" onchange="handleSceneImage(this)">
+      <button class="collect-btn" style="width:100%;border-style:solid" onclick="document.getElementById('sceneImageInput').click()">
+        <span class="emoji">📸</span>
+        <span class="label">上传现场照片</span>
+        <span class="hint">AI自动分析场景</span>
+      </button>
+    </div>
+
+    <!-- 场景描述输入 -->
+    <div style="margin-bottom:12px">
+      <textarea class="case-input" id="sceneDescription" placeholder="或描述现场场景，如：工厂围墙外有隐蔽的灰色管道向河道排放浑浊废水..." style="min-height:80px"></textarea>
+      <button class="submit-btn" style="margin-top:8px;padding:10px" onclick="analyzeSceneDescription()">
+        🔍 分析场景描述
+      </button>
+    </div>
+
+    <!-- 分析结果展示 -->
+    <div id="sceneAnalysisResult" style="display:none">
+      <div class="guide-panel" style="margin-top:10px">
+        <div class="guide-title">🤖 智能分析结果</div>
+        <div class="guide-text" id="sceneAnalysisText"></div>
+      </div>
+
+      <!-- 证据采集指导 -->
+      <div id="sceneEvidenceGuide" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- 场景模板选择 -->
+  <div class="card" id="sceneTemplateCard">
+    <div class="card-title"><span class="icon">📋</span> 执法场景模板</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <button class="vtype-chip" onclick="loadSceneTemplate('exhaust')">🏭 废气超标</button>
+      <button class="vtype-chip" onclick="loadSceneTemplate('wastewater')">💧 废水超标</button>
+      <button class="vtype-chip" onclick="loadSceneTemplate('hazardous')">☣️ 危废违规</button>
+      <button class="vtype-chip" onclick="loadSceneTemplate('noise')">🔊 噪声超标</button>
+      <button class="vtype-chip" onclick="loadSceneTemplate('dust')">🌪️ 扬尘污染</button>
+    </div>
+    <div id="sceneTemplateDetail" style="display:none;margin-top:10px">
+      <div id="stReminder" style="padding:10px;background:rgba(192,57,43,0.06);border-radius:8px;font-size:13px;line-height:1.8;color:#c0392b;white-space:pre-line"></div>
+      <div id="stEvidence" style="margin-top:8px"></div>
+      <div id="stLaws" style="margin-top:8px;font-size:12px;color:#777"></div>
+    </div>
+  </div>
+
+  <!-- === 4. 电子证据采集指导 === -->
+  <div class="card" id="eEvidenceCard" style="display:none">
+    <div class="card-title"><span class="icon">💾</span> 电子证据采集</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+      电子证据易灭失，需优先固定。点击标记已采集项目。
+    </div>
+    <div class="e-evidence-grid" id="eEvidenceGrid"></div>
+  </div>
+
+  <!-- === 5. 知识库即时查询 === -->
+  <div class="card" id="kbCard" style="display:none">
+    <div class="card-title"><span class="icon">📚</span> 知识库即时查询</div>
+    <div class="kb-search">
+      <input type="text" id="kbInput" placeholder="输入关键词查询法规/案例...">
+      <button onclick="queryKB()">查询</button>
+    </div>
+    <div class="kb-result" id="kbResult"></div>
+  </div>
+
+  <!-- === 6. 提交分析 === -->
+  <div class="card" id="submitCard" style="display:none">
+    <div class="card-title"><span class="icon">📤</span> 提交现场记录</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+      将现场采集的全部证据和记录提交至AI进行深度分析
+    </div>
+    <button class="submit-btn" onclick="submitFieldRecord()" id="submitBtn">
+      📋 生成现场检查记录 · 提交AI分析
+    </button>
+    <div class="submit-hint" id="submitHint">已采集 0 项证据</div>
+  </div>
+
+  <a href="/" class="back-link">← 返回主系统</a>
+</div>
+
+<!-- 隐藏的文件输入 -->
+<input type="file" id="photoInput" accept="image/*" capture="environment" multiple style="display:none" onchange="handlePhotos(this)">
+<input type="file" id="videoInput" accept="video/*" capture="environment" style="display:none" onchange="handleVideo(this)">
+<input type="file" id="docInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" multiple style="display:none" onchange="handleDocs(this)">
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============= 全局状态 =============
+const state = {
+  caseText: '',
+  violationType: '',
+  analysisResult: null,
+  evidence: { photos: [], videos: [], voices: [], docs: [], eEvidence: [] },
+  isRecording: false,
+  mediaRecorder: null,
+  simulatedMode: false,
+  audioChunks: [],
+  recordingTimer: null,
+  recordingSeconds: 0,
+  missionStartTime: null
+};
+
+// ============= 初始化 =============
+document.addEventListener('DOMContentLoaded', () => {
+  // 违法类型选择
+  document.querySelectorAll('.vtype-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.vtype-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.violationType = chip.dataset.type;
+    });
+  });
+
+  // 更新时间
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('missionTime').textContent = 
+      now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  }, 1000);
+
+  // 语音输入（Web Speech API）
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        transcript += e.results[i][0].transcript;
+      }
+      document.getElementById('caseText').value = transcript;
+      state.caseText = transcript;
+    };
+    // 长按语音按钮启动
+    const caseInput = document.getElementById('caseText');
+    caseInput.addEventListener('dblclick', () => {
+      recognition.start();
+      showToast('🎙 语音识别已启动');
+    });
+  }
+});
+
+// ============= 智能分析 =============
+async function startAnalysis() {
+  state.caseText = document.getElementById('caseText').value.trim();
+  if (!state.caseText && !state.violationType) {
+    showToast('⚠️ 请输入案情描述或选择违法类型');
+    return;
+  }
+
+  document.getElementById('missionInfo').textContent = '分析中...';
+  document.getElementById('statusDot').classList.remove('off');
+
+  try {
+    // 调用智能分析API
+    const resp = await fetch('/api/smart_analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: state.caseText || state.violationType + '违法案件' })
+    });
+    const data = await resp.json();
+
+    if (data.ok) {
+      state.analysisResult = data.analysis;
+      renderGuide(data.analysis);
+      renderEEvidence(data.analysis);
+      showCards();
+      state.missionStartTime = new Date();
+      document.getElementById('missionInfo').textContent = '执法进行中 · 知识库已联动';
+      showToast('✅ 分析完成，执法指引已生成');
+    } else {
+      showToast('❌ 分析失败：' + (data.error || '未知错误'));
+      document.getElementById('statusDot').classList.add('off');
+      document.getElementById('missionInfo').textContent = '分析失败';
+    }
+  } catch (err) {
+    // 离线模式：使用本地法条映射
+    try {
+      const lawResp = await fetch('/api/law_mapping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ violation_type: state.violationType })
+      });
+      const lawData = await lawResp.json();
+      if (lawData.ok) {
+        const localResult = buildLocalAnalysis(lawData.data);
+        state.analysisResult = localResult;
+        renderGuide(localResult);
+        renderEEvidence(localResult);
+        showCards();
+        state.missionStartTime = new Date();
+        document.getElementById('missionInfo').textContent = '执法进行中 · 本地模式';
+        showToast('✅ 本地分析完成');
+        return;
+      }
+    } catch(e) {}
+    showToast('❌ 网络异常，请检查服务是否启动');
+    document.getElementById('statusDot').classList.add('off');
+    document.getElementById('missionInfo').textContent = '连接失败';
+  }
+}
+
+// 本地分析（离线降级）
+function buildLocalAnalysis(lawMap) {
+  const vtypes = lawMap.violation_types || {};
+  const vtype = state.violationType || Object.keys(vtypes)[0] || '水污染类';
+  const violations = vtypes[vtype] || {};
+  const law_recs = [];
+  
+  for (const [name, details] of Object.entries(violations)) {
+    law_recs.push({
+      violation: name,
+      violations: details.violations || [],
+      penalties: details.penalties || [],
+      criminal: details.criminal || null,
+      evidence: details.evidence || [],
+      measures: details.measures || [],
+      risk_level: details.risk_level || '中风险'
+    });
+  }
+
+  const riskLevel = law_recs.some(r => r.risk_level === '高风险') ? '高风险' :
+                    law_recs.some(r => r.risk_level === '中风险') ? '中风险' : '低风险';
+
+  return {
+    extracted_info: { violation_type: vtype, keywords_matched: Object.keys(violations) },
+    law_recommendations: law_recs,
+    risk_assessment: { level: riskLevel, score: riskLevel === '高风险' ? 80 : riskLevel === '中风险' ? 50 : 20, factors: [] },
+    evidence_checklist: { required: law_recs.flatMap(r => r.evidence) },
+    similar_cases: []
+  };
+}
+
+// ============= 渲染执法指引 =============
+function renderGuide(analysis) {
+  // 显示执法指引卡片
+  document.getElementById('guideCard').style.display = 'block';
+  const risk = analysis.risk_assessment;
+  const lawRecs = analysis.law_recommendations || [];
+
+  // 风险等级
+  const riskClass = risk.level === '高风险' ? 'risk-high' : risk.level === '中风险' ? 'risk-mid' : 'risk-low';
+  document.getElementById('riskDisplay').innerHTML = 
+    `<span class="risk-tag ${riskClass}">⚠️ ${risk.level}</span>` +
+    (lawRecs.some(r => r.criminal) ? ` <span class="risk-tag risk-high">🔒 涉刑</span>` : '') +
+    `<span style="font-size:11px;color:var(--text-muted);margin-left:6px">评分：${risk.score}</span>`;
+
+  // 执法步骤
+  const steps = buildSteps(analysis);
+  document.getElementById('stepGuide').innerHTML = steps.map((s, i) => `
+    <div class="step">
+      <div class="step-num ${i === 0 ? 'active' : ''}" id="stepNum${i}">${i + 1}</div>
+      ${i < steps.length - 1 ? `<div class="step-line ${i === 0 ? 'active' : ''}" id="stepLine${i}"></div>` : ''}
+      <div class="step-body">
+        <div class="step-title">${s.title}</div>
+        <div class="step-desc">${s.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // 智能指导
+  if (lawRecs.length > 0) {
+    const guide = buildSmartGuide(analysis);
+    document.getElementById('smartGuideText').innerHTML = guide;
+    document.getElementById('smartGuide').style.display = 'block';
+  }
+}
+
+function buildSteps(analysis) {
+  const risk = analysis.risk_assessment;
+  const lawRecs = analysis.law_recommendations || [];
+  const isCriminal = lawRecs.some(r => r.criminal);
+  const isHighRisk = risk.level === '高风险';
+
+  const steps = [
+    { title: '出示证件，表明身份', desc: '出示行政执法证，告知检查事由，要求企业配合' },
+    { title: '现场取证', desc: '拍照、录像、采样，固定违法证据（详见下方采集区）' },
+  ];
+
+  if (isHighRisk || isCriminal) {
+    steps.push({ title: '⚠️ 采取紧急措施', desc: '查封扣押涉案设施，控制现场，防止证据灭失' });
+  }
+
+  steps.push({ title: '制作现场检查笔录', desc: '如实记录现场情况，由执法人员和当事人签字确认' });
+  steps.push({ title: '询问当事人', desc: '制作询问笔录，了解违法事实、原因、经过' });
+
+  if (isCriminal) {
+    steps.push({ title: '🚨 移送公安机关', desc: '涉刑案件5日内制作移送书，附证据材料，抄送检察机关' });
+  }
+
+  steps.push({ title: '整理归档', desc: '将全部证据材料整理归档，移交案件审查部门' });
+
+  return steps;
+}
+
+function buildSmartGuide(analysis) {
+  const lawRecs = analysis.law_recommendations || [];
+  const risk = analysis.risk_assessment;
+  const isCriminal = lawRecs.some(r => r.criminal);
+  
+  let guide = '';
+
+  // 根据违法类型给出具体指导
+  for (const rec of lawRecs) {
+    guide += `<b>【${rec.violation}】</b><br>`;
+    
+    // 法条提示
+    if (rec.violations.length > 0) {
+      guide += `违反：${rec.violations.join('、')}<br>`;
+    }
+    
+    // 涉刑提示
+    if (rec.criminal) {
+      guide += `<b>⚠️ 涉刑门槛：${rec.criminal.threshold}</b><br>`;
+      guide += `刑事条款：${rec.criminal.law}<br>`;
+    }
+
+    // 采集重点
+    if (rec.evidence && rec.evidence.length > 0) {
+      guide += `<br>📋 <b>必须采集的证据：</b><br>`;
+      rec.evidence.forEach(e => {
+        guide += `　• ${e} <span class="tip">${getEvidenceTip(e)}</span><br>`;
+      });
+    }
+
+    guide += '<br>';
+  }
+
+  // 通用指导
+  if (isCriminal) {
+    guide += `<b>🔴 涉刑案件特别注意：</b><br>`;
+    guide += `　• 立即固定电子证据，防止数据被删改 <span class="tip">易灭失</span><br>`;
+    guide += `　• 采样须由有CMA资质的机构进行 <span class="tip">法定要求</span><br>`;
+    guide += `　• 2名以上执法人员同时在场 <span class="tip">程序要求</span><br>`;
+    guide += `　• 全程录音录像 <span class="tip">证据保全</span><br>`;
+  }
+
+  if (risk.level === '高风险') {
+    guide += `<br>⚡ <b>高风险案件建议：</b><br>`;
+    guide += `　• 优先查封相关设施设备<br>`;
+    guide += `　• 调取企业环评、排污许可、用电量等资料<br>`;
+    guide += `　• 注意控制企业负责人，防止潜逃<br>`;
+  }
+
+  return guide;
+}
+
+function getEvidenceTip(evidenceName) {
+  const tips = {
+    '现场检查笔录': '必须',
+    '采样监测报告（CMA资质）': '核心证据',
+    '暗管位置照片/视频': '关键物证',
+    '企业负责人询问笔录': '必须',
+    '现场照片/视频': '必须',
+    '生产记录': '调取原件',
+    '用电量记录': '佐证',
+    '在线监测数据': '电子证据',
+    '监测报告': 'CMA资质',
+    '排污许可证': '核验原件',
+    '环评批复': '核验原件',
+    '转移联单': '核对签章',
+    '危废鉴定报告': '必须',
+    '操作日志': '电子证据',
+    '监控视频': '易灭失',
+    '原辅材料台账': '调取',
+    '设备运行记录': '调取',
+  };
+  return tips[evidenceName] || '重要';
+}
+
+// ============= 渲染电子证据采集 =============
+function renderEEvidence(analysis) {
+  const lawRecs = analysis.law_recommendations || [];
+  const allEvidence = new Set();
+  
+  // 从法条推荐中提取电子证据
+  const eEvidenceTypes = [
+    { name: '在线监测数据', icon: '📊', desc: '从监控平台导出原始数据' },
+    { name: '用电量记录', icon: '⚡', desc: '调取企业近期用电明细' },
+    { name: '生产台账', icon: '📋', desc: '拍照或导出电子台账' },
+    { name: '环评批复文件', icon: '📄', desc: '扫描或拍照环评批复' },
+    { name: '排污许可证', icon: '🎟', desc: '扫描正本副本' },
+    { name: '转移联单记录', icon: '🔄', desc: '危废转移五联单' },
+    { name: '监控视频截取', icon: '📹', desc: '截取关键时段监控画面' },
+    { name: '操作日志/数据库', icon: '💻', desc: '导出系统操作日志' },
+  ];
+
+  // 根据违法类型筛选相关的电子证据
+  const vtype = analysis.extracted_info?.violation_type || '';
+  let filtered = eEvidenceTypes;
+
+  if (vtype.includes('自动监控') || vtype.includes('监控')) {
+    filtered = [eEvidenceTypes[0], eEvidenceTypes[7], eEvidenceTypes[6], eEvidenceTypes[2], eEvidenceTypes[1]];
+  } else if (vtype.includes('水污染') || vtype.includes('大气')) {
+    filtered = [eEvidenceTypes[0], eEvidenceTypes[1], eEvidenceTypes[2], eEvidenceTypes[3], eEvidenceTypes[4]];
+  } else if (vtype.includes('固废') || vtype.includes('废物')) {
+    filtered = [eEvidenceTypes[5], eEvidenceTypes[2], eEvidenceTypes[3], eEvidenceTypes[6]];
+  } else if (vtype.includes('环评')) {
+    filtered = [eEvidenceTypes[3], eEvidenceTypes[4], eEvidenceTypes[1], eEvidenceTypes[2]];
+  } else if (vtype.includes('排污')) {
+    filtered = [eEvidenceTypes[4], eEvidenceTypes[3], eEvidenceTypes[0], eEvidenceTypes[1]];
+  }
+
+  document.getElementById('eEvidenceGrid').innerHTML = filtered.map(e => `
+    <div class="e-ev-btn" id="eEv_${e.name}" onclick="markEEvidence('${e.name}', this)">
+      <span>${e.icon}</span>
+      <div>
+        <div style="font-weight:700">${e.name}</div>
+        <div style="font-size:10px;color:var(--text-muted)">${e.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function markEEvidence(name, el) {
+  if (el.classList.contains('collected')) {
+    el.classList.remove('collected');
+    el.innerHTML = el.innerHTML.replace('✅ ', '');
+    state.evidence.eEvidence = state.evidence.eEvidence.filter(e => e !== name);
+  } else {
+    el.classList.add('collected');
+    const nameDiv = el.querySelector('div > div:first-child');
+    if (nameDiv) nameDiv.textContent = '✅ ' + nameDiv.textContent;
+    state.evidence.eEvidence.push(name);
+    showToast(`✅ 已标记：${name}`);
+  }
+  updateEvidenceCounts();
+}
+
+// ============= 显示卡片 =============
+function showCards() {
+  ['guideCard', 'sceneAnalysisCard', 'collectCard', 'eEvidenceCard', 'kbCard', 'submitCard'].forEach(id => {
+    document.getElementById(id).style.display = 'block';
+  });
+}
+
+// ============= 证据采集功能 =============
+
+// 拍照
+function takePhoto() {
+  document.getElementById('photoInput').click();
+}
+
+function handlePhotos(input) {
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    const id = 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.evidence.photos.push({ id, name: file.name, data: e.target.result, time: new Date().toLocaleString('zh-CN') });
+      renderPhotoPreview();
+      updateEvidenceCounts();
+      showToast('📸 照片已采集');
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderPhotoPreview() {
+  const container = document.getElementById('photoPreview');
+  container.innerHTML = state.evidence.photos.map(p => 
+    `<img class="thumb" src="${p.data}" alt="${p.name}" title="${p.time}" onclick="window.open('${p.data}')">`
+  ).join('');
+}
+
+// 视频
+function recordVideo() {
+  document.getElementById('videoInput').click();
+}
+
+function handleVideo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const id = 'video_' + Date.now();
+  const url = URL.createObjectURL(file);
+  state.evidence.videos.push({ id, name: file.name, url, size: (file.size / 1024 / 1024).toFixed(1) + 'MB', time: new Date().toLocaleString('zh-CN') });
+  updateEvidenceCounts();
+  renderEvidenceList();
+  showToast('🎥 视频已采集');
+  input.value = '';
+}
+
+// 语音
+async function toggleVoiceRecord() {
+  const area = document.getElementById('voiceArea');
+  const micStatus = document.getElementById('micStatus');
+  if (area.style.display === 'none') {
+    area.style.display = 'block';
+    // 检测麦克风可用性
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const hasMic = devices.some(d => d.kind === 'audioinput');
+      if (hasMic) {
+        micStatus.textContent = '🎤 麦克风可用，点击按钮开始录音';
+        micStatus.style.color = 'var(--green)';
+      } else {
+        micStatus.textContent = '⚠️ 未检测到麦克风，将使用测试模式';
+        micStatus.style.color = 'var(--amber)';
+      }
+    } catch(e) {
+      micStatus.textContent = '⚠️ 麦克风状态未知，将尝试录音';
+      micStatus.style.color = 'var(--amber)';
+    }
+  } else {
+    area.style.display = 'none';
+  }
+}
+
+async function toggleRecording() {
+  if (state.isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording() {
+  // 检测麦克风可用性
+  let micAvailable = false;
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    micAvailable = devices.some(d => d.kind === 'audioinput');
+  } catch(e) {}
+
+  if (!micAvailable || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // 麦克风不可用，进入模拟测试模式
+    startSimulatedRecording();
+    return;
+  }
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.mediaRecorder = new MediaRecorder(stream);
+    state.audioChunks = [];
+    
+    state.mediaRecorder.ondataavailable = (e) => {
+      state.audioChunks.push(e.data);
+    };
+    
+    state.mediaRecorder.onstop = () => {
+      const blob = new Blob(state.audioChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const id = 'voice_' + Date.now();
+      state.evidence.voices.push({ id, name: `语音记录_${state.evidence.voices.length + 1}`, url, duration: formatTime(state.recordingSeconds), time: new Date().toLocaleString('zh-CN') });
+      stream.getTracks().forEach(t => t.stop());
+      updateEvidenceCounts();
+      renderEvidenceList();
+      showToast('🎙 语音记录已保存');
+    };
+
+    state.mediaRecorder.start();
+    state.isRecording = true;
+    state.recordingSeconds = 0;
+
+    document.getElementById('voiceBtn').classList.add('recording');
+    document.getElementById('voiceIcon').textContent = '⏹';
+    document.getElementById('voiceLabel').textContent = '点击停止录音';
+    document.getElementById('voiceTimer').style.display = 'inline';
+    document.getElementById('btnVoice').classList.add('recording');
+
+    state.recordingTimer = setInterval(() => {
+      state.recordingSeconds++;
+      document.getElementById('voiceTimer').textContent = formatTime(state.recordingSeconds);
+    }, 1000);
+
+  } catch (err) {
+    // 权限被拒绝或其他错误，切换模拟模式
+    showToast('⚠️ 麦克风不可用，切换测试模式');
+    startSimulatedRecording();
+  }
+}
+
+function startSimulatedRecording() {
+  state.isRecording = true;
+  state.recordingSeconds = 0;
+  state.simulatedMode = true;
+
+  document.getElementById('voiceBtn').classList.add('recording');
+  document.getElementById('voiceIcon').textContent = '⏹';
+  document.getElementById('voiceLabel').textContent = '测试录音中（无麦克风）';
+  document.getElementById('voiceTimer').style.display = 'inline';
+  document.getElementById('btnVoice').classList.add('recording');
+
+  state.recordingTimer = setInterval(() => {
+    state.recordingSeconds++;
+    document.getElementById('voiceTimer').textContent = formatTime(state.recordingSeconds);
+  }, 1000);
+
+  showToast('🎙 测试模式：模拟录音中（麦克风不可用）');
+}
+
+function stopRecording() {
+  if (!state.isRecording) return;
+
+  if (state.simulatedMode) {
+    // 模拟模式停止
+    state.isRecording = false;
+    state.simulatedMode = false;
+    clearInterval(state.recordingTimer);
+    const id = 'voice_sim_' + Date.now();
+    state.evidence.voices.push({ id, name: `测试语音_${state.evidence.voices.length + 1}`, duration: formatTime(state.recordingSeconds), time: new Date().toLocaleString('zh-CN'), simulated: true });
+    updateEvidenceCounts();
+    renderEvidenceList();
+    showToast('🎙 测试语音记录已保存（无实际音频）');
+  } else if (state.mediaRecorder) {
+    // 真实录音停止
+    state.mediaRecorder.stop();
+    state.isRecording = false;
+    clearInterval(state.recordingTimer);
+  }
+
+  document.getElementById('voiceBtn').classList.remove('recording');
+  document.getElementById('voiceIcon').textContent = '🎙';
+  document.getElementById('voiceLabel').textContent = '点击开始录音';
+  document.getElementById('voiceTimer').style.display = 'none';
+  document.getElementById('btnVoice').classList.remove('recording');
+}
+
+// 文档
+function pickDocument() {
+  document.getElementById('docInput').click();
+}
+
+function handleDocs(input) {
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    const id = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+    state.evidence.docs.push({ id, name: file.name, size: (file.size / 1024).toFixed(0) + 'KB', time: new Date().toLocaleString('zh-CN') });
+  });
+  updateEvidenceCounts();
+  renderEvidenceList();
+  showToast(`📎 ${files.length}个文档已采集`);
+  input.value = '';
+}
+
+// 更新计数
+function updateEvidenceCounts() {
+  const counts = {
+    Photo: state.evidence.photos.length,
+    Video: state.evidence.videos.length,
+    Voice: state.evidence.voices.length,
+    Doc: state.evidence.docs.length,
+  };
+  
+  for (const [key, count] of Object.entries(counts)) {
+    const el = document.getElementById('count' + key);
+    const btn = document.getElementById('btn' + key);
+    if (count > 0) {
+      el.textContent = count;
+      btn.classList.add('has-data');
+    } else {
+      btn.classList.remove('has-data');
+    }
+  }
+
+  // 更新提交提示
+  const total = counts.Photo + counts.Video + counts.Voice + counts.Doc + state.evidence.eEvidence.length;
+  document.getElementById('submitHint').textContent = `已采集 ${total} 项证据`;
+  document.getElementById('submitBtn').disabled = total === 0;
+}
+
+// 渲染证据列表
+function renderEvidenceList() {
+  const list = document.getElementById('evidenceList');
+  const items = [
+    ...state.evidence.videos.map(v => ({ icon: '🎥', name: v.name, meta: `${v.size} · ${v.time}`, id: v.id, type: 'videos' })),
+    ...state.evidence.voices.map(v => ({ icon: '🎙', name: v.name, meta: `${v.duration} · ${v.time}`, id: v.id, type: 'voices' })),
+    ...state.evidence.docs.map(d => ({ icon: '📎', name: d.name, meta: `${d.size} · ${d.time}`, id: d.id, type: 'docs' })),
+  ];
+
+  if (items.length === 0 && state.evidence.photos.length === 0 && state.evidence.eEvidence.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <div class="evidence-item">
+      <span class="ev-icon">${item.icon}</span>
+      <div class="ev-info">
+        <div class="ev-name">${item.name}</div>
+        <div class="ev-meta">${item.meta}</div>
+      </div>
+      <button class="ev-del" onclick="removeEvidence('${item.type}', '${item.id}')">✕</button>
+    </div>
+  `).join('') + 
+  (state.evidence.photos.length > 0 ? `
+    <div class="evidence-item">
+      <span class="ev-icon">📸</span>
+      <div class="ev-info">
+        <div class="ev-name">${state.evidence.photos.length}张现场照片</div>
+        <div class="ev-meta">${state.evidence.photos[0]?.time || ''}</div>
+      </div>
+    </div>
+  ` : '') +
+  (state.evidence.eEvidence.length > 0 ? `
+    <div class="evidence-item">
+      <span class="ev-icon">💾</span>
+      <div class="ev-info">
+        <div class="ev-name">${state.evidence.eEvidence.length}项电子证据</div>
+        <div class="ev-meta">${state.evidence.eEvidence.join('、')}</div>
+      </div>
+    </div>
+  ` : '');
+}
+
+function removeEvidence(type, id) {
+  state.evidence[type] = state.evidence[type].filter(e => e.id !== id);
+  updateEvidenceCounts();
+  renderEvidenceList();
+  renderPhotoPreview();
+}
+
+// ============= 知识库查询 =============
+async function queryKB() {
+  const query = document.getElementById('kbInput').value.trim();
+  if (!query) return;
+
+  const resultEl = document.getElementById('kbResult');
+  resultEl.classList.add('show');
+  resultEl.innerHTML = '🔍 查询中...';
+
+  try {
+    // 先搜法规
+    const lawResp = await fetch('/api/search_laws', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    const lawData = await lawResp.json();
+
+    // 再搜案例
+    const caseResp = await fetch('/api/search_cases', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keyword: query, limit: 3 })
+    });
+    const caseData = caseResp.ok ? await caseResp.json() : { ok: false };
+
+    let html = '';
+    
+    if (lawData.ok && lawData.laws && lawData.laws.length > 0) {
+      html += '<b>⚖️ 相关法规：</b><br>';
+      lawData.laws.forEach(law => {
+        html += `• ${law.title || law}<br>`;
+      });
+    }
+
+    if (caseData.ok && caseData.cases && caseData.cases.length > 0) {
+      html += '<br><b>📂 相似案例：</b><br>';
+      caseData.cases.forEach(c => {
+        html += `• ${c.title} → ${c.result || c.handling || ''}<br>`;
+      });
+    }
+
+    if (!html) {
+      html = '未找到相关内容，请尝试其他关键词';
+    }
+
+    resultEl.innerHTML = html;
+  } catch (err) {
+    resultEl.innerHTML = '❌ 查询失败，请检查网络连接';
+  }
+}
+
+// 回车搜索
+document.getElementById('kbInput')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') queryKB();
+});
+
+// ============= 提交现场记录 =============
+async function submitFieldRecord() {
+  const totalEvidence = state.evidence.photos.length + state.evidence.videos.length +
+                       state.evidence.voices.length + state.evidence.docs.length + 
+                       state.evidence.eEvidence.length;
+
+  if (totalEvidence === 0) {
+    showToast('⚠️ 请先采集证据');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = '⏳ 提交中...';
+  btn.disabled = true;
+
+  // 构建提交数据
+  const fieldRecord = {
+    case_text: state.caseText,
+    violation_type: state.violationType,
+    risk_level: state.analysisResult?.risk_assessment?.level || '未知',
+    evidence_summary: {
+      photos: state.evidence.photos.length,
+      videos: state.evidence.videos.length,
+      voices: state.evidence.voices.length,
+      docs: state.evidence.docs.length,
+      e_evidence: state.evidence.eEvidence
+    },
+    law_recommendations: state.analysisResult?.law_recommendations || [],
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    // 提交到AI分析
+    const resp = await fetch('/api/smart_analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: state.caseText,
+        field_record: fieldRecord
+      })
+    });
+    
+    if (resp.ok) {
+      showToast('✅ 现场记录已提交，AI深度分析已启动');
+      
+      // 同时生成现场检查笔录
+      try {
+        await fetch('/api/generate_doc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            doc_type: 'xcjcbcjl',
+            case_data: {
+              case_desc: state.caseText,
+              violation_type: state.violationType,
+              evidence_count: totalEvidence,
+              evidence_types: [
+                state.evidence.photos.length > 0 ? '现场照片' : '',
+                state.evidence.videos.length > 0 ? '现场视频' : '',
+                state.evidence.voices.length > 0 ? '语音记录' : '',
+                state.evidence.docs.length > 0 ? '文档资料' : '',
+                state.evidence.eEvidence.length > 0 ? '电子证据' : '',
+              ].filter(Boolean),
+              field_time: new Date().toLocaleString('zh-CN'),
+              law_references: (state.analysisResult?.law_recommendations || []).flatMap(r => r.violations)
+            },
+            format: 'docx'
+          })
+        });
+        showToast('📄 现场检查笔录已生成');
+      } catch(e) {}
+
+      btn.textContent = '✅ 已提交';
+    } else {
+      showToast('❌ 提交失败');
+      btn.textContent = '📋 生成现场检查记录 · 提交AI分析';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    showToast('❌ 网络异常');
+    btn.textContent = '📋 生成现场检查记录 · 提交AI分析';
+    btn.disabled = false;
+  }
+}
+
+// ============= 工具函数 =============
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+// ============= 场景智能识别功能 =============
+
+async function handleSceneImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const previewHtml = `
+      <div class="scene-image-preview">
+        <img src="${e.target.result}" alt="场景图片">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px">正在分析图片...</div>
+      </div>
+    `;
+    document.getElementById('sceneAnalysisResult').style.display = 'block';
+    document.getElementById('sceneAnalysisText').innerHTML = previewHtml;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const resp = await fetch('/api/analyze_scene', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await resp.json();
+      
+      if (data.ok) {
+        renderSceneAnalysis(data.analysis, data.guidance);
+        showToast('✅ 场景分析完成');
+      } else {
+        showToast('❌ 分析失败：' + data.error);
+      }
+    } catch (err) {
+      showToast('❌ 网络错误：' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function analyzeSceneDescription() {
+  const desc = document.getElementById('sceneDescription').value.trim();
+  if (!desc) {
+    showToast('⚠️ 请输入场景描述');
+    return;
+  }
+  
+  document.getElementById('sceneAnalysisResult').style.display = 'block';
+  document.getElementById('sceneAnalysisText').innerHTML = '<div style="padding:10px;color:var(--text-muted)">🔍 分析中...</div>';
+  
+  try {
+    const resp = await fetch('/api/analyze_scene', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: desc,
+        scenario: 'scene_description'
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.ok) {
+      renderSceneAnalysis(data.analysis, data.guidance);
+      showToast('✅ 场景分析完成');
+    } else {
+      const localAnalysis = buildLocalAnalysisFromText(desc);
+      renderSceneAnalysis(localAnalysis, null);
+      showToast('⚠️ 使用本地分析模式');
+    }
+  } catch (err) {
+    showToast('❌ 分析失败：' + err.message);
+  }
+}
+
+function renderSceneAnalysis(analysis, guidance) {
+  let html = '';
+  
+  if (analysis.violation_type) {
+    html += `<div style="margin-bottom:8px"><span class="risk-tag risk-high">违法类型</span> ${analysis.violation_type}</div>`;
+  }
+  
+  if (analysis.risk_assessment) {
+    const risk = analysis.risk_assessment;
+    const riskClass = risk.level === '高风险' ? 'risk-high' : (risk.level === '中风险' ? 'risk-mid' : 'risk-low');
+    html += `<div style="margin-bottom:8px"><span class="risk-tag ${riskClass}">${risk.level}</span> 风险评分：${risk.score || 'N/A'}</div>`;
+  }
+  
+  if (analysis.law_recommendations && analysis.law_recommendations.length > 0) {
+    html += '<div style="margin-top:8px"><b>📋 适用法条：</b></div>';
+    analysis.law_recommendations.forEach(rec => {
+      html += `<div style="font-size:12px;margin:4px 0;padding-left:8px;border-left:2px solid var(--green-light)">`;
+      html += `${rec.law} ${rec.article ? '(' + rec.article + ')' : ''}`;
+      html += `</div>`;
+    });
+  }
+  
+  document.getElementById('sceneAnalysisText').innerHTML = html;
+  
+  if (guidance) {
+    renderSceneEvidenceGuide(guidance);
+  }
+}
+
+function renderSceneEvidenceGuide(guidance) {
+  let html = '<div style="margin-top:10px"><b>📸 证据采集指导：</b></div>';
+  
+  if (guidance.priority && guidance.priority.length > 0) {
+    html += '<div style="margin:6px 0">';
+    guidance.priority.forEach(item => {
+      html += `<div class="evidence-guide-item"><span class="priority high">优先</span> ${item}</div>`;
+    });
+    html += '</div>';
+  }
+  
+  if (guidance.steps && guidance.steps.length > 0) {
+    html += '<div style="margin:6px 0"><b>采集步骤：</b></div>';
+    guidance.steps.forEach((step, idx) => {
+      html += `<div class="evidence-guide-item" style="margin:4px 0;padding:6px 8px">`;
+      html += `${idx + 1}. <b>${step.evidence}</b>：${step.method}`;
+      if (step.legal) {
+        html += `<br><span style="font-size:11px;color:var(--text-muted)">依据：${step.legal}</span>`;
+      }
+      html += `</div>`;
+    });
+  }
+  
+  if (guidance.tips && guidance.tips.length > 0) {
+    html += '<div style="margin:6px 0"><b>⚠️ 注意事项：</b></div>';
+    guidance.tips.forEach(tip => {
+      html += `<div style="font-size:11px;padding:3px 0">${tip}</div>`;
+    });
+  }
+  
+  document.getElementById('sceneEvidenceGuide').innerHTML = html;
+}
+
+function buildLocalAnalysisFromText(text) {
+  const keywords = {
+    '暗管': '水污染类',
+    '超标': '水污染类',
+    '废气': '大气污染类',
+    '固废': '固废污染类',
+    '噪音': '噪声污染类',
+    '环评': '环评违法类',
+    '排污许可': '排污许可类',
+  };
+  
+  let violationType = '其他';
+  for (const [key, value] of Object.entries(keywords)) {
+    if (text.includes(key)) {
+      violationType = value;
+      break;
+    }
+  }
+  
+  return {
+    violation_type: violationType,
+    risk_assessment: {
+      level: '中风险',
+      score: 60
+    },
+    law_recommendations: [{
+      law: '待查询',
+      article: '',
+      violations: []
+    }]
+  };
+}
+
+<!-- 浮动快捷面板 -->
+<div id="ft-float-panel">
+  <div class="ft-float-menu" id="ft-float-menu">
+    <a href="#" class="ft-float-item" onclick="ftNewCase();ftToggleFloat()"><span>📋</span>新建案件</a>
+    <a href="#" class="ft-float-item" onclick="takePhoto();ftToggleFloat()"><span>📷</span>快速拍照</a>
+    <a href="#" class="ft-float-item" onclick="recordVideo();ftToggleFloat()"><span>🎬</span>录制视频</a>
+    <a href="#" class="ft-float-item" onclick="toggleVoiceRecord();ftToggleFloat()"><span>🎙</span>语音笔录</a>
+    <a href="#" class="ft-float-item" onclick="ftOpenSearch();ftToggleFloat()"><span>🔍</span>知识查询</a>
+    <a href="#" class="ft-float-item" onclick="startAnalysis();ftToggleFloat()"><span>🧠</span>AI分析</a>
+    <a href="/" class="ft-float-item"><span>🏠</span>返回首页</a>
+  </div>
+  <button class="ft-float-toggle" id="ft-float-toggle" onclick="ftToggleFloat()">+</button>
+</div>
+
+<!-- 底部快捷Tab栏 -->
+<div class="ft-bottom-bar">
+  <button class="ft-tab active" onclick="ftScrollTo('caseInputCard',this)"><span class="ft-tab-icon">📝</span>录入</button>
+  <button class="ft-tab" onclick="ftScrollTo('guideCard',this)"><span class="ft-tab-icon">🧭</span>指引</button>
+  <button class="ft-tab" onclick="ftScrollTo('collectCard',this)"><span class="ft-tab-icon">📷</span>采集</button>
+  <button class="ft-tab" onclick="ftScrollTo('sceneAnalysisCard',this)"><span class="ft-tab-icon">🤖</span>识别</button>
+  <button class="ft-tab" onclick="ftScrollTo('submitCard',this)"><span class="ft-tab-icon">📤</span>提交</button>
+</div>
+</script>
+<script>
+// ========== 执法终端便捷功能 ==========
+
+// 滚动到指定卡片 + 高亮Tab
+function ftScrollTo(id, el) {
+  var card = document.getElementById(id);
+  if (!card) return;
+  // 如果卡片是隐藏的，先显示它
+  if (card.style.display === 'none') card.style.display = 'block';
+  var top = card.offsetTop - 80;
+  window.scrollTo({ top: top, behavior: 'smooth' });
+  // 更新Tab高亮
+  document.querySelectorAll('.ft-tab').forEach(function(t) { t.classList.remove('active'); });
+  if (el && el.classList.contains('ft-tab')) el.classList.add('active');
+  document.querySelectorAll('.qb-btn').forEach(function(b) { b.classList.remove('active'); });
+  var qb = document.querySelector('.qb-btn[onclick*="' + id + '"]');
+  if (qb) qb.classList.add('active');
+}
+
+// 浮动面板开关
+function ftToggleFloat() {
+  var btn = document.getElementById('ft-float-toggle');
+  var menu = document.getElementById('ft-float-menu');
+  btn.classList.toggle('open');
+  menu.classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#ft-float-panel')) {
+    var btn = document.getElementById('ft-float-toggle');
+    var menu = document.getElementById('ft-float-menu');
+    if (btn) btn.classList.remove('open');
+    if (menu) menu.classList.remove('show');
+  }
+});
+
+// 全局搜索
+var ftSearchIndex = [
+  {t:'《水污染防治法》第83条',d:'超标排污/私设暗管/偷排法条及处罚标准',type:'法规',icon:'⚖️',href:'/knowledge.html',kw:'水污染防治法 超标 83条'},
+  {t:'《大气污染防治法》第99条',d:'超标排放/未批先建/数据造假处罚',type:'法规',icon:'⚖️',href:'/knowledge.html',kw:'大气法 超标 99条'},
+  {t:'《固体废物污染环境防治法》第112条',d:'危废非法倾倒/不设置标识/台账虚假',type:'法规',icon:'⚖️',href:'/knowledge.html',kw:'固废法 危废 112条'},
+  {t:'《环境行政处罚办法》立案条件',d:'发现线索→初步核实→立案审批全流程',type:'法规',icon:'📋',href:'/knowledge.html',kw:'立案 处罚办法'},
+  {t:'某化工企业COD超标案例',d:'涉嫌违反《水污染防治法》第83条第2项·处罚10万',type:'案例',icon:'📁',kw:'COD超标 化工 案例'},
+  {t:'危废非法倾倒涉刑案例',d:'危废非法倾倒·涉刑移送·典型案例',type:'案例',icon:'📁',kw:'危废 倾倒 涉刑'},
+  {t:'在线监测数据造假案例',d:'监测数据弄虚作假·涉嫌破坏计算机信息系统罪',type:'案例',icon:'📁',kw:'监测 造假 数据'},
+  {t:'某企业VOCs无组织排放',d:'未按规定使用治污设施·罚款8万·典型案例',type:'案例',icon:'📁',kw:'VOCs 无组织 案例'},
+  {t:'水质在线监测·COD超标预警',d:'IoT设备实时监测COD·超标自动告警',type:'IoT',icon:'💧',href:'/iot.html',kw:'水质 监测 COD 超标'},
+  {t:'大气监测·PM2.5/臭氧预警',d:'实时监测PM2.5/臭氧·重污染应急响应',type:'IoT',icon:'🌬️',href:'/iot.html',kw:'大气 监测 PM2.5'},
+  {t:'快速立案·现场执法终端',d:'现场快速创建执法案件·证据采集·文书生成',type:'执法',icon:'🚔',href:'/field-terminal.html',kw:'立案 执法 现场'},
+  {t:'AI案件分析·法条匹配',d:'输入违法事实→AI自动匹配适用法条→处罚建议',type:'分析',icon:'🧠',href:'/analysis.html',kw:'AI分析 法条 匹配'},
+  {t:'排污许可·执行报告审查',d:'企业排污许可执行报告AI自动审查',type:'行政',icon:'📊',kw:'排污许可 执行报告'},
+  {t:'企业查询·重点污染源',d:'重点企业管理·信用评级·整改跟踪',type:'企业',icon:'🏢',href:'/workspace.html',kw:'企业 查询 重点污染源'},
+  {t:'12369环保举报受理',d:'公众举报·工单分派·处理追踪·满意度评价',type:'公众',icon:'📞',kw:'12369 举报 热线'},
+];
+
+function ftOpenSearch() {
+  document.getElementById('ft-search-overlay').classList.add('show');
+  setTimeout(function() { document.getElementById('ft-search-input').focus(); }, 50);
+}
+function ftCloseSearch() {
+  document.getElementById('ft-search-overlay').classList.remove('show');
+  document.getElementById('ft-search-input').value = '';
+  document.getElementById('ft-search-results').innerHTML = '';
+}
+function ftDoSearch(q) {
+  var container = document.getElementById('ft-search-results');
+  if (!q.trim()) { container.innerHTML = ''; return; }
+  var words = q.toLowerCase().split(/\s+/);
+  var results = ftSearchIndex.filter(function(item) {
+    return words.some(function(w) {
+      return item.t.toLowerCase().includes(w) ||
+             (item.d && item.d.toLowerCase().includes(w)) ||
+             (item.kw && item.kw.toLowerCase().includes(w)) ||
+             item.type.toLowerCase().includes(w);
+    });
+  }).slice(0, 8);
+  if (!results.length) {
+    container.innerHTML = '<div class="ft-search-empty">未找到相关结果，请尝试其他关键词</div>';
+    return;
+  }
+  var bg = { '法规': 'var(--green-pale)', '案例': '#FDEDEC', 'IoT': 'var(--blue-pale)', '执法': 'var(--green-pale)', '分析': 'var(--purple-pale)', '行政': 'var(--green-pale)', '企业': 'var(--blue-pale)', '公众': 'var(--amber-pale)' };
+  var tc = { '法规': 'var(--green)', '案例': 'var(--red)', 'IoT': 'var(--blue)', '执法': 'var(--green)', '分析': 'var(--purple)', '行政': 'var(--green)', '企业': 'var(--blue)', '公众': 'var(--amber)' };
+  container.innerHTML = results.map(function(r) {
+    var href = r.href || '#';
+    var onclick = href === '#' ? '' : 'onclick="ftCloseSearch();window.location=\'' + href + '\'\' ';
+    return '<div class="ft-sr-item" ' + onclick + '>' +
+           '<div class="ft-sr-icon" style="background:' + (bg[r.type] || 'var(--green-pale)') + '">' + r.icon + '</div>' +
+           '<div><div class="ft-sr-title">' + r.t + '</div><div class="ft-sr-desc">' + r.d + '</div></div>' +
+           '<span class="ft-sr-tag" style="background:' + (tc[r.type]||'var(--green)') + '22;color:' + (tc[r.type]||'var(--green)') + '">' + r.type + '</span></div>';
+  }).join('');
+}
+
+// 新建案件
+function ftNewCase() {
+  document.getElementById('caseText').value = '';
+  state.caseText = '';
+  state.violationType = '';
+  state.analysisResult = null;
+  state.evidence = { photos: [], videos: [], voices: [], docs: [], eEvidence: [] };
+  document.querySelectorAll('.vtype-chip').forEach(function(c) { c.classList.remove('active'); });
+  document.querySelectorAll('.card').forEach(function(c) { if (c.id !== 'caseInputCard') c.style.display = 'none'; });
+  document.getElementById('caseInputCard').style.display = 'block';
+  document.getElementById('caseInputCard').style.display = 'block';
+  updateEvidenceCounts();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('📋 新建案件，请开始录入');
+  document.getElementById('caseText').focus();
+}
+
+// API状态检测
+async function ftCheckAPI() {
+  var dot = document.getElementById('apiDot');
+  dot.className = 'api-dot warn';
+  try {
+    var resp = await fetch('/api/law_mapping', { method: 'HEAD', cache: 'no-cache' });
+    if (resp.ok) {
+      dot.className = 'api-dot ok';
+      dot.title = 'API正常 · ' + new Date().toLocaleTimeString('zh-CN');
+    } else {
+      dot.className = 'api-dot err';
+      dot.title = 'API异常 · HTTP ' + resp.status;
+    }
+  } catch(e) {
+    dot.className = 'api-dot err';
+    dot.title = 'API离线 · ' + e.message;
+  }
+}
+
+// 键盘快捷键
+document.addEventListener('keydown', function(e) {
+  // Ctrl+K 或 Cmd+K: 打开搜索
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    ftOpenSearch();
+    return;
+  }
+  // Ctrl+N: 新建案件
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault();
+    ftNewCase();
+    return;
+  }
+  // Escape: 关闭弹窗
+  if (e.key === 'Escape') {
+    ftCloseSearch();
+    var fp = document.getElementById('ft-float-panel');
+    if (fp) {
+      document.getElementById('ft-float-toggle').classList.remove('open');
+      document.getElementById('ft-float-menu').classList.remove('show');
+    }
+    var sp = document.getElementById('ft-search-overlay');
+    if (sp && sp.classList.contains('show')) ftCloseSearch();
+    return;
+  }
+  // 数字键 1-7: 快速跳转到对应卡片
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+    var cards = ['caseInputCard', 'guideCard', 'collectCard', 'sceneAnalysisCard', 'eEvidenceCard', 'kbCard', 'submitCard'];
+    var num = parseInt(e.key);
+    if (num >= 1 && num <= cards.length) {
+      var id = cards[num - 1];
+      var card = document.getElementById(id);
+      if (card && card.style.display !== 'none') {
+        ftScrollTo(id, document.querySelectorAll('.ft-tab')[Math.min(num - 1, 4)]);
+      }
+    }
+  }
+});
+
+// 案件模板快捷填充
+function ftApplyTemplate(tpl) {
+  var textarea = document.getElementById('caseText');
+  var templates = {
+    '超标排放': '执法人员对[企业名称]进行现场检查，发现该单位[排放口名称]排放口外排废水COD浓度为[数值]mg/L，超过《[排放标准名称]》规定的[限值]mg/L排放标准。',
+    '私设暗管': '执法人员对[企业名称]进行现场检查，发现该单位[生产车间]私设暗管，将未经处理的[污染物类型]废水直接排入[受纳水体]，涉嫌通过暗管逃避监管方式排放水污染物。',
+    '危废非法倾倒': '执法人员接群众举报后对[地点]进行现场检查，发现[倾倒方]将[危废类型及数量]非法倾倒于[地点]，未采取任何防渗漏措施，涉嫌违反《固体废物污染环境防治法》第79条规定。',
+    '数据造假': '执法人员调取[企业名称]在线监测历史数据，发现[时间段]期间[监测因子]数据存在[造假方式]，与实际检测数据严重不符，涉嫌环境监测数据弄虚作假。',
+    '无组织排放': '执法人员对[企业名称]进行现场检查，发现该单位[生产工段]生产废气未在密闭空间中进行，VOCs无组织排放浓度超过《[排放标准]》规定的[限值]mg/m³。',
+  };
+  if (templates[tpl]) {
+    textarea.value = templates[tpl];
+    state.caseText = templates[tpl];
+    showToast('📋 已填充「' + tpl + '」模板，请补充方括号内容');
+  }
+}
+
+// 自动保存草稿到 localStorage
+var lastSaved = '';
+setInterval(function() {
+  var current = document.getElementById('caseText') ? document.getElementById('caseText').value : '';
+  if (current && current !== lastSaved) {
+    localStorage.setItem('ft_draft_case', current);
+    localStorage.setItem('ft_draft_time', new Date().toLocaleString('zh-CN'));
+    lastSaved = current;
+  }
+}, 3000);
+
+// 启动时恢复草稿
+window.addEventListener('DOMContentLoaded', function() {
+  var draft = localStorage.getItem('ft_draft_case');
+  var draftTime = localStorage.getItem('ft_draft_time');
+  if (draft && document.getElementById('caseText')) {
+    document.getElementById('caseText').value = draft;
+    state.caseText = draft;
+    if (draftTime) showToast('📝 已恢复草稿（' + draftTime + '）');
+  }
+  // 启动时检测API
+  ftCheckAPI();
+  setInterval(ftCheckAPI, 30000); // 每30秒检测一次
+});
+
+// === 场景语音提醒模板 ===
+var SCENE_TEMPLATES = {
+  exhaust: {
+    name: '废气超标排放',
+    icon: '🏭',
+    trigger: '烟囱冒黑烟/在线监测SO2·NOx超标',
+    reminder: '检测到疑似废气超标排放，请采集以下证据：\n1. 拍摄排放口照片\n2. 记录在线监测数据\n3. 检查治污设施运行台账\n4. 采集废气样品检测',
+    evidence: ['排放口照片','在线监测数据','治污设施台账','废气样品'],
+    laws: ['大气污染防治法第18条','大气污染防治法第99条']
+  },
+  wastewater: {
+    name: '废水超标排放',
+    icon: '💧',
+    trigger: '出水口水质异常/在线监测COD超标',
+    reminder: '检测到疑似废水超标排放，请采集：\n1. 拍摄排污口照片\n2. 记录监测数据\n3. 检查污水处理设施运行记录\n4. 采集水样',
+    evidence: ['排污口照片','监测数据','处理设施记录','水样'],
+    laws: ['水污染防治法第10条','水污染防治法第74条']
+  },
+  hazardous: {
+    name: '危废违规贮存',
+    icon: '☣️',
+    trigger: '危废未入贮存间/未设标识/混存',
+    reminder: '检测到危废贮存不规范，请采集：\n1. 拍摄危废贮存现场\n2. 检查危废台账\n3. 核对危废转移联单\n4. 检查标识和包装',
+    evidence: ['贮存现场照片','危废台账','转移联单','标识包装照片'],
+    laws: ['固废法第78条','固废法第112条']
+  },
+  noise: {
+    name: '噪声超标',
+    icon: '🔊',
+    trigger: '厂界噪声超标/夜间施工',
+    reminder: '检测到疑似噪声超标，请采集：\n1. 使用声级计测量厂界噪声\n2. 记录测量时间和位置\n3. 检查噪声防治设施\n4. 询问周边居民',
+    evidence: ['噪声测量数据','测量位置记录','防治设施照片','居民笔录'],
+    laws: ['噪声污染防治法第22条','噪声污染防治法第75条']
+  },
+  dust: {
+    name: '扬尘污染',
+    icon: '🌪️',
+    trigger: '施工场地裸土未覆盖/道路扬尘',
+    reminder: '检测到扬尘污染，请采集：\n1. 拍摄扬尘源照片\n2. 检查防尘措施落实情况\n3. 记录气象条件\n4. 查看施工许可',
+    evidence: ['扬尘源照片','防尘措施检查','气象记录','施工许可'],
+    laws: ['大气污染防治法第69条','大气污染防治法第115条']
+  }
+};
+
+// === 场景识别模板 ===
+var SCENE_RECOGNITION = {
+  factory: { name:'工厂排放场景', features:['烟囱','排放口','治污设施'], checks:['排放是否达标','设施是否运行','许可证是否有效'], laws:['大气污染防治法'], advice:'检查排污许可证、在线监测数据、治污设施运行台账' },
+  sewage: { name:'污水处理场景', features:['污水处理站','排污口','调节池'], checks:['出水水质','设施运行','药剂投加'], laws:['水污染防治法'], advice:'检查在线监测数据、药剂采购台账、污泥处置记录' },
+  storage: { name:'危废贮存场景', features:['危废间','标识','包装容器'], checks:['贮存规范','台账完整','标识清晰'], laws:['固废法'], advice:'核对危废台账、转移联单、贮存期限' },
+  construction: { name:'施工扬尘场景', features:['裸土','渣土','围挡'], checks:['覆盖措施','围挡设置','洒水降尘'], laws:['大气污染防治法'], advice:'检查施工许可、扬尘方案、防尘措施' },
+  catering: { name:'餐饮油烟场景', features:['油烟净化器','排烟管道','楼顶'], checks:['净化器运行','清洗记录','管道密封'], laws:['大气污染防治法'], advice:'检查油烟净化器清洗记录、检测报告' }
+};
+
+// === 证据完整性检查 ===
+function checkEvidenceCompleteness(sceneKey) {
+  var template = SCENE_TEMPLATES[sceneKey];
+  if (!template) return { complete: true, missing: [] };
+  var collected = (window.collectedEvidence || []).map(function(e){return e.type || e.name;});
+  var missing = template.evidence.filter(function(req){
+    return !collected.some(function(c){ return c.indexOf(req) >= 0 || req.indexOf(c) >= 0; });
+  });
+  return { complete: missing.length === 0, missing: missing, required: template.evidence };
+}
+
+// === 加载场景模板 ===
+function loadSceneTemplate(key) {
+  var tpl = SCENE_TEMPLATES[key];
+  if (!tpl) return;
+  document.querySelectorAll('#sceneTemplateCard .vtype-chip').forEach(function(c){c.classList.remove('active');});
+  event.target.classList.add('active');
+  var detail = document.getElementById('sceneTemplateDetail');
+  detail.style.display = 'block';
+  document.getElementById('stReminder').textContent = '⚠️ ' + tpl.reminder;
+  var evHtml = '<div style="font-size:12px;font-weight:600;margin-bottom:4px">需采集证据：</div>';
+  tpl.evidence.forEach(function(e, i){
+    evHtml += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:12px"><span style="width:18px;height:18px;border-radius:50%;background:#e74c3c;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px">'+(i+1)+'</span> '+e+'</div>';
+  });
+  document.getElementById('stEvidence').innerHTML = evHtml;
+  document.getElementById('stLaws').innerHTML = '📚 适用法条：' + tpl.laws.join('、');
+  // 语音播报
+  if ('speechSynthesis' in window) {
+    var utter = new SpeechSynthesisUtterance(tpl.reminder);
+    utter.lang = 'zh-CN';
+    utter.rate = 0.9;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+  }
+}
+
+// ============ 设备配置系统 ============
+var deviceConfig = {
+  smartGlasses: { enabled: false, deviceId: '', vendor: '', model: '', ip: '', port: '' },
+  bodyCamera: { enabled: false, deviceId: '', vendor: '', model: '', rtspUrl: '' },
+  audioPickup: { enabled: false, deviceId: '', vendor: '', model: '', bluetooth: false },
+  gasDetector: { enabled: false, deviceId: '', vendor: '', model: '', bluetooth: false },
+  waterSampler: { enabled: false, deviceId: '', vendor: '', model: '', bluetooth: false }
+};
+var connectedDevices = [];
+
+function showDeviceConfig() {
+  var overlay = document.getElementById('deviceConfigOverlay');
+  if (!overlay) {
+    overlay = createDeviceConfigModal();
+  }
+  loadConnectedDevices();
+  overlay.classList.add('show');
+}
+
+function createDeviceConfigModal() {
+  var html = '<div class="device-config-overlay" id="deviceConfigOverlay" onclick="if(event.target===this)closeDeviceConfig()">';
+  html += '<div class="device-config-panel">';
+  html += '<div class="dc-header"><h2>⚙️ 设备配置</h2><button onclick="closeDeviceConfig()" class="dc-close">✕</button></div>';
+  html += '<div class="dc-body">';
+  // Smart Glasses
+  html += '<div class="dc-section"><div class="dc-section-title">👓 智能眼镜</div>';
+  html += '<div class="dc-item"><span class="dc-label">启用智能眼镜</span><label class="dc-switch"><input type="checkbox" id="dc-glasses-enabled" onchange="toggleDevice(\'smartGlasses\')"><span class="dc-slider"></span></label></div>';
+  html += '<div id="dc-glasses-config" style="display:none">';
+  html += '<select class="form-input" id="dc-glasses-device" onchange="updateDeviceConfig()" style="margin-bottom:6px"><option value="">选择已注册设备</option></select>';
+  html += '<input type="text" class="form-input" id="dc-glasses-ip" placeholder="设备IP地址" style="margin-bottom:6px">';
+  html += '<input type="text" class="form-input" id="dc-glasses-port" placeholder="端口 (默认:8080)">';
+  html += '</div></div>';
+  // Body Camera
+  html += '<div class="dc-section"><div class="dc-section-title">📹 执法记录仪</div>';
+  html += '<div class="dc-item"><span class="dc-label">启用记录仪</span><label class="dc-switch"><input type="checkbox" id="dc-camera-enabled" onchange="toggleDevice(\'bodyCamera\')"><span class="dc-slider"></span></label></div>';
+  html += '<div id="dc-camera-config" style="display:none">';
+  html += '<select class="form-input" id="dc-camera-device" style="margin-bottom:6px"><option value="">选择已注册设备</option></select>';
+  html += '<input type="text" class="form-input" id="dc-camera-rtsp" placeholder="RTSP推流地址">';
+  html += '</div></div>';
+  // Audio Pickup
+  html += '<div class="dc-section"><div class="dc-section-title">🎤 拾音设备</div>';
+  html += '<div class="dc-item"><span class="dc-label">启用拾音器</span><label class="dc-switch"><input type="checkbox" id="dc-audio-enabled" onchange="toggleDevice(\'audioPickup\')"><span class="dc-slider"></span></label></div>';
+  html += '<div id="dc-audio-config" style="display:none">';
+  html += '<select class="form-input" id="dc-audio-device" style="margin-bottom:6px"><option value="">选择已注册设备</option></select>';
+  html += '<label class="dc-label" style="font-size:11px;color:var(--muted);margin-bottom:6px">连接方式：</label>';
+  html += '<select class="form-input" id="dc-audio-connect"><option value="bluetooth">蓝牙连接</option><option value="wifi">WiFi直连</option></select>';
+  html += '</div></div>';
+  // Sensors
+  html += '<div class="dc-section"><div class="dc-section-title">🌡️ 便携传感器</div>';
+  html += '<div class="dc-item"><span class="dc-label">气体检测仪</span><label class="dc-switch"><input type="checkbox" id="dc-gas-enabled" onchange="toggleDevice(\'gasDetector\')"><span class="dc-slider"></span></label></div>';
+  html += '<div class="dc-item"><span class="dc-label">水质检测仪</span><label class="dc-switch"><input type="checkbox" id="dc-water-enabled" onchange="toggleDevice(\'waterSampler\')"><span class="dc-slider"></span></label></div>';
+  html += '</div>';
+  html += '<div style="margin-top:16px"><button class="btn btn-primary" onclick="saveDeviceConfig()">保存配置</button>';
+  html += '<a href="/device-mgmt.html" style="margin-left:8px;font-size:12px;color:var(--blue)">设备管理平台 →</a></div>';
+  html += '</div></div></div>';
+  
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div.firstElementChild);
+  
+  // Add styles
+  var style = document.createElement('style');
+  style.textContent = '.device-config-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}.device-config-overlay.show{display:flex}.device-config-panel{background:#fff;border-radius:16px;width:90%;max-width:480px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}.dc-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.dc-header h2{font-size:16px;color:#1B4332}.dc-close{width:30px;height:30px;border:none;background:#f5f5f5;border-radius:50%;font-size:18px;cursor:pointer}.dc-body{padding:16px 20px}.dc-section{border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:10px}.dc-section-title{font-size:14px;font-weight:700;color:#1B4332;margin-bottom:10px}.dc-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}.dc-item:last-child{border-bottom:none}.dc-label{font-size:13px;color:#333}.dc-switch{position:relative;display:inline-block;width:44px;height:24px}.dc-switch input{opacity:0;width:0;height:0}.dc-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:24px;transition:.3s}.dc-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}input:checked+.dc-slider{background:#2D6A4F}input:checked+.dc-slider:before{transform:translateX(20px)}.form-input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box}';
+  document.head.appendChild(style);
+  
+  updateDeviceConfigUI();
+  return document.getElementById('deviceConfigOverlay');
+}
+
+function closeDeviceConfig() {
+  document.getElementById('deviceConfigOverlay').classList.remove('show');
+}
+
+function loadConnectedDevices() {
+  fetch('/api/devices').then(r=>r.json()).then(data=>{
+    connectedDevices = data.devices || [];
+    updateDeviceSelects();
+  }).catch(function(){});
+}
+
+function updateDeviceSelects() {
+  var selects = ['dc-glasses-device','dc-camera-device','dc-audio-device'];
+  selects.forEach(function(id){
+    var sel = document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML = '<option value="">选择已注册设备</option>';
+    connectedDevices.forEach(function(d){
+      sel.innerHTML += '<option value="'+d.id+'">'+d.name+' ('+(d.vendor||'')+' '+(d.model||'')+') ['+(d.status==='online'?'在线':'离线')+']</option>';
+    });
+  });
+}
+
+function toggleDevice(type) {
+  var configIds = {smartGlasses:'dc-glasses-config',bodyCamera:'dc-camera-config',audioPickup:'dc-audio-config'};
+  var el = document.getElementById(configIds[type]);
+  if(el) el.style.display = document.getElementById('dc-'+type+'-enabled')?.checked ? 'block' : 'none';
+}
+
+function updateDeviceConfigUI() {
+  // Load saved config
+  try{
+    var saved = JSON.parse(localStorage.getItem('epb_device_config')||'{}');
+    if(saved.smartGlasses) deviceConfig.smartGlasses = saved.smartGlasses;
+    if(saved.bodyCamera) deviceConfig.bodyCamera = saved.bodyCamera;
+    if(saved.audioPickup) deviceConfig.audioPickup = saved.audioPickup;
+  }catch(e){}
+  
+  var els = {
+    'dc-glasses-enabled': deviceConfig.smartGlasses.enabled,
+    'dc-camera-enabled': deviceConfig.bodyCamera.enabled,
+    'dc-audio-enabled': deviceConfig.audioPickup.enabled
+  };
+  Object.keys(els).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.checked = els[id];
+  });
+  
+  toggleDevice('smartGlasses');toggleDevice('bodyCamera');toggleDevice('audioPickup');
+  updateConnectedCount();
+}
+
+function updateConnectedCount() {
+  var count = 0;
+  if(deviceConfig.smartGlasses.enabled) count++;
+  if(deviceConfig.bodyCamera.enabled) count++;
+  if(deviceConfig.audioPickup.enabled) count++;
+  document.getElementById('countDev').textContent = count;
+  document.getElementById('devConfigLabel').textContent = count > 0 ? '已连接 '+count+' 设备' : '设备配置';
+  document.getElementById('devConfigHint').textContent = count > 0 ? '查看/修改' : '连接设备';
+  if(count > 0) {
+    document.getElementById('btnDevConfig').style.borderColor = '#27ae60';
+  }
+}
+
+function saveDeviceConfig() {
+  var types = {
+    smartGlasses: {enabled:'dc-glasses-enabled',deviceId:'dc-glasses-device',ip:'dc-glasses-ip'},
+    bodyCamera: {enabled:'dc-camera-enabled',deviceId:'dc-camera-device',rtsp:'dc-camera-rtsp'},
+    audioPickup: {enabled:'dc-audio-enabled',deviceId:'dc-audio-device',connect:'dc-audio-connect'}
+  };
+  Object.keys(types).forEach(function(type){
+    var ids = types[type];
+    var enabledEl = document.getElementById(ids.enabled);
+    deviceConfig[type].enabled = enabledEl ? enabledEl.checked : false;
+    if(ids.deviceId){ var devEl = document.getElementById(ids.deviceId); deviceConfig[type].deviceId = devEl ? devEl.value : ''; }
+    if(ids.ip){ var ipEl = document.getElementById(ids.ip); deviceConfig[type].ip = ipEl ? ipEl.value : ''; }
+    if(ids.rtsp){ var rtspEl = document.getElementById(ids.rtsp); deviceConfig[type].rtspUrl = rtspEl ? rtspEl.value : ''; }
+  });
+  localStorage.setItem('epb_device_config', JSON.stringify(deviceConfig));
+  updateConnectedCount();
+  closeDeviceConfig();
+  // Report connected devices to server
+  var report = { devices: {}, timestamp: new Date().toISOString() };
+  if(deviceConfig.smartGlasses.enabled) report.devices.smartGlasses = deviceConfig.smartGlasses;
+  if(deviceConfig.bodyCamera.enabled) report.devices.bodyCamera = deviceConfig.bodyCamera;
+  if(deviceConfig.audioPickup.enabled) report.devices.audioPickup = deviceConfig.audioPickup;
+  fetch('/api/device_data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)}).catch(function(){});
+  showToast('⚙️ 设备配置已保存' + (Object.keys(report.devices).length > 0 ? '，已连接 '+Object.keys(report.devices).length+' 台设备' : ''));
+}
+
+// Init
+updateConnectedCount();
+</script>
+</body>
+</html>

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 第三方监管督查 — 环保智能体平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gbg:#F2F8F4;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 16px rgba(27,67,50,.1);--r:14px;--red:#C0392B;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+.nav{background:linear-gradient(135deg,#1B4332,#2D6A4F);padding:0 20px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.nav-logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--gl),var(--gm));display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-logo-text{font-size:14px;font-weight:700;color:#e8f5e9}
+.nav-back{margin-left:auto;color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.1);transition:all .2s}
+.nav-back:hover{background:rgba(255,255,255,.2);color:#fff}
+.hero{background:linear-gradient(135deg,#1B4332,#2D6A4F);padding:28px 20px 20px;text-align:center}
+.hero h1{font-size:22px;color:#fff;font-weight:800;margin-bottom:4px}
+.hero p{font-size:13px;color:rgba(255,255,255,.7)}
+.ctn{max-width:1000px;margin:0 auto;padding:16px}
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:10px 18px;border:2px solid var(--border);border-radius:10px;background:#fff;font-size:13px;cursor:pointer;transition:all .2s;font-weight:500}
+.tab:hover{border-color:var(--gl);background:var(--gbg)}
+.tab.active{border-color:var(--g);background:var(--gbg);font-weight:700;color:var(--g)}
+.panel{display:none}.panel.show{display:block}
+/* Cards */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:16px;font-weight:700;color:var(--g);display:flex;align-items:center;gap:8px}
+.badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.badge.high{background:#fdecea;color:var(--red)}
+.badge.mid{background:#fef3e2;color:var(--amber)}
+.badge.low{background:#e8f5ec;color:var(--gm)}
+.badge.done{background:#e3f2fd;color:var(--blue)}
+/* Form */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--g)}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--gl);box-shadow:0 0 0 3px rgba(82,183,136,.15)}
+.form-textarea{min-height:80px;resize:vertical}
+.form-row{display:flex;gap:12px}
+.form-row>*{flex:1}
+.btn{padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--gm);color:#fff}
+.btn-primary:hover{background:var(--g)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--g)}
+.btn-outline:hover{background:var(--gbg)}
+.btn-sm{padding:6px 14px;font-size:12px}
+/* Checklist */
+.checklist-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+.checklist-item:last-child{border-bottom:none}
+.check-icon{width:24px;height:24px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;transition:all .2s}
+.check-icon.checked{background:var(--gm);border-color:var(--gm);color:#fff}
+.check-body{flex:1}
+.check-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.check-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.check-status{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.check-status.pending{background:#f0f0f0;color:var(--muted)}
+.check-status.ok{background:#e8f5ec;color:var(--gm)}
+.check-status.issue{background:#fdecea;color:var(--red)}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:800;color:var(--g)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+.stat-card.red .stat-num{color:var(--red)}
+.stat-card.amber .stat-num{color:var(--amber)}
+.stat-card.blue .stat-num{color:var(--blue)}
+/* Report item */
+.report-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:#f8f9f8;border-radius:10px;margin-bottom:10px}
+.report-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.report-info{flex:1}
+.report-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.report-meta{font-size:12px;color:var(--muted)}
+.report-actions{display:flex;gap:8px;margin-top:8px}
+/* Timeline */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.timeline-item{position:relative;padding-bottom:16px}
+.timeline-item::before{content:'';position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--gl);border:2px solid #fff;box-shadow:0 0 0 2px var(--gl)}
+.timeline-time{font-size:11px;color:var(--muted);margin-bottom:2px}
+.timeline-title{font-size:13px;font-weight:600}
+.timeline-desc{font-size:12px;color:var(--muted);margin-top:2px}
+/* Empty state */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;opacity:.3;margin-bottom:12px}
+/* Responsive */
+@media(max-width:640px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .form-row{flex-direction:column}
+}
+</style>
+<script src="/auth-guard.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">🔍</div>
+    <span class="nav-logo-text">第三方监管督查</span>
+  </a>
+  <a href="/" class="nav-back">← 返回首页</a>
+</nav>
+
+<div class="hero">
+  <h1>🔍 第三方监管督查中心</h1>
+  <p>穿戴设备辅助督查 · 智能清单引导 · 自动生成督查报告 · 关联法条建议</p>
+</div>
+
+<div class="ctn">
+  <div class="tabs">
+    <div class="tab active" onclick="showPanel('dashboard',this)">📊 督查总览</div>
+    <div class="tab" onclick="showPanel('checklist',this)">📋 督查清单</div>
+    <div class="tab" onclick="showPanel('new',this)">➕ 发起督查</div>
+    <div class="tab" onclick="showPanel('reports',this)">📝 督查报告</div>
+    <div class="tab" onclick="showPanel('devices',this)">设备管理</div>
+  </div>
+
+  <!-- Panel: Dashboard -->
+  <div class="panel show" id="panel-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">督查总数</div></div>
+      <div class="stat-card amber"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">进行中</div></div>
+      <div class="stat-card red"><div class="stat-num" id="stat-issues">0</div><div class="stat-label">发现问题</div></div>
+      <div class="stat-card blue"><div class="stat-num" id="stat-resolved">0</div><div class="stat-label">已完成</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">⚡ 最近督查任务</div>
+        <button class="btn btn-primary btn-sm" onclick="showPanel('new',document.querySelectorAll('.tab')[2])">发起督查</button>
+      </div>
+      <div id="recent-list">
+        <div class="empty"><div class="empty-icon">📋</div><p>暂无督查记录，点击「发起督查」开始</p></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔔 实时预警</div>
+      <div id="alert-list">
+        <div class="empty"><div class="empty-icon">🔔</div><p>暂无预警信息</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: Checklist -->
+  <div class="panel" id="panel-checklist">
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-title">📋 督查检查清单</div>
+        <div>
+          <select class="form-select" id="checklist-type" onchange="loadChecklist()" style="width:auto;display:inline-block">
+            <option value="general">通用环保督查</option>
+            <option value="water">水污染防治督查</option>
+            <option value="air">大气污染防治督查</option>
+            <option value="solid">固废管理督查</option>
+            <option value="permit">排污许可督查</option>
+          </select>
+        </div>
+      </div>
+      <div id="checklist-container">
+        <div class="empty"><div class="empty-icon">📋</div><p>选择督查类型加载检查清单</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: New -->
+  <div class="panel" id="panel-new">
+    <div class="card">
+      <div class="card-title">➕ 发起督查任务</div>
+      <div style="margin-top:16px">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">被督查企业 *</label>
+            <input class="form-input" id="sup-company" placeholder="请输入企业名称">
+          </div>
+          <div class="form-group">
+            <label class="form-label">督查类型 *</label>
+            <select class="form-select" id="sup-type">
+              <option value="general">通用环保督查</option>
+              <option value="water">水污染防治</option>
+              <option value="air">大气污染防治</option>
+              <option value="solid">固废管理</option>
+              <option value="permit">排污许可</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">督查人员</label>
+            <input class="form-input" id="sup-inspector" placeholder="请输入督查人员姓名">
+          </div>
+          <div class="form-group">
+            <label class="form-label">计划日期</label>
+            <input class="form-input" type="date" id="sup-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">督查重点说明</label>
+          <textarea class="form-textarea" id="sup-desc" placeholder="请描述本次督查的重点关注事项..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">穿戴设备</label>
+          <select class="form-select" id="sup-device">
+            <option value="">不使用设备</option>
+            <option value="helmet">智能头盔（RealWear HMT-1）</option>
+            <option value="camera">执法记录仪（4G版）</option>
+            <option value="sensor">便携传感器（气体检测）</option>
+            <option value="watch">智能手表</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="createSupervision()" style="width:100%">发起督查</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: Reports -->
+  <div class="panel" id="panel-reports">
+    <div class="card">
+      <div class="card-title">📝 督查报告列表</div>
+      <div id="report-list" style="margin-top:14px">
+        <div class="empty"><div class="empty-icon">📝</div><p>暂无督查报告</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: Devices -->
+  <div class="panel" id="panel-devices">
+    <div class="card">
+      <div class="card-title">📱 穿戴设备管理</div>
+      <div style="margin-top:14px">
+        <div class="report-item">
+          <div class="report-icon" style="background:#e3f2fd">⛑️</div>
+          <div class="report-info">
+            <div class="report-title">智能头盔 — RealWear HMT-1</div>
+            <div class="report-meta">用途：第一视角拍摄、语音交互、AR提示</div>
+            <div class="report-actions">
+              <span class="badge done">在线</span>
+              <span class="badge low">电量 85%</span>
+            </div>
+          </div>
+        </div>
+        <div class="report-item">
+          <div class="report-icon" style="background:#f3e5f5">📷</div>
+          <div class="report-info">
+            <div class="report-title">执法记录仪 — 海康4G版</div>
+            <div class="report-meta">用途：全程录像录音、GPS定位、实时回传</div>
+            <div class="report-actions">
+              <span class="badge done">在线</span>
+              <span class="badge low">电量 62%</span>
+            </div>
+          </div>
+        </div>
+        <div class="report-item">
+          <div class="report-icon" style="background:#e8f5e9">🔬</div>
+          <div class="report-info">
+            <div class="report-title">便携气体检测仪 — 蓝牙连接</div>
+            <div class="report-meta">用途：实时检测 VOCs/SO₂/NOₓ/PM2.5</div>
+            <div class="report-actions">
+              <span class="badge mid">离线</span>
+              <span class="badge low">电量 30%</span>
+            </div>
+          </div>
+        </div>
+        <div class="report-item">
+          <div class="report-icon" style="background:#fff3e0">⌚</div>
+          <div class="report-info">
+            <div class="report-title">智能手表 — 华为手表</div>
+            <div class="report-meta">用途：振动提醒、快速操作、健康监测</div>
+            <div class="report-actions">
+              <span class="badge done">在线</span>
+              <span class="badge low">电量 91%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔗 设备集成说明</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8">
+        <p><strong>通信协议：</strong>蓝牙 5.0（传感器）+ WiFi/4G（记录仪/头盔）</p>
+        <p><strong>数据格式：</strong>JSON over WebSocket（实时）+ MQTT（低功耗传感器）</p>
+        <p><strong>语音系统：</strong>ASR（讯飞）→ LLM 分析 → TTS（CosyVoice）</p>
+        <p><strong>离线方案：</strong>Qwen2.5:1.5B 本地推理 + 预置提醒模板</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 督查清单数据 ==========
+const CHECKLISTS = {
+  general: [
+    {title:'排污许可证有效性',desc:'核实许可证是否在有效期内，许可事项与实际是否一致',required:true},
+    {title:'在线监测设备运行',desc:'检查在线监测设备是否正常运行，数据是否传输稳定',required:true},
+    {title:'污染防治设施运行',desc:'检查污染防治设施是否正常运行，有无停运、闲置情况',required:true},
+    {title:'环境管理台账',desc:'查阅环境管理台账记录是否完整、规范',required:true},
+    {title:'危废贮存间',desc:'检查危废贮存间是否符合标准，标识是否完善',required:true},
+    {title:'排放口规范化',desc:'检查排放口是否规范化设置，标识是否清晰',required:false},
+    {title:'环境影响评价批复落实',desc:'核实环评批复要求是否落实到位',required:false},
+    {title:'环境应急预案',desc:'检查应急预案是否备案，是否定期演练',required:false},
+  ],
+  water: [
+    {title:'废水处理设施运行',desc:'检查废水处理设施是否正常运行，加药记录是否完整',required:true},
+    {title:'废水排放口监测',desc:'核实废水排放口在线监测数据是否达标',required:true},
+    {title:'雨污分流情况',desc:'检查厂区雨污分流是否彻底，有无混排',required:true},
+    {title:'污水管网完整性',desc:'检查污水管网有无破损、渗漏、私接',required:true},
+    {title:'水污染物排放标准',desc:'核实排放浓度是否满足相关排放标准',required:true},
+    {title:'排污许可证水污染物项',desc:'核对许可证中水污染物排放许可量',required:false},
+  ],
+  air: [
+    {title:'废气处理设施运行',desc:'检查废气处理设施是否正常运行，滤料是否及时更换',required:true},
+    {title:'废气排放口监测',desc:'核实废气排放口在线监测数据是否达标',required:true},
+    {title:'VOCs治理',desc:'检查VOCs收集处理效率，有无无组织排放',required:true},
+    {title:'锅炉废气',desc:'检查锅炉燃料类型及排放是否符合要求',required:false},
+    {title:'无组织排放控制',desc:'检查厂区无组织排放控制措施是否到位',required:true},
+    {title:'重污染天气应急措施',desc:'核实重污染天气应急响应措施落实情况',required:false},
+  ],
+  solid: [
+    {title:'危废识别与分类',desc:'核实危废识别是否准确，分类是否正确',required:true},
+    {title:'危废贮存场所',desc:'检查危废贮存场所防渗、防漏、防雨措施',required:true},
+    {title:'危废标识与台账',desc:'检查危废容器标识和台账记录是否完整',required:true},
+    {title:'危废转移联单',desc:'核实危废转移联单是否齐全，去向是否合法',required:true},
+    {title:'一般固废管理',desc:'检查一般固废收集、贮存、利用处置情况',required:false},
+  ],
+  permit: [
+    {title:'许可证有效性',desc:'核实排污许可证是否在有效期内',required:true},
+    {title:'许可事项一致性',desc:'实际排放与许可事项是否一致',required:true},
+    {title:'自行监测落实',desc:'自行监测方案是否落实，数据是否公开',required:true},
+    {title:'执行报告提交',desc:'是否按期提交排污许可执行报告',required:true},
+    {title:'台账记录',desc:'环境管理台账记录是否完整规范',required:true},
+  ],
+};
+
+// ========== 督查任务存储 ==========
+let supervisions = JSON.parse(localStorage.getItem('epb_supervisions') || '[]');
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('show');
+  el.classList.add('active');
+  if (id === 'dashboard') loadDashboard();
+  if (id === 'reports') loadReports();
+}
+
+// ========== Dashboard ==========
+function loadDashboard() {
+  document.getElementById('stat-total').textContent = supervisions.length;
+  document.getElementById('stat-pending').textContent = supervisions.filter(s => s.status === 'pending' || s.status === 'processing').length;
+  document.getElementById('stat-issues').textContent = supervisions.filter(s => s.issues && s.issues.length > 0).length;
+  document.getElementById('stat-resolved').textContent = supervisions.filter(s => s.status === 'done').length;
+
+  // Recent list
+  const list = document.getElementById('recent-list');
+  if (supervisions.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>暂无督查记录，点击「发起督查」开始</p></div>';
+  } else {
+    list.innerHTML = supervisions.slice(0, 5).map(s => `
+      <div class="report-item">
+        <div class="report-icon" style="background:${s.status==='done'?'#e3f2fd':'#fef3e2'}">${s.status==='done'?'✅':'🔍'}</div>
+        <div class="report-info">
+          <div class="report-title">${s.company} — ${s.typeLabel}</div>
+          <div class="report-meta">督查员：${s.inspector || '未指定'} | 日期：${s.date || '未设定'}</div>
+          ${s.issues && s.issues.length ? `<div class="report-meta" style="color:var(--red)">发现问题：${s.issues.length} 项</div>` : ''}
+          <div class="report-actions">
+            <span class="badge ${s.status==='done'?'done':'mid'}">${s.status==='done'?'已完成':'进行中'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Load alerts from fusion API
+  loadAlerts();
+}
+
+function loadAlerts() {
+  fetch('/api/fusion_alert', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('alert-list');
+      if (!data.ok || !data.alerts || data.alerts.length === 0) {
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><p>暂无预警信息</p></div>';
+        return;
+      }
+      list.innerHTML = data.alerts.slice(0, 5).map(a => `
+        <div class="report-item">
+          <div class="report-icon" style="background:${a.level==='高风险'?'#fdecea':a.level==='中风险'?'#fef3e2':'#e8f5ec'}">${a.level==='高风险'?'🔴':a.level==='中风险'?'🟡':'🟢'}</div>
+          <div class="report-info">
+            <div class="report-title">${a.type} — ${a.location}</div>
+            <div class="report-meta">${a.desc}</div>
+            <div class="report-meta">来源：${a.sources.join('、')} | 时间：${a.time}</div>
+          </div>
+        </div>
+      `).join('');
+    })
+    .catch(() => {
+      document.getElementById('alert-list').innerHTML = '<div class="empty"><div class="empty-icon">🔔</div><p>预警加载失败</p></div>';
+    });
+}
+
+// ========== Checklist ==========
+function loadChecklist() {
+  const type = document.getElementById('checklist-type').value;
+  const items = CHECKLISTS[type] || [];
+  const container = document.getElementById('checklist-container');
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>选择督查类型加载检查清单</p></div>';
+    return;
+  }
+  container.innerHTML = items.map((item, i) => `
+    <div class="checklist-item">
+      <div class="check-icon" onclick="toggleCheck(${i})" id="check-${i}">✓</div>
+      <div class="check-body">
+        <div class="check-title">${item.title} ${item.required ? '<span style="color:var(--red);font-size:12px">*必查</span>' : '<span style="color:var(--muted);font-size:12px">选查</span>'}</div>
+        <div class="check-desc">${item.desc}</div>
+      </div>
+      <div class="check-status pending" id="status-${i}">待检查</div>
+    </div>
+  `).join('');
+  // Reset states
+  window._checkStates = items.map(() => 'pending');
+}
+
+function toggleCheck(i) {
+  const states = window._checkStates || [];
+  const current = states[i] || 'pending';
+  const next = current === 'pending' ? 'ok' : current === 'ok' ? 'issue' : 'pending';
+  states[i] = next;
+  const icon = document.getElementById('check-' + i);
+  const status = document.getElementById('status-' + i);
+  icon.classList.toggle('checked', next !== 'pending');
+  if (next === 'ok') {
+    icon.textContent = '✓';
+    status.className = 'check-status ok';
+    status.textContent = '合格';
+  } else if (next === 'issue') {
+    icon.textContent = '!';
+    status.className = 'check-status issue';
+    status.textContent = '有问题';
+  } else {
+    icon.textContent = '';
+    icon.classList.remove('checked');
+    status.className = 'check-status pending';
+    status.textContent = '待检查';
+  }
+}
+
+// ========== New Supervision ==========
+function createSupervision() {
+  const company = document.getElementById('sup-company').value.trim();
+  const type = document.getElementById('sup-type').value;
+  const typeLabel = document.getElementById('sup-type').selectedOptions[0].text;
+  const inspector = document.getElementById('sup-inspector').value.trim();
+  const date = document.getElementById('sup-date').value;
+  const desc = document.getElementById('sup-desc').value.trim();
+  const device = document.getElementById('sup-device').value;
+  const deviceLabel = device ? document.getElementById('sup-device').selectedOptions[0].text : '';
+
+  if (!company) {
+    alert('请输入被督查企业名称');
+    return;
+  }
+
+  // Create task via API
+  fetch('/api/task', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      type: 'supervision',
+      source: '第三方监管',
+      target: company,
+      title: `${typeLabel} — ${company}`,
+      content: desc || '无特别说明',
+      deadline: date,
+      priority: 'medium',
+      assigned_to: inspector
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const sup = {
+      id: data.data ? data.data.id : 'SUP-' + Date.now(),
+      company,
+      type,
+      typeLabel,
+      inspector,
+      date,
+      desc,
+      device: deviceLabel,
+      status: 'pending',
+      issues: [],
+      checklist: (CHECKLISTS[type] || []).map(c => ({...c, status: 'pending'})),
+      logs: [{time: new Date().toLocaleString('zh-CN'), action: '创建督查任务', actor: inspector || '系统'}],
+      created_at: new Date().toISOString()
+    };
+    supervisions.unshift(sup);
+    localStorage.setItem('epb_supervisions', JSON.stringify(supervisions));
+    alert('督查任务已创建！\n编号：' + sup.id);
+    // Reset form
+    document.getElementById('sup-company').value = '';
+    document.getElementById('sup-inspector').value = '';
+    document.getElementById('sup-desc').value = '';
+    document.getElementById('sup-date').value = '';
+    showPanel('dashboard', document.querySelectorAll('.tab')[0]);
+  })
+  .catch(err => {
+    // Fallback: save locally only
+    const sup = {
+      id: 'SUP-' + Date.now(),
+      company, type, typeLabel, inspector, date, desc,
+      device: deviceLabel, status: 'pending', issues: [],
+      created_at: new Date().toISOString()
+    };
+    supervisions.unshift(sup);
+    localStorage.setItem('epb_supervisions', JSON.stringify(supervisions));
+    alert('督查任务已创建（本地存储）！');
+    showPanel('dashboard', document.querySelectorAll('.tab')[0]);
+  });
+}
+
+// ========== Reports ==========
+function loadReports() {
+  const list = document.getElementById('report-list');
+  if (supervisions.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><p>暂无督查报告</p></div>';
+    return;
+  }
+  list.innerHTML = supervisions.map(s => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-hd">
+        <div class="card-title">${s.company} — ${s.typeLabel}</div>
+        <span class="badge ${s.status==='done'?'done':'mid'}">${s.status==='done'?'已完成':'进行中'}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">
+        督查员：${s.inspector || '未指定'} | 日期：${s.date || '未设定'} | 设备：${s.device || '未使用'}
+      </div>
+      ${s.desc ? `<div style="font-size:13px;margin-bottom:10px">${s.desc}</div>` : ''}
+      ${s.issues && s.issues.length ? `
+        <div style="margin-top:10px">
+          <strong style="font-size:13px;color:var(--red)">发现问题：</strong>
+          <ul style="margin:6px 0 0 20px;font-size:13px">
+            ${s.issues.map(i => `<li>${i}</li>`).join('')}
+          </ul>
+        </div>
+      ` : ''}
+      ${s.logs && s.logs.length ? `
+        <div style="margin-top:12px">
+          <strong style="font-size:13px">操作记录：</strong>
+          <div class="timeline" style="margin-top:8px">
+            ${s.logs.map(l => `
+              <div class="timeline-item">
+                <div class="timeline-time">${l.time}</div>
+                <div class="timeline-title">${l.action}</div>
+                <div class="timeline-desc">${l.actor}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// ========== Init ==========
+loadChecklist();
+loadDashboard();
+
+// Voice guidance simulation
+function startVoiceGuide() {
+  const type = document.getElementById('sup-type').value;
+  const typeLabel = document.getElementById('sup-type').selectedOptions[0].text;
+  const items = CHECKLISTS[type] || [];
+  if (items.length === 0) return;
+
+  const text = `本次督查重点：${typeLabel}。请按以下步骤进行检查：${items.map((c,i) => `${i+1}、${c.title}`).join('；')}。督查过程中请随时拍照取证。`;
+  if ('speechSynthesis' in window) {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'zh-CN';
+    utter.rate = 0.9;
+    speechSynthesis.speak(utter);
+  } else {
+    alert(text);
+  }
+}
+</script>
+</body>
+</html>

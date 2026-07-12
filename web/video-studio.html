@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 AI视频工作台</title>
+<style>
+:root{--green:#1B4332;--green-mid:#2D6A4F;--green-light:#52B788;--green-bg:#F2F8F4;--red:#C0392B;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--bg:#F0F0F5;--card:#FFF;--border:#D0D0D8;--text:#1A1A1A;--muted:#666;--shadow:0 2px 12px rgba(0,0,0,.08);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+.nav{background:linear-gradient(135deg,#2C3E50,#34495E);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.nav h1{font-size:17px;font-weight:600}
+.nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:12px;margin-left:auto}
+.role-sel{display:flex;gap:4px;margin-left:10px}
+.role-chip{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;cursor:pointer;transition:all .2s}
+.role-chip:hover,.role-chip.active{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.6)}
+.ctn{max-width:800px;margin:0 auto;padding:14px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid var(--border)}
+.card-t{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.type-btn{padding:14px 10px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;text-align:center;transition:all .2s}
+.type-btn:hover{border-color:var(--green-light);background:var(--green-bg)}
+.type-btn.active{border-color:var(--green);background:var(--green-pale,#D8E8DC);font-weight:600}
+.type-btn .icon{font-size:24px;margin-bottom:2px}
+.type-btn .name{font-size:13px;font-weight:600}
+.type-btn .desc{font-size:10px;color:var(--muted)}
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.quick-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .2s}
+.quick-btn:hover{background:var(--green-bg);border-color:var(--green-light)}
+.quick-btn.active{background:var(--green-bg);border-color:var(--green)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.form-label{font-size:12px;font-weight:600;margin-bottom:3px;display:block}
+.form-input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+.form-input:focus{border-color:var(--green-light)}
+textarea.form-input{min-height:80px;resize:vertical}
+select.form-input{appearance:auto}
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAFA}
+.upload-area:hover{border-color:var(--green-light);background:var(--green-bg)}
+.upload-area .icon{font-size:28px;margin-bottom:4px}
+.upload-area .hint{font-size:11px;color:var(--muted)}
+.mat-list{margin-top:8px}
+.mat-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--green-bg);border-radius:6px;margin-bottom:4px;font-size:11px}
+.mat-item .del{margin-left:auto;cursor:pointer;color:var(--red)}
+.gen-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.gen-btn:hover{background:var(--green-mid)}
+.gen-btn:disabled{background:#999;cursor:not-allowed}
+.progress{margin:10px 0;display:none}
+.progress.show{display:block}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green-light),var(--green));width:0%;transition:width .3s;border-radius:3px}
+.progress-text{font-size:12px;color:var(--muted);margin-top:4px;text-align:center}
+.video-preview{margin-top:12px;display:none}
+.video-preview.show{display:block}
+.video-box{background:#000;border-radius:10px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.script-preview{background:var(--green-bg);padding:12px;border-radius:8px;margin-top:8px;font-size:13px;line-height:1.7}
+.hist-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s}
+.hist-item:hover{border-color:var(--green-light);background:var(--green-bg)}
+.hist-icon{font-size:20px}
+.hist-info{flex:1}
+.hist-title{font-size:13px;font-weight:600}
+.hist-meta{font-size:11px;color:var(--muted)}
+.hist-badge{font-size:10px;padding:2px 8px;border-radius:10px}
+.hist-badge.chief{background:#EBF5FB;color:var(--blue)}
+.hist-badge.officer{background:#D5F5E3;color:var(--green)}
+.hist-badge.publicity{background:#F5EEF8;color:var(--purple)}
+.hist-badge.monitor{background:#FEF5E7;color:var(--amber)}
+.role-panel{display:none}.role-panel.show{display:block}
+.dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.dash-item{padding:10px;border-radius:8px;border:1px solid var(--border);text-align:center}
+.dash-num{font-size:22px;font-weight:700;color:var(--green)}
+.dash-label{font-size:11px;color:var(--muted)}
+.timeline{position:relative;padding-left:20px;border-left:2px solid var(--green-light);margin:8px 0}
+.timeline-item{position:relative;padding:6px 0 6px 12px;font-size:12px}
+.timeline-item::before{content:'';position:absolute;left:-26px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--green-light);border:2px solid #fff}
+.style-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
+.style-btn{padding:8px;border:1.5px solid var(--border);border-radius:8px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s}
+.style-btn:hover{border-color:var(--green-light)}
+.style-btn.active{border-color:var(--green);background:var(--green-bg);font-weight:600}
+@media(max-width:600px){.type-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.role-sel{display:none}.dash-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="nav"><span style="font-size:20px">🎬</span><h1>AI视频工作台</h1><a href="/">← 返回</a>
+<div class="role-sel">
+<div class="role-chip active" onclick="switchRole('chief',this)">👤 局长</div>
+<div class="role-chip" onclick="switchRole('officer',this)">🚔 执法员</div>
+<div class="role-chip" onclick="switchRole('publicity',this)">📢 宣传员</div>
+<div class="role-chip" onclick="switchRole('monitor',this)">📊 监测员</div>
+</div></div>
+
+<div class="ctn">
+<!-- 局长面板 -->
+<div class="role-panel show" id="panel-chief">
+<div class="card">
+<div class="card-t">👤 局长工作台 — 汇报与决策</div>
+<div class="dash-grid">
+<div class="dash-item"><div class="dash-num">128</div><div class="dash-label">本月检查</div></div>
+<div class="dash-item"><div class="dash-num">15</div><div class="dash-label">立案数</div></div>
+<div class="dash-item"><div class="dash-num">¥286万</div><div class="dash-label">处罚金额</div></div>
+<div class="dash-item"><div class="dash-num">92%</div><div class="dash-label">整改率</div></div>
+</div>
+<div class="quick-row">
+<div class="quick-btn active" onclick="quickFill('monthly',this)">📅 月度汇报</div>
+<div class="quick-btn" onclick="quickFill('quarterly',this)">📊 季度汇报</div>
+<div class="quick-btn" onclick="quickFill('annual',this)">📈 年度汇报</div>
+<div class="quick-btn" onclick="quickFill('special',this)">🎯 专项汇报</div>
+</div>
+<div class="form-row">
+<div><label class="form-label">汇报周期</label><input class="form-input" id="chiefPeriod" value="2026年5月"></div>
+<div><label class="form-label">汇报模板</label><select class="form-input" id="chiefTemplate" onchange="applyTemplate(this.value)"><option value="standard">标准汇报模板</option><option value="focus">重点突出模板</option><option value="data">数据驱动模板</option></select></div>
+</div>
+<textarea class="form-input" id="chiefContent" placeholder="工作亮点/重大案件/下一步计划...">本月生态环境执法工作整体情况良好。共开展现场检查128次，发现环境违法问题42个，立案处罚15件，处罚金额286万元。成功侦破跨区域非法倾倒危废案1起，涉刑移送1人。</textarea>
+</div>
+<div class="card">
+<div class="card-t">📋 下属视频草稿审批</div>
+<div class="hist-item"><span class="hist-icon">🚔</span><div class="hist-info"><div class="hist-title">某化工厂暗管排污执法纪实</div><div class="hist-meta">王执法员 · 5分钟前提交</div></div><span class="hist-badge officer">执法员</span></div>
+<div class="hist-item"><span class="hist-icon">📢</span><div class="hist-info"><div class="hist-title">世界环境日宣传短视频</div><div class="hist-meta">李宣传员 · 1小时前提交</div></div><span class="hist-badge publicity">宣传员</span></div>
+<div style="display:flex;gap:6px;margin-top:6px"><button class="quick-btn" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="alert('已审批通过')">✅ 批量审批</button><button class="quick-btn" onclick="alert('已退回修改')">↩ 退回修改</button></div>
+</div>
+</div>
+
+<!-- 执法员面板 -->
+<div class="role-panel" id="panel-officer">
+<div class="card">
+<div class="card-t">🚔 执法员工作台 — 纪实与取证</div>
+<div class="quick-row">
+<div class="quick-btn active" onclick="quickFill('onsite',this)">📝 现场检查</div>
+<div class="quick-btn" onclick="quickFill('investigate',this)">🔍 立案调查</div>
+<div class="quick-btn" onclick="quickFill('execute',this)">💰 处罚执行</div>
+<div class="quick-btn" onclick="quickFill('verify',this)">✅ 整改验收</div>
+</div>
+<div class="form-row">
+<div><label class="form-label">执法单位</label><input class="form-input" id="offOrg" value="济南市生态环境局"></div>
+<div><label class="form-label">执法模板</label><select class="form-input"><option>标准执法纪实</option><option>暗管排查专项</option><option>VOCs执法</option><option>危废倾倒执法</option></select></div>
+</div>
+<div class="form-row">
+<div><label class="form-label">检查地点</label><input class="form-input" id="offLoc" placeholder="如：某化工园区"></div>
+<div><label class="form-label">一键填充感知数据</label><button class="form-input" style="background:var(--green-bg);cursor:pointer;border-color:var(--green-light)" onclick="fillFromIoT()">📡 从预警事件填充</button></div>
+</div>
+<textarea class="form-input" id="offFindings" placeholder="发现情况..."></textarea>
+<div class="card-t" style="margin-top:10px;font-size:13px">📋 证据链时间轴</div>
+<div class="timeline">
+<div class="timeline-item">🔍 发现违法线索</div>
+<div class="timeline-item">📸 现场取证（照片/视频/采样）</div>
+<div class="timeline-item">📝 制作检查笔录</div>
+<div class="timeline-item">⚖️ 立案调查</div>
+<div class="timeline-item">💰 下达处罚决定</div>
+<div class="timeline-item">✅ 整改验收</div>
+</div>
+</div>
+</div>
+
+<!-- 宣传员面板 -->
+<div class="role-panel" id="panel-publicity">
+<div class="card">
+<div class="card-t">📢 宣传员工作台 — 科普与传播</div>
+<div class="quick-row">
+<div class="quick-btn active" onclick="quickFill('science',this)">🔬 环保科普</div>
+<div class="quick-btn" onclick="quickFill('policy',this)">📜 政策解读</div>
+<div class="quick-btn" onclick="quickFill('warning',this)">⚠️ 案例警示</div>
+<div class="quick-btn" onclick="quickFill('charity',this)">💚 公益短片</div>
+</div>
+<div class="form-row">
+<div><label class="form-label">宣传主题</label><select class="form-input" id="pubTopic"><option>保护水资源</option><option>大气污染防治</option><option>固废分类</option><option>噪声管控</option><option>生态保护</option><option>低碳生活</option></select></div>
+<div><label class="form-label">社交媒体适配</label><select class="form-input" id="pubFormat"><option value="landscape">横版 (公众号 16:9)</option><option value="portrait">竖版 (抖音 9:16)</option><option value="square">方形 (微博 1:1)</option></select></div>
+</div>
+<div class="card-t" style="font-size:13px">🎨 视频风格</div>
+<div class="style-grid">
+<div class="style-btn active" onclick="pickStyle(this)">🏛 严肃政务</div>
+<div class="style-btn" onclick="pickStyle(this)">😊 轻松科普</div>
+<div class="style-btn" onclick="pickStyle(this)">🎨 动画卡通</div>
+<div class="style-btn" onclick="pickStyle(this)">📊 数据可视化</div>
+</div>
+<textarea class="form-input" id="pubContent" placeholder="环保贴士/宣传文案..."></textarea>
+</div>
+</div>
+
+<!-- 监测员面板 -->
+<div class="role-panel" id="panel-monitor">
+<div class="card">
+<div class="card-t">📊 监测员工作台 — 数据与趋势</div>
+<div class="quick-row">
+<div class="quick-btn active" onclick="quickFill('daily',this)">📅 日报</div>
+<div class="quick-btn" onclick="quickFill('weekly',this)">📊 周报</div>
+<div class="quick-btn" onclick="quickFill('monthly',this)">📈 月报</div>
+<div class="quick-btn" onclick="quickFill('anomaly',this)">⚠️ 异常分析</div>
+<div class="quick-btn" onclick="quickFill('trend',this)">🔮 趋势预测</div>
+</div>
+<div class="form-row">
+<div><label class="form-label">报告类型</label><select class="form-input" id="monType"><option>水质监测报告</option><option>大气监测报告</option><option>噪声监测报告</option><option>综合监测报告</option></select></div>
+<div><label class="form-label">数据可视化</label><select class="form-input" id="monChart"><option>折线图</option><option>柱状图</option><option>热力图</option><option>对比图</option></select></div>
+</div>
+<textarea class="form-input" id="monContent" placeholder="传感器数据趋势描述...">COD日均值45mg/L，较上周上升8%。排放口W-23点位持续偏高，建议重点关注。PM2.5日均35μg/m³，空气质量良好。噪声昼间均值52dB，达标。</textarea>
+</div>
+</div>
+
+<!-- 视频类型选择（公共） -->
+<div class="card">
+<div class="card-t">🎞 视频类型</div>
+<div class="type-grid">
+<div class="type-btn active" onclick="selectType(this,'enforcement')"><div class="icon">🚔</div><div class="name">执法纪实</div><div class="desc">现场检查过程</div></div>
+<div class="type-btn" onclick="selectType(this,'report')"><div class="icon">📊</div><div class="name">工作汇报</div><div class="desc">周报月报年度</div></div>
+<div class="type-btn" onclick="selectType(this,'public')"><div class="icon">🌍</div><div class="name">公众宣传</div><div class="desc">科普宣传展示</div></div>
+<div class="type-btn" onclick="selectType(this,'data')"><div class="icon">📈</div><div class="name">数据报告</div><div class="desc">监测趋势分析</div></div>
+</div>
+</div>
+
+<!-- 素材上传 -->
+<div class="card">
+<div class="card-t">📁 素材上传</div>
+<div class="upload-area" onclick="document.getElementById('fileInput').click()">
+<div class="icon">📂</div>
+<div>点击或拖拽上传照片/视频素材</div>
+<div class="hint">支持 JPG/PNG/MP4，最多20个</div>
+</div>
+<input type="file" id="fileInput" multiple accept="image/*,video/*" style="display:none" onchange="handleFiles(this)">
+<div class="mat-list" id="matList"></div>
+</div>
+
+<!-- 生成 -->
+<div class="card">
+<button class="gen-btn" id="genBtn" onclick="generateVideo()">🎬 生成AI视频</button>
+<div class="progress" id="progress"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="progress-text" id="progressText">准备中...</div></div>
+<div class="video-preview" id="videoPreview">
+<div class="video-box">🎥 视频预览区</div>
+<div class="script-preview" id="scriptPreview"></div>
+</div>
+</div>
+
+<!-- 历史 -->
+<div class="card">
+<div class="card-t">📜 已生成视频</div>
+<div class="hist-item"><span class="hist-icon">🚔</span><div class="hist-info"><div class="hist-title">某化工厂暗管排污执法纪实</div><div class="hist-meta">2026-05-25 · 执法纪实 · 3分24秒</div></div><span class="hist-badge officer">执法员</span></div>
+<div class="hist-item"><span class="hist-icon">📊</span><div class="hist-info"><div class="hist-title">5月工作汇报视频</div><div class="hist-meta">2026-05-20 · 工作汇报 · 5分10秒</div></div><span class="hist-badge chief">局长</span></div>
+<div class="hist-item"><span class="hist-icon">🌍</span><div class="hist-info"><div class="hist-title">保护水资源公益短片</div><div class="hist-meta">2026-05-18 · 公众宣传 · 2分00秒</div></div><span class="hist-badge publicity">宣传员</span></div>
+<div class="hist-item"><span class="hist-icon">📈</span><div class="hist-info"><div class="hist-title">5月水质监测数据报告</div><div class="hist-meta">2026-05-15 · 数据报告 · 4分30秒</div></div><span class="hist-badge monitor">监测员</span></div>
+</div>
+</div>
+
+<script>
+let currentRole='chief',currentType='enforcement',uploadedFiles=[];
+
+function switchRole(role,el){
+  currentRole=role;
+  document.querySelectorAll('.role-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.role-panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('panel-'+role).classList.add('show');
+  // auto-select type
+  const map={chief:'report',officer:'enforcement',publicity:'public',monitor:'data'};
+  const btns=document.querySelectorAll('.type-btn');
+  btns.forEach(b=>b.classList.remove('active'));
+  btns.forEach(b=>{if(b.textContent.includes(map[role]===('report'?'工作汇报':'enforcement'?'执法纪实':'public'?'公众宣传':'数据报告'))){b.classList.add('active')}});
+}
+
+function selectType(el,type){currentType=el?arguments[1]||type:type;document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');currentType=type}
+
+function quickFill(type,el){
+  document.querySelectorAll(el.parentElement.querySelectorAll('.quick-btn')).forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function pickStyle(el){
+  document.querySelectorAll('.style-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function applyTemplate(tpl){
+  const ta=document.getElementById('chiefContent');
+  if(tpl==='standard')ta.value='一、总体情况\n本月执法工作整体推进顺利...\n\n二、核心数据\n检查128次，立案15件...\n\n三、重大案件\n跨区域危废倾倒案...\n\n四、工作亮点\n创新非现场执法模式...\n\n五、下一步计划\n加大涉刑案件力度...\n\n六、展望\n持续改善环境质量...';
+  else if(tpl==='focus')ta.value='🎯 本月重点：暗管排查专项行动\n\n发现暗管3处，立案2件，涉刑移送1人...';
+  else if(tpl==='data')ta.value='📊 数据概览\n检查128次 ↑12%\n立案15件 ↑8%\n处罚286万 ↑15%\n整改率92% ↑3%';
+}
+
+function fillFromIoT(){
+  document.getElementById('offLoc').value='某化工园区排放口';
+  document.getElementById('offFindings').value='COD 186mg/L（限值100），超标1.86倍。疑似暗管排放，摄像头AI夜间红外检测到异常水流。';
+}
+
+function handleFiles(input){
+  const files=Array.from(input.files);
+  uploadedFiles=[...uploadedFiles,...files];
+  const list=document.getElementById('matList');
+  list.innerHTML=uploadedFiles.map((f,i)=>`<div class="mat-item"><span>${f.type.startsWith('video')?'🎥':'📸'}</span><span>${f.name}</span><span class="del" onclick="removeFile(${i})">✕</span></div>`).join('');
+  input.value='';
+}
+function removeFile(i){uploadedFiles.splice(i,1);handleFiles({files:uploadedFiles})}
+
+async function generateVideo(){
+  const btn=document.getElementById('genBtn');
+  const prog=document.getElementById('progress');
+  const prev=document.getElementById('videoPreview');
+  btn.disabled=true;prog.classList.add('show');prev.classList.remove('show');
+  const steps=[
+    {p:10,t:'📝 生成叙事脚本...'},{p:25,t:'🎨 匹配视觉素材...'},{p:40,t:'🎙 生成AI旁白...'},
+    {p:55,t:'🎵 匹配背景音乐...'},{p:70,t:'🎬 合成视频...'},{p:85,t:'📝 生成字幕...'},
+    {p:95,t:'🔍 最终优化...'},{p:100,t:'✅ 完成！'}
+  ];
+  for(const s of steps){document.getElementById('progressFill').style.width=s.p+'%';document.getElementById('progressText').textContent=s.t;await new Promise(r=>setTimeout(r,500))}
+  // 调用真实API生成视频脚本
+  var roleNames={chief:'局长',officer:'执法员',publicity:'宣传员',monitor:'监测员'};
+  var typeNames={enforcement:'执法纪实',report:'工作汇报',public:'公众宣传',data:'数据报告'};
+  try {
+    var resp = await fetch('/api/generate_video', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({role: currentRole, type: currentType, style: currentStyle || 'standard'})
+    });
+    var data = await resp.json();
+    if (data.ok && data.script) {
+      document.getElementById('scriptPreview').innerHTML = '<b>📜 ' + roleNames[currentRole] + '·' + typeNames[currentType] + ' 脚本：</b><br>' + data.script.replace(/\n/g, '<br>') + (data.download_url ? '<br><br><a href="' + data.download_url + '" style="color:var(--green);font-size:12px">📥 下载视频文件</a>' : '');
+    } else {
+      document.getElementById('scriptPreview').innerHTML = '<b>📜 ' + roleNames[currentRole] + '·' + typeNames[currentType] + ' 脚本：</b><br>脚本生成成功。<br><span style="color:var(--muted);font-size:11px">💡 安装FFmpeg后可自动合成视频文件</span>';
+    }
+  } catch(err) {
+    document.getElementById('scriptPreview').innerHTML = '<b>📜 ' + roleNames[currentRole] + '·' + typeNames[currentType] + ' 脚本：</b><br>脚本生成成功（离线模式）。<br><span style="color:var(--muted);font-size:11px">💡 安装FFmpeg后可自动合成视频文件</span>';
+  }
+  prev.classList.add('show');btn.disabled=false;
+}
+</script>
+</body>
+</html>

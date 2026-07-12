@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚖️ 行政管理员 - 环保执法平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #2e7d32;
+            --light-green: #4caf50;
+            --lighter-green: #81c784;
+            --bg-green: #e8f5e9;
+            --text-dark: #1b5e20;
+            --text-light: #666;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --border: #c8e6c9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: var(--bg-green);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* 顶栏导航 */
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .top-bar h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .top-bar .time {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .quick-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 科室Tab导航 */
+        .tab-nav {
+            background: var(--white);
+            padding: 0 24px;
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            overflow-x: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-green);
+            background: var(--bg-green);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-green);
+            border-bottom-color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 24px;
+        }
+
+        /* 仪表盘统计卡片 */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .stat-card .number {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .stat-card .unit {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-left: 4px;
+        }
+
+        /* 科室内容区 */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--bg-green);
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-green);
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f1f8e9;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: var(--light-green);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-green);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--primary-green);
+            border: 1px solid var(--primary-green);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-green);
+        }
+
+        /* 表单元素 */
+        input, select, textarea {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--light-green);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        /* 搜索模态框 */
+        .search-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 100px;
+        }
+
+        .search-modal.active {
+            display: flex;
+        }
+
+        .search-box {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        .search-results {
+            margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .search-result-item:hover {
+            background: var(--bg-green);
+        }
+
+        /* 浮动快捷面板 */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .fab-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .fab-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .fab-panel {
+            display: none;
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 180px;
+        }
+
+        .fab-panel.active {
+            display: block;
+        }
+
+        .fab-item {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 6px;
+            margin: 2px 0;
+            color: var(--text-dark);
+        }
+
+        .fab-item:hover {
+            background: var(--bg-green);
+        }
+
+        /* 返回顶部 */
+        .back-to-top {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .back-to-top.visible {
+            display: block;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .tab-nav {
+                flex-wrap: nowrap;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 0 12px;
+            }
+        }
+
+        /* 状态标签 */
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success { background: #c8e6c9; color: #2e7d32; }
+        .status-warning { background: #fff9c4; color: #f57f17; }
+        .status-danger { background: #ffcdd2; color: #c62828; }
+        .status-info { background: #b3e5fc; color: #0277bd; }
+
+        /* 列表样式 */
+        .list-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+<script src="/auth-guard.js"></script>
+</head>
+<body>
+    <!-- 顶栏导航 -->
+    <div class="top-bar">
+        <h1>⚖️ 行政管理员</h1>
+        <div class="time" id="currentTime"></div>
+        <div class="quick-buttons">
+            <button class="quick-btn" onclick="goHome()">🏠 返回首页</button>
+            <button class="quick-btn" onclick="toggleSearch()">🔍 搜索 (Ctrl+K)</button>
+            <button class="quick-btn" onclick="showStats()">📊 统计</button>
+        </div>
+    </div>
+
+    <!-- 科室Tab导航 -->
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="dashboard">📊 总览</button>
+        <button class="tab-btn" data-tab="law">⚖️ 法规科</button>
+        <button class="tab-btn" data-tab="water">💧 水生态</button>
+        <button class="tab-btn" data-tab="air">🌬️ 大气</button>
+        <button class="tab-btn" data-tab="soil">🪨 土壤固废</button>
+        <button class="tab-btn" data-tab="eia">📋 环评排放</button>
+        <button class="tab-btn" data-tab="enforcement">🚔 执法局</button>
+        <button class="tab-btn" data-tab="monitoring">📡 监测中心</button>
+        <button class="tab-btn" data-tab="petition">📞 信访科</button>
+        <button class="tab-btn" data-tab="education">🎨 宣教科</button>
+        <button class="tab-btn" data-tab="users">👥 用户管理</button>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 仪表盘 -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="dashboard">
+                <div class="stat-card">
+                    <h3>今日待办案件数</h3>
+                    <div><span class="number">888</span><span class="unit">件</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>本月执法案件数</h3>
+                    <div><span class="number">888</span><span class="unit">件</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>预警数量</h3>
+                    <div><span class="number">888</span><span class="unit">条</span></div>
+                </div>
+                <div class="stat-card">
+                    <h3>在线企业数</h3>
+                    <div><span class="number">888</span><span class="unit">家</span></div>
+                </div>
+            </div>
+
+            <!-- 各科室快速概览 -->
+            <div class="section">
+                <div class="section-title">科室工作概览</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>科室</th>
+                            <th>待办事项</th>
+                            <th>进行中</th>
+                            <th>已完成</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>法规与标准科</td><td>12</td><td>8</td><td>156</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>水生态环境科</td><td>18</td><td>15</td><td>234</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>大气环境科</td><td>22</td><td>19</td><td>198</td><td><span class="status status-warning">预警</span></td></tr>
+                        <tr><td>土壤与固废科</td><td>9</td><td>11</td><td>167</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>环评与排放管理科</td><td>15</td><td>13</td><td>189</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>生态环境执法局</td><td>28</td><td>35</td><td>567</td><td><span class="status status-danger">繁忙</span></td></tr>
+                        <tr><td>生态环境监测中心</td><td>8</td><td>6</td><td>234</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>信访科/12369热线</td><td>45</td><td>38</td><td>1234</td><td><span class="status status-warning">预警</span></td></tr>
+                        <tr><td>宣教科普中心</td><td>6</td><td>4</td><td>89</td><td><span class="status status-success">正常</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 法规与标准科 -->
+        <div class="tab-content" id="tab-law">
+            <div class="section">
+                <div class="section-title">⚖️ 环保法规库搜索</div>
+                <input type="text" id="lawSearch" placeholder="输入关键词搜索法规..." onkeyup="searchLaw(this.value)">
+                <div id="lawResults" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">行业标准查询</div>
+                <select id="standardType" onchange="filterStandards(this.value)">
+                    <option value="">全部</option>
+                    <option value="water">水标准</option>
+                    <option value="air">大气标准</option>
+                    <option value="soil">土壤标准</option>
+                    <option value="noise">噪声标准</option>
+                    <option value="solid">固废标准</option>
+                </select>
+                <table id="standardTable" style="margin-top: 12px;">
+                    <thead>
+                        <tr><th>标准名称</th><th>标准号</th><th>类型</th><th>发布日期</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">排放标准速查</div>
+                <table>
+                    <thead>
+                        <tr><th>标准名称</th><th>指标</th><th>限值</th><th>适用范围</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>GB 16297-1996</td><td>颗粒物</td><td>120 mg/m³</td><td>大气污染物排放</td></tr>
+                        <tr><td>GB 8978-1996</td><td>COD</td><td>100 mg/L</td><td>污水综合排放</td></tr>
+                        <tr><td>GB 18485-2014</td><td>二噁英</td><td>0.1 ng TEQ/m³</td><td>垃圾焚烧</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">法条智能匹配</div>
+                <textarea id="caseInput" rows="4" placeholder="输入案情描述..."></textarea>
+                <button class="btn" onclick="matchLaw()" style="margin-top: 8px;">匹配法条</button>
+                <div id="lawMatchResult" style="margin-top: 12px;"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">典型案例库</div>
+                <div class="list-item"><span>案例001: 某化工厂超标排放案</span><span class="status status-success">已归档</span></div>
+                <div class="list-item"><span>案例002: 某养殖场违法排污案</span><span class="status status-success">已归档</span></div>
+                <div class="list-item"><span>案例003: 某工地扬尘污染案</span><span class="status status-success">已归档</span></div>
+            </div>
+        </div>
+
+        <!-- 水生态环境科 -->
+        <div class="tab-content" id="tab-water">
+            <div class="section">
+                <div class="section-title">💧 涉水企业列表</div>
+                <table>
+                    <thead>
+                        <tr><th>企业名称</th><th>行业类型</th><th>排放口数</th><th>状态</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>绿源化工有限公司</td><td>化工</td><td>3</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>东海造纸厂</td><td>造纸</td><td>5</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>清润制药股份有限公司</td><td>制药</td><td>4</td><td><span class="status status-warning">预警</span></td></tr>
+                        <tr><td>江河印染有限公司</td><td>印染</td><td>6</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>明洋食品厂</td><td>食品</td><td>2</td><td><span class="status status-success">正常</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">重点河流监测数据</div>
+                <table>
+                    <thead>
+                        <tr><th>河流名称</th><th>监测点位</th><th>水质类别</th><th>主要指标</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>长江</td><td>干流断面A</td><td>Ⅱ类</td><td>COD: 15mg/L</td></tr>
+                        <tr><td>黄河</td><td>支流断面B</td><td>Ⅲ类</td><td>氨氮: 0.8mg/L</td></tr>
+                        <tr><td>珠江</td><td>干流断面C</td><td>Ⅱ类</td><td>总磷: 0.1mg/L</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">流域水质等级</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div class="status status-success" style="padding: 16px; border-radius: 8px;">长江流域: 优</div>
+                    <div class="status status-success" style="padding: 16px; border-radius: 8px;">黄河流域: 良</div>
+                    <div class="status status-warning" style="padding: 16px; border-radius: 8px;">淮河流域: 轻度污染</div>
+                    <div class="status status-danger" style="padding: 16px; border-radius: 8px;">海河流域: 重度污染</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 大气环境科 -->
+        <div class="tab-content" id="tab-air">
+            <div class="section">
+                <div class="section-title">🌬️ 空气质量指数（AQI）实时显示</div>
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 72px; font-weight: bold; color: var(--primary-green);">88</div>
+                    <div style="font-size: 24px; color: var(--light-green);">优</div>
+                    <div style="margin-top: 12px; color: var(--text-light);">更新时间: <span id="aqiTime"></span></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">VOCs排放企业列表</div>
+                <table>
+                    <thead>
+                        <tr><th>企业名称</th><th>VOCs排放量(吨/年)</th><th>治理设施</th><th>状态</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>蓝天喷涂有限公司</td><td>12.5</td><td>RTO焚烧</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr><td>华盛印刷厂</td><td>8.3</td><td>活性炭吸附</td><td><span class="status status-warning">维护中</span></td></tr>
+                        <tr><td>创新化工有限公司</td><td>25.6</td><td>催化燃烧</td><td><span class="status status-success">正常</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">重污染天气应急响应状态</div>
+                <div style="padding: 20px; background: var(--bg-green); border-radius: 8px;">
+                    <h3 style="color: var(--primary-green);">当前等级: <span style="color: #f57f17;">黄色预警</span></h3>
+                    <p style="margin-top: 8px;">响应措施: 工业企业限产50%，停止室外施工作业</p>
+                    <p style="margin-top: 4px;">启动时间: 2026-05-26 08:00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 土壤与固废科 -->
+        <div class="tab-content" id="tab-soil">
+            <div class="section">
+                <div class="section-title">🪨 危废产生企业台账</div>
+                <table>
+                    <thead>
+                        <tr><th>企业名称</th><th>危废类别</th><th>年产量(吨)</th><th>处置方式</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>金鹏电镀厂</td><td>HW17 表面处理废物</td><td>120</td><td>委托处置</td></tr>
+                        <tr><td>天润制药</td><td>HW02 医药废物</td><td>85</td><td>自行处置</td></tr>
+                        <tr><td>华盛化工</td><td>HW06 废有机溶剂</td><td>200</td><td>委托处置</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">危废转移联单管理</div>
+                <div class="list-item">
+                    <span>联单2026001: 金鹏电镀厂 → 绿环处置公司</span>
+                    <span class="status status-info">运输中</span>
+                </div>
+                <div class="list-item">
+                    <span>联单2026002: 天润制药 → 润天环保公司</span>
+                    <span class="status status-success">已签收</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">土壤污染修复进度</div>
+                <div class="list-item">
+                    <div>
+                        <strong>原红星化工厂地块</strong>
+                        <div style="margin-top: 4px; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 65%; height: 100%; background: var(--light-green);"></div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-light); margin-top: 4px;">进度: 65%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 环评与排放管理科 -->
+        <div class="tab-content" id="tab-eia">
+            <div class="section">
+                <div class="section-title">📋 排污许可证台账</div>
+                <table>
+                    <thead>
+                        <tr><th>企业名称</th><th>许可证编号</th><th>有效期</th><th>状态</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>东海造纸厂</td><td>91370000MA3XXX</td><td>2026-12-31</td><td><span class="status status-success">有效</span></td></tr>
+                        <tr><td>绿源化工</td><td>91370000MA4XXX</td><td>2025-06-30</td><td><span class="status status-danger">即将到期</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">环评审批进度列表</div>
+                <div class="list-item">
+                    <span>审批2026001: 新能源产业园项目</span>
+                    <span class="status status-info">技术评估中</span>
+                </div>
+                <div class="list-item">
+                    <span>审批2026002: 扩建污水处理设施</span>
+                    <span class="status status-warning">待补正</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">执行报告提交率统计</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);">88.8%</div>
+                    <div style="color: var(--text-light); margin-top: 8px;">年度执行报告提交率</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生态环境执法局 -->
+        <div class="tab-content" id="tab-enforcement">
+            <div class="section">
+                <div class="section-title">🚔 本月执法案件统计</div>
+                <div class="dashboard">
+                    <div class="stat-card">
+                        <h3>立案数</h3>
+                        <div><span class="number">888</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>处罚金额(万元)</h3>
+                        <div><span class="number">888</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">各区执法案件分布</div>
+                <table>
+                    <thead>
+                        <tr><th>区域</th><th>案件数</th><th>占比</th><th>趋势</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>东城区</td><td>128</td><td>25%</td><td>↑</td></tr>
+                        <tr><td>西城区</td><td>98</td><td>19%</td><td>→</td></tr>
+                        <tr><td>南城区</td><td>156</td><td>30%</td><td>↑</td></tr>
+                        <tr><td>北城区</td><td>134</td><td>26%</td><td>↓</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <div class="section-title">案件类型分布</div>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="margin: 8px 0;">超标排放 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 45%;"></div></div>
+                        <div style="margin: 8px 0;">无证排污 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 30%;"></div></div>
+                        <div style="margin: 8px 0;">擅自停运 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 25%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 生态环境监测中心 -->
+        <div class="tab-content" id="tab-monitoring">
+            <div class="section">
+                <div class="section-title">📡 监测设备在线率</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);;">96.8%</div>
+                    <div style="color: var(--text-light); margin-top: 8px;">设备在线率</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">告警统计</div>
+                <div class="dashboard">
+                    <div class="stat-card">
+                        <h3>今日告警</h3>
+                        <div><span class="number">18</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本周告警</h3>
+                        <div><span class="number">88</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>本月告警</h3>
+                        <div><span class="number">888</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">数据审核待办列表</div>
+                <div class="list-item">
+                    <span>审核2026001: 东海造纸厂 2026-05-25数据</span>
+                    <button class="btn" onclick="alert('审核通过')">审核</button>
+                </div>
+                <div class="list-item">
+                    <span>审核2026002: 绿源化工 2026-05-25数据</span>
+                    <button class="btn" onclick="alert('审核通过')">审核</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 信访科 -->
+        <div class="tab-content" id="tab-petition">
+            <div class="section">
+                <div class="section-title">📞 举报工单统计</div>
+                <div class="dashboard">
+                    <div class="stat-card">
+                        <h3>待分派</h3>
+                        <div><span class="number">88</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>处理中</h3>
+                        <div><span class="number">888</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>已结案</h3>
+                        <div><span class="number">8888</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">满意度评价</div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);">98.8%</div>
+                    <div style="color: var(--text-light); margin-top: 8px;">群众满意度</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 宣教科普中心 -->
+        <div class="tab-content" id="tab-education">
+            <div class="section">
+                <div class="section-title">🎨 宣传视频生成入口</div>
+                <button class="btn" onclick="alert('正在生成宣传视频...')">🎬 生成新视频</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title">科普文章列表</div>
+                <div class="list-item">
+                    <span>《环保小知识: 如何理解AQI》</span>
+                    <span class="status status-success">已发布</span>
+                </div>
+                <div class="list-item">
+                    <span>《危险废物管理指南》</span>
+                    <span class="status status-info">草稿</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">公众参与活动计划</div>
+                <div class="list-item">
+                    <span>6月5日世界环境日宣传活动</span>
+                    <span class="status status-info">筹备中</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户管理 -->
+        <div class="tab-content" id="tab-users">
+            <div class="section">
+                <div class="section-title">👥 注册用户管理</div>
+                <div style="display:flex;gap:12px;margin-bottom:16px">
+                    <div class="stat-card" style="flex:1"><h3>注册用户</h3><div><span class="number" id="user-total">--</span></div></div>
+                    <div class="stat-card" style="flex:1"><h3>角色类型</h3><div><span class="number">6</span></div></div>
+                    <div class="stat-card" style="flex:1"><h3>今日活跃</h3><div><span class="number" id="user-active">--</span></div></div>
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:13px">
+                    <thead><tr style="background:var(--light-green)">
+                        <th style="padding:8px;text-align:left">角色</th>
+                        <th style="padding:8px;text-align:left">姓名</th>
+                        <th style="padding:8px;text-align:left">单位</th>
+                        <th style="padding:8px;text-align:left">手机号</th>
+                        <th style="padding:8px;text-align:left">注册时间</th>
+                        <th style="padding:8px;text-align:left">最后登录</th>
+                    </tr></thead>
+                    <tbody id="user-table-body">
+                        <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-light)">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="section">
+                <div class="section-title">🔐 角色权限说明</div>
+                <div id="role-permissions" style="font-size:12px;line-height:1.8"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局搜索模态框 -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-box">
+            <input type="text" id="globalSearch" placeholder="输入关键词搜索..." onkeyup="performSearch(this.value)">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- 浮动快捷面板 -->
+    <div class="fab">
+        <button class="fab-btn" onclick="toggleFab()">+</button>
+        <div class="fab-panel" id="fabPanel">
+            <button class="fab-item" onclick="alert('新建案件')">📝 新建案件</button>
+            <button class="fab-item" onclick="goToTab('dashboard')">📊 数据看板</button>
+            <button class="fab-item" onclick="alert('企业查询')">🏢 企业查询</button>
+            <button class="fab-item" onclick="alert('生成报告')">📄 生成报告</button>
+            <button class="fab-item" onclick="goToTab('law')">⚖️ 法规查询</button>
+            <button class="fab-item" onclick="goHome()">🏠 返回首页</button>
+        </div>
+    </div>
+
+    <!-- 返回顶部 -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+
+    <script>
+        // 全局数据
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {hour12: false});
+            document.getElementById('currentTime').textContent = timeStr;
+            document.getElementById('aqiTime').textContent = timeStr;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Tab切换
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                if(btn.dataset.tab === 'users') loadUsers();
+            });
+        });
+
+        function goToTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                if(b.dataset.tab === tabName) b.click();
+            });
+        }
+
+        // 搜索功能 — 调用真实API
+        function toggleSearch() {
+            document.getElementById('searchModal').classList.toggle('active');
+            if(document.getElementById('searchModal').classList.contains('active')) {
+                document.getElementById('globalSearch').focus();
+            }
+        }
+
+        function performSearch(query) {
+            const results = document.getElementById('searchResults');
+            if(!query) { results.innerHTML = ''; return; }
+            fetch('/api/search?q=' + encodeURIComponent(query))
+                .then(r => r.json())
+                .then(data => {
+                    var items = data.results || [];
+                    if(items.length === 0) {
+                        results.innerHTML = '<div class="search-result-item" style="color:#999">未找到相关结果</div>';
+                    } else {
+                        results.innerHTML = items.map(function(item) {
+                            return '<div class="search-result-item" onclick="location.href=\'/knowledge.html\'">' +
+                                '<span style="color:#1B4332;font-weight:600">[' + item.type + ']</span> ' +
+                                item.title +
+                                (item.desc ? '<br><span style="font-size:11px;color:#999">' + item.desc.slice(0,60) + '</span>' : '') +
+                            '</div>';
+                        }).join('');
+                    }
+                })
+                .catch(function() {
+                    results.innerHTML = '<div class="search-result-item" style="color:#999">搜索失败</div>';
+                });
+        }
+
+        // 法规搜索 — 调用真实API
+        function searchLaw(query) {
+            if(!query) {
+                document.getElementById('lawResults').innerHTML = '';
+                return;
+            }
+            fetch('/api/search?q=' + encodeURIComponent(query))
+                .then(r => r.json())
+                .then(data => {
+                    var results = (data.results || []).filter(function(r) { return r.type === '法规'; });
+                    if(results.length === 0) {
+                        document.getElementById('lawResults').innerHTML = '<div class="list-item"><span style="color:#999">未找到相关法规</span></div>';
+                    } else {
+                        document.getElementById('lawResults').innerHTML = results.map(function(l) {
+                            return '<div class="list-item"><span>' + l.title + '</span><span class="status status-active">查看</span></div>';
+                        }).join('');
+                    }
+                });
+        }
+
+        // 标准筛选 — 从API加载
+        function filterStandards(type) {
+            const tbody = document.querySelector('#standardTable tbody');
+            fetch('/api/law_index').then(r => r.json()).then(data => {
+                var laws = data.laws || {};
+                var html = '';
+                Object.keys(laws).forEach(function(key) {
+                    var law = laws[key];
+                    var provisions = law.provisions || [];
+                    provisions.forEach(function(p) {
+                        var full = p.full || '';
+                        var t = 'other';
+                        if(full.indexOf('水') >= 0) t = 'water';
+                        else if(full.indexOf('大气') >= 0 || full.indexOf('废气') >= 0) t = 'air';
+                        else if(full.indexOf('噪') >= 0) t = 'noise';
+                        else if(full.indexOf('固废') >= 0 || full.indexOf('危废') >= 0) t = 'solid';
+                        else if(full.indexOf('土壤') >= 0) t = 'soil';
+                        if(type && t !== type) return;
+                        html += '<tr><td>' + (full.slice(0, 30) || key) + '</td><td>' + key + '</td><td>' + t + '</td><td>' + (law.updated || '') + '</td></tr>';
+                    });
+                });
+                if(!html) html = '<tr><td colspan="4" style="text-align:center;color:#999">暂无数据</td></tr>';
+                tbody.innerHTML = html;
+            }).catch(function() {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999">加载失败</td></tr>';
+            });
+        }
+        filterStandards('');
+
+        // 法条匹配 — 调用真实API
+        function matchLaw() {
+            const input = document.getElementById('caseInput').value;
+            if(!input) return;
+            document.getElementById('lawMatchResult').innerHTML = '<div class="section" style="margin-top:12px">正在分析...</div>';
+            fetch('/api/smart_analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: input})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.ok) {
+                    var a = data.analysis || {};
+                    var laws = (a.law_recommendations || []).map(function(l) {
+                        return '<br>• ' + (l.law || l.title || l.name || JSON.stringify(l).slice(0,80));
+                    }).join('');
+                    var risk = a.risk_assessment || {};
+                    document.getElementById('lawMatchResult').innerHTML =
+                        '<div class="section" style="margin-top:12px">' +
+                        '<strong>匹配结果:</strong>' + laws +
+                        '<br><br><strong>风险等级:</strong> ' + (risk.level || '未知') +
+                        '<br><strong>证据清单:</strong> ' + (a.evidence_checklist || []).length + ' 项' +
+                        '</div>';
+                } else {
+                    document.getElementById('lawMatchResult').innerHTML = '<div class="section" style="margin-top:12px;color:#999">分析失败: ' + (data.error || '') + '</div>';
+                }
+            })
+            .catch(function() {
+                document.getElementById('lawMatchResult').innerHTML = '<div class="section" style="margin-top:12px;color:#999">网络错误</div>';
+            });
+        }
+
+        // 浮动面板
+        function toggleFab() {
+            document.getElementById('fabPanel').classList.toggle('active');
+        }
+
+        // 返回顶部
+        window.addEventListener('scroll', () => {
+            document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 100);
+        });
+
+        function scrollToTop() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // 快捷键
+        document.addEventListener('keydown', (e) => {
+            if(e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                toggleSearch();
+            }
+            if(e.key === 'Escape') {
+                document.getElementById('searchModal').classList.remove('active');
+                document.getElementById('fabPanel').classList.remove('active');
+            }
+        });
+
+        // 返回首页
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        function showStats() {
+            goToTab('dashboard');
+        }
+
+        // API调用
+        async function callAPI(endpoint, data) {
+            const response = await fetch('/api/' + endpoint, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        // 加载用户管理数据
+        function loadUsers() {
+            fetch('/api/users').then(r=>r.json()).then(data=>{
+                if(!data.ok) return;
+                var users=data.users||[];
+                document.getElementById('user-total').textContent=users.length;
+                document.getElementById('user-active').textContent=users.filter(function(u){return u.lastLogin;}).length;
+                if(users.length===0){
+                    document.getElementById('user-table-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-light)">暂无注册用户</td></tr>';
+                    return;
+                }
+                var html=users.map(function(u){
+                    return '<tr style="border-bottom:1px solid #eee">'+
+                    '<td style="padding:8px">'+(u.roleIcon||'')+' '+(u.roleName||'')+'</td>'+
+                    '<td style="padding:8px">'+(u.name||'')+'</td>'+
+                    '<td style="padding:8px">'+(u.org||'')+'</td>'+
+                    '<td style="padding:8px">'+(u.phoneMasked||'')+'</td>'+
+                    '<td style="padding:8px;font-size:11px;color:#999">'+(u.registeredAt||'').slice(0,10)+'</td>'+
+                    '<td style="padding:8px;font-size:11px;color:#999">'+(u.lastLogin||'').slice(0,16).replace('T',' ')+'</td>'+
+                    '</tr>';
+                }).join('');
+                document.getElementById('user-table-body').innerHTML=html;
+            }).catch(function(){});
+            // 加载角色权限说明
+            fetch('/api/roles').then(r=>r.json()).then(data=>{
+                var roles=data.roles||{};
+                var html=Object.keys(roles).map(function(k){
+                    var r=roles[k];
+                    return '<div style="padding:6px 0;border-bottom:1px solid #eee"><b>'+r.icon+' '+r.name+'</b> — 权限: '+(r.permissions||[]).join(', ')+'</div>';
+                }).join('');
+                document.getElementById('role-permissions').innerHTML=html;
+            }).catch(function(){});
+        }
+        // 当切换到用户管理Tab时加载
+        document.querySelectorAll('.tab-btn').forEach(function(btn){
+            btn.addEventListener('click',function(){
+                if(this.dataset.tab==='users') loadUsers();
+            });
+        });
+    </script>
+</body>
+</html>

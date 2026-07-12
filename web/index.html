@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#C0392B;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 16px rgba(27,67,50,.1);--r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+/* Loader */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--g);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s,visibility .5s}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.loader-leaf{width:44px;height:44px;animation:spin 2s linear infinite;position:relative}
+.loader-leaf::before,.loader-leaf::after{content:'';position:absolute;border-radius:50%;background:var(--gl)}
+.loader-leaf::before{width:44px;height:44px;opacity:.3}
+.loader-leaf::after{width:24px;height:24px;top:10px;left:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{color:#a5d6a7;font-size:13px;letter-spacing:2px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+/* Nav */
+.nav{background:linear-gradient(135deg,#1B4332,#2D6A4F,#1B4332);padding:0 20px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;flex-shrink:0}
+.nav-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gl),var(--gm));display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-logo-text{font-size:15px;font-weight:700;color:#e8f5e9;letter-spacing:1px}
+.nav-tabs{display:flex;gap:2px;margin-left:24px;overflow-x:auto;flex:1}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:8px 14px;color:rgba(255,255,255,.6);font-size:13px;cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap;text-decoration:none;border:none;background:none;flex-shrink:0}
+.nav-tab:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nav-tab.active{color:#fff;background:rgba(255,255,255,.15);font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.kb-status{display:flex;align-items:center;gap:4px;background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);color:#a5d6a7;border-radius:16px;padding:4px 10px;font-size:11px}
+.kb-dot{width:6px;height:6px;border-radius:50%;background:#4caf50;box-shadow:0 0 4px #4caf50;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+.nav-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;position:relative;transition:all .2s}
+.nav-btn:hover{background:rgba(255,255,255,.15)}
+.notif-badge{position:absolute;top:-3px;right:-3px;background:var(--red);color:#fff;border-radius:8px;padding:1px 4px;font-size:9px;font-weight:700;line-height:1}
+/* Global Search */
+#search-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding-top:80px}
+#search-overlay.show{display:flex}
+.search-box{background:#fff;border-radius:14px;width:90%;max-width:600px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.search-input-wrap{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)}
+.search-input-wrap .si-icon{font-size:18px;margin-right:10px;color:var(--muted)}
+#search-input{flex:1;border:none;outline:none;font-size:15px;font-family:inherit;color:var(--text);background:transparent}
+#search-input::placeholder{color:#aaa}
+.search-hint{font-size:11px;color:#aaa;margin-left:10px;background:#f0f0f0;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.search-results{padding:8px 0;max-height:400px;overflow-y:auto}
+.search-result-item{pisplay:flex;align-items:center;gap:10px;padding:10px 18px;cursor:pointer;transition:background .15s;text-decoration:none;color:var(--text)}
+.search-result-item:hover{background:var(--gbg)}
+.sr-icon{font-size:18px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sr-info{flex:1;min-width:0}
+.sr-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-type{font-size:11px;color:var(--muted);margin-top:1px}
+.sr-match{font-size:11px;color:var(--gl);background:#e8f5ec;padding:1px 5px;border-radius:4px;flex-shrink:0}
+.search-empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+.search-footer{padding:8px 18px;border-top:1px solid var(--border);font-size:11px;color:#aaa;display:flex;gap:12px;align-items:center}
+.search-footer kbd{background:#f0f0f0;border:1px solid #ddd;border-radius:4px;padding:1px 5px;font-family:inherit;font-size:11px}
+/* Notification Center */
+#notif-panel{position:fixed;top:60px;right:20px;width:340px;background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.18);z-index:200;display:none;overflow:hidden}
+#notif-panel.show{display:block}
+.notif-panel-hd{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--gbg)}
+.notif-panel-hd .t{font-size:14px;font-weight:700;color:var(--g)}
+.notif-panel-hd .count{font-size:11px;background:var(--red);color:#fff;border-radius:8px;padding:2px 7px}
+.notif-tabs{display:flex;padding:8px 16px;gap:4px;border-bottom:1px solid var(--border)}
+.notif-tab{padding:4px 10px;font-size:11px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--muted);border:none;background:none}
+.notif-tab.active{background:var(--gbg);color:var(--g);font-weight:600}
+.notif-list{padding:8px 0;max-height:350px;overflow-y:auto}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid #f5f5f5}
+.notif-item:hover{background:#fafafa}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{font-size:16px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:12px;font-weight:600;line-height:1.4}
+.notif-time{font-size:10px;color:var(--muted);margin-top:2px}
+.notif-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.notif-dot.red{background:var(--red)}
+.notif-dot.amber{background:var(--amber)}
+.notif-dot.blue{background:var(--blue)}
+.notif-dot.green{background:#4caf50}
+/* Hero */
+.hero{background:linear-gradient(135deg,#1B4332 0%,#2D6A4F 40%,#1B4332 100%);padding:32px 20px 24px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(82,183,136,.1) 0%,transparent 60%);animation:hero-glow 6s ease-in-out infinite}
+@keyframes hero-glow{0%,100%{transform:translate(0,0)}50%{transform:translate(10%,5%)}}
+.hero h1{font-size:26px;color:#fff;font-weight:800;margin-bottom:6px;position:relative}
+.hero p{font-size:13px;color:rgba(255,255,255,.7);max-width:600px;margin:0 auto;position:relative;line-height:1.6}
+.hero-stats{display:flex;justify-content:center;gap:24px;margin-top:18px;position:relative}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:24px;font-weight:800;color:var(--gl)}
+.hero-stat .label{font-size:11px;color:rgba(255,255,255,.5)}
+/* Portal Tabs */
+.portal-bar{display:flex;justify-content:center;gap:8px;padding:16px 20px;flex-wrap:wrap;background:var(--card);border-bottom:1px solid var(--border)}
+.portal-btn{padding:10px 18px;border:2px solid var(--border);border-radius:10px;background:#fff;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;font-weight:500}
+.portal-btn:hover{border-color:var(--gl);background:var(--gbg)}
+.portal-btn.active{border-color:var(--g);background:var(--gbg);font-weight:700;color:var(--g)}
+.portal-btn .icon{font-size:16px}
+/* Container */
+.ctn{max-width:1100px;margin:0 auto;padding:16px 16px 80px}
+/* Portal Sections */
+.portal{display:none}.portal.show{display:block}
+/* Role Flow */
+.flow-card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid var(--border)}
+.flow-t{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.flow-chain{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.flow-node{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap}
+.flow-arrow{color:var(--muted);font-size:14px}
+.fn-green{background:#D5F5E3;color:var(--g)}
+.fn-blue{background:#EBF5FB;color:var(--blue)}
+.fn-amber{background:#FEF5E7;color:var(--amber)}
+.fn-red{background:#FDEDEC;color:var(--red)}
+.fn-purple{background:#F5EEF8;color:var(--purple)}
+.fn-teal{background:#E0F2F1;color:var(--teal)}
+/* Flow law tag */
+.flow-law-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--blue);background:#ebf5fb;padding:2px 7px;border-radius:10px;margin:2px 4px 0 0;border:1px solid #aed6f1}
+.flow-law-tag.red-tag{color:var(--red);background:#fdedec;border-color:#f5b7b1}
+/* Module Grid */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:16px}
+.mod-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border:1px solid var(--border);cursor:pointer;transition:all .25s;text-decoration:none;color:var(--text);display:flex;flex-direction:column;gap:8px}
+.mod-card:hover{transform:translateY(-3px);box-shadow:0 6px 24px rgba(27,67,50,.15);border-color:var(--gl)}
+.mod-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.mod-name{font-size:14px;font-weight:700}
+.mod-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.mod-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.mod-tag.on{background:#D5F5E3;color:var(--g)}
+.mod-tag.dev{background:#FEF5E7;color:var(--amber)}
+/* AI Center */
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.ai-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.ai-card-t{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.model-row{display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px}
+.model-icon{font-size:18px;width:28px;text-align:center}
+.model-info{flex:1}
+.model-name{font-size:12px;font-weight:600}
+.model-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.model-badge{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600}
+.model-badge.a{background:#D5F5E3;color:var(--g)}
+.model-badge.b{background:#EBF5FB;color:var(--blue)}
+.model-badge.c{background:#FEF5E7;color:var(--amber)}
+.model-badge.d{background:#FDEDEC;color:var(--red)}
+.pros-cons{font-size:11px;margin-top:4px}
+.pros-cons b{font-size:11px}
+.pros{color:var(--g)}
+.cons{color:var(--amber)}
+/* Agent Architecture */
+.agent-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:12px;background:var(--gbg);border-radius:10px;margin-top:10px}
+.agent-node{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;text-align:center}
+.agent-node.core{background:linear-gradient(135deg,var(--g),var(--gm));color:#fff;box-shadow:0 0 12px rgba(82,183,136,.3)}
+.agent-node.layer{background:var(--card);border:2px solid var(--gl);color:var(--g)}
+.agent-node.tool{background:#EBF5FB;border:1px solid #AED6F1;color:var(--blue)}
+.agent-node.data{background:#FEF5E7;border:1px solid #F9E79F;color:var(--amber)}
+/* Quick Actions */
+.quick-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.quick-btn{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;font-size:12px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--text);box-shadow:var(--shadow)}
+.quick-btn:hover{border-color:var(--gl);transform:translateY(-2px);box-shadow:0 4px 16px rgba(27,67,50,.12)}
+.quick-btn .icon{font-size:22px}
+.quick-btn .label{font-weight:600}
+/* Activity */
+.act-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font-size:12px;transition:all .2s}
+.act-item:hover{background:var(--gbg)}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.act-dot.red{background:var(--red);box-shadow:0 0 4px var(--red)}
+.act-dot.green{background:#4caf50;box-shadow:0 0 4px #4caf50}
+.act-dot.amber{background:var(--amber)}
+.act-dot.blue{background:var(--blue)}
+.act-content{flex:1}
+.act-title{font-weight:600}
+.act-meta{color:var(--muted);font-size:11px}
+.act-badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600}
+.act-badge.urgent{background:#FDEDEC;color:var(--red)}
+.act-badge.ok{background:#D5F5E3;color:var(--g)}
+.act-badge.info{background:#EBF5FB;color:var(--blue)}
+.act-badge.warn{background:#FEF5E7;color:var(--amber)}
+/* Dept Section (行政职能) */
+.dept-section{margin-bottom:16px}
+.dept-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,var(--gbg),#fff);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.dept-hd:hover{background:var(--gbg);border-color:var(--gl)}
+.dept-hd-l{display:flex;align-items:center;gap:8px}
+.dept-icon{font-size:18px;width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.dept-name{font-size:14px;font-weight:700}
+.dept-sub{font-size:11px;color:var(--muted)}
+.dept-indicators{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dept-ind{display:flex;align-items:center;gap:3px;font-size:11px;background:#f0f5f0;border-radius:6px;padding:2px 7px;color:var(--g)}
+.dept-ind .di-n{font-weight:700;font-size:13px}
+.dept-expand{font-size:16px;color:var(--muted);transition:transform .2s}
+.dept-hd.open .dept-expand{transform:rotate(180deg)}
+.dept-body{padding:0 4px 8px;display:none}
+.dept-body.show{display:block}
+/* Norm Tag */
+.norm-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--blue);background:#ebf5fb;padding:2px 7px;border-radius:8px;border:1px solid #aed6f1;margin-right:4px;margin-bottom:4px}
+/* Knowledge Category Pills */
+.kb-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.kb-cat{display:flex;align-items:center;gap:5px;padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;transition:all .2s;background:#fff;color:var(--muted)}
+.kb-cat:hover{border-color:var(--gl);color:var(--g)}
+.kb-cat.active{border-color:var(--g);background:var(--gbg);color:var(--g);font-weight:600}
+.kb-cat .kbc-icon{font-size:13px}
+/* Floating Action Button */
+#fab{position:fixed;bottom:24px;right:24px;z-index:150;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.fab-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--gm));color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(27,67,50,.4);display:flex;align-items:center;justify-content:center;transition:all .3s;position:relative;z-index:2}
+.fab-main:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(27,67,50,.5)}
+.fab-main.open{transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:6px;overflow:hidden;max-height:0;transition:max-height .3s ease,width .3s ease;width:0}
+.fab-menu.open{max-height:300px;width:220px}
+.fab-item{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:8px 14px;font-size:12px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);white-space:nowrap;text-decoration:none;color:var(--text);width:100%;justify-content:flex-end}
+.fab-item:hover{background:var(--gbg);border-color:var(--gl);transform:translateX(-4px)}
+.fab-item .fi-icon{font-size:15px}
+/* Back to Top */
+#back-top{position:fixed;bottom:24px;right:80px;z-index:140;width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid var(--border);color:var(--g);font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .2s}
+#back-top:hover{border-color:var(--gl);background:var(--gbg);transform:translateY(-2px)}
+/* Footer */
+.footer{background:var(--g);color:rgba(255,255,255,.5);padding:20px;text-align:center;font-size:12px}
+/* Mobile */
+@media(max-width:768px){
+.nav-tabs{display:none}
+.nav-search-btn{display:block!important}
+.hero h1{font-size:20px}.hero-stats{gap:16px}.mod-grid{grid-template-columns:1fr}.ai-grid{grid-template-columns:1fr}.quick-row{grid-template-columns:repeat(2,1fr)}
+.portal-bar{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;padding-bottom:12px}
+.portal-btn{flex-shrink:0}
+.dept-indicators{display:none}
+.kb-status{display:none}
+#notif-panel{width:calc(100vw - 32px);right:16px}
+.search-box{width:95%}
+}
+/* nav search btn */
+.nav-search-btn{display:none;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:7px;padding:6px 10px;font-size:12px;cursor:pointer;margin-left:4px}
+/* Floating Quick Panel */
+#float-panel{position:fixed;bottom:24px;right:24px;z-index:150;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.float-toggle{width:48px;height:48px;border-radius:50%;background:var(--g);border:none;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(39,174,96,.35);transition:all .25s;display:flex;align-items:center;justify-content:center}
+.float-toggle:hover{transform:scale(1.1);box-shadow:0 6px 20px rgba(39,174,96,.5)}
+.float-toggle.open{transform:rotate(45deg)}
+.float-menu{display:none;flex-direction:column;gap:6px;align-items:flex-end}
+.float-menu.show{display:flex;animation:fadeInUp .2s ease}
+.float-item{background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 14px;font-size:13px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .15s;text-decoration:none;font-weight:500}
+.float-item:hover{background:var(--gbg);border-color:var(--gl);transform:translateX(-2px)}
+.float-item span.icon{font-size:15px}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){#float-panel{bottom:16px;right:16px}#back-top{bottom:80px;right:16px}}
+/* Search box */
+.search-box{background:#fff;border-radius:16px;width:600px;max-width:95vw;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.search-input-wrap{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:8px}
+.si-icon{font-size:18px;color:var(--muted)}
+#search-input{flex:1;border:none;outline:none;font-size:15px;color:var(--text);background:transparent}
+.search-hint{font-size:11px;color:var(--muted);background:#f5f5f5;padding:2px 6px;border-radius:4px;cursor:pointer}
+.search-results{max-height:400px;overflow-y:auto}
+.search-group{padding:10px 16px 4px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.search-result-item{padding:10px 16px;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:10px}
+.search-result-item:hover,.search-result-item.focused{background:var(--gbg)}
+.search-result-item .sri-icon{font-size:18px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.search-result-item .sri-name{font-size:14px;font-weight:500;color:var(--text)}
+.search-result-item .sri-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.search-result-item .sri-tag{font-size:10px;padding:1px 6px;border-radius:4px;margin-left:auto}
+.search-footer{padding:8px 16px;border-top:1px solid var(--border);display:flex;gap:12px;font-size:11px;color:var(--muted);align-items:center}
+.search-footer kbd{background:#f0f0f0;border:1px solid #d0d0d0;border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace}
+/* Notification Panel */
+#notif-panel{position:fixed;top:60px;right:20px;z-index:200;width:360px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.15);border:1px solid var(--border);display:none;flex-direction:column;overflow:hidden}
+#notif-panel.show{display:flex;animation:fadeInUp .2s ease}
+.notif-panel-hd{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-panel-hd .t{font-size:14px;font-weight:700;color:var(--text)}
+.notif-panel-hd .count{background:var(--red);color:#fff;border-radius:10px;padding:1px 8px;font-size:12px;font-weight:700}
+.notif-tabs{display:flex;padding:8px 12px;gap:4px;border-bottom:1px solid var(--border)}
+.notif-tab{padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;background:none;border:none;color:var(--muted);transition:all .15s}
+.notif-tab.active{background:var(--g);color:#fff;font-weight:600}
+.notif-list{padding:8px 0;max-height:350px;overflow-y:auto}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid #f5f5f5}
+.notif-item:hover{background:#fafafa}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.notif-body{flex:1}
+.notif-title{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.notif-time{font-size:11px;color:var(--muted);margin-top:2px}
+.notif-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.notif-dot.red{background:var(--red)}
+.notif-dot.amber{background:var(--amber)}
+.notif-dot.green{background:var(--g)}
+</style>
+</head>
+<body>
+<div id="loader"><div class="loader-leaf" style="position:relative"><span></span></div><div class="loader-text">🌿 环保智慧执法平台 · 加载中</div></div>
+
+<!-- 用户欢迎条 -->
+<div id="welcome-bar" style="display:none;background:linear-gradient(135deg,#2D6A4F,#1B4332);color:#fff;padding:8px 20px;font-size:12px;display:none;align-items:center;gap:10px">
+  <span id="welcome-icon">🌿</span>
+  <span>欢迎，<strong id="welcome-name">用户</strong></span>
+  <span style="opacity:.7">|</span>
+  <span id="welcome-role"></span>
+  <span style="opacity:.7">|</span>
+  <span id="welcome-org" style="opacity:.8"></span>
+  <a href="/login.html" style="margin-left:auto;color:rgba(255,255,255,.7);font-size:11px;text-decoration:none">切换身份</a>
+</div>
+
+<!-- Search Overlay -->
+<div id="search-overlay" onclick="if(event.target===this)closeSearch()">
+<div class="search-box">
+<div class="search-input-wrap">
+<span class="si-icon">🔍</span>
+<input id="search-input" placeholder="搜索法规、案例、企业、功能模块…" autocomplete="off" oninput="doSearch(this.value)" onkeydown="if(event.key==='Escape')closeSearch()">
+<span class="search-hint">Ctrl+K</span>
+</div>
+<div id="search-results" class="search-results"></div>
+<div class="search-footer">
+<kbd>↑↓</kbd> 导航 <kbd>Enter</kbd> 打开 <kbd>Esc</kbd> 关闭
+</div>
+</div>
+</div>
+
+<!-- Notification Panel -->
+<div id="notif-panel">
+<div class="notif-panel-hd">
+<span class="t">📋 通知中心</span>
+<span class="count" id="notif-total-count">5</span>
+</div>
+<div class="notif-tabs">
+<button class="notif-tab active" onclick="filterNotif('all',this)">全部 <span id="nc-all">5</span></button>
+<button class="notif-tab" onclick="filterNotif('warn',this)">⚠️预警 <span id="nc-warn">2</span></button>
+<button class="notif-tab" onclick="filterNotif('todo',this)">📝待办 <span id="nc-todo">1</span></button>
+<button class="notif-tab" onclick="filterNotif('sys',this)">⚙️系统 <span id="nc-sys">2</span></button>
+</div>
+<div class="notif-list" id="notif-list">
+<div class="notif-item" onclick="this.style.opacity='0.5'">
+<div class="notif-icon" style="background:#fdedec">⚠️</div>
+<div class="notif-body"><div class="notif-title">某化工企业COD超标1.86倍</div><div class="notif-time">10分钟前 · 在线监测</div></div>
+<div class="notif-dot red"></div>
+</div>
+<div class="notif-item" onclick="this.style.opacity='0.5'">
+<div class="notif-icon" style="background:#fef5e7">🔔</div>
+<div class="notif-body"><div class="notif-title">青山化工厂监测数据异常，需现场核查</div><div class="notif-time">25分钟前 · 预警系统</div></div>
+<div class="notif-dot amber"></div>
+</div>
+<div class="notif-item" onclick="this.style.opacity='0.5'">
+<div class="notif-icon" style="background:#ebf5fb">📝</div>
+<div class="notif-body"><div class="notif-title">待办：某钢厂烧结脱硫设施停运案待立案审批</div><div class="notif-time">1小时前 · 执法工作台</div></div>
+<div class="notif-dot blue"></div>
+</div>
+<div class="notif-item" onclick="this.style.opacity='0.5'">
+<div class="notif-icon" style="background:#f0f5f0">🖥️</div>
+<div class="notif-body"><div class="notif-title">系统更新：知识库新增3条市级处罚公示</div><div class="notif-time">2小时前 · 系统通知</div></div>
+<div class="notif-dot green"></div>
+</div>
+<div class="notif-item" onclick="this.style.opacity='0.5'">
+<div class="notif-icon" style="background:#fef5e7">⚠️</div>
+<div class="notif-body"><div class="notif-title">无人机巡查：化工园区3号排口夜间红外异常</div><div class="notif-time">3小时前 · 视频AI</div></div>
+<div class="notif-dot amber"></div>
+</div>
+</div>
+</div>
+
+<nav class="nav">
+<a href="#" class="nav-logo"><div class="nav-logo-icon">🌿</div><span class="nav-logo-text">环保智慧执法平台</span></a>
+<div class="nav-tabs">
+<a class="nav-tab active" onclick="showPortal('public',this)">👥 公众</a>
+<a class="nav-tab" onclick="showPortal('enterprise',this)">🏢 企业</a>
+<a class="nav-tab" onclick="showPortal('government',this)">🏛 政府</a>
+<a class="nav-tab" onclick="showPortal('regulatory',this)">🔍 监管</a>
+<a class="nav-tab" onclick="showPortal('admin',this)">🏢 行政</a>
+<a class="nav-tab" onclick="showPortal('enforcement',this)">🚔 执法</a>
+<a class="nav-tab" onclick="showPortal('ai',this)">🧠 AI中心</a>
+</div>
+<button class="nav-search-btn" onclick="openSearch()" title="全局搜索 Ctrl+K">🔍</button>
+<div class="nav-right">
+<div class="kb-status"><div class="kb-dot"></div><span>知识库在线</span></div>
+<button class="nav-btn" id="notif-btn" onclick="toggleNotif(event)">🔔<span class="notif-badge" id="notif-badge">5</span></button>
+</div>
+</nav>
+
+<div class="hero">
+<h1>🌿 环保智慧执法平台</h1>
+<p>知识驱动 · AI闭环 · 天地一体 · 开源开放 — 面向公众·企业·政府·监管·执法五位一体</p>
+<div class="hero-stats">
+<div class="hero-stat"><div class="num" id="hNum1">0</div><div class="label">今日检查(次)</div></div>
+<div class="hero-stat"><div class="num" id="hNum2">0</div><div class="label">在线企业(家)</div></div>
+<div class="hero-stat"><div class="num" id="hNum3">0</div><div class="label">AI预警(条)</div></div>
+<div class="hero-stat"><div class="num" id="hNum4">0</div><div class="label">知识条目</div></div>
+</div>
+</div>
+
+<div class="portal-bar">
+<div class="portal-btn active" onclick="showPortal('public',this)"><span class="icon">👥</span>公众服务</div>
+<div class="portal-btn" onclick="showPortal('enterprise',this)"><span class="icon">🏢</span>企业服务</div>
+<div class="portal-btn" onclick="showPortal('government',this)"><span class="icon">🏛</span>政府决策</div>
+<div class="portal-btn" onclick="showPortal('regulatory',this)"><span class="icon">🔍</span>监管中心</div>
+<div class="portal-btn" onclick="showPortal('admin',this)"><span class="icon">🏢</span>行政职能</div>
+<div class="portal-btn" onclick="showPortal('enforcement',this)"><span class="icon">🚔</span>执法闭环</div>
+<div class="portal-btn" onclick="showPortal('ai',this)"><span class="icon">🧠</span>AI智能中心</div>
+</div>
+
+<div class="ctn">
+
+<!-- ====== 公众服务 ====== -->
+<div class="portal show" id="portal-public">
+<div class="flow-card">
+<div class="flow-t">👥 公众服务 — 环保参与闭环</div>
+<div class="flow-chain">
+<span class="flow-node fn-green">举报线索</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">受理分流</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">调查核实</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-red">处置反馈</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">结果公示</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-teal">满意度评价</span>
+</div>
+</div>
+<div class="mod-grid">
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(82,183,136,.12)">📚</div><div class="mod-name">环保知识查询</div><div class="mod-desc">法律法规/排放标准/环保科普，开放查询</div><span class="mod-tag on">● 开放</span></a>
+<a href="/report.html" class="mod-card"><div class="mod-icon" style="background:rgba(231,76,60,.12)">🚨</div><div class="mod-name">环境污染举报</div><div class="mod-desc">在线举报/匿名举报/进度查询，12369热线</div><span class="mod-tag on">● 开放</span></a>
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🌍</div><div class="mod-name">环保宣传</div><div class="mod-desc">科普短视频/典型案例/政策解读</div><span class="mod-tag on">● 开放</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">📊</div><div class="mod-name">环境信息公开</div><div class="mod-desc">空气质量/水质数据/企业排放公示</div><span class="mod-tag dev">◐ 建设中</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🎓</div><div class="mod-name">环保学堂</div><div class="mod-desc">环保法规自学/碳排放知识/绿色生活指南</div><span class="mod-tag on">● 开放</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">⭐</div><div class="mod-name">监督评价</div><div class="mod-desc">执法满意度/处理结果评价/建议反馈</div><span class="mod-tag dev">◐ 建设中</span></a>
+</div>
+<div class="flow-card">
+<div class="flow-t">⚡ 公众快捷入口</div>
+<div class="quick-row">
+<a href="/report.html" class="quick-btn"><span class="icon">🚨</span><span class="label">一键举报</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">🔍</span><span class="label">查法规</span></a>
+<a href="#" class="quick-btn"><span class="icon">💨</span><span class="label">查空气</span></a>
+<a href="#" class="quick-btn"><span class="icon">💧</span><span class="label">查水质</span></a>
+<a href="/video-studio.html" class="quick-btn"><span class="icon">🎬</span><span class="label">看视频</span></a>
+<a href="#" class="quick-btn"><span class="icon">📋</span><span class="label">查处罚</span></a>
+</div>
+</div>
+</div>
+
+<!-- ====== 企业服务 ====== -->
+<div class="portal" id="portal-enterprise">
+<div class="flow-card">
+<div class="flow-t">🏢 企业服务 — 合规经营闭环</div>
+<div class="flow-chain">
+<span class="flow-node fn-green">排污许可</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">自行监测</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">合规自查</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-teal">问题整改</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-green">达标排放</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">信用评级</span>
+</div>
+</div>
+<div class="mod-grid">
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📋</div><div class="mod-name">法规合规查询</div><div class="mod-desc">排放标准/排污许可/行业规范实时查询</div><span class="mod-tag on">● 在线</span></a>
+<a href="/self-check.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🔍</div><div class="mod-name">AI合规自检</div><div class="mod-desc">AI自动对照法规，逐项检查合规状态</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📊</div><div class="mod-name">自行监测管理</div><div class="mod-desc">在线监测数据上报/异常自查/台账管理</div><span class="mod-tag dev">◐ 建设中</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🔧</div><div class="mod-name">整改指导</div><div class="mod-desc">AI分析问题→生成整改方案→跟踪进度</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="/training.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🎓</div><div class="mod-name">环保培训</div><div class="mod-desc">企业环保负责人培训/考试/证书</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">⭐</div><div class="mod-name">环保信用</div><div class="mod-desc">企业环境信用评级/绿蓝黄红标/公示</div><span class="mod-tag dev">◐ 建设中</span></a>
+</div>
+</div>
+
+<!-- ====== 政府决策 ====== -->
+<div class="portal" id="portal-government">
+<div class="flow-card">
+<div class="flow-t">🏛 政府决策 — 治理闭环</div>
+<div class="flow-chain">
+<span class="flow-node fn-blue">环境态势感知</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-green">AI分析研判</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">决策建议</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">政策制定</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-teal">执行监督</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-green">效果评估</span>
+</div>
+</div>
+<div class="mod-grid">
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,96,100,.12)">📡</div><div class="mod-name">天地一体感知</div><div class="mod-desc">卫星/无人机/传感器/企业在线监测数据汇聚</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🧠</div><div class="mod-name">AI态势分析</div><div class="mod-desc">区域环境风险地图/趋势预测/异常检测</div><span class="mod-tag on">● 在线</span></a>
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">🎬</div><div class="mod-name">汇报视频生成</div><div class="mod-desc">月报/季报/年报AI视频一键生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="/workspace.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">📋</div><div class="mod-name">工作台</div><div class="mod-desc">日程/任务/日志/审批，全局管理</div><span class="mod-tag on">● 在线</span></a>
+<a href="/collaboration.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🔄</div><div class="mod-name">协同工作台</div><div class="mod-desc">政府下达任务→企业整改→第三方核查→群众监督</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📚</div><div class="mod-name">知识库支撑</div><div class="mod-desc">政策法规库/案例库/标准库辅助决策</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🗺</div><div class="mod-name">环境一张图</div><div class="mod-desc">GIS地图/企业分布/风险热力/监测点</div><span class="mod-tag dev">◐ 规划中</span></a>
+</div>
+</div>
+
+<!-- ====== 监管中心 ====== -->
+<div class="portal" id="portal-regulatory">
+<div class="flow-card">
+<div class="flow-t">🔍 监管中心 — 非现场监管闭环</div>
+<div class="flow-chain">
+<span class="flow-node fn-teal">在线监测</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">AI异常识别</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">预警推送</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-green">非现场执法</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-red">问题溯源</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">跟踪闭环</span>
+</div>
+</div>
+<div class="mod-grid">
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📡</div><div class="mod-name">在线监测中心</div><div class="mod-desc">企业在线监测数据/超标自动识别/恒值检测</div><span class="mod-tag on">● 在线</span></a>
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">⚡</div><div class="mod-name">用电监控</div><div class="mod-desc">治污设施用电监控/异常停产自动发现</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🧠</div><div class="mod-name">AI视频分析</div><div class="mod-desc">排放口异常/黑臭水体/固废堆场自动识别</div><span class="mod-tag on">● 在线</span></a>
+<a href="/supervision.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">📋</div><div class="mod-name">排污许可审查</div><div class="mod-desc">自动审查执行报告/台账/监测数据合规</div><span class="mod-tag on">● 在线</span></a>
+<a href="/supervision.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🔍</div><div class="mod-name">第三方督查</div><div class="mod-desc">穿戴设备督查/智能清单/自动报告/法条关联</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📚</div><div class="mod-name">法条对照</div><div class="mod-desc">违法线索自动匹配法条/证据清单/处罚建议</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🔔</div><div class="mod-name">预警管理</div><div class="mod-desc">多源预警汇聚/分级分类/推送处置闭环</div><span class="mod-tag dev">◐ 建设中</span></a>
+</div>
+</div>
+
+<!-- ====== 行政职能 ====== -->
+<div class="portal" id="portal-admin">
+<div class="flow-card">
+<div class="flow-t">🏢 行政职能 — 生态环境局科室工作门户</div>
+<div class="flow-chain">
+<span class="flow-node fn-teal">法规标准</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">监测监管</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">执法办案</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">信访热线</span><span class="flow-arrow">→</span>
+<span class="flow-node fn-green">宣教科普</span>
+</div>
+</div>
+
+<!-- 1. 法规与标准科 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(46,125,50,.12)">⚖️</div>
+<div>
+<div class="dept-name">法规与标准科</div>
+<div class="dept-sub">法规查询 · 法条匹配 · 处罚标准 · 规范性文件审查</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">128</span> 法规</span>
+<span class="dept-ind"><span class="di-n">46</span> 标准</span>
+<span class="dept-ind"><span class="di-n">15</span> 待审</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="kb-cats">
+<span class="kb-cat active" onclick="filterKB(this,'all')"><span class="kbc-icon">📚</span> 全部</span>
+<span class="kb-cat" onclick="filterKB(this,'norm')"><span class="kbc-icon">📋</span> 行业规范标准</span>
+<span class="kb-cat" onclick="filterKB(this,'law')"><span class="kbc-icon">⚖️</span> 法规文件</span>
+<span class="kb-cat" onclick="filterKB(this,'std')"><span class="kbc-icon">📏</span> 排放标准</span>
+<span class="kb-cat" onclick="filterKB(this,'case')"><span class="kbc-icon">📁</span> 典型案例</span>
+</div>
+<div class="mod-grid">
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">⚖️</div><div class="mod-name">环保法规库</div><div class="mod-desc">环境保护法律/行政法规/部门规章全文检索</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">📋</div><div class="mod-name">行业规范标准</div><div class="mod-desc">国家/地方行业标准·规范·技术导则·指南文件</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">📏</div><div class="mod-name">排放标准查询</div><div class="mod-desc">水/气/声/固废排放标准·行业基准·地方限值</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🔍</div><div class="mod-name">法条智能匹配</div><div class="mod-desc">输入违法事实→AI自动匹配适用法条→处罚标准</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📄</div><div class="mod-name">规范文书生成</div><div class="mod-desc">处罚决定书/告知书/批复等规范文书AI生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">📁</div><div class="mod-name">典型案例库</div><div class="mod-desc">全国环保执法典型案例/裁判文书/复函汇编</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/knowledge.html" class="quick-btn"><span class="icon">⚖️</span><span class="label">查法规</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📋</span><span class="label">行业标准</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🔍</span><span class="label">法条匹配</span></a>
+<a href="#" class="quick-btn"><span class="icon">📄</span><span class="label">生成文书</span></a>
+</div>
+</div>
+</div>
+
+<!-- 2. 水生态环境科 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(41,128,185,.12)">💧</div>
+<div>
+<div class="dept-name">水生态环境科</div>
+<div class="dept-sub">水质监测 · 涉水企业监管 · 超标预警 · 流域治理</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">38</span> 监测点</span>
+<span class="dept-ind"><span class="di-n">126</span> 企业</span>
+<span class="dept-ind" style="color:var(--red)">🔴 3</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">💧</div><div class="mod-name">水质在线监测</div><div class="mod-desc">COD/氨氮/TP/TN在线监测·实时数据·超标报警</div><span class="mod-tag on">● 在线</span></a>
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🏭</div><div class="mod-name">涉水企业管理</div><div class="mod-desc">重点排水企业台账·排污许可·排放数据查询</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">⚠️</div><div class="mod-name">超标预警</div><div class="mod-desc">水质超标自动预警·触发红色/橙色/黄色三级响应</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">📊</div><div class="mod-name">流域分析</div><div class="mod-desc">重点流域水质趋势·污染溯源·治理效果评估</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🌊</div><div class="mod-name">入河排污口</div><div class="mod-desc">入河排污口核查·排放量核算·整治跟踪</div><span class="mod-tag dev">◐ 建设中</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📚</div><div class="mod-name">水法规支撑</div><div class="mod-desc">《水污染防治法》相关法条·检查要点·典型案例</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/iot.html" class="quick-btn"><span class="icon">💧</span><span class="label">查水质</span></a>
+<a href="#" class="quick-btn"><span class="icon">⚠️</span><span class="label">查预警</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">📊</span><span class="label">流域分析</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📚</span><span class="label">水法条</span></a>
+</div>
+</div>
+</div>
+
+<!-- 3. 大气环境科 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(142,68,173,.12)">💨</div>
+<div>
+<div class="dept-name">大气环境科</div>
+<div class="dept-sub">大气监测 · VOCs治理 · 重污染应急 · 减排清单</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">52</span> 监测点</span>
+<span class="dept-ind"><span class="di-n">89</span> 企业</span>
+<span class="dept-ind"><span class="di-n">良</span> AQI</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">💨</div><div class="mod-name">空气质量监测</div><div class="mod-desc">PM2.5/PM10/O3/SO2/NO2/CO六项指标实时数据</div><span class="mod-tag on">● 在线</span></a>
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🏭</div><div class="mod-name">VOCs企业监管</div><div class="mod-desc">挥发性有机物排放企业LDAR·在线监测·治理设施</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🚨</div><div class="mod-name">重污染应急</div><div class="mod-desc">预警发布→应急响应→减排清单→效果评估闭环</div><span class="mod-tag dev">◐ 建设中</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">📊</div><div class="mod-name">污染溯源分析</div><div class="mod-desc">激光雷达·风场模型·站点关联·污染源反演</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📋</div><div class="mod-name">减排清单管理</div><div class="mod-desc">工业企业减排清单·应急限产比例·台账管理</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📚</div><div class="mod-name">大气法规支撑</div><div class="mod-desc">《大气污染防治法》·VOCs标准·检查要点·典型案例</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/iot.html" class="quick-btn"><span class="icon">💨</span><span class="label">查空气</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🔍</span><span class="label">污染溯源</span></a>
+<a href="#" class="quick-btn"><span class="icon">🚨</span><span class="label">应急预案</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📚</span><span class="label">大气法条</span></a>
+</div>
+</div>
+</div>
+
+<!-- 4. 土壤与固废科 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(230,126,34,.12)">🏔️</div>
+<div>
+<div class="dept-name">土壤与固废科</div>
+<div class="dept-sub">危废管理 · 土壤监测 · 固废排查 · 土壤修复</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">64</span> 危废企业</span>
+<span class="dept-ind"><span class="di-n">28</span> 地块</span>
+<span class="dept-ind"><span class="di-n">5</span> 修复中</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">☣️</div><div class="mod-name">危废联网监管</div><div class="mod-desc">危废产生/转移/处置全过程追踪·电子联单</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🔍</div><div class="mod-name">危废智能识别</div><div class="mod-desc">AI识别危废种类·判定危废代码·推送处置方案</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🛰️</div><div class="mod-name">土壤普查数据</div><div class="mod-desc">农用地/建设用地土壤污染状况详查数据管理</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">🔬</div><div class="mod-name">固废排查整治</div><div class="mod-desc">一般固废/建筑垃圾/生活垃圾排查·整改跟踪</div><span class="mod-tag dev">◐ 建设中</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">📚</div><div class="mod-name">固废法规支撑</div><div class="mod-desc">《固废法》·危废名录·贮存规范·典型案例</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">⚠️</div><div class="mod-name">非法倾倒预警</div><div class="mod-desc">卫星/无人机巡查→AI识别→预警推送→执法联动</div><span class="mod-tag dev">◐ 内测</span></a>
+</div>
+<div class="quick-row">
+<a href="#" class="quick-btn"><span class="icon">☣️</span><span class="label">危废管理</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🔍</span><span class="label">危废识别</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📚</span><span class="label">固废法条</span></a>
+<a href="#" class="quick-btn"><span class="icon">🔬</span><span class="label">固废排查</span></a>
+</div>
+</div>
+</div>
+
+<!-- 5. 环评与排放管理科 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(41,128,185,.12)">📋</div>
+<div>
+<div class="dept-name">环评与排放管理科</div>
+<div class="dept-sub">排污许可管理 · 环评审查 · 执行报告 · 许可证核发</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">234</span> 许可证</span>
+<span class="dept-ind"><span class="di-n">18</span> 待审</span>
+<span class="dept-ind"><span class="di-n">89%</span> 报告率</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">📋</div><div class="mod-name">排污许可管理</div><div class="mod-desc">排污许可证核发/变更/延续/注销全生命周期管理</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">🔍</div><div class="mod-name">执行报告审查</div><div class="mod-desc">企业执行报告自动审查·数据校验·问题清单</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📝</div><div class="mod-name">环评智能审查</div><div class="mod-desc">环评文件AI辅助审查·风险点识别·修改意见</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">📚</div><div class="mod-name">许可法规支撑</div><div class="mod-desc">排污许可条例·技术规范·行业许可标准·典型案例</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">⚠️</div><div class="mod-name">许可预警</div><div class="mod-desc">许可证到期/报告超期/台账缺失自动预警</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📊</div><div class="mod-name">排放数据管理</div><div class="mod-desc">排污许可执行数据汇总·排放量核算·趋势分析</div><span class="mod-tag dev">◐ 规划中</span></a>
+</div>
+<div class="quick-row">
+<a href="#" class="quick-btn"><span class="icon">📋</span><span class="label">许可证</span></a>
+<a href="#" class="quick-btn"><span class="icon">📝</span><span class="label">环评审查</span></a>
+<a href="#" class="quick-btn"><span class="icon">📊</span><span class="label">报告审查</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📚</span><span class="label">许可法条</span></a>
+</div>
+</div>
+</div>
+
+<!-- 6. 生态环境执法局 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(192,57,43,.12)">🚔</div>
+<div>
+<div class="dept-name">生态环境执法局</div>
+<div class="dept-sub">现场检查 · 案件办理 · 处罚执行 · 涉刑移送</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">128</span> 本月检查</span>
+<span class="dept-ind"><span class="di-n">23</span> 在办案件</span>
+<span class="dept-ind"><span class="di-n">3</span> 涉刑</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="/field-terminal.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🚔</div><div class="mod-name">现场执法终端</div><div class="mod-desc">场景AI识别·证据采集指导·语音交互·文书生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🧠</div><div class="mod-name">AI案件分析</div><div class="mod-desc">违法事实认定·法条匹配·证据充分性·裁量建议</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">⚖️</div><div class="mod-name">涉刑判断</div><div class="mod-desc">污染环境罪构成要件分析·移送公安条件判定</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📄</div><div class="mod-name">规范文书生成</div><div class="mod-desc">处罚告知书/决定书/强制执行等规范文书AI生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="/workspace.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">📋</div><div class="mod-name">执法工作台</div><div class="mod-desc">检查计划·执法日志·任务分派·周报月报</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📚</div><div class="mod-name">执法知识库</div><div class="mod-desc">法条速查·案例推送·行业检查要点·取证规范</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/field-terminal.html" class="quick-btn"><span class="icon">📝</span><span class="label">快速立案</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🧠</span><span class="label">AI分析</span></a>
+<a href="#" class="quick-btn"><span class="icon">⚖️</span><span class="label">涉刑判断</span></a>
+<a href="#" class="quick-btn"><span class="icon">📄</span><span class="label">生成文书</span></a>
+</div>
+</div>
+</div>
+
+<!-- 7. 生态环境监测中心 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(0,150,136,.12)">🔬</div>
+<div>
+<div class="dept-name">生态环境监测中心</div>
+<div class="dept-sub">在线监测 · 数据审核 · 质控管理 · 异常预警</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">312</span> 监测设备</span>
+<span class="dept-ind"><span class="di-n">99.2%</span> 在线率</span>
+<span class="dept-ind" style="color:var(--red)">⚠️ 7</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="/iot.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📡</div><div class="mod-name">在线监测总览</div><div class="mod-desc">水/气/土全要素在线监测数据汇聚·实时展示</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">✅</div><div class="mod-name">数据审核</div><div class="mod-desc">监测数据三级审核·异常数据标注·审核日志</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🔍</div><div class="mod-name">数据异常检测</div><div class="mod-desc">恒值/突降/缺失/逻辑异常AI自动识别</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📊</div><div class="mod-name">质控报告</div><div class="mod-desc">比对监测·质控考核·设备检定·实验室质控</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">⚠️</div><div class="mod-name">多源预警</div><div class="mod-desc">监测异常/设备故障/数据传输中断预警汇总</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📚</div><div class="mod-name">监测法规规范</div><div class="mod-desc">监测技术规范·质控标准·数据审核要点</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/iot.html" class="quick-btn"><span class="icon">📡</span><span class="label">监测总览</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🔍</span><span class="label">数据异常</span></a>
+<a href="#" class="quick-btn"><span class="icon">⚠️</span><span class="label">多源预警</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">📚</span><span class="label">监测规范</span></a>
+</div>
+</div>
+</div>
+
+<!-- 8. 信访科/12369热线 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(142,68,173,.12)">📞</div>
+<div>
+<div class="dept-name">信访科 / 12369热线</div>
+<div class="dept-sub">举报受理 · 线索分办 · 举报查询 · 结果反馈</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">89</span> 本月举报</span>
+<span class="dept-ind"><span class="di-n">94%</span> 办结率</span>
+<span class="dept-ind"><span class="di-n">3.2天</span> 均办结</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">📞</div><div class="mod-name">12369热线</div><div class="mod-desc">来电受理·自动登记·工单分派·处理时限追踪</div><span class="mod-tag on">● 在线</span></a>
+<a href="/report.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🚨</div><div class="mod-name">举报受理</div><div class="mod-desc">微信/网站/APP多渠道举报统一受理</div><span class="mod-tag on">● 在线</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📍</div><div class="mod-name">线索智能分办</div><div class="mod-desc">举报内容AI分析→科室自动匹配→工单分派</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🔍</div><div class="mod-name">举报查询</div><div class="mod-desc">举报进度实时查询·处理结果公示·满意度评价</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📊</div><div class="mod-name">举报数据分析</div><div class="mod-desc">举报热点区域·高发类型·重复举报预警</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">📚</div><div class="mod-name">举报法规支撑</div><div class="mod-desc">举报受理规范·办理期限·反馈要求·典型案例</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="#" class="quick-btn"><span class="icon">📞</span><span class="label">12369热线</span></a>
+<a href="/report.html" class="quick-btn"><span class="icon">🚨</span><span class="label">我要举报</span></a>
+<a href="/report.html" class="quick-btn"><span class="icon">🔍</span><span class="label">查进度</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">📊</span><span class="label">举报分析</span></a>
+</div>
+</div>
+</div>
+
+<!-- 9. 宣教中心 -->
+<div class="dept-section">
+<div class="dept-hd" onclick="toggleDept(this)">
+<div class="dept-hd-l">
+<div class="dept-icon" style="background:rgba(46,125,50,.12)">🎤</div>
+<div>
+<div class="dept-name">宣教中心</div>
+<div class="dept-sub">宣传视频 · 科普教育 · 公众参与 · 媒体发布</div>
+</div>
+</div>
+<div class="dept-indicators">
+<span class="dept-ind"><span class="di-n">26</span> 视频</span>
+<span class="dept-ind"><span class="di-n">5.6万</span> 观看</span>
+<span class="dept-ind"><span class="di-n">1280</span> 参与</span>
+</div>
+<span class="dept-expand">▼</span>
+</div>
+<div class="dept-body">
+<div class="mod-grid">
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">🎬</div><div class="mod-name">宣传视频生成</div><div class="mod-desc">环保政策宣传·典型案例警示·科普动画AI生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🌍</div><div class="mod-name">科普教育</div><div class="mod-desc">环保知识科普·校园宣教·社区活动素材</div><span class="mod-tag on">● 在线</span></a>
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">📢</div><div class="mod-name">新闻发布</div><div class="mod-desc">新闻发布会·新闻通稿·新媒体内容生成</div><span class="mod-tag dev">◐ 内测</span></a>
+<a href="#" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">🤝</div><div class="mod-name">公众参与</div><div class="mod-desc">环评公众参与·问卷调查·线上互动活动</div><span class="mod-tag dev">◐ 规划中</span></a>
+<a href="/workspace.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">📋</div><div class="mod-name">宣教管理</div><div class="mod-desc">宣教计划·素材库·发布管理·效果统计</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">📚</div><div class="mod-name">环保知识库</div><div class="mod-desc">环保科普知识库·典型案例·法规宣传资料</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="quick-row">
+<a href="/video-studio.html" class="quick-btn"><span class="icon">🎬</span><span class="label">生成视频</span></a>
+<a href="/video-studio.html" class="quick-btn"><span class="icon">🌍</span><span class="label">科普教育</span></a>
+<a href="#" class="quick-btn"><span class="icon">📢</span><span class="label">新闻发布</span></a>
+<a href="/workspace.html" class="quick-btn"><span class="icon">📋</span><span class="label">宣教管理</span></a>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ====== 执法闭环 ====== -->
+<div class="portal" id="portal-enforcement">
+<div class="flow-card">
+<div class="flow-t">🚔 执法闭环 — 全流程智能辅助 <span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:8px">全链路规范支撑</span></div>
+<div class="flow-chain">
+<span class="flow-node fn-green">线索发现</span>
+<span class="flow-law-tag">《环境行政处罚办法》第12条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">立案审批</span>
+<span class="flow-law-tag">《环境行政处罚办法》第16条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-amber">现场检查</span>
+<span class="flow-law-tag">《环境行政处罚办法》第22条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-red">证据固定</span>
+<span class="flow-law-tag">《环境行政处罚办法》第25条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-purple">案件审查</span>
+<span class="flow-law-tag">《环境行政处罚办法》第31条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-teal">处罚决定</span>
+<span class="flow-law-tag">《环境行政处罚办法》第37条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-green">执行监督</span>
+<span class="flow-law-tag">《行政处罚法》第66条</span>
+<span class="flow-arrow">→</span>
+<span class="flow-node fn-blue">结案归档</span>
+<span class="flow-law-tag">《环境行政处罚办法》第45条</span>
+</div>
+<div style="text-align:center;margin-top:6px;font-size:11px;color:var(--muted)">🧠 AI全程辅助：法条匹配 · 证据推荐 · 文书生成 · 裁量计算 · 涉刑判断</div>
+</div>
+<div class="mod-grid">
+<a href="/field-terminal.html" class="mod-card"><div class="mod-icon" style="background:rgba(41,128,185,.12)">🚔</div><div class="mod-name">现场执法终端</div><div class="mod-desc">场景AI识别/证据采集指导/语音交互/文书生成</div><span class="mod-tag on">● 在线</span></a>
+<a href="/analysis.html" class="mod-card"><div class="mod-icon" style="background:rgba(142,68,173,.12)">🧠</div><div class="mod-name">AI智能分析</div><div class="mod-desc">涉嫌违反《水污染防治法》第83条第2项·法条匹配·证据充分性·裁量建议</div><span class="mod-tag on">● 在线</span></a>
+<a href="/knowledge.html" class="mod-card"><div class="mod-icon" style="background:rgba(46,125,50,.12)">📚</div><div class="mod-name">执法知识库</div><div class="mod-desc">法条速查/案例推送/行业检查要点/取证规范</div><span class="mod-tag on">● 在线</span></a>
+<a href="/training.html" class="mod-card"><div class="mod-icon" style="background:rgba(0,150,136,.12)">🎓</div><div class="mod-name">执法培训</div><div class="mod-desc">场景实训/AI模拟询问/能力认证</div><span class="mod-tag on">● 在线</span></a>
+<a href="/workspace.html" class="mod-card"><div class="mod-icon" style="background:rgba(230,126,34,.12)">📋</div><div class="mod-name">执法工作台</div><div class="mod-desc">检查计划/执法日志/任务分派/周报月报</div><span class="mod-tag on">● 在线</span></a>
+<a href="/video-studio.html" class="mod-card"><div class="mod-icon" style="background:rgba(192,57,43,.12)">🎬</div><div class="mod-name">执法纪实</div><div class="mod-desc">执法过程视频生成/工作汇报/案例展示</div><span class="mod-tag on">● 在线</span></a>
+</div>
+<div class="flow-card">
+<div class="flow-t">⚡ 执法快捷入口</div>
+<div class="quick-row">
+<a href="/field-terminal.html" class="quick-btn"><span class="icon">📝</span><span class="label">快速立案</span></a>
+<a href="/analysis.html" class="quick-btn"><span class="icon">🧠</span><span class="label">AI分析</span></a>
+<a href="/knowledge.html" class="quick-btn"><span class="icon">🔍</span><span class="label">查法条</span></a>
+<a href="/iot.html" class="quick-btn"><span class="icon">📡</span><span class="label">查预警</span></a>
+<a href="#" class="quick-btn"><span class="icon">📄</span><span class="label">规范文书生成</span></a>
+<a href="#" class="quick-btn"><span class="icon">⚖️</span><span class="label">涉刑判断</span></a>
+</div>
+</div>
+</div>
+
+<!-- ====== AI智能中心 ====== -->
+<div class="portal" id="portal-ai">
+<div class="flow-card">
+<div class="flow-t">🧠 AI智能中心 — 智能体架构</div>
+<div class="agent-flow">
+<span class="agent-node core">🧠 环保执法<br>智能体(EPB-Agent)</span>
+<span class="flow-arrow">→</span>
+<span class="agent-node layer">👁 感知层<br>IoT+视频AI</span>
+<span class="flow-arrow">→</span>
+<span class="agent-node layer">🧠 推理层<br>LLM+规则引擎</span>
+<span class="flow-arrow">→</span>
+<span class="agent-node layer">🎬 执行层<br>文书+视频</span>
+<span class="flow-arrow">→</span>
+<span class="agent-node data">📚 知识层<br>法规+案例+标准</span>
+</div>
+<div style="margin-top:8px;font-size:12px;color:var(--muted)">
+自研智能体 <b>EPB-Agent</b>：融合多模型推理+环保领域知识+规则引擎+多模态感知，形成环保执法专属AI算法
+</div>
+</div>
+
+<div class="flow-card">
+<div class="flow-t">🤖 调用大模型清单与对比</div>
+<div class="ai-grid">
+<!-- 本地模型 -->
+<div class="ai-card">
+<div class="ai-card-t">🏠 本地模型（Ollama）</div>
+<div class="model-row"><div class="model-icon">🟢</div><div class="model-info"><div class="model-name">Qwen2.5:1.5B</div><div class="model-meta">986MB · M4 GPU加速 · 纯本地</div></div><span class="model-badge a">✅ 已部署</span></div>
+<div class="pros-cons"><div class="pros">✅ 数据不出局 · 零延迟 · 无API费用 · 离线可用 · 隐私安全</div><div class="cons">⚠️ 1.5B参数能力有限 · 复杂推理弱 · 无联网能力 · 中文需微调</div></div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px">💡 适用：简单分类/法条关键词匹配/离线应急</div>
+</div>
+
+<!-- 云端通用 -->
+<div class="ai-card">
+<div class="ai-card-t">☁️ 云端通用大模型</div>
+<div class="model-row"><div class="model-icon">🔵</div><div class="model-info"><div class="model-name">Claude 3.5 Sonnet</div><div class="model-meta">Anthropic · 长上下文 · 强推理</div></div><span class="model-badge a">✅ 主力</span></div>
+<div class="model-row"><div class="model-icon">🟣</div><div class="model-info"><div class="model-name">GPT-4o</div><div class="model-meta">OpenAI · 多模态 · 工具调用强</div></div><span class="model-badge b">备选</span></div>
+<div class="model-row"><div class="model-icon">🟠</div><div class="model-info"><div class="model-name">DeepSeek-V3</div><div class="model-meta">国产 · 性价比高 · 代码强</div></div><span class="model-badge b">备选</span></div>
+<div class="model-row"><div class="model-icon">🔴</div><div class="model-info"><div class="model-name">Qwen-Max</div><div class="model-meta">阿里 · 中文最强 · 联网搜索</div></div><span class="model-badge b">备选</span></div>
+<div class="pros-cons"><div class="pros">✅ 推理能力强 · 长文本理解 · 工具调用 · 多语言 · 知识广</div><div class="cons">⚠️ API费用 · 网络依赖 · 数据出境风险 · 延迟较高</div></div>
+</div>
+
+<!-- 视觉模型 -->
+<div class="ai-card">
+<div class="ai-card-t">👁 视觉识别模型</div>
+<div class="model-row"><div class="model-icon">🔵</div><div class="model-info"><div class="model-name">GPT-4o Vision</div><div class="model-meta">OpenAI · 图像理解 · 场景识别</div></div><span class="model-badge a">✅ 在用</span></div>
+<div class="model-row"><div class="model-icon">🟠</div><div class="model-info"><div class="model-name">Qwen-VL-Max</div><div class="model-meta">阿里 · 中文场景理解强</div></div><span class="model-badge b">备选</span></div>
+<div class="model-row"><div class="model-icon">🟢</div><div class="model-info"><div class="model-name">YOLOv8-Pollution</div><div class="model-meta">本地 · 排放口/黑烟/水体检测 · 60fps</div></div><span class="model-badge c">内测</span></div>
+<div class="pros-cons"><div class="pros">✅ 多模态理解 · 场景识别 · OCR · 目标检测 · 实时视频</div><div class="cons">⚠️ API费用(云端) · 本地模型需GPU · 细粒度环保场景需微调</div></div>
+</div>
+
+<!-- 语音模型 -->
+<div class="ai-card">
+<div class="ai-card-t">🎙 语音模型</div>
+<div class="model-row"><div class="model-icon">🟣</div><div class="model-info"><div class="model-name">CosyVoice</div><div class="model-meta">阿里 · 中文TTS · 声音克隆</div></div><span class="model-badge a">✅ 规划</span></div>
+<div class="model-row"><div class="model-icon">🟠</div><div class="model-info"><div class="model-name">Whisper-Large</div><div class="model-meta">OpenAI · 语音识别 · 多语言</div></div><span class="model-badge b">备选</span></div>
+<div class="model-row"><div class="model-icon">🔵</div><div class="model-info"><div class="model-name">FishSpeech</div><div class="model-meta">开源 · 可本地部署 · 低延迟</div></div><span class="model-badge b">备选</span></div>
+<div class="pros-cons"><div class="pros">✅ 语音交互 · 语音笔录 · 视频旁白 · 无障碍</div><div class="cons">⚠️ 方言识别弱 · 术语准确度 · 本地部署资源</div></div>
+</div>
+
+<!-- 视频生成 -->
+<div class="ai-card">
+<div class="ai-card-t">🎬 视频生成模型</div>
+<div class="model-row"><div class="model-icon">🔴</div><div class="model-info"><div class="model-name">可灵(Kling)</div><div class="model-meta">快手 · 文生视频 · 5s-2min</div></div><span class="model-badge a">✅ 规划</span></div>
+<div class="model-row"><div class="model-icon">🟣</div><div class="model-info"><div class="model-name">Runway Gen-3</div><div class="model-meta">海外 · 高质量 · 图生视频</div></div><span class="model-badge b">备选</span></div>
+<div class="model-row"><div class="model-icon">🔵</div><div class="model-info"><div class="model-name">Remotion+FFmpeg</div><div class="model-meta">代码驱动 · 数据可视化 · 稳定可控</div></div><span class="model-badge a">✅ 主力</span></div>
+<div class="pros-cons"><div class="pros">✅ 工作汇报可视化 · 数据动画 · 稳定输出 · 成本低</div><div class="cons">⚠️ AI生视频质量不稳定 · 时长短 · 需素材拼接</div></div>
+</div>
+</div>
+</div>
+
+<!-- 自研算法 -->
+<div class="flow-card">
+<div class="flow-t">🧬 自研EPB-Agent智能算法</div>
+<div style="font-size:13px;line-height:1.8">
+<div style="margin-bottom:8px"><b>1. 法条精准匹配算法 (LawMatch v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">关键词提取 → 语义扩展 → 法条向量检索 → 法条相关性排序 → 上下文校验</span><br>
+<span style="color:var(--g);font-size:11px">✅ 已实现：law_mapping.json 50+关键词映射 → smart_analyzer.py 匹配引擎</span></div>
+
+<div style="margin-bottom:8px"><b>2. 违法严重度评估算法 (ViolationAssess v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">违法类型 → 法定罚则区间 → 情节加重/减轻因子 → 自由裁量计算 → 处罚建议</span><br>
+<span style="color:var(--g);font-size:11px">✅ 已实现：smart_analyzer.py 严重度分级 + 刑事移送判断</span></div>
+
+<div style="margin-bottom:8px"><b>3. 证据充分性检查算法 (EvidenceCheck v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">违法类型 → 必需证据清单 → 已有证据比对 → 证据缺口提示 → 补证建议</span><br>
+<span style="color:var(--amber);font-size:11px">◐ 规划中：基于案例库的必需证据清单自动生成</span></div>
+
+<div style="margin-bottom:8px"><b>4. 多源数据融合预警算法 (FusionAlert v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">在线监测 → 用电监控 → 视频AI → 举报线索 → 多源融合 → 风险评分 → 预警分级</span><br>
+<span style="color:var(--amber);font-size:11px">◐ 规划中：IoT多源数据融合分析引擎</span></div>
+
+<div style="margin-bottom:8px"><b>5. 执法文书生成算法 (DocGen v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">案件要素 → 文书模板 → LLM生成 → 法条校验 → 格式规范 → 文书输出</span><br>
+<span style="color:var(--amber);font-size:11px">◐ 规划中：检查笔录/询问笔录/处罚决定书AI生成</span></div>
+
+<div style="margin-bottom:8px"><b>6. 视频叙事生成算法 (VideoNarrative v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">素材分析 → 叙事脚本 → 镜头规划 → TTS旁白 → 字幕同步 → FFmpeg合成</span><br>
+<span style="color:var(--g);font-size:11px">✅ 已实现：video_generator.py 脚本生成 + 进度模拟</span></div>
+
+<div style="margin-bottom:8px"><b>7. 场景智能识别算法 (SceneSense v1.0)</b><br>
+<span style="color:var(--muted);font-size:12px">摄像头/语音/文本输入 → 多模态识别 → 环保场景分类 → 知识库联动 → 行动建议</span><br>
+<span style="color:var(--g);font-size:11px">✅ 已实现：/api/analyze_scene + /api/voice_guide 端点</span></div>
+</div>
+</div>
+
+<!-- 智能体架构图 -->
+<div class="flow-card">
+<div class="flow-t">🏗 EPB-Agent 多层架构</div>
+<div style="font-size:12px;line-height:1.8">
+<pre style="background:var(--gbg);padding:14px;border-radius:10px;overflow-x:auto;font-size:11px;line-height:1.6">
+┌─────────────────────────────────────────────────────────────────┐
+│                    🧠 EPB-Agent 智能体                         │
+├─────────────────────────────────────────────────────────────────┤
+│  🎬 执行层  文书生成·视频生成·预警推送·任务分派              │
+├─────────────────────────────────────────────────────────────────┤
+│  🧠 推理层  LLM推理·规则引擎·法条匹配·裁量计算              │
+│            ├─ 本地: Qwen2.5(1.5B) ← 简单/离线/隐私          │
+│            ├─ 云端: Claude/GPT-4o ← 复杂推理/长文本          │
+│            └─ 视觉: GPT-4oV/YOLOv8 ← 场景识别/视频AI        │
+├─────────────────────────────────────────────────────────────────┤
+│  👁 感知层  摄像头·无人机·无人船·传感器·举报·用电监控        │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 知识层  法规库·案例库·标准库·行业知识·专家经验            │
+└─────────────────────────────────────────────────────────────────┘
+
+🔄 闭环机制: 感知→推理→执行→反馈→学习→感知(持续迭代)
+📊 决策路径: 数据→信息→知识→智慧→行动
+🎯 优化目标: 精准执法·高效闭环·智能决策·持续学习
+</pre>
+</div>
+</div>
+</div>
+
+<!-- 全局动态 -->
+<div class="flow-card">
+<div class="flow-t">🕐 实时动态</div>
+<div class="act-item"><div class="act-dot red"></div><div class="act-content"><div class="act-title">某化工企业COD超标1.86倍触发红色预警</div><div class="act-meta">在线监测 · 企业：青山化工 · W-23传感器</div></div><span class="act-badge urgent">紧急</span></div>
+<div class="act-item"><div class="act-dot green"></div><div class="act-content"><div class="act-title">AI智能分析完成：某钢厂烧结脱硫设施停运案</div><div class="act-meta">法条匹配3条 · 证据充分 · 建议立案</div></div><span class="act-badge ok">完成</span></div>
+<div class="act-item"><div class="act-dot blue"></div><div class="act-content"><div class="act-title">无人机巡查发现化工园区3号排口夜间红外异常</div><div class="act-meta">AI视频分析 · 疑似夜间偷排</div></div><span class="act-badge info">预警</span></div>
+<div class="act-item"><div class="act-dot amber"></div><div class="act-content"><div class="act-title">知识库采集完成：新增3条市级处罚公示</div><div class="act-meta">济南市环保局 · 自动采集</div></div><span class="act-badge warn">更新</span></div>
+<div class="act-item"><div class="act-dot green"></div><div class="act-content"><div class="act-title">执法培训：《危废执法实务》36人完成考核</div><div class="act-meta">平均分87 · 合格率94%</div></div><span class="act-badge ok">完成</span></div>
+</div>
+
+<footer class="footer">
+🌿 环保智慧执法平台 · 六位一体 · 知识驱动 · AI闭环 · 开源开放<br>
+© 2026 MIT License · Built with ☘️ & AI
+</footer>
+
+<!-- Floating Action Button -->
+<div id="fab">
+<div class="fab-menu" id="fab-menu">
+<a href="/field-terminal.html" class="fab-item"><span class="fi-icon">📝</span>快速立案</a>
+<a href="#" class="fab-item"><span class="fi-icon">🔍</span>查询企业</a>
+<a href="#" class="fab-item"><span class="fi-icon">📷</span>上传证据</a>
+<a href="#" class="fab-item"><span class="fi-icon">📄</span>生成文书</a>
+<a href="/analysis.html" class="fab-item"><span class="fi-icon">🧠</span>AI分析</a>
+</div>
+<button class="fab-main" id="fab-main" onclick="toggleFab()" title="快捷操作">+</button>
+</div>
+
+<!-- Back to Top -->
+<button id="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Floating Quick Panel -->
+<div id="float-panel">
+  <div class="float-menu" id="float-menu">
+    <a href="/field-terminal.html" class="float-item"><span class="icon">🚨</span>快速立案</a>
+    <a href="/workspace.html" class="float-item"><span class="icon">🏢</span>企业查询</a>
+    <a href="/field-terminal.html" class="float-item"><span class="icon">📸</span>上传证据</a>
+    <a href="#" onclick="showPortal('ai',document.querySelector('.portal-btn:last-child'))" class="float-item"><span class="icon">📄</span>生成文书</a>
+    <a href="/collaboration.html" class="float-item"><span class="icon">🔄</span>协同工作</a>
+    <a href="/analysis.html" class="float-item"><span class="icon">🧠</span>AI分析</a>
+    <a href="/knowledge.html" class="float-item"><span class="icon">📚</span>查法规</a>
+  </div>
+  <button class="float-toggle" id="float-toggle" onclick="toggleFloat()">+</button>
+</div>
+
+<script>
+window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('loader').classList.add('hidden')},600)});
+
+// Portal navigation
+const PORTAL_NAME_MAP={'public':'公众','enterprise':'企业','government':'政府','regulatory':'监管','admin':'行政','enforcement':'执法','ai':'AI'};
+const PORTAL_BTN_ICON={'public':'👥','enterprise':'🏢','government':'🏛','regulatory':'🔍','admin':'🏢','enforcement':'🚔','ai':'🧠'};
+
+function showPortal(name,el){
+  // Update portal bar buttons
+  document.querySelectorAll('.portal-btn').forEach(b=>b.classList.remove('active'));
+  if(el&&el.closest('.portal-bar,.nav-tabs')){
+    el.classList.add('active');
+    // Sync other bar
+    document.querySelectorAll('.portal-btn,.nav-tab').forEach(b=>{
+      const icon=PORTAL_BTN_ICON[name]||'';
+      if(b.textContent.includes(icon)||(PORTAL_NAME_MAP[name]&&b.textContent.includes(PORTAL_NAME_MAP[name])))b.classList.add('active');
+    });
+  }
+  // Show/hide portals
+  document.querySelectorAll('.portal').forEach(p=>p.classList.remove('show'));
+  var target=document.getElementById('portal-'+name);
+  if(target)target.classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// Hero counter animation
+function animNum(el,target,dur){
+  const s=performance.now();
+  (function step(now){
+    const p=Math.min((now-s)/dur,1);
+    el.textContent=Math.floor((1-Math.pow(1-p,3))*target).toLocaleString();
+    if(p<1)requestAnimationFrame(step);
+  })(s);
+}
+
+// 用户登录信息检测
+try{
+  var savedUser=JSON.parse(localStorage.getItem('epb_user')||'{}');
+  if(savedUser && savedUser.role){
+    var bar=document.getElementById('welcome-bar');
+    if(bar){bar.style.display='flex';}
+    document.getElementById('welcome-icon').textContent=savedUser.roleIcon||'🌿';
+    document.getElementById('welcome-name').textContent=savedUser.name||'用户';
+    document.getElementById('welcome-role').textContent=savedUser.roleName||'';
+    document.getElementById('welcome-org').textContent=savedUser.org||'';
+  }
+}catch(e){}
+
+setTimeout(()=>{
+  // 动态加载统计数据
+  fetch('/api/health').then(r=>r.json()).then(d=>{
+    var s=d.data_stats||{};
+    animNum(document.getElementById('hNum1'),s.cases||101);
+    animNum(document.getElementById('hNum2'),s.law_index||28);
+    animNum(document.getElementById('hNum3'),s.knowledge_graph||8);
+    animNum(document.getElementById('hNum4'),s.law_mapping||15);
+  }).catch(()=>{
+    animNum(document.getElementById('hNum1'),101);
+    animNum(document.getElementById('hNum2'),28);
+    animNum(document.getElementById('hNum3'),8);
+    animNum(document.getElementById('hNum4'),15);
+  });
+},800);
+
+// Dept toggle
+function toggleDept(el){
+  el.classList.toggle('open');
+  var body=el.nextElementSibling;
+  body.classList.toggle('show');
+}
+
+// FAB
+function toggleFab(){
+  var main=document.getElementById('fab-main');
+  var menu=document.getElementById('fab-menu');
+  main.classList.toggle('open');
+  menu.classList.toggle('open');
+}
+
+// Back to top visibility
+window.addEventListener('scroll',function(){
+  var bt=document.getElementById('back-top');
+  bt.style.display=window.scrollY>400?'flex':'none';
+});
+
+// Global Search
+function openSearch(){
+  document.getElementById('search-overlay').classList.add('show');
+  document.getElementById('search-input').focus();
+}
+function closeSearch(){
+  document.getElementById('search-overlay').classList.remove('show');
+  document.getElementById('search-input').value='';
+  document.getElementById('search-results').innerHTML='';
+}
+
+// Search data
+var searchIndex=[
+  {t:'环保法规库',d:'法律法规全文检索',type:'功能',icon:'📚',url:'/knowledge.html',kw:'环保法 法规 法律'},
+  {t:'行业规范标准',d:'国家/地方行业标准·规范·技术导则',type:'知识库',icon:'📋',url:'/knowledge.html',kw:'行业标准 规范 导则'},
+  {t:'在线监测中心',d:'企业在线监测数据·超标识别',type:'功能',icon:'📡',url:'/iot.html',kw:'在线监测 超标 水 气'},
+  {t:'AI智能分析',d:'违法识别·法条匹配·裁量建议',type:'功能',icon:'🧠',url:'/analysis.html',kw:'AI分析 违法 法条'},
+  {t:'现场执法终端',d:'场景识别·证据采集·文书生成',type:'功能',icon:'🚔',url:'/field-terminal.html',kw:'执法 现场 立案'},
+  {t:'规范文书生成',d:'处罚决定书·告知书·批复AI生成',type:'功能',icon:'📄',url:'#',kw:'文书 处罚 决定书'},
+  {t:'法条智能匹配',d:'输入违法事实→AI匹配法条→处罚标准',type:'功能',icon:'🔍',url:'/analysis.html',kw:'法条 匹配 裁量'},
+  {t:'排污许可管理',d:'许可证核发/变更/延续/注销',type:'行政',icon:'📋',kw:'排污许可 许可证'},
+  {t:'12369热线',d:'举报受理·工单分派·处理追踪',type:'行政',icon:'📞',kw:'举报 12369 热线'},
+  {t:'水污染防治法 第83条',d:'超标排污/私设暗管/偷排法条及处罚标准',type:'法规',icon:'⚖️',url:'/knowledge.html',kw:'水污染防治法 超标 83条'},
+  {t:'大气污染防治法',d:'VOCs治理·重污染应急·罚则',type:'法规',icon:'⚖️',url:'/knowledge.html',kw:'大气法 VOCs 应急'},
+  {t:'固体废物污染环境防治法',d:'危废管理·固废排查·贮存规范',type:'法规',icon:'⚖️',url:'/knowledge.html',kw:'固废法 危废'},
+  {t:'环境行政处罚办法',d:'立案·调查·审查·决定·执行全流程',type:'法规',icon:'⚖️',url:'/knowledge.html',kw:'处罚办法 立案 结案'},
+  {t:'某化工企业COD超标案例',d:'涉嫌违反《水污染防治法》第83条第2项·处罚10万',type:'案例',icon:'📁',kw:'COD超标 化工 案例'},
+  {t:'危废非法倾倒案例',d:'危废非法倾倒·涉刑移送·典型案例',type:'案例',icon:'📁',kw:'危废 倾倒 涉刑'},
+  {t:'宣传视频生成',d:'环保宣传·科普动画·工作汇报AI生成',type:'功能',icon:'🎬',url:'/video-studio.html',kw:'视频 宣传 科普'},
+  {t:'执法培训',d:'场景实训·AI模拟询问·能力认证',type:'功能',icon:'🎓',url:'/training.html',kw:'培训 执法'},
+  {t:'执法工作台',d:'检查计划·执法日志·任务分派·周报',type:'功能',icon:'📋',url:'/workspace.html',kw:'工作台 日志 周报'},
+  {t:'涉刑判断',d:'污染环境罪构成要件·移送公安条件判定',type:'功能',icon:'⚖️',url:'#',kw:'涉刑 污染环境罪 移送'},
+  {t:'排污许可执行报告',d:'企业执行报告自动审查·数据校验',type:'行政',icon:'📊',kw:'执行报告 台账 审查'},
+];
+
+function doSearch(q){
+  var container=document.getElementById('search-results');
+  if(!q.trim()){container.innerHTML='';return;}
+  var words=q.toLowerCase().split(/\s+/);
+  var results=searchIndex.filter(function(item){
+    return words.some(function(w){
+      return item.t.toLowerCase().includes(w)||
+             (item.d&&item.d.toLowerCase().includes(w))||
+             (item.kw&&item.kw.toLowerCase().includes(w))||
+             item.type.toLowerCase().includes(w);
+    });
+  }).slice(0,8);
+  if(!results.length){
+    container.innerHTML='<div class="search-empty">未找到相关结果，请尝试其他关键词</div>';
+    return;
+  }
+  container.innerHTML=results.map(function(r){
+    var matchKW=words.find(function(w){return r.kw&&r.kw.toLowerCase().includes(w);})||words[0];
+    return '<a href="'+(r.url||'#')+'" class="search-result-item" onclick="closeSearch()">'+
+           '<div class="sr-icon" style="background:'+(r.type==='法规'?'rgba(46,125,50,.1)':r.type==='案例'?'rgba(192,57,43,.1)':r.type==='行政'?'rgba(142,68,173,.1)':'rgba(82,183,136,.1)')+'">'+r.icon+'</div>'+
+           '<div class="sr-info"><div class="sr-title">'+r.t+'</div><div class="sr-type">'+r.d+'</div></div>'+
+           '<span class="sr-match">'+r.type+'</span></a>';
+  }).join('');
+}
+
+// Keyboard shortcut Ctrl+K
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearch();}
+  if(e.key==='Escape')closeSearch();
+});
+
+// Notification panel
+function toggleNotif(e){
+  e.stopPropagation();
+  var panel=document.getElementById('notif-panel');
+  panel.classList.toggle('show');
+  if(panel.classList.contains('show')){
+    document.getElementById('notif-badge').style.display='none';
+  }
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#notif-panel')&&!e.target.closest('#notif-btn')){
+    document.getElementById('notif-panel').classList.remove('show');
+  }
+});
+
+function filterNotif(type,el){
+  document.querySelectorAll('.notif-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Knowledge base category filter
+function filterKB(el,cat){
+  el.parentElement.querySelectorAll('.kb-cat').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Floating quick panel
+function toggleFloat(){
+  var btn=document.getElementById('float-toggle');
+  var menu=document.getElementById('float-menu');
+  btn.classList.toggle('open');
+  menu.classList.toggle('show');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#float-panel')){
+    var btn=document.getElementById('float-toggle');
+    var menu=document.getElementById('float-menu');
+    if(btn)btn.classList.remove('open');
+    if(menu)menu.classList.remove('show');
+  }
+});
+</script>
+</body>
+</html>

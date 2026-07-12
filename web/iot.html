@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📡 智慧感知</title>
+<style>
+:root{--nav:#1a2332;--nav2:#2C3E50;--green:#1B4332;--green-mid:#2D6A4F;--green-light:#52B788;--green-bg:#F2F8F4;--red:#C0392B;--amber:#E67E22;--blue:#2980B9;--bg:#F0F2F5;--card:#FFF;--border:#D0D0D8;--text:#1A1A1A;--muted:#666;--shadow:0 2px 12px rgba(0,0,0,.08);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+.nav{background:linear-gradient(135deg,var(--nav),var(--nav2));color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.nav h1{font-size:17px;font-weight:600}
+.nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:12px;margin-left:auto}
+.role-btns{display:flex;gap:6px;margin-left:12px}
+.role-btn{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;cursor:pointer;transition:all .2s}
+.role-btn:hover,.role-btn.active{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
+.ctn{max-width:900px;margin:0 auto;padding:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border-radius:10px;padding:12px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+.stat-n{font-size:24px;font-weight:700;color:var(--green)}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid var(--border)}
+.card-t{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:4px}
+.tab:hover{border-color:var(--green-light)}
+.tab.active{border-color:var(--green);background:var(--green-bg);font-weight:600}
+.section{display:none}.section.show{display:block}
+.device-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:all .2s}
+.device-row:hover{border-color:var(--green-light);background:var(--green-bg)}
+.dev-icon{font-size:20px;width:28px;text-align:center}
+.dev-info{flex:1}
+.dev-name{font-size:13px;font-weight:600}
+.dev-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.dev-status{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.dev-status.on{background:#D5F5E3;color:var(--green)}
+.dev-status.off{background:#EEE;color:#999}
+.dev-status.warn{background:#FDEDEC;color:var(--red)}
+.dev-status.busy{background:#FEF5E7;color:var(--amber)}
+.alert-card{padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid}
+.alert-card.red{border-color:var(--red);background:#FFF5F5}
+.alert-card.orange{border-color:var(--amber);background:#FFFAF0}
+.alert-card.yellow{border-color:#F1C40F;background:#FFF9E6}
+.alert-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.alert-time{font-size:11px;color:var(--muted)}
+.alert-title{font-size:13px;font-weight:600}
+.alert-body{font-size:12px;color:var(--muted);line-height:1.6}
+.alert-actions{display:flex;gap:6px;margin-top:8px}
+.alert-btn{padding:4px 10px;border-radius:6px;font-size:11px;border:1px solid var(--border);cursor:pointer;background:#fff;transition:all .2s}
+.alert-btn:hover{background:var(--green-bg)}
+.alert-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--green-bg);border-color:var(--green)}
+.mgmt-tabs{display:flex;gap:8px;margin-bottom:14px}
+.mgmt-tab{padding:8px 16px;border-radius:8px;background:#fff;border:1.5px solid var(--border);cursor:pointer;font-size:13px;transition:all .2s}
+.mgmt-tab:hover{border-color:var(--green-light)}
+.mgmt-tab.active{background:var(--green-bg);border-color:var(--green);font-weight:600}
+.mgmt-section{display:none}.mgmt-section.show{display:block}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--green-bg);padding:8px;text-align:left;font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:8px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--green-bg)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.form-label{font-size:12px;font-weight:600;margin-bottom:3px;display:block}
+.form-input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+.form-input:focus{border-color:var(--green-light)}
+.net-node{display:inline-block;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1);margin:4px;font-size:13px}
+.net-center{display:inline-block;background:var(--green);font-weight:700;padding:10px 16px;border-radius:10px;margin:8px;color:#fff}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.role-btns{display:none}}
+</style>
+</head>
+<body>
+<div class="nav"><span style="font-size:20px">📡</span><h1>智慧感知</h1><a href="/">← 返回</a>
+<div class="role-btns"><div class="role-btn active" onclick="switchRole(this)">局长</div><div class="role-btn" onclick="switchRole(this)">执法员</div><div class="role-btn" onclick="switchRole(this)">监测员</div></div></div>
+
+<div class="ctn">
+<div class="stats">
+<div class="stat"><div class="stat-n">156</div><div class="stat-l">在线设备</div></div>
+<div class="stat"><div class="stat-n">6</div><div class="stat-l">实时预警</div></div>
+<div class="stat"><div class="stat-n">156</div><div class="stat-l">监测点</div></div>
+<div class="stat"><div class="stat-n">98%</div><div class="stat-l">在线率</div></div>
+<div class="stat"><div class="stat-n">2.4万</div><div class="stat-l">日采集量</div></div>
+<div class="stat"><div class="stat-n">34</div><div class="stat-l">覆盖企业</div></div>
+</div>
+
+<div class="card">
+<div class="card-t">🔍 感知数据源</div>
+<div class="tabs" id="sourceTabs">
+<div class="tab active" onclick="showSource('camera',this)">📷 视频监控</div>
+<div class="tab" onclick="showSource('drone',this)">🚁 无人机</div>
+<div class="tab" onclick="showSource('boat',this)">🚤 无人船</div>
+<div class="tab" onclick="showSource('sensor',this)">📊 传感器</div>
+<div class="tab" onclick="showSource('report',this)">📞 群众举报</div>
+</div>
+
+<div class="section show" id="sec-camera">
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">厂区大门摄像头 #C01</div><div class="dev-meta">化工园区正门 · 截图2分钟前 · AI识别3次</div></div><span class="dev-status on">● 在线</span></div>
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">排放口摄像头 #C02</div><div class="dev-meta">排污管出口 · 截图1分钟前 · AI识别8次(超标)</div></div><span class="dev-status warn">● 预警</span></div>
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">河道监控 #C05</div><div class="dev-meta">小清河桥段 · 截图5分钟前 · AI识别1次</div></div><span class="dev-status on">● 在线</span></div>
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">秸秆燃烧监控 #C08</div><div class="dev-meta">郊区农田 · 热成像 · 截图10分钟前</div></div><span class="dev-status on">● 在线</span></div>
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">夜间偷排监控 #C10</div><div class="dev-meta">重点企业围墙外 · 红外+可见光 · 截图3分钟前</div></div><span class="dev-status on">● 在线</span></div>
+<div class="device-row"><div class="dev-icon">📷</div><div class="dev-info"><div class="dev-name">交通路口摄像头 #C12</div><div class="dev-meta">渣土车路线节点 · 截图8分钟前</div></div><span class="dev-status on">● 在线</span></div>
+<div style="text-align:center;padding:8px;font-size:12px;color:var(--muted)">共12台在线 · 2台离线 · AI累计识别23次</div>
+</div>
+
+<div class="section" id="sec-drone">
+<div class="device-row"><div class="dev-icon">🚁</div><div class="dev-info"><div class="dev-name">大疆M300RTK #D1</div><div class="dev-meta">电池87% · 上次09:30 · 区域:化工园区 · 86张 · AI:热异常2处、疑似暗管1处</div></div><span class="dev-status busy">● 待命</span></div>
+<div class="device-row"><div class="dev-icon">🚁</div><div class="dev-info"><div class="dev-name">大疆M300RTK #D2</div><div class="dev-meta">电池62% · 上次08:00 · 区域:河流沿岸 · 124张 · AI:露天堆放3处</div></div><span class="dev-status on">● 待命</span></div>
+<div style="padding:10px;background:var(--green-bg);border-radius:8px;font-size:12px"><b>🚁 AI识别统计：</b>热异常2 · 疑似暗管1 · 露天堆放3 · 异常排水1 · 植被变化4</div>
+</div>
+
+<div class="section" id="sec-boat">
+<div class="device-row"><div class="dev-icon">🚤</div><div class="dev-info"><div class="dev-name">水质采样无人船 #B1</div><div class="dev-meta">小清河中段 · 3号采样点 · 预计返回14:30</div></div><span class="dev-status busy">● 采样中</span></div>
+<div style="padding:10px;background:var(--green-bg);border-radius:8px;font-size:12px"><b>🧪 实时水质：</b>COD <span style="color:var(--red);font-weight:700">186mg/L</span>(限100) · 氨氮12.5 · 总磷0.8 · 溶解氧3.2 · pH6.8</div>
+</div>
+
+<div class="section" id="sec-sensor">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px">
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:13px;font-weight:600">💧 水质传感器</div><div style="font-size:11px;color:var(--muted)">在线48/离线2/预警3</div><div style="font-size:12px;margin-top:4px">COD均值<b>45</b> · 最高<span style="color:var(--red)">186</span></div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:13px;font-weight:600">💨 大气传感器</div><div style="font-size:11px;color:var(--muted)">在线36/离线1/预警1</div><div style="font-size:12px;margin-top:4px">PM2.5均值<b>35</b> · 最高<span style="color:var(--amber)">78</span></div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:13px;font-weight:600">🔊 噪声传感器</div><div style="font-size:11px;color:var(--muted)">在线24/离线0/预警0</div><div style="font-size:12px;margin-top:4px">均值<b>52dB</b> · 最高68dB</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:13px;font-weight:600">🌱 土壤传感器</div><div style="font-size:11px;color:var(--muted)">在线12/离线0/预警0</div><div style="font-size:12px;margin-top:4px">重金属正常 · pH6.5-7.2</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:13px;font-weight:600">⚡ 用电监控</div><div style="font-size:11px;color:var(--muted)">在线34家/离线1家/预警2</div><div style="font-size:12px;margin-top:4px">某钢铁骤降<span style="color:var(--red)">⚠停运</span></div></div>
+</div>
+</div>
+
+<div class="section" id="sec-report">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border);text-align:center"><div style="font-size:22px;font-weight:700;color:var(--green)">128</div><div style="font-size:11px;color:var(--muted)">本月举报</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border);text-align:center"><div style="font-size:22px;font-weight:700;color:var(--amber)">23</div><div style="font-size:11px;color:var(--muted)">待处理</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border);text-align:center"><div style="font-size:22px;font-weight:700;color:var(--green)">89</div><div style="font-size:11px;color:var(--muted)">已核实</div></div>
+</div>
+<div style="padding:10px;background:var(--green-bg);border-radius:8px;font-size:12px;margin-bottom:8px"><b>📊 分类：</b>水42% · 气28% · 噪声12% · 固废10% · 其他8%</div>
+<div class="device-row"><div class="dev-icon">📞</div><div class="dev-info"><div class="dev-name">12369热线</div><div class="dev-meta">24h值班 · 本月96件</div></div><span class="dev-status on">● 运行</span></div>
+<div class="device-row"><div class="dev-icon">📱</div><div class="dev-info"><div class="dev-name">微信小程序举报</div><div class="dev-meta">拍照定位上传 · 本月20件</div></div><span class="dev-status on">● 运行</span></div>
+<div class="device-row"><div class="dev-icon">🌐</div><div class="dev-info"><div class="dev-name">网站在线举报</div><div class="dev-meta">表单+附件 · 本月12件</div></div><span class="dev-status on">● 运行</span></div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">⚠️ 实时预警中心</div>
+<div class="filter-bar">
+<div class="filter-btn active" onclick="filterAlerts('all',this)">全部</div>
+<div class="filter-btn" onclick="filterAlerts('water',this)">水</div>
+<div class="filter-btn" onclick="filterAlerts('air',this)">气</div>
+<div class="filter-btn" onclick="filterAlerts('noise',this)">噪声</div>
+<div class="filter-btn" onclick="filterAlerts('solid',this)">固废</div>
+<div class="filter-btn" onclick="filterAlerts('power',this)">用电</div>
+</div>
+<div class="alert-card red" data-cat="water"><div class="alert-top"><span>🔴</span><span class="alert-time">3分钟前</span><span class="alert-title">某化工排放口COD超标</span></div><div class="alert-body">COD 186mg/L（限100）超标1.86倍 · 水质传感器W-23 · 济南某化工<br>💡 AI建议：立即现场检查，固定在线监测数据，采集水样送检CMA</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+<div class="alert-card red" data-cat="power"><div class="alert-top"><span>🔴</span><span class="alert-time">15分钟前</span><span class="alert-title">某钢铁脱硫设施疑似停运</span></div><div class="alert-body">用电骤降72% · 用电监控E-09 · 济南某钢铁集团<br>💡 AI建议：调取用电明细，核实治污设施状态，排查擅自停运</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+<div class="alert-card orange" data-cat="air"><div class="alert-top"><span>🟠</span><span class="alert-time">30分钟前</span><span class="alert-title">PM2.5浓度持续上升</span></div><div class="alert-body">PM2.5 78μg/m³逐时上升 · 大气传感器A-15 · 工业园区周边<br>💡 AI建议：关注周边企业排放，检查VOCs治理设施</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+<div class="alert-card orange" data-cat="water"><div class="alert-top"><span>🟠</span><span class="alert-time">45分钟前</span><span class="alert-title">摄像头AI识别疑似暗管</span></div><div class="alert-body">夜间红外检测围墙外异常水流 · 摄像头C-10 · 某化工企业<br>💡 AI建议：安排无人机低空航拍确认，排查隐蔽排放口</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+<div class="alert-card yellow" data-cat="solid"><div class="alert-top"><span>🟡</span><span class="alert-time">1小时前</span><span class="alert-title">群众举报疑似危废倾倒</span></div><div class="alert-body">照片显示土坑内黑色黏稠物 · 微信小程序 · 待核实<br>💡 AI建议：现场核实，快检初筛，采样送危废鉴定</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+<div class="alert-card yellow" data-cat="noise"><div class="alert-top"><span>🟡</span><span class="alert-time">2小时前</span><span class="alert-title">夜间噪声超标</span></div><div class="alert-body">68dB(夜间限55) · 噪声传感器N-07 · 某工地夜间施工<br>💡 AI建议：核实施工审批，排查违规夜间施工</div><div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button><button class="alert-btn">详情</button></div></div>
+</div>
+
+<div class="card">
+<div class="card-t">🔧 设备管理</div>
+<div class="mgmt-tabs">
+<div class="mgmt-tab active" onclick="showMgmt('overview',this)">设备总览</div>
+<div class="mgmt-tab" onclick="showMgmt('register',this)">设备注册</div>
+<div class="mgmt-tab" onclick="showMgmt('maint',this)">维护记录</div>
+<div class="mgmt-tab" onclick="showMgmt('threshold',this)">告警配置</div>
+</div>
+
+<div class="mgmt-section show" id="mg-overview">
+<input class="form-input" placeholder="搜索设备ID/位置/负责人..." style="margin-bottom:10px" oninput="filterDev(this.value)">
+<table><thead><tr><th>ID</th><th>类型</th><th>位置</th><th>状态</th><th>上报</th><th>负责人</th></tr></thead><tbody id="devTable">
+<tr><td>C-01</td><td>摄像头</td><td>化工园区正门</td><td><span class="dev-status on">在线</span></td><td>2分钟前</td><td>张明</td></tr>
+<tr><td>C-02</td><td>摄像头</td><td>排污管出口</td><td><span class="dev-status warn">预警</span></td><td>1分钟前</td><td>张明</td></tr>
+<tr><td>D-01</td><td>无人机</td><td>基地</td><td><span class="dev-status busy">待命</span></td><td>09:30</td><td>王飞</td></tr>
+<tr><td>B-01</td><td>无人船</td><td>小清河中段</td><td><span class="dev-status busy">采样中</span></td><td>实时</td><td>李涛</td></tr>
+<tr><td>W-23</td><td>水质传感器</td><td>化工排放口</td><td><span class="dev-status warn">预警</span></td><td>1分钟前</td><td>赵丽</td></tr>
+<tr><td>A-15</td><td>大气传感器</td><td>园区北门</td><td><span class="dev-status on">在线</span></td><td>5分钟前</td><td>赵丽</td></tr>
+<tr><td>N-07</td><td>噪声传感器</td><td>某工地</td><td><span class="dev-status on">在线</span></td><td>10分钟前</td><td>孙伟</td></tr>
+<tr><td>E-09</td><td>用电监控</td><td>某钢铁集团</td><td><span class="dev-status warn">预警</span></td><td>实时</td><td>孙伟</td></tr>
+</tbody></table>
+</div>
+
+<div class="mgmt-section" id="mg-register">
+<div class="form-row">
+<div><label class="form-label">设备类型</label><select class="form-input"><option>摄像头</option><option>无人机</option><option>无人船</option><option>水质传感器</option><option>大气传感器</option><option>噪声传感器</option><option>土壤传感器</option><option>用电监控</option></select></div>
+<div><label class="form-label">设备编号</label><input class="form-input" placeholder="如 W-24"></div>
+</div>
+<div class="form-row">
+<div><label class="form-label">安装位置</label><input class="form-input" placeholder="如 化工园区3号排放口"></div>
+<div><label class="form-label">经纬度</label><input class="form-input" placeholder="如 36.65,116.98"></div>
+</div>
+<div class="form-row">
+<div><label class="form-label">负责人</label><input class="form-input" placeholder="姓名"></div>
+<div><label class="form-label">联系电话</label><input class="form-input" placeholder="手机号"></div>
+</div>
+<div class="form-row">
+<div><label class="form-label">监控参数</label><input class="form-input" placeholder="如 COD,氨氮,总磷"></div>
+<div><label class="form-label">告警阈值</label><input class="form-input" placeholder="如 COD>100"></div>
+</div>
+<button class="alert-btn primary" style="width:100%;padding:10px;font-size:14px;margin-top:8px" onclick="alert('设备注册成功！')">✅ 提交注册</button>
+</div>
+
+<div class="mgmt-section" id="mg-maint">
+<div class="device-row"><div class="dev-icon">🔧</div><div class="dev-info"><div class="dev-name">W-20 水质传感器 · 定期校准</div><div class="dev-meta">2026-05-25 · 赵丽 · CMA资质校准完成</div></div></div>
+<div class="device-row"><div class="dev-icon">🔋</div><div class="dev-info"><div class="dev-name">D-01 无人机 · 电池更换</div><div class="dev-meta">2026-05-22 · 王飞 · 更换TB60电池组</div></div></div>
+<div class="device-row"><div class="dev-icon">🔧</div><div class="dev-info"><div class="dev-name">C-05 摄像头 · 镜头清洁</div><div class="dev-meta">2026-05-20 · 张明 · 户外积尘清理</div></div></div>
+<div class="device-row"><div class="dev-icon">🚤</div><div class="dev-info"><div class="dev-name">B-01 无人船 · 推进器维护</div><div class="dev-meta">2026-05-18 · 李涛 · 螺旋桨更换</div></div></div>
+</div>
+
+<div class="mgmt-section" id="mg-threshold">
+<table><thead><tr><th>设备类型</th><th>参数</th><th>黄色预警</th><th>橙色预警</th><th>红色预警</th></tr></thead><tbody>
+<tr><td>水质传感器</td><td>COD(mg/L)</td><td>>80</td><td>>100</td><td>>150</td></tr>
+<tr><td>水质传感器</td><td>氨氮(mg/L)</td><td>>8</td><td>>12</td><td>>20</td></tr>
+<tr><td>大气传感器</td><td>PM2.5(μg/m³)</td><td>>75</td><td>>115</td><td>>150</td></tr>
+<tr><td>噪声传感器</td><td>噪声(dB)</td><td>>65(昼)</td><td>>70(昼)</td><td>>75(昼)</td></tr>
+<tr><td>用电监控</td><td>用电变化率</td><td>下降>40%</td><td>下降>60%</td><td>下降>80%</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<div class="card" style="background:var(--nav);color:#fff">
+<div class="card-t" style="color:#fff">🌐 天地一体化感知网络</div>
+<div style="text-align:center;padding:10px 0;font-size:13px">
+<span class="net-node">🛰 卫星遥感</span> →
+<span class="net-node">🚁 无人机</span> →
+<span class="net-node">📷 摄像头</span> →
+<span class="net-node">📊 传感器</span> →
+<span class="net-node">🚤 无人船</span> →
+<span class="net-node">📞 群众举报</span><br>
+<span style="font-size:20px">⬇</span><br>
+<span class="net-center">🧠 AI分析中心 → 执法决策 → 预警推送</span>
+</div>
+</div>
+</div>
+
+<script>
+function showSource(name,el){
+  document.querySelectorAll('#sourceTabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+  document.getElementById('sec-'+name).classList.add('show');
+}
+function filterAlerts(cat,el){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.alert-card').forEach(c=>{
+    c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';
+  });
+}
+function showMgmt(name,el){
+  document.querySelectorAll('.mgmt-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.mgmt-section').forEach(s=>s.classList.remove('show'));
+  document.getElementById('mg-'+name).classList.add('show');
+}
+function switchRole(el){
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function pushEnforce(btn){btn.textContent='✅ 已推送';btn.disabled=true;btn.style.opacity='.6'}
+function markDone(btn){btn.textContent='✅ 已标记';btn.disabled=true;btn.style.opacity='.6'}
+function filterDev(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#devTable tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+// 动态加载预警数据
+function loadAlerts(){
+  fetch('/api/fusion_alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+    .then(r=>r.json())
+    .then(data=>{
+      var alerts=data.alerts||[];
+      if(alerts.length===0)return;
+      var html='';
+      alerts.slice(0,10).forEach(function(a){
+        var level=a.level||a.risk_level||'中';
+        var cls=level.indexOf('高')>=0?'red':level.indexOf('中')>=0?'amber':'green';
+        var cat=a.type||a.category||'other';
+        var catMap={'水污染类':'water','大气污染类':'air','固体废物污染类':'solid','噪声污染类':'noise','危险废物类':'solid','自动监控类':'monitor','排污许可类':'other','环评类':'other','移动源监管类':'other','土壤污染类':'soil','其他':'other'};
+        var catEn=catMap[cat]||'other';
+        html+='<div class="alert-card '+cls+'" data-cat="'+catEn+'">'+
+          '<div class="alert-top"><span>'+(level.indexOf('高')>=0?'🔴':level.indexOf('中')>=0?'🟡':'🟢')+'</span>'+
+          '<span class="alert-time">'+(a.time||'')+'</span>'+
+          '<span class="alert-title">'+(a.desc||a.title||a.enterprise||'')+'</span></div>'+
+          '<div class="alert-body">'+(a.desc||a.description||a.detail||'')+' | 来源: '+(a.sources?a.sources.join(','):'')+'</div>'+
+          '<div class="alert-actions"><button class="alert-btn primary" onclick="pushEnforce(this)">推送执法</button><button class="alert-btn" onclick="markDone(this)">标记处理</button></div>'+
+        '</div>';
+      });
+      if(html){
+        var alertContainer=document.querySelector('#sec-alert .alert-list');
+        if(alertContainer)alertContainer.innerHTML=html;
+      }
+    })
+    .catch(function(){});
+}
+// 页面加载后获取预警
+document.addEventListener('DOMContentLoaded',function(){setTimeout(loadAlerts,500);});
+</script>
+</body>
+</html>

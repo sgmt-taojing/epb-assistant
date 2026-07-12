@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎓 培训学院</title>
+<style>
+:root {
+  --green: #1B4332; --green-mid: #2D6A4F; --green-light: #52B788;
+  --green-pale: #D8E8DC; --green-bg: #F2F8F4;
+  --red: #C0392B; --amber: #E67E22; --blue: #2980B9; --purple: #8E44AD;
+  --bg: #F8FAF8; --card: #FFFFFF; --border: #D0E0D4;
+  --text: #1A1A1A; --text-muted: #666; --shadow: 0 2px 12px rgba(27,67,50,0.08);
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); }
+.top-bar { background: linear-gradient(135deg, #1B4332, #2D6A4F); color: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.top-bar h1 { font-size: 18px; font-weight: 600; }
+.top-bar .back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; margin-left: auto; }
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; border: 1px solid var(--border); }
+.card-title { font-size: 15px; font-weight: 700; color: var(--green-mid); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+/* 场景实训卡片 */
+.scenario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.scenario-card {
+  border: 2px solid var(--border); border-radius: 10px; padding: 14px;
+  cursor: pointer; transition: all 0.2s; background: white;
+}
+.scenario-card:hover { border-color: var(--green-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(27,67,50,0.12); }
+.scenario-icon { font-size: 32px; margin-bottom: 6px; }
+.scenario-name { font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+.scenario-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+.scenario-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-top: 6px; }
+.scenario-tag.water { background: #EBF5FB; color: var(--blue); }
+.scenario-tag.air { background: #F4ECF7; color: var(--purple); }
+.scenario-tag.solid { background: #FEF5E7; color: var(--amber); }
+.scenario-tag.monitor { background: #FDEDEC; color: var(--red); }
+
+/* 场景模拟面板 */
+.sim-panel { display: none; }
+.sim-panel.show { display: block; }
+.sim-chat { background: var(--green-bg); border-radius: 10px; padding: 14px; max-height: 400px; overflow-y: auto; margin-bottom: 10px; }
+.sim-msg { margin-bottom: 10px; }
+.sim-msg .role { font-size: 11px; font-weight: 700; margin-bottom: 2px; }
+.sim-msg .role.ai { color: var(--green); }
+.sim-msg .role.user { color: var(--blue); }
+.sim-msg .text { font-size: 13px; line-height: 1.6; padding: 8px 12px; border-radius: 8px; background: white; }
+.sim-input-row { display: flex; gap: 8px; }
+.sim-input { flex: 1; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
+.sim-input:focus { border-color: var(--green-light); }
+.sim-send { padding: 10px 16px; background: var(--green); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; }
+
+/* 每日一题 */
+.quiz-card { background: linear-gradient(135deg, var(--green-bg), white); padding: 16px; border-radius: 10px; border: 1px solid var(--border); }
+.quiz-q { font-size: 14px; font-weight: 600; margin-bottom: 10px; line-height: 1.6; }
+.quiz-opts { list-style: none; }
+.quiz-opt { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.quiz-opt:hover { border-color: var(--green-light); background: var(--green-bg); }
+.quiz-opt.correct { border-color: var(--green); background: #D5F5E3; color: var(--green); }
+.quiz-opt.wrong { border-color: var(--red); background: #FDEDEC; color: var(--red); }
+.quiz-explain { margin-top: 10px; padding: 10px; background: var(--green-pale); border-radius: 8px; font-size: 12px; line-height: 1.6; display: none; }
+.quiz-explain.show { display: block; }
+
+/* 学习路径 */
+.path-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--green-bg); }
+.path-num { width: 28px; height: 28px; border-radius: 50%; background: var(--green-pale); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.path-num.done { background: var(--green); color: white; }
+.path-info { flex: 1; }
+.path-title { font-size: 13px; font-weight: 600; }
+.path-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.path-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.path-status.done { background: #D5F5E3; color: var(--green); }
+.path-status.current { background: #FEF5E7; color: var(--amber); }
+.path-status.locked { background: #EEE; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span style="font-size:22px">🎓</span>
+  <h1>培训学院</h1>
+  <a href="/" class="back">← 返回平台</a>
+</div>
+
+<div class="container">
+  <!-- 场景实训 -->
+  <div class="card">
+    <div class="card-title">🎭 场景化实训</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">AI模拟真实执法场景，交互式决策训练</div>
+    <div class="scenario-grid">
+      <div class="scenario-card" onclick="startScenario('water_dark')">
+        <div class="scenario-icon">💧</div>
+        <div class="scenario-name">暗管排查实训</div>
+        <div class="scenario-desc">模拟化工厂暗管排查场景，训练排查技巧和取证要点</div>
+        <span class="scenario-tag water">水污染</span>
+      </div>
+      <div class="scenario-card" onclick="startScenario('air_voc')">
+        <div class="scenario-icon">🏭</div>
+        <div class="scenario-name">VOCs执法实训</div>
+        <div class="scenario-desc">模拟VOCs超标企业检查，掌握检测和取证方法</div>
+        <span class="scenario-tag air">大气污染</span>
+      </div>
+      <div class="scenario-card" onclick="startScenario('solid_dump')">
+        <div class="scenario-icon">🗑</div>
+        <div class="scenario-name">危废倾倒实训</div>
+        <div class="scenario-desc">模拟非法倾倒危废案件查处，从发现到移送全流程</div>
+        <span class="scenario-tag solid">固废</span>
+      </div>
+      <div class="scenario-card" onclick="startScenario('monitor_fake')">
+        <div class="scenario-icon">📡</div>
+        <div class="scenario-name">数据造假识别</div>
+        <div class="scenario-desc">模拟在线监测数据造假案件，训练异常数据识别能力</div>
+        <span class="scenario-tag monitor">自动监控</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 培训课程库 -->
+  <div class="card">
+    <div class="card-title">📚 培训课程库</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">系统培训课程，涵盖执法全流程</div>
+    <div class="scenario-grid" id="training-modules">
+      <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--text-muted);font-size:13px">课程加载中...</div>
+    </div>
+  </div>
+
+  <!-- 场景模拟面板 -->
+  <div class="card sim-panel" id="simPanel">
+    <div class="card-title" id="simTitle">🎭 场景模拟</div>
+    <div class="sim-chat" id="simChat"></div>
+    <div class="sim-input-row">
+      <input class="sim-input" id="simInput" placeholder="输入你的执法决策..." onkeydown="if(event.key==='Enter')sendSimMsg()">
+      <button class="sim-send" onclick="sendSimMsg()">发送</button>
+    </div>
+  </div>
+
+  <!-- 每日一题 -->
+  <div class="card">
+    <div class="card-title">📝 每日一题</div>
+    <div class="quiz-card" id="quizCard">
+      <div class="quiz-q" id="quizQ">根据《水污染防治法》，私设暗管排放水污染物的，处以多少罚款？</div>
+      <ul class="quiz-opts" id="quizOpts">
+        <li class="quiz-opt" onclick="answerQuiz(this, false)">A. 2万元以上20万元以下</li>
+        <li class="quiz-opt" onclick="answerQuiz(this, true)">B. 10万元以上100万元以下</li>
+        <li class="quiz-opt" onclick="answerQuiz(this, false)">C. 20万元以上100万元以下</li>
+        <li class="quiz-opt" onclick="answerQuiz(this, false)">D. 50万元以上200万元以下</li>
+      </ul>
+      <div class="quiz-explain" id="quizExplain">正确答案：B。根据《水污染防治法》第83条，私设暗管等逃避监管方式排放水污染物的，处十万元以上一百万元以下的罚款。情节严重的，报经有批准权的人民政府批准，责令停业、关闭。</div>
+    </div>
+  </div>
+
+  <!-- 学习路径 -->
+  <div class="card">
+    <div class="card-title">🗺 学习路径</div>
+    <div class="path-item">
+      <div class="path-num done">1</div>
+      <div class="path-info"><div class="path-title">环保法律法规基础</div><div class="path-desc">6部核心法律 + 配套法规</div></div>
+      <span class="path-status done">已完成</span>
+    </div>
+    <div class="path-item">
+      <div class="path-num done">2</div>
+      <div class="path-info"><div class="path-title">执法程序与文书</div><div class="path-desc">执法流程 + 文书制作规范</div></div>
+      <span class="path-status done">已完成</span>
+    </div>
+    <div class="path-item">
+      <div class="path-num" style="background:var(--amber);color:white">3</div>
+      <div class="path-info"><div class="path-title">现场检查实务</div><div class="path-desc">各行业检查要点 + 取证技巧</div></div>
+      <span class="path-status current">进行中 60%</span>
+    </div>
+    <div class="path-item">
+      <div class="path-num">4</div>
+      <div class="path-info"><div class="path-title">非现场执法技术</div><div class="path-desc">在线监测分析 + 视频AI应用</div></div>
+      <span class="path-status locked">未解锁</span>
+    </div>
+    <div class="path-item">
+      <div class="path-num">5</div>
+      <div class="path-info"><div class="path-title">涉刑案件办理</div><div class="path-desc">刑事移送 + 行刑衔接</div></div>
+      <span class="path-status locked">未解锁</span>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ===== 配置加载 =====
+fetch('/api/config').then(r=>r.json()).then(cfg=>{
+  var modules=document.getElementById('training-modules');
+  if(!modules) return;
+  var scenarios=cfg.training_scenarios||[];
+  if(scenarios.length>0){
+    // Scenario section already has hardcoded fallback, just update course modules
+  }
+}).catch(function(){});
+
+// 场景模拟
+const scenarios = {
+  water_dark: {
+    title: '💧 暗管排查实训',
+    opening: '📍 场景：你接到群众举报，某化工厂疑似通过暗管向河道排放生产废水。\n\n你作为带队执法人员，已到达厂区门口。请描述你的执法行动：',
+    responses: {
+      '进入': '好的，你进入厂区。门卫要求你出示执法证件。\n\n✅ 正确做法：出示执法证，告知检查事由，要求配合。\n\n你进入后首先来到哪里？',
+      '排放口': '你来到厂区排放口，发现：\n1. 排放口水质浑浊，有刺鼻气味\n2. 在线监测设备显示COD数据为"恒值35mg/L"\n3. 排放口周边地面有水渍痕迹\n\n你会如何处理？',
+      '取样': '✅ 取样是关键步骤！\n\n你采集了排放口水样，同时注意到在线监测数据异常（恒值可能涉嫌造假）。\n\n接下来你需要：\n1. 检查污水处理设施运行状态\n2. 沿管线排查是否有暗管\n3. 调取企业生产台账\n\n你选择先做哪一项？',
+      '排查': '你沿着厂区围墙和管线排查，在污水处理站后方发现一根隐蔽的灰色管道，通向厂区围墙外的河道方向！\n\n⚠️ 发现暗管！你需要立即：\n1. 拍照/录像固定证据\n2. 追溯管道走向和来源\n3. 采集暗管排放口水样\n\n请描述你的操作：',
+      '拍照': '✅ 你拍摄了暗管位置、走向和排放情况的照片和视频。\n\n关键取证要点：\n- 拍摄暗管全景和特写\n- 拍摄排放口与河道的连接\n- 确保照片有时间水印\n- 2名执法人员入镜确认\n\n本场景实训要点总结：\n1. 进厂出示执法证\n2. 首先检查排放口状态\n3. 注意在线监测数据异常\n4. 沿管线排查暗管\n5. 固定证据要规范\n\n🎓 场景实训完成！'
+    }
+  },
+  air_voc: {
+    title: '🏭 VOCs执法实训',
+    opening: '📍 场景：你正在对某家具制造企业进行VOCs排放检查。该企业环评批复要求配套建设VOCs治理设施。\n\n请描述你的检查思路：',
+    responses: {}
+  },
+  solid_dump: {
+    title: '🗑 危废倾倒实训',
+    opening: '📍 场景：你接到举报，某偏僻山沟内发现大量不明废弃物，疑似危险废物非法倾倒。\n\n你到达现场后发现：黑色塑料桶堆放约30个，部分已破损，流出的液体有刺鼻气味，周围土壤变色。\n\n请描述你的处置方案：',
+    responses: {}
+  },
+  monitor_fake: {
+    title: '📡 数据造假识别',
+    opening: '📍 场景：你正在审查某企业在线监测数据，发现以下异常：\n\n1. COD数据连续30天恒定在28mg/L\n2. 氨氮数据每天0:00-4:00突然降至0.1\n3. 流量数据与用电量趋势不匹配\n\n请分析可能存在的造假方式：',
+    responses: {}
+  }
+};
+
+let currentScenario = null;
+let simHistory = [];
+
+function startScenario(id) {
+  currentScenario = scenarios[id];
+  if (!currentScenario) return;
+  
+  const panel = document.getElementById('simPanel');
+  document.getElementById('simTitle').textContent = currentScenario.title;
+  document.getElementById('simChat').innerHTML = '';
+  simHistory = [];
+  
+  addSimMsg('ai', currentScenario.opening);
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function addSimMsg(role, text) {
+  const chat = document.getElementById('simChat');
+  const msg = document.createElement('div');
+  msg.className = 'sim-msg';
+  msg.innerHTML = `<div class="role ${role}">${role === 'ai' ? '🤖 AI教练' : '👤 你'}</div><div class="text">${text.replace(/\n/g, '<br>')}</div>`;
+  chat.appendChild(msg);
+  chat.scrollTop = chat.scrollHeight;
+  simHistory.push({ role, text });
+}
+
+function sendSimMsg() {
+  const input = document.getElementById('simInput');
+  const text = input.value.trim();
+  if (!text || !currentScenario) return;
+  
+  addSimMsg('user', text);
+  input.value = '';
+  
+  // 简单关键词匹配回复
+  setTimeout(() => {
+    let response = '🤔 请继续描述你的执法行动。你可以尝试：\n- 进入厂区\n- 检查排放口\n- 取样检测\n- 排查暗管\n- 拍照取证';
+    
+    if (currentScenario.responses) {
+      for (const [key, resp] of Object.entries(currentScenario.responses)) {
+        if (text.includes(key)) {
+          response = resp;
+          break;
+        }
+      }
+    }
+    
+    addSimMsg('ai', response);
+  }, 500);
+}
+
+// 答题
+let quizAnswered = false;
+function answerQuiz(el, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  
+  document.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.style.pointerEvents = 'none';
+  });
+  
+  if (correct) {
+    el.classList.add('correct');
+  } else {
+    el.classList.add('wrong');
+    // 标记正确答案
+    document.querySelectorAll('.quiz-opt')[1].classList.add('correct');
+  }
+  
+  document.getElementById('quizExplain').classList.add('show');
+}
+
+// 从API加载培训课程列表
+function loadTrainingModules() {
+  fetch('/api/training', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({topic: 'all', level: 'all'})
+  }).then(r => r.json()).then(data => {
+    var content = data.content || {};
+    var modules = content.modules || [];
+    if (modules.length === 0) return;
+    var container = document.getElementById('training-modules');
+    if (!container) return;
+    var html = modules.map(function(m) {
+      return '<div class="scenario-card" onclick="startTrainModule(\'' + m.id + '\')">' +
+        '<div style="font-size:28px;margin-bottom:8px">' + (m.icon || '📚') + '</div>' +
+        '<div style="font-weight:600;font-size:14px;margin-bottom:4px">' + m.name + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:6px">' + m.desc + '</div>' +
+        '<div style="font-size:10px;color:var(--green)">⏱ ' + (m.duration || '') + ' | ' + (m.level || '') + '</div>' +
+        '</div>';
+    }).join('');
+    container.innerHTML = html;
+  }).catch(function(){});
+}
+function startTrainModule(id) {
+  // 培训模块跳转
+  showToast('培训模块：' + id + ' 即将上线');
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'show';
+  setTimeout(function(){t.className = '';}, 2000);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(loadTrainingModules, 300);
+});
+</script>
+</body>
+</html>

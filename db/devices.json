@@ -1,0 +1,200 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-29",
+  "description": "环保执法设备管理 — 设备台账、类型定义、厂商型号",
+  "device_types": {
+    "smart_glasses": {
+      "name": "智能眼镜",
+      "icon": "👓",
+      "protocol": "WiFi/WebSocket",
+      "category": "wearable"
+    },
+    "body_camera": {
+      "name": "执法记录仪",
+      "icon": "📹",
+      "protocol": "WiFi/4G/RTMP",
+      "category": "recorder"
+    },
+    "gas_detector": {
+      "name": "便携气体检测仪",
+      "icon": "🌡️",
+      "protocol": "蓝牙5.0",
+      "category": "sensor"
+    },
+    "water_sampler": {
+      "name": "便携水质检测仪",
+      "icon": "💧",
+      "protocol": "蓝牙5.0",
+      "category": "sensor"
+    },
+    "noise_meter": {
+      "name": "噪声检测仪",
+      "icon": "🔊",
+      "protocol": "蓝牙5.0",
+      "category": "sensor"
+    },
+    "dust_meter": {
+      "name": "粉尘检测仪",
+      "icon": "🌫️",
+      "protocol": "蓝牙5.0",
+      "category": "sensor"
+    },
+    "thermal_camera": {
+      "name": "红外热成像仪",
+      "icon": "🔭",
+      "protocol": "WiFi",
+      "category": "sensor"
+    },
+    "drone": {
+      "name": "无人机",
+      "icon": "🛸",
+      "protocol": "WiFi/4G/RTMP",
+      "category": "aerial"
+    },
+    "online_monitor": {
+      "name": "在线监测设备",
+      "icon": "📡",
+      "protocol": "MQTT/HTTP",
+      "category": "stationary"
+    },
+    "power_monitor": {
+      "name": "用电监控设备",
+      "icon": "⚡",
+      "protocol": "MQTT/HTTP",
+      "category": "stationary"
+    },
+    "video_surveillance": {
+      "name": "视频监控摄像头",
+      "icon": "📷",
+      "protocol": "RTSP/ONVIF",
+      "category": "stationary"
+    },
+    "audio_pickup": {
+      "name": "拾音设备",
+      "icon": "🎤",
+      "protocol": "蓝牙/WiFi",
+      "category": "audio"
+    }
+  },
+  "vendor_models": {
+    "smart_glasses": [
+      {
+        "vendor": "RealWear",
+        "model": "HMT-1",
+        "features": "第一视角拍摄/语音交互/AR提示/防爆",
+        "ref_price": 15000
+      },
+      {
+        "vendor": "Rokid",
+        "model": "X-Craft",
+        "features": "防爆设计/AR叠加/AI识别/5G",
+        "ref_price": 12000
+      },
+      {
+        "vendor": "EPSON",
+        "model": "Moverio BT-40",
+        "features": "双目AR/高透光率/1080p",
+        "ref_price": 8000
+      }
+    ],
+    "body_camera": [
+      {
+        "vendor": "海康威视",
+        "model": "DSJ-HIKN1A1 4G版",
+        "features": "1080P/红外夜视/GPS/4G回传",
+        "ref_price": 3000
+      },
+      {
+        "vendor": "大华",
+        "model": "DH-DVR0404 4G版",
+        "features": "4K/H.265/GPS/实时回传",
+        "ref_price": 3500
+      }
+    ],
+    "gas_detector": [
+      {
+        "vendor": "青岛崂应",
+        "model": "3022型",
+        "features": "VOCs/SO2/NOx/CO/O3/蓝牙输出",
+        "ref_price": 8000
+      }
+    ],
+    "water_sampler": [
+      {
+        "vendor": "哈希HACH",
+        "model": "HQ40d",
+        "features": "pH/COD/氨氮/溶解氧/蓝牙输出",
+        "ref_price": 12000
+      }
+    ],
+    "audio_pickup": [
+      {
+        "vendor": "科大讯飞",
+        "model": "听见M1S",
+        "features": "远场拾音/实时转写/蓝牙连接/降噪",
+        "ref_price": 2000
+      }
+    ]
+  },
+  "devices": [
+    {
+      "id": "DEV-20260629-001",
+      "name": "执法眼镜-HMT1-01号",
+      "type": "smart_glasses",
+      "vendor": "RealWear",
+      "model": "HMT-1",
+      "serial_no": "RW2026001",
+      "assigned_to": "",
+      "assigned_dept": "",
+      "status": "online",
+      "health": {
+        "battery": 78,
+        "storage_free": 35840,
+        "temperature": 0,
+        "last_report": "2026-06-29T13:02:55.155040"
+      },
+      "config": {
+        "resolution": "1080p",
+        "fps": 30,
+        "video_codec": "H.264",
+        "auto_upload": true,
+        "gps_enabled": true,
+        "night_mode": "auto"
+      },
+      "registered_at": "2026-06-29",
+      "last_active": "2026-06-29T13:02:55.155033"
+    },
+    {
+      "name": "执法记录仪-大华-01号",
+      "type": "body_camera",
+      "vendor": "大华",
+      "model": "DH-DVR0404",
+      "serial_no": "DH20260001",
+      "assigned_to": "执法大队/李四",
+      "status": "offline",
+      "health": {
+        "battery": 100,
+        "storage_free": 65536,
+        "temperature": 25
+      },
+      "id": "DEV-20260629-002",
+      "registered_at": "2026-06-29"
+    },
+    {
+      "name": "便携气体检测仪-崂应-01",
+      "type": "gas_detector",
+      "vendor": "青岛崂应",
+      "model": "3022型",
+      "serial_no": "LY2026001",
+      "assigned_to": "河东区执法大队",
+      "status": "offline",
+      "health": {
+        "battery": 100,
+        "storage_free": 0,
+        "temperature": 25
+      },
+      "id": "DEV-20260629-003",
+      "registered_at": "2026-06-29"
+    }
+  ]
+}

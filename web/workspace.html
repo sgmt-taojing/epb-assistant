@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 执法工作台</title>
+<style>
+:root {
+  --green: #1B4332; --green-mid: #2D6A4F; --green-light: #52B788;
+  --green-pale: #D8E8DC; --green-bg: #F2F8F4;
+  --red: #C0392B; --amber: #E67E22; --blue: #2980B9; --purple: #8E44AD;
+  --bg: #F8FAF8; --card: #FFFFFF; --border: #D0E0D4;
+  --text: #1A1A1A; --text-muted: #666; --shadow: 0 2px 12px rgba(27,67,50,0.08);
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); }
+.top-bar { background: linear-gradient(135deg, #1B4332, #2D6A4F); color: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.top-bar h1 { font-size: 18px; font-weight: 600; }
+.top-bar .back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; margin-left: auto; }
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; border: 1px solid var(--border); }
+.card-title { font-size: 15px; font-weight: 700; color: var(--green-mid); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+/* Tab切换 */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+.tab { padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--text-muted); transition: all 0.2s; }
+.tab.active { color: var(--green); border-bottom-color: var(--green); }
+.tab:hover:not(.active) { color: var(--green-mid); }
+
+/* 日历 */
+.calendar { width: 100%; }
+.cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: var(--text-muted); padding: 4px 0; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-size: 13px; cursor: pointer; position: relative; }
+.cal-day:hover { background: var(--green-bg); }
+.cal-day.today { background: var(--green); color: white; font-weight: 700; }
+.cal-day.has-event::after { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--amber); position: absolute; bottom: 4px; }
+.cal-day.other-month { color: #ccc; }
+
+/* 任务列表 */
+.task-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; transition: all 0.2s; }
+.task-item:hover { border-color: var(--green-light); }
+.task-check { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; }
+.task-check.done { background: var(--green); border-color: var(--green); color: white; font-size: 12px; }
+.task-content { flex: 1; }
+.task-title { font-size: 14px; font-weight: 600; }
+.task-title.done { text-decoration: line-through; color: var(--text-muted); }
+.task-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.task-priority { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.task-priority.high { background: #FDEDEC; color: var(--red); }
+.task-priority.mid { background: #FEF5E7; color: var(--amber); }
+.task-priority.low { background: #D5F5E3; color: var(--green); }
+
+/* 添加任务 */
+.add-task { display: flex; gap: 8px; margin-bottom: 12px; }
+.add-task input { flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; }
+.add-task input:focus { border-color: var(--green-light); }
+.add-btn { padding: 8px 16px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; }
+
+/* 日志 */
+.log-entry { padding: 12px; border-left: 3px solid var(--green-light); margin-bottom: 10px; background: var(--green-bg); border-radius: 0 8px 8px 0; }
+.log-time { font-size: 11px; color: var(--text-muted); }
+.log-text { font-size: 13px; margin-top: 4px; line-height: 1.5; }
+
+/* 报告生成 */
+.report-btn {
+  display: flex; align-items: center; gap: 10px; padding: 14px;
+  border: 2px solid var(--border); border-radius: 10px; cursor: pointer;
+  transition: all 0.2s; margin-bottom: 8px; background: white;
+}
+.report-btn:hover { border-color: var(--green-light); background: var(--green-bg); }
+.report-btn .icon { font-size: 24px; }
+.report-btn .name { font-size: 14px; font-weight: 600; }
+.report-btn .desc { font-size: 12px; color: var(--text-muted); }
+
+/* 统计卡片 */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--green-bg); padding: 12px; border-radius: 8px; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--green); }
+.stat-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* 搜索按钮 */
+.search-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 4px; transition: all 0.2s; }
+.search-btn:hover { background: rgba(255,255,255,0.25); }
+
+/* 全局搜索模态框 */
+.search-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; padding-top: 100px; }
+.search-modal.active { display: flex; }
+.search-box { background: white; width: 90%; max-width: 600px; border-radius: 12px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.search-box input { width: 100%; padding: 12px 16px; font-size: 16px; border: 2px solid var(--green-light); border-radius: 8px; outline: none; }
+.search-results { margin-top: 12px; max-height: 300px; overflow-y: auto; }
+.search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+.search-result-item:hover { background: var(--green-bg); }
+.search-hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+/* 快捷操作栏 */
+.quick-actions { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; }
+.quick-action-btn { flex-shrink: 0; padding: 8px 14px; background: var(--card); border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px; color: var(--green-mid); }
+.quick-action-btn:hover { border-color: var(--green-light); background: var(--green-bg); }
+
+/* 今日统计卡片 */
+.today-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.today-stat { background: var(--card); padding: 14px; border-radius: var(--radius); text-align: center; border: 1px solid var(--border); transition: all 0.2s; }
+.today-stat:hover { border-color: var(--green-light); transform: translateY(-2px); box-shadow: var(--shadow); }
+.today-stat .num { font-size: 28px; font-weight: 700; }
+.today-stat .label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.today-stat.pending .num { color: var(--amber); }
+.today-stat.in-progress .num { color: var(--blue); }
+.today-stat.completed .num { color: var(--green); }
+.today-stat.alert .num { color: var(--red); }
+
+/* 浮动快捷面板 */
+.floating-panel { position: fixed; bottom: 30px; right: 30px; z-index: 999; }
+.fab-btn { width: 56px; height: 56px; border-radius: 50%; background: var(--green); color: white; border: none; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(27,67,50,0.3); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+.fab-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(27,67,50,0.4); }
+.fab-menu { position: absolute; bottom: 70px; right: 0; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); padding: 8px; min-width: 160px; display: none; }
+.fab-menu.active { display: block; }
+.fab-menu-item { padding: 10px 14px; cursor: pointer; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+.fab-menu-item:hover { background: var(--green-bg); }
+
+/* 返回顶部按钮 */
+.back-to-top { position: fixed; bottom: 100px; right: 30px; width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid var(--green-light); color: var(--green); font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; align-items: center; justify-content: center; z-index: 998; transition: all 0.3s; }
+.back-to-top.active { display: flex; }
+.back-to-top:hover { background: var(--green); color: white; }
+</style>
+<script src="/auth-guard.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+  <span style="font-size:22px">📋</span>
+  <h1>执法工作台</h1>
+  <button class="search-btn" onclick="openSearch()" title="搜索 (Ctrl+K)">
+    🔍 搜索
+  </button>
+  <a href="/" class="back">← 返回首页</a>
+</div>
+
+<div class="container">
+  <!-- 统计概览 -->
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">今日待办</div></div>
+    <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">本周检查</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-label">待结案件</div></div>
+    <div class="stat-card"><div class="stat-num">2</div><div class="stat-label">即将到期</div></div>
+  </div>
+
+  <!-- 快捷操作栏 -->
+  <div class="quick-actions">
+    <button class="quick-action-btn" onclick="quickAction('立案')">⚡ 快速立案</button>
+    <button class="quick-action-btn" onclick="quickAction('企业查询')">🏢 企业查询</button>
+    <button class="quick-action-btn" onclick="quickAction('查法规')">📚 查法规</button>
+    <button class="quick-action-btn" onclick="quickAction('AI分析')">🤖 AI分析</button>
+    <button class="quick-action-btn" onclick="quickAction('生成视频')">🎬 生成视频</button>
+  </div>
+
+  <!-- 今日统计 -->
+  <div class="today-stats">
+    <div class="today-stat pending">
+      <div class="num" id="pendingCount">5</div>
+      <div class="label">待办</div>
+    </div>
+    <div class="today-stat in-progress">
+      <div class="num" id="inProgressCount">3</div>
+      <div class="label">进行中</div>
+    </div>
+    <div class="today-stat completed">
+      <div class="num" id="completedCount">12</div>
+      <div class="label">已完成</div>
+    </div>
+    <div class="today-stat alert">
+      <div class="num" id="alertCount">2</div>
+      <div class="label">预警</div>
+    </div>
+  </div>
+
+  <!-- Tab切换 -->
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this, 'calendar')">📅 日历</div>
+      <div class="tab" onclick="switchTab(this, 'tasks')">✅ 任务</div>
+      <div class="tab" onclick="switchTab(this, 'log')">📝 日志</div>
+      <div class="tab" onclick="switchTab(this, 'reports')">📊 报告</div>
+    </div>
+
+    <!-- 日历视图 -->
+    <div id="calendarView">
+      <div class="calendar" id="calendar"></div>
+    </div>
+
+    <!-- 任务视图 -->
+    <div id="tasksView" style="display:none">
+      <div class="add-task">
+        <input id="newTask" placeholder="添加新任务..." onkeydown="if(event.key==='Enter')addTask()">
+        <select id="taskPriority" style="padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px">
+          <option value="mid">中优先级</option>
+          <option value="high">高优先级</option>
+          <option value="low">低优先级</option>
+        </select>
+        <button class="add-btn" onclick="addTask()">添加</button>
+      </div>
+      <div id="taskList"></div>
+    </div>
+
+    <!-- 日志视图 -->
+    <div id="logView" style="display:none">
+      <div class="log-entry">
+        <div class="log-time">2026-05-26 09:30</div>
+        <div class="log-text">前往某化工园区检查，发现3号排放口在线监测数据异常，已采集水样送检。</div>
+      </div>
+      <div class="log-entry">
+        <div class="log-time">2026-05-25 14:20</div>
+        <div class="log-text">完成某印染企业环评验收现场检查，企业基本落实环评要求，部分环保设施需整改。</div>
+      </div>
+      <div class="log-entry">
+        <div class="log-time">2026-05-24 10:00</div>
+        <div class="log-text">参加局执法培训会议，学习新修订的行政处罚法实施要点。</div>
+      </div>
+      <div class="log-entry">
+        <div class="log-time">2026-05-23 15:45</div>
+        <div class="log-text">处理某居民投诉噪音扰民案件，现场检测厂界噪声65dB，超出标准限值。</div>
+      </div>
+    </div>
+
+    <!-- 报告视图 -->
+    <div id="reportsView" style="display:none">
+      <div class="report-btn" onclick="generateReport('daily')">
+        <span class="icon">📄</span>
+        <div><div class="name">生成日报</div><div class="desc">今日工作自动汇总</div></div>
+      </div>
+      <div class="report-btn" onclick="generateReport('weekly')">
+        <span class="icon">📊</span>
+        <div><div class="name">生成周报</div><div class="desc">本周执法工作汇总</div></div>
+      </div>
+      <div class="report-btn" onclick="generateReport('monthly')">
+        <span class="icon">📈</span>
+        <div><div class="name">生成月报</div><div class="desc">月度执法数据分析</div></div>
+      </div>
+      <div class="report-btn" onclick="generateReport('video')">
+        <span class="icon">🎬</span>
+        <div><div class="name">AI视频周报</div><div class="desc">自动生成汇报短视频</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 全局搜索模态框 -->
+<div class="search-modal" id="searchModal">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索任务、日程、企业、功能..." oninput="performSearch(this.value)" autofocus>
+    <div class="search-results" id="searchResults"></div>
+    <div class="search-hint">💡 支持搜索任务、日程、企业名称、功能模块 | 按 ESC 关闭</div>
+  </div>
+</div>
+
+<!-- 浮动快捷面板 -->
+<div class="floating-panel">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-menu-item" onclick="fabAction('newTask')">➕ 新建任务</div>
+    <div class="fab-menu-item" onclick="fabAction('todayTodo')">📋 今日待办</div>
+    <div class="fab-menu-item" onclick="fabAction('dashboard')">📊 数据看板</div>
+    <div class="fab-menu-item" onclick="fabAction('enterprise')">🏢 企业查询</div>
+    <div class="fab-menu-item" onclick="fabAction('lawEnforcement')">🚔 现场执法</div>
+    <div class="fab-menu-item" onclick="fabAction('home')">🏠 返回首页</div>
+  </div>
+  <button class="fab-btn" id="fabBtn" onclick="toggleFab()">+</button>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+
+<script>
+function switchTab(el, view) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['calendarView', 'tasksView', 'logView', 'reportsView'].forEach(v => document.getElementById(v).style.display = 'none');
+  document.getElementById(view + 'View').style.display = 'block';
+}
+
+// 日历渲染
+function renderCalendar() {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrev = new Date(year, month, 0).getDate();
+
+  const events = [3, 8, 12, 15, 20, 25]; // 有事件的日期
+  let html = `<div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:10px;color:var(--green)">${year}年${month + 1}月</div>`;
+  html += '<div class="cal-header"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>';
+  html += '<div class="cal-grid">';
+
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-day other-month">${daysInPrev - firstDay + i + 1}</div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === now.getDate();
+    const hasEvent = events.includes(d);
+    html += `<div class="cal-day${isToday ? ' today' : ''}${hasEvent ? ' has-event' : ''}">${d}</div>`;
+  }
+
+  document.getElementById('calendar').innerHTML = html;
+}
+
+// 任务管理 - 从API动态加载
+let tasks = [];
+
+function loadTasks() {
+  fetch('/api/tasks').then(r=>r.json()).then(res=>{
+    var data = (res && res.data) || res.tasks || [];
+    tasks = data.map(function(t, idx) {
+      return {
+        id: t.id || idx,
+        title: t.title || t.content || '未命名任务',
+        priority: t.priority === 'high' ? 'high' : (t.priority === 'low' ? 'low' : 'mid'),
+        done: t.status === 'completed',
+        meta: t.type ? t.type : (t.deadline || '')
+      };
+    });
+    if (tasks.length === 0) {
+      tasks = [
+        { id: 1, title: '暂无待办任务', priority: 'low', done: true, meta: '系统同步中' }
+      ];
+    }
+    renderTasks();
+    updateStats();
+  }).catch(function() {
+    tasks = [
+      { id: 1, title: '某化工厂暗管排查复查', priority: 'high', done: false, meta: '限期：2026-05-28' },
+      { id: 2, title: '某印染企业整改验收', priority: 'mid', done: false, meta: '限期：2026-05-30' },
+    ];
+    renderTasks();
+    updateStats();
+  });
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  list.innerHTML = tasks.map(t => `
+    <div class="task-item">
+      <div class="task-check${t.done ? ' done' : ''}" onclick="toggleTask(${t.id})">${t.done ? '✓' : ''}</div>
+      <div class="task-content">
+        <div class="task-title${t.done ? ' done' : ''}">${t.title}</div>
+        <div class="task-meta"><span class="task-priority ${t.priority}">${t.priority === 'high' ? '紧急' : (t.priority === 'mid' ? '一般' : '低')}</span> ${t.meta}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) t.done = !t.done;
+  renderTasks();
+}
+
+function addTask() {
+  const input = document.getElementById('newTask');
+  const priority = document.getElementById('taskPriority').value;
+  if (!input.value.trim()) return;
+  tasks.unshift({ id: Date.now(), title: input.value.trim(), priority, done: false, meta: '新任务' });
+  input.value = '';
+  renderTasks();
+}
+
+function generateReport(type) {
+  const names = { daily: '日报', weekly: '周报', monthly: '月报', video: 'AI视频周报' };
+  if (type === 'video') {
+    window.location.href = '/video-studio.html';
+    return;
+  }
+  alert(`📋 正在生成${names[type]}...\n\nAI将自动汇总工作数据，生成${names[type]}文档（Word/PDF）。\n\n此功能需连接后端API，当前为演示模式。`);
+}
+
+// ============ 新增功能 JavaScript ============
+
+// 全局搜索功能
+function openSearch() {
+  const modal = document.getElementById('searchModal');
+  modal.classList.add('active');
+  document.getElementById('searchInput').focus();
+}
+
+function closeSearch() {
+  const modal = document.getElementById('searchModal');
+  modal.classList.remove('active');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+}
+
+function performSearch(query) {
+  const resultsDiv = document.getElementById('searchResults');
+  if (!query.trim()) {
+    resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">输入关键词搜索任务、案例、法规...</div>';
+    return;
+  }
+  
+  // 调用真实搜索API
+  fetch('/api/search?q=' + encodeURIComponent(query))
+    .then(r => r.json())
+    .then(data => {
+      var results = data.results || [];
+      // 同时搜索本地任务
+      var localTasks = tasks.filter(function(t) {
+        return (t.title || '').indexOf(query) >= 0;
+      }).map(function(t) {
+        return {type: '任务', title: t.title, desc: t.meta || ''};
+      });
+      var allResults = localTasks.concat(results.map(function(r) {
+        return {type: r.type || '案例', title: r.title || '', desc: (r.desc || '').slice(0, 60)};
+      }));
+      if (allResults.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">未找到相关结果</div>';
+      } else {
+        resultsDiv.innerHTML = allResults.map(function(r) {
+          return '<div class="search-result-item">' +
+            '<div style="font-size:12px;color:var(--green-mid);font-weight:600;">' + r.type + '</div>' +
+            '<div style="font-size:14px;margin:2px 0;">' + r.title + '</div>' +
+            '<div style="font-size:11px;color:var(--text-muted);">' + r.desc + '</div>' +
+          '</div>';
+        }).join('');
+      }
+    })
+    .catch(function() {
+      resultsDiv.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">搜索失败，请重试</div>';
+    });
+}
+
+// Ctrl+K 快捷键
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+  if (e.key === 'Escape') {
+    closeSearch();
+  }
+});
+
+// 点击模态框背景关闭
+document.getElementById('searchModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSearch();
+});
+
+// 快捷操作栏
+function quickAction(action) {
+  const actions = {
+    '立案': () => alert('⚡ 快速立案\n\n即将跳转到立案表单...'),
+    '企业查询': () => window.location.href = '/enterprise.html',
+    '查法规': () => alert('📚 法规查询\n\n即将打开法规数据库...'),
+    'AI分析': () => alert('🤖 AI智能分析\n\n正在启动AI分析引擎...'),
+    '生成视频': () => window.location.href = '/video-studio.html'
+  };
+  if (actions[action]) actions[action]();
+}
+
+// 浮动快捷面板
+function toggleFab() {
+  const menu = document.getElementById('fabMenu');
+  const btn = document.getElementById('fabBtn');
+  menu.classList.toggle('active');
+  btn.textContent = menu.classList.contains('active') ? '×' : '+';
+}
+
+function fabAction(action) {
+  toggleFab();
+  const actions = {
+    'newTask': () => {
+      switchTab(document.querySelectorAll('.tab')[1], 'tasks');
+      document.getElementById('newTask').focus();
+    },
+    'todayTodo': () => switchTab(document.querySelectorAll('.tab')[1], 'tasks'),
+    'dashboard': () => alert('📊 数据看板\n\n即将显示可视化数据看板...'),
+    'enterprise': () => window.location.href = '/enterprise.html',
+    'lawEnforcement': () => alert('🚔 现场执法\n\n即将打开执法记录模块...'),
+    'home': () => window.location.href = '/'
+  };
+  if (actions[action]) actions[action]();
+}
+
+// 点击其他地方关闭FAB菜单
+document.addEventListener('click', (e) => {
+  const panel = document.querySelector('.floating-panel');
+  if (!panel.contains(e.target)) {
+    const menu = document.getElementById('fabMenu');
+    const btn = document.getElementById('fabBtn');
+    menu.classList.remove('active');
+    btn.textContent = '+';
+  }
+});
+
+// 返回顶部功能
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (window.scrollY > 100) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+});
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// 更新统计数字（模拟动态数据）
+function updateStats() {
+  const pending = tasks.filter(t => !t.done).length;
+  document.getElementById('pendingCount').textContent = pending;
+  document.getElementById('inProgressCount').textContent = Math.floor(pending * 0.6);
+  document.getElementById('completedCount').textContent = tasks.filter(t => t.done).length;
+  document.getElementById('alertCount').textContent = 2;
+}
+
+// 初始化
+updateStats();
+renderCalendar();
+loadTasks();
+</script>
+
+</body>
+</html>

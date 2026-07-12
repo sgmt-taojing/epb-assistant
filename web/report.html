@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚨 群众举报 — 环保智慧执法平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --bg2:#141414; --bg3:#1e1e1e;
+  --gold:#c9a84c; --gold-dim:#8a7430; --gold-bright:#e8c968;
+  --text:#e0e0e0; --text-dim:#999; --text-mute:#666;
+  --red:#c0392b; --green:#27ae60; --amber:#e67e22; --blue:#2980b9;
+  --border:#333; --border-gold:#c9a84c33;
+  --r:10px; --r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Serif SC',serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:var(--gold);text-decoration:none}
+a:hover{color:var(--gold-bright)}
+
+/* Nav */
+.nav{background:linear-gradient(135deg,#0a0a0a,#1a1a1a);border-bottom:1px solid var(--border-gold);padding:0 24px;height:60px;display:flex;align-items:center;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px;color:var(--gold);font-weight:700;font-size:16px;letter-spacing:2px}
+.nav-logo-icon{font-size:22px}
+.nav-tabs{display:flex;gap:4px;margin-left:32px;flex:1;overflow-x:auto}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:8px 16px;color:var(--text-dim);font-size:13px;cursor:pointer;border-radius:6px;transition:all .2s;white-space:nowrap;border:none;background:none;font-family:inherit}
+.nav-tab:hover{color:var(--gold);background:rgba(201,168,76,.08)}
+.nav-tab.active{color:var(--gold);background:rgba(201,168,76,.12);font-weight:600}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.nav-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-dim)}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Container */
+.ctn{max-width:900px;margin:0 auto;padding:32px 20px 80px}
+
+/* Page Header */
+.page-hd{text-align:center;margin-bottom:36px}
+.page-hd h1{font-size:28px;color:var(--gold);font-weight:900;letter-spacing:3px;margin-bottom:8px}
+.page-hd p{color:var(--text-dim);font-size:14px}
+.page-hd .divider{width:60px;height:2px;background:var(--gold);margin:16px auto 0}
+
+/* Section */
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;margin-bottom:24px;position:relative}
+.section::before{content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,var(--border-gold),transparent)}
+.section-t{font-size:18px;font-weight:700;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.section-t .icon{font-size:20px}
+
+/* Form */
+.form-group{margin-bottom:20px}
+.form-label{display:block;font-size:13px;color:var(--gold);margin-bottom:6px;font-weight:600}
+.form-label .req{color:var(--red);margin-left:2px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.1)}
+.form-textarea{min-height:120px;resize:vertical;line-height:1.6}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23c9a84c' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.form-select option{background:var(--bg2);color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Checkbox */
+.checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text-dim);padding:8px 0}
+.checkbox-wrap input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.checkbox-wrap:hover{color:var(--gold)}
+
+/* Image Upload */
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:24px;text-align:center;transition:all .2s;cursor:pointer;background:var(--bg3)}
+.upload-area:hover,.upload-area.dragover{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.upload-icon{font-size:36px;color:var(--gold-dim);margin-bottom:8px}
+.upload-text{font-size:13px;color:var(--text-dim)}
+.upload-hint{font-size:11px;color:var(--text-mute);margin-top:4px}
+#file-input{display:none}
+.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:16px}
+.preview-item{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border);aspect-ratio:1}
+.preview-item img{width:100%;height:100%;object-fit:cover}
+.preview-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1}
+.preview-remove:hover{background:var(--red)}
+
+/* Submit Button */
+.btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a0a;border:none;border-radius:var(--r);font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;letter-spacing:2px}
+.btn-submit:hover{background:linear-gradient(135deg,var(--gold-bright),var(--gold));box-shadow:0 4px 20px rgba(201,168,76,.3)}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* Query Section */
+.query-row{display:flex;gap:12px;margin-bottom:16px}
+.query-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit}
+.query-input:focus{outline:none;border-color:var(--gold)}
+.btn-query{padding:10px 24px;background:var(--bg3);border:1px solid var(--gold);color:var(--gold);border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-query:hover{background:rgba(201,168,76,.1)}
+
+/* Report Result */
+.report-result{margin-top:16px}
+.report-card{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:8px;padding:16px;margin-bottom:12px}
+.report-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.report-id{font-size:13px;color:var(--gold);font-weight:600}
+.report-date{font-size:11px;color:var(--text-mute)}
+.report-status{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.status-pending{background:#fff3cd;color:#856404}
+.status-accepted{background:#d1ecf1;color:#0c5460}
+.status-processing{background:#ffe0b2;color:#e65100}
+.status-resolved{background:#c8e6c9;color:#1b5e20}
+.status-closed{background:#e0e0e0;color:#616161}
+.report-detail{font-size:13px;color:var(--text-dim);line-height:1.8}
+.report-detail .label{color:var(--gold);font-weight:600;margin-right:6px}
+.report-empty{text-align:center;padding:32px;color:var(--text-mute);font-size:14px}
+
+/* Notice */
+.notice{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-top:16px}
+.notice-t{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:10px}
+.notice-list{font-size:12px;color:var(--text-dim);line-height:2;list-style:none}
+.notice-list li::before{content:'◆ ';color:var(--gold-dim)}
+.disclaimer{margin-top:16px;padding:12px;background:rgba(192,57,43,.05);border:1px solid rgba(192,57,43,.2);border-radius:8px;font-size:11px;color:var(--text-mute);line-height:1.8}
+
+/* Toast */
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:999;padding:14px 28px;border-radius:10px;font-size:14px;font-weight:600;display:none;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+#toast.show{display:block;animation:toastIn .3s ease}
+#toast.success{background:var(--green);color:#fff}
+#toast.error{background:var(--red);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Tabs */
+.tab-bar{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.tab-btn{padding:12px 24px;font-size:14px;font-weight:600;color:var(--text-dim);cursor:pointer;border:none;background:none;font-family:inherit;position:relative;transition:color .2s}
+.tab-btn:hover{color:var(--gold)}
+.tab-btn.active{color:var(--gold)}
+.tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--gold)}
+.tab-content{display:none}
+.tab-content.show{display:block}
+
+/* Responsive */
+@media(max-width:768px){
+  .nav-tabs{display:none}
+  .ctn{padding:20px 14px 60px}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .page-hd h1{font-size:22px}
+  .section{padding:20px 16px}
+  .query-row{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="nav">
+  <a href="/" class="nav-logo"><span class="nav-logo-icon">🌿</span><span>环保智慧执法平台</span></a>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="/">🏠 首页</a>
+    <a class="nav-tab active" href="/report.html">🚨 群众举报</a>
+    <a class="nav-tab" href="/knowledge.html">📚 知识库</a>
+    <a class="nav-tab" href="/analysis.html">🧠 AI分析</a>
+    <a class="nav-tab" href="/iot.html">📡 在线监测</a>
+    <a class="nav-tab" href="/field-terminal.html">🚔 执法终端</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-status"><div class="nav-dot"></div><span>系统在线</span></div>
+  </div>
+</nav>
+
+<div class="ctn">
+
+<!-- Page Header -->
+<div class="page-hd">
+  <h1>🚨 群众举报</h1>
+  <p>人人参与环境保护 · 共建绿水青山</p>
+  <div class="divider"></div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('submit',this)">📝 提交举报</button>
+  <button class="tab-btn" onclick="switchTab('query',this)">🔍 查询举报</button>
+</div>
+
+<!-- Submit Tab -->
+<div class="tab-content show" id="tab-submit">
+
+<!-- Report Form -->
+<div class="section">
+  <div class="section-t"><span class="icon">📝</span> 举报信息</div>
+
+  <div class="form-group">
+    <label class="checkbox-wrap">
+      <input type="checkbox" id="anonymous" onchange="toggleAnonymous()">
+      <span>🔒 匿名举报（不填写举报人信息）</span>
+    </label>
+  </div>
+
+  <div class="form-row" id="reporter-fields">
+    <div class="form-group">
+      <label class="form-label">举报人姓名<span class="req">*</span></label>
+      <input type="text" class="form-input" id="r-name" placeholder="请输入您的姓名">
+    </div>
+    <div class="form-group">
+      <label class="form-label">联系电话<span class="req">*</span></label>
+      <input type="tel" class="form-input" id="r-phone" placeholder="请输入手机号（用于查询举报进度）">
+    </div>
+  </div>
+</div>
+
+<!-- Target -->
+<div class="section">
+  <div class="section-t"><span class="icon">🏭</span> 被举报对象</div>
+  <div class="form-group">
+    <label class="form-label">企业/单位名称<span class="req">*</span></label>
+    <input type="text" class="form-input" id="t-company" placeholder="请输入被举报的企业或单位名称">
+  </div>
+  <div class="form-group">
+    <label class="form-label">被举报对象地址</label>
+    <input type="text" class="form-input" id="t-address" placeholder="请输入企业/单位地址（如已知）">
+  </div>
+</div>
+
+<!-- Pollution Type -->
+<div class="section">
+  <div class="section-t"><span class="icon">⚠️</span> 污染信息</div>
+  <div class="form-group">
+    <label class="form-label">污染类型<span class="req">*</span></label>
+    <select class="form-select" id="p-type">
+      <option value="">请选择污染类型</option>
+      <option value="水污染">💧 水污染</option>
+      <option value="大气污染">💨 大气污染</option>
+      <option value="固废">🗑️ 固体废物</option>
+      <option value="噪声">🔊 噪声污染</option>
+      <option value="土壤">🏔️ 土壤污染</option>
+      <option value="辐射">☢️ 辐射污染</option>
+      <option value="其他">📋 其他</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">污染描述<span class="req">*</span></label>
+    <textarea class="form-textarea" id="p-desc" placeholder="请详细描述污染情况，包括：污染发生时间、频率、具体表现、对周边环境和居民的影响等。描述越详细，越有利于执法部门调查处理。"></textarea>
+  </div>
+</div>
+
+<!-- Location -->
+<div class="section">
+  <div class="section-t"><span class="icon">📍</span> 污染位置</div>
+  <div class="form-row-3">
+    <div class="form-group">
+      <label class="form-label">省份</label>
+      <input type="text" class="form-input" id="l-province" placeholder="如：山东省" value="山东省">
+    </div>
+    <div class="form-group">
+      <label class="form-label">城市</label>
+      <input type="text" class="form-input" id="l-city" placeholder="如：济南市" value="济南市">
+    </div>
+    <div class="form-group">
+      <label class="form-label">区/县</label>
+      <input type="text" class="form-input" id="l-district" placeholder="如：历城区">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">详细地址<span class="req">*</span></label>
+    <input type="text" class="form-input" id="l-detail" placeholder="请输入详细地址，如：XX路XX号XX工厂XX排口">
+  </div>
+</div>
+
+<!-- Image Upload -->
+<div class="section">
+  <div class="section-t"><span class="icon">📷</span> 图片证据</div>
+  <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+    <div class="upload-icon">📷</div>
+    <div class="upload-text">点击或拖拽图片到此处上传</div>
+    <div class="upload-hint">支持 JPG/PNG/BMP，最多上传 6 张，每张不超过 5MB</div>
+  </div>
+  <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+  <div class="preview-grid" id="preview-grid"></div>
+</div>
+
+<!-- Submit -->
+<div class="section" style="text-align:center">
+  <button class="btn-submit" id="btn-submit" onclick="submitReport()">提交举报</button>
+  <div style="margin-top:10px;font-size:12px;color:var(--text-mute)">
+    提交即表示您已阅读并同意下方《举报须知和免责声明》
+  </div>
+</div>
+
+<!-- Notice -->
+<div class="section">
+  <div class="section-t"><span class="icon">📋</span> 举报须知和免责声明</div>
+  <div class="notice">
+    <div class="notice-t">📌 举报须知</div>
+    <ul class="notice-list">
+      <li>举报人应如实反映情况，不得捏造、歪曲事实，不得诬告陷害他人</li>
+      <li>请提供准确的被举报对象信息、污染类型和位置信息，以便执法部门及时处理</li>
+      <li>举报人信息严格保密，未经举报人同意不对外公开</li>
+      <li>举报处理后，可通过手机号查询举报办理进度</li>
+      <li>对查证属实的举报，将按有关规定给予举报人奖励</li>
+      <li>举报事项已受理或正在办理的，请勿重复举报</li>
+    </ul>
+    <div class="disclaimer">
+      <b>⚠️ 免责声明：</b>本平台提供的举报功能仅供群众反映环境违法线索使用。举报内容不代表本平台立场，本平台不对举报内容的真实性负责。对于恶意举报、虚假举报造成不良后果的，举报人应承担相应法律责任。本平台将依法保护举报人合法权益，对举报人信息严格保密。
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-submit -->
+
+<!-- Query Tab -->
+<div class="tab-content" id="tab-query">
+  <div class="section">
+    <div class="section-t"><span class="icon">🔍</span> 举报查询</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">输入您举报时填写的手机号，查询举报办理进度</p>
+    <div class="query-row">
+      <input type="tel" class="query-input" id="q-phone" placeholder="请输入手机号" onkeydown="if(event.key==='Enter')queryReports()">
+      <button class="btn-query" onclick="queryReports()">🔍 查询</button>
+    </div>
+    <div class="report-result" id="query-result">
+      <div class="report-empty">请输入手机号查询举报进度</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /ctn -->
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// Store uploaded images as base64
+var uploadedImages = [];
+
+// Tab switch
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('show')});
+  document.getElementById('tab-' + name).classList.add('show');
+}
+
+// Anonymous toggle
+function toggleAnonymous() {
+  var anon = document.getElementById('anonymous').checked;
+  var fields = document.getElementById('reporter-fields');
+  var nameInput = document.getElementById('r-name');
+  var phoneInput = document.getElementById('r-phone');
+  if (anon) {
+    fields.style.opacity = '0.4';
+    nameInput.disabled = true;
+    phoneInput.disabled = true;
+    nameInput.value = '';
+    phoneInput.value = '';
+  } else {
+    fields.style.opacity = '1';
+    nameInput.disabled = false;
+    phoneInput.disabled = false;
+  }
+}
+
+// Image upload
+var uploadArea = document.getElementById('upload-area');
+uploadArea.addEventListener('dragover', function(e){e.preventDefault();this.classList.add('dragover')});
+uploadArea.addEventListener('dragleave', function(e){e.preventDefault();this.classList.remove('dragover')});
+uploadArea.addEventListener('drop', function(e){
+  e.preventDefault();
+  this.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+  for (var i = 0; i < files.length && uploadedImages.length < 6; i++) {
+    (function(file){
+      if (!file.type.startsWith('image/')) return;
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('图片 "' + file.name + '" 超过5MB限制', 'error');
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedImages.push(e.target.result);
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+  if (uploadedImages.length >= 6) {
+    showToast('最多上传6张图片', 'error');
+  }
+}
+
+function renderPreviews() {
+  var grid = document.getElementById('preview-grid');
+  grid.innerHTML = uploadedImages.map(function(img, idx){
+    return '<div class="preview-item"><img src="' + img + '" alt="证据' + (idx+1) + '">' +
+           '<button class="preview-remove" onclick="removeImage(' + idx + ')">✕</button></div>';
+  }).join('');
+}
+
+function removeImage(idx) {
+  uploadedImages.splice(idx, 1);
+  renderPreviews();
+}
+
+// Submit report
+function submitReport() {
+  var anon = document.getElementById('anonymous').checked;
+  var name = document.getElementById('r-name').value.trim();
+  var phone = document.getElementById('r-phone').value.trim();
+  var company = document.getElementById('t-company').value.trim();
+  var tAddress = document.getElementById('t-address').value.trim();
+  var pType = document.getElementById('p-type').value;
+  var pDesc = document.getElementById('p-desc').value.trim();
+  var province = document.getElementById('l-province').value.trim();
+  var city = document.getElementById('l-city').value.trim();
+  var district = document.getElementById('l-district').value.trim();
+  var lDetail = document.getElementById('l-detail').value.trim();
+
+  // Validation
+  if (!anon) {
+    if (!name) { showToast('请输入举报人姓名', 'error'); return; }
+    if (!phone) { showToast('请输入联系电话', 'error'); return; }
+    if (!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入正确的手机号', 'error'); return; }
+  }
+  if (!company) { showToast('请输入被举报企业名称', 'error'); return; }
+  if (!pType) { showToast('请选择污染类型', 'error'); return; }
+  if (!pDesc) { showToast('请填写污染描述', 'error'); return; }
+  if (!lDetail) { showToast('请填写详细地址', 'error'); return; }
+
+  var data = {
+    reporter: {
+      name: anon ? '' : name,
+      phone: anon ? '' : phone,
+      anonymous: anon
+    },
+    target: {
+      company: company,
+      address: tAddress
+    },
+    type: pType,
+    description: pDesc,
+    location: {
+      province: province,
+      city: city,
+      district: district,
+      detail: lDetail
+    },
+    images: uploadedImages
+  };
+
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = '提交中...';
+
+  fetch('/api/report', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(function(r){return r.json()})
+  .then(function(res){
+    if (res.ok) {
+      showToast('举报提交成功！编号：' + res.id, 'success');
+      // Reset form
+      document.getElementById('r-name').value = '';
+      document.getElementById('r-phone').value = '';
+      document.getElementById('t-company').value = '';
+      document.getElementById('t-address').value = '';
+      document.getElementById('p-type').value = '';
+      document.getElementById('p-desc').value = '';
+      document.getElementById('l-district').value = '';
+      document.getElementById('l-detail').value = '';
+      uploadedImages = [];
+      renderPreviews();
+      // Switch to query tab and show result
+      setTimeout(function(){
+        if (!anon && phone) {
+          document.getElementById('q-phone').value = phone;
+          queryReports();
+          switchTab('query', document.querySelectorAll('.tab-btn')[1]);
+        }
+      }, 1500);
+    } else {
+      showToast('提交失败：' + (res.error || '未知错误'), 'error');
+    }
+  })
+  .catch(function(err){
+    showToast('网络错误，请稍后重试', 'error');
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.textContent = '提交举报';
+  });
+}
+
+// Query reports
+function queryReports() {
+  var phone = document.getElementById('q-phone').value.trim();
+  if (!phone) { showToast('请输入手机号', 'error'); return; }
+  if (!/^1[3-9]\d{9}$/.test(phone)) { showToast('请输入正确的手机号', 'error'); return; }
+
+  var resultDiv = document.getElementById('query-result');
+  resultDiv.innerHTML = '<div class="report-empty">查询中...</div>';
+
+  fetch('/api/report?phone=' + encodeURIComponent(phone))
+  .then(function(r){return r.json()})
+  .then(function(res){
+    if (res.ok && res.reports && res.reports.length > 0) {
+      resultDiv.innerHTML = res.reports.map(function(r){
+        var statusMap = {
+          'pending': {'cls':'status-pending','text':'待受理'},
+          'accepted': {'cls':'status-accepted','text':'已受理'},
+          'processing': {'cls':'status-processing','text':'处理中'},
+          'resolved': {'cls':'status-resolved','text':'已办结'},
+          'closed': {'cls':'status-closed','text':'已关闭'}
+        };
+        var st = statusMap[r.status] || statusMap['pending'];
+        var imagesNote = r.images && r.images.length > 0 ? r.images.length + '张' : '无';
+        return '<div class="report-card">' +
+          '<div class="report-card-header">' +
+            '<span class="report-id">' + r.id + '</span>' +
+            '<span class="report-date">' + (r.created_at||'') + '</span>' +
+          '</div>' +
+          '<div style="margin-bottom:8px"><span class="report-status ' + st.cls + '">' + st.text + '</span></div>' +
+          '<div class="report-detail">' +
+          '<div><span class="label">污染类型：</span>' + (r.type||'未填写') + '</div>' +
+          '<div><span class="label">被举报对象：</span>' + (r.target && r.target.company || '未填写') + '</div>' +
+          '<div><span class="label">位置：</span>' + (r.location && r.location.detail || '未填写') + '</div>' +
+          '<div><span class="label">图片证据：</span>' + imagesNote + '</div>' +
+          '<div><span class="label">描述：</span>' + (r.description||'').substring(0,100) + (r.description && r.description.length>100?'...':'') + '</div>' +
+          (r.updated_at ? '<div><span class="label">最后更新：</span>' + r.updated_at + '</div>' : '') +
+          '</div></div>';
+      }).join('');
+    } else {
+      resultDiv.innerHTML = '<div class="report-empty">未找到该手机号对应的举报记录</div>';
+    }
+  })
+  .catch(function(err){
+    resultDiv.innerHTML = '<div class="report-empty">查询失败，请稍后重试</div>';
+  });
+}
+
+// Toast
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type || 'success';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')}, 3500);
+}
+</script>
+</body>
+</html>

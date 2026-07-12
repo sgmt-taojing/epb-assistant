@@ -1,0 +1,24 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-29",
+  "description": "辖区企业名录 — 部署时导入本地企业信息",
+  "enterprises": [
+    {
+      "id": "ENT-DEMO-001",
+      "name": "示例化工有限公司（部署后替换为真实企业）",
+      "type": "化工",
+      "address": "",
+      "lng": 0,
+      "lat": 0,
+      "permit_no": "",
+      "pollutants": ["COD", "氨氮", "VOCs"],
+      "monitoring_points": [],
+      "contact_person": "",
+      "contact_phone": "",
+      "credit_level": "B级",
+      "risk_level": "中风险",
+      "last_check_date": "",
+      "status": "正常生产"
+    }
+  ]
+}

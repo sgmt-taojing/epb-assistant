@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "updated": "2026-06-29",
+  "description": "监测站点配置 — 部署时导入本地监测点位",
+  "stations": [
+    {
+      "id": "ST-DEMO-001",
+      "name": "示例废水排口在线监测（部署后替换为真实站点）",
+      "type": "废水",
+      "enterprise_id": "ENT-DEMO-001",
+      "location": "",
+      "lng": 0,
+      "lat": 0,
+      "indicators": ["COD", "氨氮", "pH", "流量"],
+      "device_model": "",
+      "status": "offline",
+      "last_data_time": ""
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📊 数据驾驶舱 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--bg:#0a1929;--bg2:#102a43;--bg3:#1a3a5c;--card:#15273d;--border:#234166;--text:#e0e8f0;--muted:#8aa5be;--glow:#52B788;--r:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.top-bar{background:linear-gradient(135deg,#0a1929,#1a3a5c);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(82,183,136,.15);display:flex;align-items:center;justify-content:center;color:var(--glow);text-decoration:none;font-size:18px}
+.top-bar h1{font-size:16px;font-weight:600;flex:1;letter-spacing:1px}
+.top-bar .live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--glow)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--glow);box-shadow:0 0 6px var(--glow);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.grid{display:grid;gap:12px;padding:16px;max-width:1600px;margin:0 auto}
+.row-1{grid-template-columns:repeat(4,1fr)}
+.row-2{grid-template-columns:1fr 1fr}
+.row-3{grid-template-columns:1fr 1fr 1fr}
+.row-4{grid-template-columns:2fr 1fr}
+@media(max-width:1200px){.row-1{grid-template-columns:repeat(2,1fr)}.row-2,.row-3,.row-4{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title .icon{font-size:16px}
+.stat-value{font-size:32px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-trend{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:4px}
+.trend-up{color:var(--red)}
+.trend-down{color:var(--glow)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{text-align:center;padding:12px 8px;border-radius:8px;background:var(--bg3)}
+.kpi-val{font-size:28px;font-weight:700}
+.kpi-label{font-size:10px;color:var(--muted);margin-top:2px}
+.bar-chart{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.bar-label{width:80px;flex-shrink:0;color:var(--muted)}
+.bar-track{flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;color:#fff}
+.fill-water{background:linear-gradient(90deg,#1565c0,#42a5f5)}
+.fill-air{background:linear-gradient(90deg,#e65100,#ff9800)}
+.fill-solid{background:linear-gradient(90deg,#6a1b9a,#ab47bc)}
+.fill-noise{background:linear-gradient(90deg,#c62828,#ef5350)}
+.fill-other{background:linear-gradient(90deg,#2e7d32,#66bb6a)}
+.ring-container{display:flex;justify-content:center;align-items:center;padding:8px}
+.ring{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--glow) 0%,var(--bg3) 0%);display:flex;align-items:center;justify-content:center;position:relative}
+.ring-inner{width:90px;height:90px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-val{font-size:24px;font-weight:700;color:var(--glow)}
+.ring-label{font-size:10px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.table th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);font-size:11px}
+.table td{padding:6px 8px;border-bottom:1px solid var(--border)}
+.table tr:hover{background:var(--bg3)}
+.badge{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-high{background:rgba(231,76,60,.2);color:#ef5350}
+.badge-mid{background:rgba(230,126,34,.2);color:#ffa726}
+.badge-low{background:rgba(82,183,136,.2);color:var(--glow)}
+.alert-list{max-height:200px;overflow-y:auto}
+.alert-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.alert-item:last-child{border:none}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.alert-dot.red{background:#ef5350;box-shadow:0 0 4px #ef5350}
+.alert-dot.amber{background:#ffa726;box-shadow:0 0 4px #ffa726}
+.alert-dot.green{background:var(--glow);box-shadow:0 0 4px var(--glow)}
+.alert-content{flex:1}
+.alert-title{font-weight:600;margin-bottom:2px}
+.alert-meta{font-size:10px;color:var(--muted)}
+.map-card{min-height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:8px;font-size:13px;color:var(--muted)}
+.heat-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:8px}
+.heat-cell{aspect-ratio:1;border-radius:3px;background:var(--bg3)}
+.heat-0{background:#1a3a5c}.heat-1{background:#2e7d32}.heat-2{background:#558b2f}.heat-3{background:#f57f17}.heat-4{background:#e65100}.heat-5{background:#c62828}
+.footer{text-align:center;padding:16px;color:var(--muted);font-size:11px}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/index.html" class="back-btn">‹</a>
+  <h1>📊 数据驾驶舱</h1>
+  <div class="live"><div class="live-dot"></div><span id="live-time">实时</span></div>
+</div>
+
+<div class="grid row-1" id="kpi-row">
+  <div class="card">
+    <div class="card-title"><span class="icon">📁</span>执法案例</div>
+    <div class="stat-value" id="stat-cases">--</div>
+    <div class="stat-label">累计案例总数</div>
+    <div class="stat-trend trend-up">↑ 本月新增 12 件</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">⚖️</span>法规库</div>
+    <div class="stat-value" id="stat-laws">--</div>
+    <div class="stat-label">法律法规数量</div>
+    <div class="stat-trend trend-down">本季度新增 7 部</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">🚨</span>群众举报</div>
+    <div class="stat-value" id="stat-reports">--</div>
+    <div class="stat-label">累计举报工单</div>
+    <div class="stat-trend trend-up">↑ 待处理 3 件</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">🔄</span>协同任务</div>
+    <div class="stat-value" id="stat-tasks">--</div>
+    <div class="stat-label">在办任务数</div>
+    <div class="stat-trend trend-down">本周完成 8 件</div>
+  </div>
+</div>
+
+<div class="grid row-4" style="margin-top:0">
+  <div class="card">
+    <div class="card-title"><span class="icon">📊</span>案例类型分布</div>
+    <div class="bar-chart" id="type-chart">
+      <div class="bar-row"><div class="bar-label">加载中...</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">🎯</span>合规率</div>
+    <div class="ring-container">
+      <div class="ring" id="compliance-ring">
+        <div class="ring-inner">
+          <div class="ring-val" id="compliance-val">--%</div>
+          <div class="ring-label">企业合规率</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px">
+      <span style="color:var(--glow)">●</span> 合规 <span style="color:var(--red);margin-left:8px">●</span> 不合规
+    </div>
+  </div>
+</div>
+
+<div class="grid row-3" style="margin-top:0">
+  <div class="card">
+    <div class="card-title"><span class="icon">🔴</span>实时预警</div>
+    <div class="alert-list" id="alert-list">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">加载中...</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">🏭</span>重点监管企业</div>
+    <table class="table">
+      <thead><tr><th>企业</th><th>类型</th><th>风险</th><th>状态</th></tr></thead>
+      <tbody id="enterprise-table"></tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">📅</span>执法活动热力图</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">最近8周执法活动密度</div>
+    <div class="heat-grid" id="heat-grid"></div>
+    <div style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;color:var(--muted)">
+      <span>低</span>
+      <div style="width:16px;height:16px;border-radius:3px;background:#1a3a5c"></div>
+      <div style="width:16px;height:16px;border-radius:3px;background:#2e7d32"></div>
+      <div style="width:16px;height:16px;border-radius:3px;background:#f57f17"></div>
+      <div style="width:16px;height:16px;border-radius:3px;background:#c62828"></div>
+      <span>高</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid row-2" style="margin-top:0">
+  <div class="card">
+    <div class="card-title"><span class="icon">📈</span>月度执法趋势</div>
+    <div id="trend-chart" style="height:160px;display:flex;align-items:flex-end;gap:4px;padding:12px 4px;border-bottom:1px solid var(--border)">
+      <div style="flex:1;text-align:center;font-size:10px;color:var(--muted);padding-top:60px">加载中...</div>
+    </div>
+    <div id="trend-labels" style="display:flex;gap:4px;padding:4px"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span>举报处理流程</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#1565c0;display:flex;align-items:center;justify-content:center;font-size:12px">1</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:600">举报提交</div><div style="font-size:10px;color:var(--muted)">群众/企业通过多渠道提交</div></div>
+        <div style="font-size:18px;font-weight:700;color:#1565c0" id="flow-submit">--</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#e65100;display:flex;align-items:center;justify-content:center;font-size:12px">2</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:600">受理分派</div><div style="font-size:10px;color:var(--muted)">AI智能分类，分派至对应科室</div></div>
+        <div style="font-size:18px;font-weight:700;color:#e65100" id="flow-accept">--</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#8e44ad;display:flex;align-items:center;justify-content:center;font-size:12px">3</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:600">核实处置</div><div style="font-size:10px;color:var(--muted)">执法核实、企业整改、第三方核查</div></div>
+        <div style="font-size:18px;font-weight:700;color:#8e44ad" id="flow-process">--</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--glow);display:flex;align-items:center;justify-content:center;font-size:12px">4</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:600">公示评价</div><div style="font-size:10px;color:var(--muted)">结果公示，群众满意度评价</div></div>
+        <div style="font-size:18px;font-weight:700;color:var(--glow)" id="flow-done">--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">📊 数据驾驶舱 · 数据每5分钟自动刷新 · © 2026 环保智慧执法平台</div>
+
+<script>
+function updateTime(){
+  var d=new Date();
+  document.getElementById('live-time').textContent=d.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateTime,1000);updateTime();
+
+// Load KPI data
+fetch('/api/health').then(r=>r.json()).then(d=>{
+  var s=d.data_stats||{};
+  document.getElementById('stat-cases').textContent=s.cases||0;
+  document.getElementById('stat-laws').textContent=s.law_index||0;
+  document.getElementById('stat-reports').textContent=s.reports||0;
+  document.getElementById('stat-tasks').textContent=s.tasks||0;
+});
+
+// Load case type distribution
+fetch('/api/cases?limit=200').then(r=>r.json()).then(data=>{
+  var cases=data.cases||[];
+  var typeMap={};
+  cases.forEach(function(c){typeMap[c.type]=(typeMap[c.type]||0)+1;});
+  var colorMap={'水污染类':'fill-water','大气污染类':'fill-air','固体废物污染类':'fill-solid','噪声污染类':'fill-noise','危险废物类':'fill-solid','土壤污染类':'fill-other','环评类':'fill-other','排污许可类':'fill-other','自动监控类':'fill-other','移动源监管类':'fill-other','其他':'fill-other'};
+  var sorted=Object.keys(typeMap).sort(function(a,b){return typeMap[b]-typeMap[a];});
+  var maxVal=typeMap[sorted[0]]||1;
+  var html=sorted.map(function(t){
+    var pct=Math.round(typeMap[t]/maxVal*100);
+    return '<div class="bar-row">'+
+      '<div class="bar-label">'+t.replace('类','')+'</div>'+
+      '<div class="bar-track"><div class="bar-fill '+(colorMap[t]||'fill-other')+'" style="width:'+pct+'%">'+typeMap[t]+'</div></div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('type-chart').innerHTML=html;
+});
+
+// Load alerts
+fetch('/api/fusion_alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+.then(r=>r.json()).then(data=>{
+  var alerts=data.alerts||[];
+  if(alerts.length===0){
+    document.getElementById('alert-list').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">暂无预警</div>';
+    return;
+  }
+  var html=alerts.slice(0,8).map(function(a){
+    var level=a.level||'中';
+    var dotCls=level.indexOf('高')>=0?'red':level.indexOf('中')>=0?'amber':'green';
+    return '<div class="alert-item">'+
+      '<div class="alert-dot '+dotCls+'"></div>'+
+      '<div class="alert-content">'+
+        '<div class="alert-title">'+(a.desc||a.title||'').slice(0,50)+'</div>'+
+        '<div class="alert-meta">'+(a.type||'')+' | '+(a.time||'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('alert-list').innerHTML=html;
+});
+
+// Compliance ring (simulate from case data)
+fetch('/api/cases?limit=200').then(r=>r.json()).then(data=>{
+  var cases=data.cases||[];
+  var high=cases.filter(function(c){return c.risk_level==='高风险';}).length;
+  var total=cases.length||1;
+  var compliance=Math.round((1-high/total)*100);
+  document.getElementById('compliance-val').textContent=compliance+'%';
+  var ring=document.getElementById('compliance-ring');
+  ring.style.background='conic-gradient(var(--glow) 0deg '+compliance*3.6+'deg, var(--bg3) '+compliance*3.6+'deg 360deg)';
+});
+
+// Enterprise table (from cases, extract unique parties)
+fetch('/api/cases?limit=50').then(r=>r.json()).then(data=>{
+  var cases=data.cases||[];
+  var seen={};
+  var rows=cases.filter(function(c){
+    var p=c.party||'';
+    if(!p||seen[p])return false;
+    seen[p]=true;
+    return true;
+  }).slice(0,6).map(function(c){
+    var risk=c.risk_level||'低风险';
+    var badge=risk==='高风险'?'badge-high':risk==='中风险'?'badge-mid':'badge-low';
+    return '<tr><td style="font-size:11px">'+(c.party||'').slice(0,14)+'</td><td style="font-size:11px">'+(c.type||'').replace('类','')+'</td><td><span class="badge '+badge+'">'+risk+'</span></td><td style="font-size:11px;color:var(--muted)">'+(c.status==='closed'?'已结案':'处理中')+'</td></tr>';
+  }).join('');
+  document.getElementById('enterprise-table').innerHTML=rows||'<tr><td colspan="4" style="text-align:center;color:var(--muted)">暂无数据</td></tr>';
+});
+
+// Heatmap + Trend — from real case data
+fetch('/api/cases?limit=200').then(r=>r.json()).then(data=>{
+  var cases=data.cases||[];
+  var now=new Date();
+  var dateMap={};
+  cases.forEach(function(c){var d=c.date||''; if(d) dateMap[d]=(dateMap[d]||0)+1;});
+  var heatData=[];
+  for(var i=55;i>=0;i--){
+    var day=new Date(now.getTime()-i*86400000);
+    var ds=day.toISOString().slice(0,10);
+    var count=dateMap[ds]||0;
+    var level=count===0?0:count===1?1:count===2?2:count<=4?3:4;
+    heatData.push(level);
+  }
+  while(heatData.length<56) heatData.push(0);
+  document.getElementById('heat-grid').innerHTML=heatData.map(function(v){return '<div class="heat-cell heat-'+v+'"></div>';}).join('');
+
+  var monthMap={};
+  cases.forEach(function(c){var m=(c.date||'').slice(0,7); if(m) monthMap[m]=(monthMap[m]||0)+1;});
+  var sortedMonths=Object.keys(monthMap).sort().slice(-6);
+  var trendData=sortedMonths.map(function(m){return monthMap[m];});
+  var monthLabels=sortedMonths.map(function(m){return parseInt(m.split('-')[1])+'月';});
+  if(trendData.length===0){trendData=[0,0,0,0,0,0];monthLabels=['1月','2月','3月','4月','5月','6月'];}
+  var maxTrend=Math.max.apply(null,trendData)||1;
+  var colors=['#1565c0','#2e7d32','#e65100','#8e44ad','#c62828','#009688'];
+  var trendHtml=trendData.map(function(v,idx){
+    var h=Math.round(v/maxTrend*120)+10;
+    return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">'+
+      '<div style="font-size:10px;color:var(--muted);margin-bottom:2px">'+v+'</div>'+
+      '<div style="width:80%;height:'+h+'px;background:'+colors[idx%6]+';border-radius:4px 4px 0 0;opacity:.8"></div></div>';
+  }).join('');
+  document.getElementById('trend-chart').innerHTML=trendHtml;
+  document.getElementById('trend-labels').innerHTML=monthLabels.map(function(m){
+    return '<div style="flex:1;text-align:center;font-size:10px;color:var(--muted)">'+m+'</div>';
+  }).join('');
+}).catch(function(){});
+
+// Flow stats
+fetch('/api/report').then(r=>r.json()).then(data=>{
+  var reports=data.reports||[];
+  document.getElementById('flow-submit').textContent=reports.length;
+  var accepted=reports.filter(function(r){return r.status!=='pending';}).length;
+  document.getElementById('flow-accept').textContent=accepted;
+  var processing=reports.filter(function(r){return r.status==='accepted'||r.status==='processing';}).length;
+  document.getElementById('flow-process').textContent=processing;
+  var done=reports.filter(function(r){return r.status==='closed';}).length;
+  document.getElementById('flow-done').textContent=done;
+}).catch(function(){
+  document.getElementById('flow-submit').textContent='0';
+  document.getElementById('flow-accept').textContent='0';
+  document.getElementById('flow-process').textContent='0';
+  document.getElementById('flow-done').textContent='0';
+});
+
+// Auto refresh every 5 minutes
+setInterval(function(){location.reload();},300000);
+</script>
+</body>
+</html>

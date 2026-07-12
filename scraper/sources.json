@@ -1,0 +1,104 @@
+{
+  "sources": [
+    {
+      "name": "生态环境部行政处罚",
+      "url": "https://www.mee.gov.cn/hjzl/hjjcxfg/xzcf/",
+      "type": "national",
+      "encoding": "utf-8",
+      "fields": [
+        "title",
+        "date",
+        "party",
+        "type",
+        "punishment"
+      ]
+    },
+    {
+      "name": "山东省生态环境厅行政处罚",
+      "url": "https://sthj.shandong.gov.cn/col/col21892/index.html",
+      "type": "provincial",
+      "encoding": "utf-8",
+      "fields": [
+        "title",
+        "date",
+        "party",
+        "type",
+        "punishment"
+      ]
+    },
+    {
+      "name": "济南市生态环境局行政处罚",
+      "url": "https://jnepb.jinan.gov.cn/col/col00011/index.html",
+      "type": "city",
+      "encoding": "utf-8",
+      "fields": [
+        "title",
+        "date",
+        "party",
+        "type",
+        "punishment"
+      ]
+    },
+    {
+      "name": "信用中国（山东）行政处罚",
+      "url": "https://www.creditchina.gov.cn/xinyongchaxunzhongxin/xygk/search/?keyword=%E7%8E%AF%E5%A2%83%E8%BD%AC%E7%94%9F%E6%80%A7%E8%B4%A3%E4%BB%BB&source=credit&page=1",
+      "type": "credit",
+      "encoding": "utf-8",
+      "fields": [
+        "title",
+        "date",
+        "party",
+        "type",
+        "punishment"
+      ]
+    },
+    {
+      "name": "GB 18285-2018 汽油车排放限值",
+      "url": "outputs/GB_18285-2018_汽油车排放限值.pdf",
+      "type": "standard",
+      "standard_id": "GB 18285-2018"
+    },
+    {
+      "name": "GB 17691-2018 重型车国六标准",
+      "url": "outputs/GB_17691-2018_重型车国六排放标准.pdf",
+      "type": "standard",
+      "standard_id": "GB 17691-2018"
+    },
+    {
+      "name": "GB 36886-2018 非道路机械烟度限值",
+      "url": "outputs/GB_36886-2018_非道路机械烟度限值.pdf",
+      "type": "standard",
+      "standard_id": "GB 36886-2018"
+    },
+    {
+      "name": "GB 14621-2011 摩托车排放限值",
+      "url": "outputs/GB_14621-2011_摩托车排放限值.pdf",
+      "type": "standard",
+      "standard_id": "GB 14621-2011"
+    },
+    {
+      "name": "GB 20952-2020 加油站大气污染物排放标准",
+      "url": "outputs/GB_20952-2020_加油站大气污染物排放标准.pdf",
+      "type": "standard",
+      "standard_id": "GB 20952-2020"
+    },
+    {
+      "name": "HJ 1321-2023 移动源监管与核查技术指南",
+      "url": "outputs/HJ_1321-2023_移动源监管与核查技术指南.pdf",
+      "type": "standard",
+      "standard_id": "HJ 1321-2023"
+    },
+    {
+      "name": "HJ 1237-2021 机动车排放定期检验规范",
+      "url": "outputs/HJ_1237-2021_机动车排放定期检验规范.pdf",
+      "type": "standard",
+      "standard_id": "HJ 1237-2021"
+    },
+    {
+      "name": "HJ 1238-2021 检验信息采集传输技术规范",
+      "url": "outputs/HJ_1238-2021_检验信息采集传输技术规范.pdf",
+      "type": "standard",
+      "standard_id": "HJ 1238-2021"
+    }
+  ]
+}
