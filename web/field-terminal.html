@@ -1004,7 +1004,7 @@ function takePhoto() {
 function handlePhotos(input) {
   const files = Array.from(input.files);
   files.forEach(file => {
-    const id = 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+    const id = 'photo_' + Date.now() + '_' + (window._epbSeq = (window._epbSeq || 0) + 1).toString(36);
     const reader = new FileReader();
     reader.onload = (e) => {
       state.evidence.photos.push({ id, name: file.name, data: e.target.result, time: new Date().toLocaleString('zh-CN') });
@@ -1185,7 +1185,7 @@ function pickDocument() {
 function handleDocs(input) {
   const files = Array.from(input.files);
   files.forEach(file => {
-    const id = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+    const id = 'doc_' + Date.now() + '_' + (window._epbSeq = (window._epbSeq || 0) + 1).toString(36);
     state.evidence.docs.push({ id, name: file.name, size: (file.size / 1024).toFixed(0) + 'KB', time: new Date().toLocaleString('zh-CN') });
   });
   updateEvidenceCounts();
