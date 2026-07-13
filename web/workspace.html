@@ -125,6 +125,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 .back-to-top:hover { background: var(--green); color: white; }
 </style>
 <script src="/auth-guard.js"></script>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
 
@@ -369,7 +378,7 @@ function generateReport(type) {
     window.location.href = '/video-studio.html';
     return;
   }
-  alert(`📋 正在生成${names[type]}...\n\nAI将自动汇总工作数据，生成${names[type]}文档（Word/PDF）。\n\n此功能需连接后端API，当前为演示模式。`);
+  epbToast(`📋 正在生成${names[type]}...\n\nAI将自动汇总工作数据，生成${names[type]}文档（Word/PDF）。\n\n此功能需连接后端API，当前为演示模式。`);
 }
 
 // ============ 新增功能 JavaScript ============
@@ -445,10 +454,10 @@ document.getElementById('searchModal').addEventListener('click', (e) => {
 // 快捷操作栏
 function quickAction(action) {
   const actions = {
-    '立案': () => alert('⚡ 快速立案\n\n即将跳转到立案表单...'),
+    '立案': () => epbToast('⚡ 快速立案\n\n即将跳转到立案表单...'),
     '企业查询': () => window.location.href = '/enterprise.html',
-    '查法规': () => alert('📚 法规查询\n\n即将打开法规数据库...'),
-    'AI分析': () => alert('🤖 AI智能分析\n\n正在启动AI分析引擎...'),
+    '查法规': () => epbToast('📚 法规查询\n\n即将打开法规数据库...'),
+    'AI分析': () => epbToast('🤖 AI智能分析\n\n正在启动AI分析引擎...'),
     '生成视频': () => window.location.href = '/video-studio.html'
   };
   if (actions[action]) actions[action]();
@@ -470,9 +479,9 @@ function fabAction(action) {
       document.getElementById('newTask').focus();
     },
     'todayTodo': () => switchTab(document.querySelectorAll('.tab')[1], 'tasks'),
-    'dashboard': () => alert('📊 数据看板\n\n即将显示可视化数据看板...'),
+    'dashboard': () => epbToast('📊 数据看板\n\n即将显示可视化数据看板...'),
     'enterprise': () => window.location.href = '/enterprise.html',
-    'lawEnforcement': () => alert('🚔 现场执法\n\n即将打开执法记录模块...'),
+    'lawEnforcement': () => epbToast('🚔 现场执法\n\n即将打开执法记录模块...'),
     'home': () => window.location.href = '/'
   };
   if (actions[action]) actions[action]();
