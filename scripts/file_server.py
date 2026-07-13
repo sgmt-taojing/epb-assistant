@@ -1742,21 +1742,21 @@ class EPBHandler(SimpleHTTPRequestHandler):
             report = {
                 'id': rpt_id,
                 'reporter': {
-                    'name': data.get('reporter', {}).get('name', ''),
-                    'phone': data.get('reporter', {}).get('phone', ''),
-                    'anonymous': data.get('reporter', {}).get('anonymous', False)
+                    'name': data.get('reporter', {}).get('name', '') if isinstance(data.get('reporter'), dict) else '',
+                    'phone': data.get('reporter', {}).get('phone', '') if isinstance(data.get('reporter'), dict) else data.get('phone', ''),
+                    'anonymous': data.get('reporter', {}).get('anonymous', False) if isinstance(data.get('reporter'), dict) else data.get('anonymous', False)
                 },
                 'target': {
-                    'company': data.get('target', {}).get('company', ''),
-                    'address': data.get('target', {}).get('address', '')
+                    'company': data.get('target', {}).get('company', '') if isinstance(data.get('target'), dict) else data.get('company', ''),
+                    'address': data.get('target', {}).get('address', '') if isinstance(data.get('target'), dict) else data.get('address', '')
                 },
                 'type': data.get('type', ''),
                 'description': data.get('description', ''),
                 'location': {
-                    'province': data.get('location', {}).get('province', ''),
-                    'city': data.get('location', {}).get('city', ''),
-                    'district': data.get('location', {}).get('district', ''),
-                    'detail': data.get('location', {}).get('detail', '')
+                    'province': data.get('location', {}).get('province', '') if isinstance(data.get('location'), dict) else '',
+                    'city': data.get('location', {}).get('city', '') if isinstance(data.get('location'), dict) else '',
+                    'district': data.get('location', {}).get('district', '') if isinstance(data.get('location'), dict) else '',
+                    'detail': data.get('location', {}).get('detail', '') if isinstance(data.get('location'), dict) else data.get('location', '')
                 },
                 'images': data.get('images', []),
                 'status': 'pending',
