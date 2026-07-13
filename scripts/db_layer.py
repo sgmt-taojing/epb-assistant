@@ -178,9 +178,16 @@ def db_create_report(data):
     count = c.fetchone()[0]
     rpt_id = f'RPT-{today}-{count+1:03d}'
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    reporter = data.get('reporter', {})
-    target = data.get('target', {})
-    location = data.get('location', {})
+    reporter = data.get('reporter', {}) if isinstance(data.get('reporter'), dict) else {}
+    target = data.get('target', {}) if isinstance(data.get('target'), dict) else {}
+    location = data.get('location', {}) if isinstance(data.get('location'), dict) else {}
+    # 兼容扁平结构：location为字符串时放入detail
+    if isinstance(data.get('location'), str):
+        location = {'detail': data.get('location', '')}
+    if not reporter and data.get('phone'):
+        reporter = {'phone': data.get('phone', ''), 'name': data.get('name', '')}
+    if not target and data.get('company'):
+        target = {'company': data.get('company', ''), 'address': data.get('address', '')}
     c.execute('''INSERT INTO reports
         (id, reporter_name, reporter_phone, anonymous, target_company, target_address,
          type, description, location_province, location_city, location_district, location_detail,

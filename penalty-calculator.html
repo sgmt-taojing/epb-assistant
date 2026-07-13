@@ -199,7 +199,7 @@ lawArea.innerHTML='<div class="section"><div class="section-title">适用法条<
 
 function calculate(){
 var vType=document.getElementById('violation-type').value;
-if(!vType){alert('请先选择违法行为类型');return}
+if(!vType){epbToast('请先选择违法行为类型');return}
 var law=LAW_MAP[vType];
 var baseMin=law.base_min;
 var baseMax=law.base_max;
