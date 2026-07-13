@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>跳转中...</title>
+<style>body{font-family:sans-serif;padding:20px;text-align:center;background:#0a0e1a;color:#fff;}</style>
+</head><body>
+<div style="margin-top:50px">
+<h2>🔗 环保智能体平台</h2>
+<p id="msg">正在跳转...</p>
+<p><a href="/" style="color:#4fc3f7">← 返回首页</a></p>
+</div>
+<script>
+var p = location.pathname;
+// /api/health → /api/health.json
+if(p.startsWith('/api/') && !p.match(/\.[a-z]+$/i)){
+  location.href = p + '.json';
+}else{
+  document.getElementById('msg').textContent = '页面不存在: ' + p;
+}
+</script>
+</body></html>
