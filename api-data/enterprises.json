@@ -1,0 +1,1 @@
+{"ok": true, "enterprises": [{"id": "ENT-DEMO-001", "name": "示例化工有限公司（部署后替换为真实企业）", "type": "化工", "address": "", "lng": 0, "lat": 0, "permit_no": "", "pollutants": ["COD", "氨氮", "VOCs"], "monitoring_points": [], "contact_person": "", "contact_phone": "", "credit_level": "B级", "risk_level": "中风险", "last_check_date": "", "status": "正常生产"}], "total": 1}
