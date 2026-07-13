@@ -105,6 +105,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'auth-guard.js'))
         elif path == '/device-mgmt.html':
             self._serve_static(os.path.join(WEB_DIR, 'device-mgmt.html'))
+        elif path == '/equipment-mall.html':
+            self._serve_static(os.path.join(WEB_DIR, 'equipment-mall.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
@@ -152,6 +154,14 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_config()
         elif path == '/api/search':
             self._handle_global_search()
+        elif path == '/api/equipment':
+            from urllib.parse import parse_qs
+            query = parse_qs(parsed.query)
+            self._handle_equipment_list(query)
+        elif path == '/api/equipment/categories':
+            self._handle_equipment_categories()
+        elif path.startswith('/api/equipment/'):
+            self._handle_equipment_detail(path.split('/')[-1])
         else:
             self.send_response(404)
             self.end_headers()
@@ -1875,6 +1885,43 @@ class EPBHandler(SimpleHTTPRequestHandler):
         REPORTS_FILE = os.path.join(DB_DIR, 'reports.json')
         with open(REPORTS_FILE, 'w', encoding='utf-8') as f:
             json.dump(reports, f, ensure_ascii=False, indent=2)
+
+    def _handle_equipment_list(self, query):
+        """GET /api/equipment — 设备产品列表"""
+        try:
+            from equipment_data import get_all_products, get_products_by_category, get_categories, search_equipment
+            cat = query.get('category', [None])[0] if query else None
+            kw = query.get('q', [None])[0] if query else None
+            if kw:
+                products = search_equipment(kw)
+            elif cat:
+                products = get_products_by_category(cat)
+            else:
+                products = get_all_products()
+            cats = get_categories()
+            self._send_json({'products': products, 'categories': cats, 'total': len(products)})
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
+    def _handle_equipment_detail(self, pid):
+        """GET /api/equipment/:id — 设备详情"""
+        try:
+            from equipment_data import get_product_by_id
+            p = get_product_by_id(pid)
+            if p:
+                self._send_json(p)
+            else:
+                self._send_json({'error': 'not found'}, 404)
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
+
+    def _handle_equipment_categories(self):
+        """GET /api/equipment/categories — 设备分类"""
+        try:
+            from equipment_data import get_categories
+            self._send_json({'categories': get_categories()})
+        except Exception as e:
+            self._send_json({'error': str(e)}, 500)
 
     def _handle_global_search(self):
         """全局搜索 API"""
