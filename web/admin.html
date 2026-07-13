@@ -428,6 +428,15 @@
         }
     </style>
 <script src="/auth-guard.js"></script>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
     <!-- 顶栏导航 -->
@@ -793,11 +802,11 @@
                 <div class="section-title">数据审核待办列表</div>
                 <div class="list-item">
                     <span>审核2026001: 东海造纸厂 2026-05-25数据</span>
-                    <button class="btn" onclick="alert('审核通过')">审核</button>
+                    <button class="btn" onclick="epbToast('审核通过')">审核</button>
                 </div>
                 <div class="list-item">
                     <span>审核2026002: 绿源化工 2026-05-25数据</span>
-                    <button class="btn" onclick="alert('审核通过')">审核</button>
+                    <button class="btn" onclick="epbToast('审核通过')">审核</button>
                 </div>
             </div>
         </div>
@@ -835,7 +844,7 @@
         <div class="tab-content" id="tab-education">
             <div class="section">
                 <div class="section-title">🎨 宣传视频生成入口</div>
-                <button class="btn" onclick="alert('正在生成宣传视频...')">🎬 生成新视频</button>
+                <button class="btn" onclick="epbToast('正在生成宣传视频...')">🎬 生成新视频</button>
             </div>
 
             <div class="section">
@@ -901,10 +910,10 @@
     <div class="fab">
         <button class="fab-btn" onclick="toggleFab()">+</button>
         <div class="fab-panel" id="fabPanel">
-            <button class="fab-item" onclick="alert('新建案件')">📝 新建案件</button>
+            <button class="fab-item" onclick="epbToast('新建案件')">📝 新建案件</button>
             <button class="fab-item" onclick="goToTab('dashboard')">📊 数据看板</button>
-            <button class="fab-item" onclick="alert('企业查询')">🏢 企业查询</button>
-            <button class="fab-item" onclick="alert('生成报告')">📄 生成报告</button>
+            <button class="fab-item" onclick="epbToast('企业查询')">🏢 企业查询</button>
+            <button class="fab-item" onclick="epbToast('生成报告')">📄 生成报告</button>
             <button class="fab-item" onclick="goToTab('law')">⚖️ 法规查询</button>
             <button class="fab-item" onclick="goHome()">🏠 返回首页</button>
         </div>

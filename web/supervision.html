@@ -92,6 +92,15 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 }
 </style>
 <script src="/auth-guard.js"></script>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
 <nav class="nav">
@@ -459,7 +468,7 @@ function createSupervision() {
   const deviceLabel = device ? document.getElementById('sup-device').selectedOptions[0].text : '';
 
   if (!company) {
-    alert('请输入被督查企业名称');
+    epbToast('请输入被督查企业名称');
     return;
   }
 
@@ -497,7 +506,7 @@ function createSupervision() {
     };
     supervisions.unshift(sup);
     localStorage.setItem('epb_supervisions', JSON.stringify(supervisions));
-    alert('督查任务已创建！\n编号：' + sup.id);
+    epbToast('督查任务已创建！\n编号：' + sup.id);
     // Reset form
     document.getElementById('sup-company').value = '';
     document.getElementById('sup-inspector').value = '';
@@ -515,7 +524,7 @@ function createSupervision() {
     };
     supervisions.unshift(sup);
     localStorage.setItem('epb_supervisions', JSON.stringify(supervisions));
-    alert('督查任务已创建（本地存储）！');
+    epbToast('督查任务已创建（本地存储）！');
     showPanel('dashboard', document.querySelectorAll('.tab')[0]);
   });
 }
@@ -581,7 +590,7 @@ function startVoiceGuide() {
     utter.rate = 0.9;
     speechSynthesis.speak(utter);
   } else {
-    alert(text);
+    epbToast(text);
   }
 }
 </script>

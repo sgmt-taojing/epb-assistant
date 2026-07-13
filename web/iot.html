@@ -69,6 +69,15 @@ tr:hover td{background:var(--green-bg)}
 .net-center{display:inline-block;background:var(--green);font-weight:700;padding:10px 16px;border-radius:10px;margin:8px;color:#fff}
 @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.role-btns{display:none}}
 </style>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
 <div class="nav"><span style="font-size:20px">📡</span><h1>智慧感知</h1><a href="/">← 返回</a>
@@ -196,7 +205,7 @@ tr:hover td{background:var(--green-bg)}
 <div><label class="form-label">监控参数</label><input class="form-input" placeholder="如 COD,氨氮,总磷"></div>
 <div><label class="form-label">告警阈值</label><input class="form-input" placeholder="如 COD>100"></div>
 </div>
-<button class="alert-btn primary" style="width:100%;padding:10px;font-size:14px;margin-top:8px" onclick="alert('设备注册成功！')">✅ 提交注册</button>
+<button class="alert-btn primary" style="width:100%;padding:10px;font-size:14px;margin-top:8px" onclick="epbToast('设备注册成功！')">✅ 提交注册</button>
 </div>
 
 <div class="mgmt-section" id="mg-maint">

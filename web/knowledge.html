@@ -163,6 +163,15 @@ select.form-input{appearance:auto}
 }
 
 </style>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
 <div class="nav"><span style="font-size:20px">📚</span><h1>开源环保知识库</h1><a href="/" class="nav-back">← 返回首页</a><div class="nav-actions"><button class="nav-btn" onclick="toggleSearchModal()" title="搜索 (Ctrl+K)">🔍 <span class="nav-btn-text">搜索</span></button><button class="nav-btn" onclick="showTab('contribute',document.querySelectorAll('.tab')[4])" title="新建条目">＋ <span class="nav-btn-text">新建条目</span></button></div></div>
@@ -177,9 +186,9 @@ select.form-input{appearance:auto}
 
 <!-- 快捷模板区 -->
 <div class="quick-templates">
-  <a class="template-tag green" href="#" onclick="alert('快速立案功能开发中');return false">⚡ 快速立案</a>
-  <a class="template-tag light" href="#" onclick="alert('企业查询功能开发中');return false">🏢 企业查询</a>
-  <a class="template-tag amber" href="#" onclick="alert('现场执法终端功能开发中');return false">📱 现场执法终端</a>
+  <a class="template-tag green" href="#" onclick="epbToast('快速立案功能开发中');return false">⚡ 快速立案</a>
+  <a class="template-tag light" href="#" onclick="epbToast('企业查询功能开发中');return false">🏢 企业查询</a>
+  <a class="template-tag amber" href="#" onclick="epbToast('现场执法终端功能开发中');return false">📱 现场执法终端</a>
   <a class="template-tag light" href="#" onclick="showTab('list',document.querySelectorAll('.tab')[3]);return false">📋 条目列表</a>
   <a class="template-tag light" href="#" onclick="showTab('contribute',document.querySelectorAll('.tab')[4]);return false">✏️ 贡献投稿</a>
   <a class="template-tag green" href="#" onclick="filterTag(document.querySelector('.tag'),'law');return false">⚖️ 法律法规</a>
@@ -247,7 +256,7 @@ select.form-input{appearance:auto}
 <div><label class="form-label">采集频率</label><select class="form-input"><option>每日</option><option>每周</option><option>每月</option><option>按需</option></select></div>
 <div><label class="form-label">优先级</label><select class="form-input"><option>高(法律法规)</option><option>中(技术标准)</option><option>低(行业知识)</option></select></div>
 </div>
-<button style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px" onclick="alert('采集配置已更新')">💾 保存配置</button>
+<button style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px" onclick="epbToast('采集配置已更新')">💾 保存配置</button>
 </div>
 </div>
 
@@ -377,8 +386,8 @@ function filterListSearch(q){
 }
 function submitContrib(){
   const t=document.getElementById('contribTitle').value;
-  if(!t){alert('请填写标题');return}
-  alert('投稿已提交，审核通过后将入库。感谢贡献！');
+  if(!t){epbToast('请填写标题');return}
+  epbToast('投稿已提交，审核通过后将入库。感谢贡献！');
   document.getElementById('contribTitle').value='';
   document.getElementById('contribContent').value='';
 }
@@ -451,11 +460,11 @@ function showDetail(type){
       <div class="fab-item-icon contribute">📤</div>
       <span>贡献投稿</span>
     </div>
-    <div class="fab-item" onclick="alert('批量导入功能开发中')">
+    <div class="fab-item" onclick="epbToast('批量导入功能开发中')">
       <div class="fab-item-icon import">📥</div>
       <span>批量导入</span>
     </div>
-    <div class="fab-item" onclick="alert('导出列表功能开发中')">
+    <div class="fab-item" onclick="epbToast('导出列表功能开发中')">
       <div class="fab-item-icon export">📤</div>
       <span>导出列表</span>
     </div>
@@ -463,7 +472,7 @@ function showDetail(type){
       <div class="fab-item-icon stats">📊</div>
       <span>数据统计</span>
     </div>
-    <div class="fab-item" onclick="alert('管理设置功能开发中')">
+    <div class="fab-item" onclick="epbToast('管理设置功能开发中')">
       <div class="fab-item-icon settings">⚙️</div>
       <span>管理设置</span>
     </div>

@@ -78,6 +78,15 @@ select.form-input{appearance:auto}
 .style-btn.active{border-color:var(--green);background:var(--green-bg);font-weight:600}
 @media(max-width:600px){.type-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.role-sel{display:none}.dash-grid{grid-template-columns:1fr}}
 </style>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
 </head>
 <body>
 <div class="nav"><span style="font-size:20px">🎬</span><h1>AI视频工作台</h1><a href="/">← 返回</a>
@@ -115,7 +124,7 @@ select.form-input{appearance:auto}
 <div class="card-t">📋 下属视频草稿审批</div>
 <div class="hist-item"><span class="hist-icon">🚔</span><div class="hist-info"><div class="hist-title">某化工厂暗管排污执法纪实</div><div class="hist-meta">王执法员 · 5分钟前提交</div></div><span class="hist-badge officer">执法员</span></div>
 <div class="hist-item"><span class="hist-icon">📢</span><div class="hist-info"><div class="hist-title">世界环境日宣传短视频</div><div class="hist-meta">李宣传员 · 1小时前提交</div></div><span class="hist-badge publicity">宣传员</span></div>
-<div style="display:flex;gap:6px;margin-top:6px"><button class="quick-btn" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="alert('已审批通过')">✅ 批量审批</button><button class="quick-btn" onclick="alert('已退回修改')">↩ 退回修改</button></div>
+<div style="display:flex;gap:6px;margin-top:6px"><button class="quick-btn" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="epbToast('已审批通过')">✅ 批量审批</button><button class="quick-btn" onclick="epbToast('已退回修改')">↩ 退回修改</button></div>
 </div>
 </div>
 
