@@ -1,0 +1,549 @@
+"""
+环保设备设施商城数据模块
+以案例驱动、降本增效为核心卖点
+"""
+import json
+import os
+
+# 设备产品数据库 — 按环保领域分类，每个产品绑定真实案例和降本数据
+EQUIPMENT_PRODUCTS = [
+    # ==================== 水污染治理 ====================
+    {
+        "id": "EQ-WW-001",
+        "name": "智能工业废水处理一体机",
+        "category": "水污染治理",
+        "subcategory": "废水处理设备",
+        "price_range": "12-35万",
+        "brand": "清源环保",
+        "model": "QY-IWW-50T",
+        "capacity": "50吨/日",
+        "power": "15kW",
+        "footprint": "6m×3m×2.5m",
+        "tags": ["一体化", "自动加药", "在线监测", "MBR膜"],
+        "description": "集成调节池+混凝沉淀+MBR膜生物反应器+消毒工艺，全自动PLC控制，出水达一级A标准。适用于化工、电镀、食品加工等中小型工业企业。",
+        "case": {
+            "title": "某电镀企业含铬废水治理改造项目",
+            "industry": "电镀加工",
+            "location": "广东东莞",
+            "before": "原采用化学沉淀法，药剂成本高，污泥量大，出水Cr⁶⁺偶尔超标",
+            "after": "改造为MBR一体机后，出水Cr⁶⁺<0.05mg/L（稳定达标），药剂用量减少60%",
+            "cost_before": "年运行费用18.5万元（药剂8万+电费4万+污泥处置3.5万+人工3万）",
+            "cost_after": "年运行费用7.2万元（药剂3.2万+电费2.5万+污泥处置0.5万+人工1万）",
+            "saving": "年节省11.3万元",
+            "payback": "2.1年回收设备投资",
+            "roi": "47%",
+            "compliance": "GB21900-2008 表2 排放限值",
+            "highlights": ["药剂减量60%", "污泥减量85%", "稳定达标率100%"]
+        },
+        "applicable_scenarios": ["电镀废水", "化工废水", "食品加工废水", "印染废水"],
+        "certifications": ["CE认证", "环保产品认证CCEP", "ISO14001"],
+        "warranty": "3年质保，终身维护",
+        "installation_period": "15-20个工作日",
+        "images": ["eq-ww-001-main.jpg", "eq-ww-001-case.jpg"]
+    },
+    {
+        "id": "EQ-WW-002",
+        "name": "在线水质多参数监测仪",
+        "category": "水污染治理",
+        "subcategory": "水质监测设备",
+        "price_range": "3-8万",
+        "brand": "中环测控",
+        "model": "ZC-WQM-9000",
+        "capacity": "7参数同步监测",
+        "power": "0.5kW",
+        "footprint": "壁挂式800×600×300mm",
+        "tags": ["COD", "氨氮", "总磷", "总氮", "pH", "浊度", "温度"],
+        "description": "同时监测COD、氨氮、总磷、总氮、pH、浊度、温度7项参数，数据实时上传环保监管平台，支持超标短信预警。适配排污许可自行监测要求。",
+        "case": {
+            "title": "某化工园区集中污水处理厂在线监测升级",
+            "industry": "污水处理",
+            "location": "山东淄博",
+            "before": "原设备仅监测COD和氨氮，总磷总氮需人工化验，数据滞后2-3天",
+            "after": "升级7参数在线监测后，数据实时上传，超标10分钟内预警",
+            "cost_before": "人工化验年费用6.5万元（2名化验员+试剂+送检）",
+            "cost_after": "设备年运行1.8万元（试剂+电费+维护），减少1名化验员",
+            "saving": "年节省4.7万元",
+            "payback": "0.9年回收投资",
+            "roi": "115%",
+            "compliance": "HJ 353-2019 水污染源在线监测系统安装技术规范",
+            "highlights": ["监测参数7项", "数据实时上传", "超标10分钟预警", "减少人工60%"]
+        },
+        "applicable_scenarios": ["排污许可证自行监测", "污水处理厂", "企业废水总排口", "河流断面监测"],
+        "certifications": ["CPA计量器具型式批准", "CCEP环保产品认证", "CMA检测报告"],
+        "warranty": "2年质保，免费校准3次",
+        "installation_period": "3-5个工作日",
+        "images": ["eq-ww-002-main.jpg"]
+    },
+    {
+        "id": "EQ-WW-003",
+        "name": "雨污分流智能识别与截流系统",
+        "category": "水污染治理",
+        "subcategory": "管网管控设备",
+        "price_range": "8-20万",
+        "brand": "管网卫士",
+        "model": "GW-RS-Smart200",
+        "capacity": "覆盖2km管网",
+        "power": "2kW",
+        "footprint": "井式安装",
+        "tags": ["雨污分流", "智能截流", "AI识别", "防倒灌"],
+        "description": "利用AI视觉识别雨水管中污水混入情况，自动启闭截流闸门，实现雨污分流精准管控。解决雨季污水溢流直排河道问题。",
+        "case": {
+            "title": "某工业园区雨污混排整治工程",
+            "industry": "工业园区",
+            "location": "浙江杭州",
+            "before": "雨季时污水随雨水溢流进入河道，多次被环保督察通报处罚",
+            "after": "安装智能截流系统后，雨季污水溢流事件归零，环保督察顺利通过",
+            "cost_before": "年环保处罚15-30万元（雨季多次处罚）",
+            "cost_after": "设备年运行0.5万元（电费+维护）",
+            "saving": "年避免处罚20万元以上",
+            "payback": "0.8年回收投资",
+            "roi": "125%",
+            "compliance": "GB50014 室外排水设计标准",
+            "highlights": ["雨季溢流归零", "AI自动识别", "环保督察免罚", "管网全覆盖监控"]
+        },
+        "applicable_scenarios": ["工业园区管网改造", "老旧城区雨污分流", "河道排口整治", "环保督察整改"],
+        "certifications": ["CE认证", "ISO9001"],
+        "warranty": "2年质保",
+        "installation_period": "10-15个工作日",
+        "images": ["eq-ww-003-main.jpg"]
+    },
+
+    # ==================== 大气污染治理 ====================
+    {
+        "id": "EQ-AIR-001",
+        "name": "VOCs催化燃烧净化装置（CO）",
+        "category": "大气污染治理",
+        "subcategory": "VOCs治理设备",
+        "price_range": "15-50万",
+        "brand": "蓝天卫士",
+        "model": "LT-CO-20000",
+        "capacity": "20000m³/h",
+        "power": "25kW",
+        "footprint": "8m×3m×3m",
+        "tags": ["VOCs", "催化燃烧", "余热回收", "防爆"],
+        "description": "采用贵金属催化剂，将VOCs在250-350°C下催化氧化为CO₂和H₂O，净化效率≥97%，配套余热回收系统降低运行成本。适用于涂装、印刷、化工等行业。",
+        "case": {
+            "title": "某汽车零部件涂装线VOCs治理改造",
+            "industry": "汽车制造",
+            "location": "江苏南京",
+            "before": "原活性炭吸附+蒸汽脱附工艺，运行成本高，活性炭更换频繁，VOCs排放浓度波动大",
+            "after": "改为催化燃烧后，VOCs排放浓度稳定<30mg/m³，活性炭3年更换一次",
+            "cost_before": "年运行费用32万元（活性炭更换12万+蒸汽8万+电费6万+危废处置6万）",
+            "cost_after": "年运行费用11万元（电费5万+催化剂分摊3万+余热回收收益-2万+维护3万）",
+            "saving": "年节省21万元",
+            "payback": "1.4年回收设备投资",
+            "roi": "71%",
+            "compliance": "GB16297-1996 大气污染物综合排放标准",
+            "highlights": ["净化效率97%", "余热回收降本", "活性炭3年一换", "排放稳定达标"]
+        },
+        "applicable_scenarios": ["涂装喷漆废气", "印刷废气", "化工尾气", "医药制造废气"],
+        "certifications": ["CE认证", "防爆认证ExdIIBT4", "CCEP环保产品认证"],
+        "warranty": "3年质保（催化剂1年）",
+        "installation_period": "20-30个工作日",
+        "images": ["eq-air-001-main.jpg"]
+    },
+    {
+        "id": "EQ-AIR-002",
+        "name": "超低排放布袋除尘器",
+        "category": "大气污染治理",
+        "subcategory": "除尘设备",
+        "price_range": "10-40万",
+        "brand": "绿创除尘",
+        "model": "LC-Pulse-5000",
+        "capacity": "5000m³/h",
+        "power": "7.5kW",
+        "footprint": "4m×3m×6m",
+        "tags": ["超低排放", "脉冲清灰", "PTFE覆膜", "在线检修"],
+        "description": "采用PTFE覆膜滤袋，排放浓度<5mg/m³，满足超低排放要求。脉冲在线清灰，不停机检修。适用于水泥、钢铁、锅炉等行业。",
+        "case": {
+            "title": "某水泥厂窑尾除尘超低排放改造",
+            "industry": "水泥制造",
+            "location": "河北唐山",
+            "before": "原电除尘器排放浓度45mg/m³，不满足超低排放(<10mg/m³)要求，面临限产",
+            "after": "改造为布袋除尘后排放浓度3mg/m³，超低排放达标，不限产",
+            "cost_before": "年环保罚款+限产损失约80万元",
+            "cost_after": "设备年运行8万元（电费+滤袋分摊+维护）",
+            "saving": "年避免损失72万元",
+            "payback": "0.5年回收投资",
+            "roi": "200%",
+            "compliance": "GB4915-2013 水泥工业大气污染物排放标准（超低排放）",
+            "highlights": ["排放<5mg/m³", "超低排放达标", "避免限产", "脉冲在线清灰"]
+        },
+        "applicable_scenarios": ["水泥窑尾除尘", "钢铁烧结除尘", "燃煤锅炉除尘", "矿山破碎除尘"],
+        "certifications": ["CCEP环保产品认证", "ISO9001"],
+        "warranty": "3年质保（滤袋1年）",
+        "installation_period": "15-25个工作日",
+        "images": ["eq-air-002-main.jpg"]
+    },
+    {
+        "id": "EQ-AIR-003",
+        "name": "烟气脱硫脱硝一体化塔",
+        "category": "大气污染治理",
+        "subcategory": "脱硫脱硝设备",
+        "price_range": "30-120万",
+        "brand": "清源环保",
+        "model": "QY-FGD-SNCR-30000",
+        "capacity": "30000m³/h",
+        "power": "45kW",
+        "footprint": "Φ4m×18m",
+        "tags": ["脱硫脱硝", "湿法脱硫", "SNCR", "超低排放"],
+        "description": "湿法石灰石-石膏脱硫+SNCR脱硝一体化塔，脱硫效率≥95%，脱硝效率≥60%。配套石膏脱水系统，副产物可综合利用。适用于工业锅炉、烧结机等。",
+        "case": {
+            "title": "某钢铁企业烧结机烟气脱硫脱硝改造",
+            "industry": "钢铁冶炼",
+            "location": "河北邯郸",
+            "before": "烧结机烟气SO₂排放300mg/m³，NOx排放400mg/m³，不满足超低排放要求",
+            "after": "改造后SO₂<35mg/m³，NOx<50mg/m³，全面达到超低排放标准",
+            "cost_before": "年环保罚款+限产损失约200万元",
+            "cost_after": "年运行费用85万元（石灰石+氨水+电费+人工+维护）",
+            "saving": "年避免损失115万元",
+            "payback": "2.2年回收投资",
+            "roi": "45%",
+            "compliance": "GB28662-2012 钢铁烧结球团工业大气污染物排放标准",
+            "highlights": ["脱硫效率95%", "脱硝效率60%", "超低排放达标", "副产物综合利用"]
+        },
+        "applicable_scenarios": ["钢铁烧结机", "工业锅炉", "玻璃窑炉", "陶瓷窑炉"],
+        "certifications": ["CCEP环保产品认证", "CE认证"],
+        "warranty": "3年质保",
+        "installation_period": "30-45个工作日",
+        "images": ["eq-air-003-main.jpg"]
+    },
+
+    # ==================== 固废/危废处理 ====================
+    {
+        "id": "EQ-SW-001",
+        "name": "危废贮存间标准化改造套装",
+        "category": "固废处理",
+        "subcategory": "危废贮存设备",
+        "price_range": "5-15万",
+        "brand": "安环科技",
+        "model": "AH-HWS-Standard",
+        "capacity": "适配50-500㎡",
+        "power": "0kW（被动式）",
+        "footprint": "模块化组装",
+        "tags": ["标准化", "防渗漏", "标识齐全", "智能监控"],
+        "description": "一站式危废贮存间标准化改造方案：防渗地坪+导流沟+收集池+分类标识+通风系统+智能监控+台账管理。满足《危险废物贮存污染控制标准》GB18597-2023全部要求。",
+        "case": {
+            "title": "某机械加工企业危废贮存间规范化整改",
+            "industry": "机械加工",
+            "location": "山东临沂",
+            "before": "危废贮存间防渗不达标、标识缺失、台账混乱，被环保检查下达限期整改",
+            "after": "完成标准化改造后通过环保验收，台账电子化管理，后续检查零问题",
+            "cost_before": "面临环保处罚5-20万元+限期整改停工损失",
+            "cost_after": "改造投入8万元，一劳永逸",
+            "saving": "避免处罚+停工损失15万元以上",
+            "payback": "0.5年回收投资",
+            "roi": "188%",
+            "compliance": "GB18597-2023 危险废物贮存污染控制标准",
+            "highlights": ["一次改造长期合规", "电子台账管理", "环保检查零问题", "智能监控预警"]
+        },
+        "applicable_scenarios": ["机械加工危废", "化工危废", "电镀危废", "医药制造危废", "汽修危废"],
+        "certifications": ["符合GB18597-2023", "防渗检测报告"],
+        "warranty": "5年质保（防渗部分10年）",
+        "installation_period": "7-15个工作日",
+        "images": ["eq-sw-001-main.jpg"]
+    },
+    {
+        "id": "EQ-SW-002",
+        "name": "污泥低温干化减量设备",
+        "category": "固废处理",
+        "subcategory": "污泥处理设备",
+        "price_range": "20-60万",
+        "brand": "干源环保",
+        "model": "GY-LTD-500",
+        "capacity": "500kg/h（湿泥→干泥）",
+        "power": "18kW",
+        "footprint": "6m×3m×2.8m",
+        "tags": ["低温干化", "减量70%", "余热利用", "无尾气"],
+        "description": "利用热泵低温干化技术（60-80°C），将含水率80%污泥干化至20%，减量70%。干化后污泥可资源化利用或大幅降低处置费。全程封闭，无尾气排放。",
+        "case": {
+            "title": "某污水处理厂污泥减量改造",
+            "industry": "污水处理",
+            "location": "江苏苏州",
+            "before": "年产湿污泥3000吨（80%含水率），处置费280元/吨，年支出84万元",
+            "after": "干化后年产干泥900吨（20%含水率），处置费280元/吨，年支出25.2万元",
+            "cost_before": "年污泥处置费84万元",
+            "cost_after": "设备年运行15万元（电费+维护）+干泥处置25.2万元=40.2万元",
+            "saving": "年节省43.8万元",
+            "payback": "0.7年回收投资",
+            "roi": "146%",
+            "compliance": "GB24188-2009 城镇污水处理厂污泥处置分类",
+            "highlights": ["污泥减量70%", "处置费降52%", "热泵低能耗", "全程无尾气"]
+        },
+        "applicable_scenarios": ["污水处理厂污泥", "印染污泥", "电镀污泥", "制药污泥"],
+        "certifications": ["CCEP环保产品认证", "CE认证"],
+        "warranty": "2年质保",
+        "installation_period": "15-20个工作日",
+        "images": ["eq-sw-002-main.jpg"]
+    },
+
+    # ==================== 环境监测 ====================
+    {
+        "id": "EQ-EM-001",
+        "name": "微型空气质量监测站",
+        "category": "环境监测",
+        "subcategory": "大气监测设备",
+        "price_range": "2-6万",
+        "brand": "中环测控",
+        "model": "ZC-AQM-Mini200",
+        "capacity": "6参数同步监测",
+        "power": "0.3kW",
+        "footprint": "立杆式安装H2.5m",
+        "tags": ["PM2.5", "PM10", "SO₂", "NO₂", "CO", "O₃"],
+        "description": "网格化微型空气站，同步监测PM2.5/PM10/SO₂/NO₂/CO/O₃六项参数+温湿度+风速风向。4G无线传输，太阳能+市电双供电。适合工业园区网格化布点。",
+        "case": {
+            "title": "某化工园区大气污染网格化监控体系建设",
+            "industry": "化工园区",
+            "location": "江苏南京化工园",
+            "before": "园区仅有1个国控站，无法锁定污染源头，居民投诉无法溯源",
+            "after": "部署20台微型站后，实现500m网格化覆盖，污染溯源时间从3天缩短至1小时",
+            "cost_before": "年环保投诉处理成本+溯源检测费约30万元",
+            "cost_after": "20台设备年运行3万元（电费+通信+校准）",
+            "saving": "年节省27万元",
+            "payback": "1.1年回收投资",
+            "roi": "90%",
+            "compliance": "HJ 655-2013 环境空气颗粒物(PM10和PM2.5)连续自动监测系统安装和验收技术规范",
+            "highlights": ["网格化全覆盖", "污染溯源1小时", "居民投诉下降85%", "太阳能供电"]
+        },
+        "applicable_scenarios": ["工业园区网格化监测", "工地扬尘监测", "道路扬尘监测", "社区空气质量监测"],
+        "certifications": ["CCEP环保产品认证", "CPA计量器具型式批准"],
+        "warranty": "2年质保",
+        "installation_period": "2-3个工作日/台",
+        "images": ["eq-em-001-main.jpg"]
+    },
+    {
+        "id": "EQ-EM-002",
+        "name": "企业排污许可证自行监测平台",
+        "category": "环境监测",
+        "subcategory": "合规管理软件",
+        "price_range": "1.5-5万/年",
+        "brand": "环信通",
+        "model": "HXT-PDM-SaaS",
+        "capacity": "支持多企业多排污口",
+        "power": "0kW（云端SaaS）",
+        "footprint": "云端部署",
+        "tags": ["排污许可", "自行监测", "台账自动", "合规预警"],
+        "description": "对接全国排污许可证管理信息平台，自动生成自行监测计划、记录台账、编制报告。超标自动预警，台账自动归档，满足环保检查随时调阅需求。",
+        "case": {
+            "title": "某集团企业下属12家工厂排污许可合规管理",
+            "industry": "集团企业",
+            "location": "全国多地",
+            "before": "12家工厂各自手工管理台账，格式不统一，检查时临时整理加班3-5天",
+            "after": "统一平台管理，台账自动生成，检查时10分钟导出完整资料",
+            "cost_before": "12家工厂年人工管理成本36万元（3万元/家/年）",
+            "cost_after": "平台年费4万元+1人管理5万元=9万元",
+            "saving": "年节省27万元",
+            "payback": "0.2年回收投资",
+            "roi": "300%",
+            "compliance": "排污许可管理条例 + HJ 942-2018",
+            "highlights": ["台账自动生成", "检查10分钟出件", "超标实时预警", "12厂统一管理"]
+        },
+        "applicable_scenarios": ["持证排污企业", "集团多工厂管理", "环保合规审计", "证后管理"],
+        "certifications": ["信息安全等级保护三级"],
+        "warranty": "持续更新服务",
+        "installation_period": "3-7个工作日（云端开通）",
+        "images": ["eq-em-002-main.jpg"]
+    },
+
+    # ==================== 噪声治理 ====================
+    {
+        "id": "EQ-NS-001",
+        "name": "工业噪声综合治理方案",
+        "category": "噪声治理",
+        "subcategory": "降噪设备",
+        "price_range": "5-30万",
+        "brand": "静源环保",
+        "model": "JY-NS-Custom",
+        "capacity": "定制化",
+        "power": "0kW（被动式）",
+        "footprint": "定制化",
+        "tags": ["隔声罩", "消声器", "减振", "吸声"],
+        "description": "针对空压机、风机、泵房、冷却塔等工业噪声源，提供隔声罩+消声器+减振基座+吸声体综合降噪方案。治理后厂界噪声达标，解决扰民投诉。",
+        "case": {
+            "title": "某建材企业厂界噪声扰民治理",
+            "industry": "建材制造",
+            "location": "浙江温州",
+            "before": "厂界噪声65dB(A)，夜间超标10dB，周边居民持续投诉，被下达限期治理",
+            "after": "综合治理后厂界噪声52dB(A)，夜间达标，居民投诉消除",
+            "cost_before": "年居民投诉处理+面临处罚约10万元",
+            "cost_after": "一次投入15万元，无后续运行成本（被动式降噪）",
+            "saving": "年避免损失8万元+消除投诉",
+            "payback": "1.9年回收投资",
+            "roi": "53%",
+            "compliance": "GB12348-2008 工业企业厂界环境噪声排放标准",
+            "highlights": ["降噪13dB", "夜间达标", "投诉消除", "被动式零运行成本"]
+        },
+        "applicable_scenarios": ["空压机房降噪", "风机噪声治理", "泵房降噪", "冷却塔噪声", "厂界噪声超标"],
+        "certifications": ["ISO9001", "降噪效果检测报告"],
+        "warranty": "5年质保",
+        "installation_period": "10-20个工作日",
+        "images": ["eq-ns-001-main.jpg"]
+    },
+
+    # ==================== 土壤修复 ====================
+    {
+        "id": "EQ-SOIL-001",
+        "name": "土壤重金属原位快速检测仪",
+        "category": "土壤修复",
+        "subcategory": "土壤检测设备",
+        "price_range": "8-25万",
+        "brand": "中环测控",
+        "model": "ZC-XRF-SoilPro",
+        "capacity": "30秒/样点",
+        "power": "电池供电8小时",
+        "footprint": "手持式1.5kg",
+        "tags": ["XRF", "重金属", "原位检测", "GPS定位"],
+        "description": "手持式XRF土壤重金属分析仪，30秒检测Pb/Cd/As/Hg/Cr/Cu/Zn/Ni等8种重金属。内置GPS，数据自动定位上传。用于场地调查、修复验收、农用地筛查。",
+        "case": {
+            "title": "某搬迁化工厂场地环境调查",
+            "industry": "场地修复",
+            "location": "辽宁沈阳",
+            "before": "传统采样+实验室分析，每个点位耗时3天，费用2000元/点，调查100个点需30万",
+            "after": "XRF原位筛查100个点仅需2天，费用2万元，锁定重点污染区域后再精准采样",
+            "cost_before": "场地调查费30万元（100点×2000元+报告）",
+            "cost_after": "XRF筛查2万+精准采样5万=7万元",
+            "saving": "节省23万元",
+            "payback": "0.3年回收投资",
+            "roi": "329%",
+            "compliance": "HJ/T 166-2004 土壤环境监测技术规范",
+            "highlights": ["检测速度提升100倍", "调查费用降77%", "GPS自动定位", "30秒出结果"]
+        },
+        "applicable_scenarios": ["搬迁企业场地调查", "农用地土壤筛查", "修复工程验收", "土壤污染状况详查"],
+        "certifications": ["CPA计量器具型式批准", "CMA检测报告"],
+        "warranty": "2年质保",
+        "installation_period": "即买即用",
+        "images": ["eq-soil-001-main.jpg"]
+    },
+
+    # ==================== 自动监控 ====================
+    {
+        "id": "EQ-AUTO-001",
+        "name": "CEMS烟气在线监测系统",
+        "category": "自动监控",
+        "subcategory": "烟气在线监测",
+        "price_range": "15-45万",
+        "brand": "蓝天卫士",
+        "model": "LT-CEMS-Pro",
+        "capacity": "全参数监测",
+        "power": "3kW",
+        "footprint": "机柜式1800×800×600mm",
+        "tags": ["SO₂", "NOx", "颗粒物", "O₂", "温压流", "数据联网"],
+        "description": "完整CEMS系统，监测SO₂/NOx/颗粒物/O₂/温度/压力/流速/湿度，数据自动上传省/市环保平台。满足排污许可自动监控要求，超标自动标记上报。",
+        "case": {
+            "title": "某热电联产企业CEMS安装与联网",
+            "industry": "电力",
+            "location": "山东济南",
+            "before": "无在线监测设备，季度监督性监测偶尔超标，被要求限期安装自动监控",
+            "after": "CEMS安装联网后，实时监控排放浓度，超标1分钟内预警，调整运行参数",
+            "cost_before": "面临限期整改+潜在限产损失约50万元/年",
+            "cost_after": "设备年运行3万元（标气+电费+维护）",
+            "saving": "年避免损失47万元",
+            "payback": "0.6年回收投资",
+            "roi": "167%",
+            "compliance": "HJ 75-2017 固定污染源烟气（SO₂、NOx、颗粒物）排放连续监测技术规范",
+            "highlights": ["全参数实时监测", "数据自动联网", "超标1分钟预警", "环保检查免罚"]
+        },
+        "applicable_scenarios": ["燃煤锅炉", "烧结机", "水泥窑", "玻璃窑炉", "垃圾焚烧"],
+        "certifications": ["CCEP环保产品认证", "CPA计量器具型式批准"],
+        "warranty": "2年质保（免费校准4次）",
+        "installation_period": "15-20个工作日",
+        "images": ["eq-auto-001-main.jpg"]
+    },
+    {
+        "id": "EQ-AUTO-002",
+        "name": "用电智能监控终端（环保用电）",
+        "category": "自动监控",
+        "subcategory": "环保用电监管",
+        "price_range": "0.3-0.8万/套",
+        "brand": "环信通",
+        "model": "HXT-EM-Terminal",
+        "capacity": "单设备监控",
+        "power": "0.01kW",
+        "footprint": "导轨式安装",
+        "tags": ["用电监控", "治污设施", "停运预警", "无线传输"],
+        "description": "安装在企业治污设施和生产设施电路上，实时监测用电状态。治污设施停运时10分钟内自动预警推送到企业和环保部门。解决'治污设施不正常运行'监管难题。",
+        "case": {
+            "title": "某市生态环境局环保用电监管平台建设",
+            "industry": "政府监管",
+            "location": "山东日照",
+            "before": "依靠人工巡查，治污设施停运发现率低，违法取证困难",
+            "after": "200家企业安装用电监控后，治污设施停运10分钟内自动预警，执法精准化",
+            "cost_before": "年人工巡查成本60万元（20人×3万），违法发现率<5%",
+            "cost_after": "设备投入40万元（200家×0.2万/家），年运行5万元",
+            "saving": "年节省人工巡查55万元+违法处罚增收200万元",
+            "payback": "0.7年回收投资",
+            "roi": "137%",
+            "compliance": "HJ 1200-2021 排污单位自行监测技术指南",
+            "highlights": ["停运10分钟预警", "执法精准化", "违法发现率提升400%", "在线取证"]
+        },
+        "applicable_scenarios": ["涉气企业治污设施监控", "涉水企业治污设施监控", "环保执法监管", "重污染天气应急"],
+        "certifications": ["CCEP环保产品认证", "CPA计量器具型式批准"],
+        "warranty": "3年质保",
+        "installation_period": "0.5个工作日/套",
+        "images": ["eq-auto-002-main.jpg"]
+    },
+]
+
+
+def get_all_products():
+    """获取所有产品"""
+    return EQUIPMENT_PRODUCTS
+
+def get_product_by_id(pid):
+    """按ID获取产品"""
+    for p in EQUIPMENT_PRODUCTS:
+        if p["id"] == pid:
+            return p
+    return None
+
+def get_products_by_category(cat):
+    """按分类获取产品"""
+    return [p for p in EQUIPMENT_PRODUCTS if p["category"] == cat]
+
+def get_categories():
+    """获取所有分类及统计"""
+    cats = {}
+    for p in EQUIPMENT_PRODUCTS:
+        cat = p["category"]
+        if cat not in cats:
+            cats[cat] = {"count": 0, "subcategories": set()}
+        cats[cat]["count"] += 1
+        cats[cat]["subcategories"].add(p["subcategory"])
+    result = []
+    for cat, info in cats.items():
+        result.append({
+            "category": cat,
+            "count": info["count"],
+            "subcategories": list(info["subcategories"])
+        })
+    return result
+
+def get_case_studies():
+    """获取所有案例（精简版）"""
+    cases = []
+    for p in EQUIPMENT_PRODUCTS:
+        c = p["case"]
+        cases.append({
+            "product_id": p["id"],
+            "product_name": p["name"],
+            "category": p["category"],
+            "case_title": c["title"],
+            "industry": c["industry"],
+            "location": c["location"],
+            "saving": c["saving"],
+            "payback": c["payback"],
+            "roi": c["roi"],
+            "highlights": c["highlights"]
+        })
+    return cases
+
+def search_equipment(keyword):
+    """搜索设备"""
+    kw = keyword.lower()
+    results = []
+    for p in EQUIPMENT_PRODUCTS:
+        if kw in p["name"].lower() or kw in p["description"].lower() or \
+           kw in p["category"].lower() or any(kw in t.lower() for t in p["tags"]) or \
+           any(kw in s.lower() for s in p["applicable_scenarios"]):
+            results.append(p)
+    return results
