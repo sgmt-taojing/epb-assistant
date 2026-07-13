@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>企业风险画像 · 环保执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#7c2d12 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--warn)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.search-bar{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.search-input{width:100%;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:14px;outline:none}
+.search-input:focus{border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 风险评分卡 */
+.risk-score-card{background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.08));border:1px solid rgba(239,68,68,.2);border-radius:16px;padding:20px;text-align:center;margin-bottom:12px}
+.risk-score{font-size:48px;font-weight:700;line-height:1}
+.risk-level{font-size:16px;font-weight:600;margin-top:4px}
+.risk-level.high{color:var(--danger)}
+.risk-level.medium{color:var(--warn)}
+.risk-level.low{color:var(--accent)}
+.risk-desc{font-size:11px;color:var(--muted);margin-top:6px}
+/* 维度评分 */
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dim-item{background:var(--card2);border-radius:10px;padding:12px}
+.dim-item .dim-name{font-size:11px;color:var(--muted);margin-bottom:6px}
+.dim-item .dim-score{font-size:20px;font-weight:700}
+.dim-item .dim-bar{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.dim-item .dim-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.dim-item.red .dim-score{color:var(--danger)}
+.dim-item.red .dim-bar-fill{background:var(--danger)}
+.dim-item.amber .dim-score{color:var(--warn)}
+.dim-item.amber .dim-bar-fill{background:var(--warn)}
+.dim-item.green .dim-score{color:var(--accent)}
+.dim-item.green .dim-bar-fill{background:var(--accent)}
+/* 风险事件列表 */
+.event-list{list-style:none}
+.event-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.event-item:last-child{border-bottom:none}
+.event-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+.event-dot.red{background:var(--danger)}
+.event-dot.amber{background:var(--warn)}
+.event-dot.green{background:var(--accent)}
+.event-info{flex:1}
+.event-title{font-size:13px;font-weight:500}
+.event-meta{font-size:11px;color:var(--muted);margin-top:2px}
+/* 建议 */
+.advice-box{background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--primary)}
+.advice-box .advice-title{font-size:13px;font-weight:600;color:var(--primary2);margin-bottom:8px}
+.advice-box .advice-item{font-size:12px;color:var(--text);padding:4px 0;padding-left:16px;position:relative}
+.advice-box .advice-item::before{content:'→';position:absolute;left:0;color:var(--primary)}
+/* 企业卡片 */
+.ent-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.ent-card:active{transform:scale(.98)}
+.ent-card .ent-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ent-card .ent-name{font-size:14px;font-weight:600}
+.ent-card .ent-risk{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.ent-card .ent-risk.high{background:rgba(239,68,68,.15);color:#fca5a5}
+.ent-card .ent-risk.medium{background:rgba(245,158,11,.15);color:#fcd34d}
+.ent-card .ent-risk.low{background:rgba(16,185,129,.15);color:#6ee7b7}
+.ent-card .ent-info{font-size:11px;color:var(--muted)}
+.ent-card .ent-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.ent-card .ent-tag{padding:2px 6px;background:var(--card2);border-radius:3px;font-size:10px;color:var(--muted)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>企业风险 <span>画像</span></h1>
+<p>多维度风险评估 · 精准执法靶向 · 风险趋势追踪</p>
+</div>
+
+<div class="search-bar">
+<input class="search-input" id="search" placeholder="搜索企业名称或统一社会信用代码..." oninput="doSearch()">
+</div>
+
+<div id="ent-list" class="container"></div>
+<div id="detail-area"></div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/risk-profile.html"><span class="icon">🎯</span>风险</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var API_BASE='';
+var _apiFallbackMap={'/api/risk_profile':'/api-data/risk_profile.json'};
+var _origFetch=window.fetch;
+window.fetch=function(url,opts){return _origFetch(url,opts).catch(function(){var fb=_apiFallbackMap[url]||_apiFallbackMap[url.split('?')[0]];if(fb)return _origFetch(fb);throw new Error('API unavailable: '+url);})};
+
+var ENTERPRISES=[
+{id:'EQ-001',name:'山东华源化工有限公司',code:'91370100MA3XXXXX1A',industry:'化工制造',location:'济南市历下区',permit:'PW-2023-001',risk_score:82,risk_level:'high',dims:{compliance:75,monitoring:88,history:90,rectification:70,emergency:85},events:[{type:'red',title:'COD连续3天超标排放',time:'2026-06-20',desc:'在线监测COD浓度超标准1.5倍'},{type:'amber',title:'危废贮存间标识不全',time:'2026-05-15',desc:'检查发现危废标识缺失3处'},{type:'amber',title:'环保检查限期整改',time:'2026-04-10',desc:'治污设施运行记录不完整'}],advice:['立即排查COD超标原因，检查治污设施运行状态','完善危废贮存间标准化标识','建立治污设施运行台账电子化管理']},
+{id:'EQ-002',name:'临沂市建材集团股份有限公司',code:'91371300MA3XXXXX2B',industry:'建材制造',location:'临沂市河东区',permit:'PW-2023-002',risk_score:68,risk_level:'medium',dims:{compliance:60,monitoring:65,history:75,rectification:72,emergency:68},events:[{type:'amber',title:'粉尘排放浓度偏高',time:'2026-06-15',desc:'PM10接近排放限值'},{type:'amber',title:'危废贮存间防渗不达标',time:'2026-05-20',desc:'防渗层破损需修补'},{type:'green',title:'完成脱硫脱硝改造',time:'2026-04-01',desc:'超低排放改造通过验收'}],advice:['加强除尘设施维护，降低粉尘排放','修补危废贮存间防渗层','保持超低排放设施运行']},
+{id:'EQ-003',name:'青岛海润电镀有限公司',code:'91370200MA3XXXXX3C',industry:'电镀加工',location:'青岛市城阳区',permit:'PW-2023-003',risk_score:91,risk_level:'high',dims:{compliance:85,monitoring:95,history:95,rectification:88,emergency:92},events:[{type:'red',title:'含铬废水渗坑排放',time:'2026-06-25',desc:'发现私设暗管排放含铬废水'},{type:'red',title:'在线监测数据篡改',time:'2026-06-22',desc:'发现人为修改监测数据'},{type:'amber',title:'危废转移联证缺失',time:'2026-05-10',desc:'危废转移联证不完整'}],advice:['立即封堵暗管，停止违法排放','恢复在线监测设备正常运行','补充完善危废转移联证','建议立案调查，考虑涉刑移送']},
+{id:'EQ-004',name:'淄博新华制药股份有限公司',code:'91370300MA3XXXXX4D',industry:'制药',location:'淄博市张店区',permit:'PW-2023-004',risk_score:45,risk_level:'low',dims:{compliance:90,monitoring:85,history:30,rectification:40,emergency:50},events:[{type:'green',title:'环保信用评级AA',time:'2026-06-01',desc:'获得环保信用AA级评定'},{type:'green',title:'自行监测全部达标',time:'2026-05-20',desc:'季度自行监测报告全部合格'},{type:'amber',title:'VOCs排放偶有波动',time:'2026-04-15',desc:'VOCs浓度偶有接近限值'}],advice:['保持环保管理体系运行','关注VOCs排放波动，优化治污设施','维持AA级环保信用']},
+{id:'EQ-005',name:'烟台渤海印染有限公司',code:'91370600MA3XXXXX5E',industry:'印染',location:'烟台市福山区',permit:'PW-2023-005',risk_score:72,risk_level:'medium',dims:{compliance:65,monitoring:70,history:80,rectification:68,emergency:75},events:[{type:'red',title:'利用雨水管网偷排印染废水',time:'2026-06-18',desc:'发现通过雨水管排放染色废水'},{type:'amber',title:'污泥处置不规范',time:'2026-05-05',desc:'污泥堆放未入库'},{type:'green',title:'安装在线监测设备',time:'2026-03-20',desc:'完成水质在线监测安装'}],advice:['立即停止雨水管网偷排行为','规范污泥入库管理','保持在线监测设备正常运行']},
+{id:'EQ-006',name:'潍坊绿洲纸业有限公司',code:'91370700MA3XXXXX6F',industry:'造纸',location:'潍坊市奎文区',permit:'PW-2023-006',risk_score:58,risk_level:'medium',dims:{compliance:55,monitoring:60,history:65,rectification:52,emergency:58},events:[{type:'amber',title:'COD排放接近限值',time:'2026-06-10',desc:'COD浓度达到限值的90%'},{type:'amber',title:'环保台账不完整',time:'2026-05-12',desc:'治污设施运行台账缺失7天'},{type:'green',title:'完成排污许可证换证',time:'2026-04-20',desc:'排污许可证续展完成'}],advice:['优化废水处理工艺，降低COD浓度','完善治污设施运行台账','保持排污许可证有效']},
+{id:'EQ-007',name:'济宁运达金属加工有限公司',code:'91370800MA3XXXXX7G',industry:'金属加工',location:'济宁市任城区',permit:'PW-2023-007',risk_score:87,risk_level:'high',dims:{compliance:80,monitoring:92,history:90,rectification:85,emergency:88},events:[{type:'red',title:'危险废物非法倾倒',time:'2026-06-28',desc:'发现非法倾倒废酸3.5吨'},{type:'red',title:'危废贮存间严重不达标',time:'2026-06-05',desc:'危废贮存间无防渗、无标识、无台账'},{type:'amber',title:'噪声超标扰民',time:'2026-05-01',desc:'厂界噪声超标5dB'}],advice:['立即清理倾倒废酸，开展场地调查','危废贮存间标准化改造','安装降噪设施','建议立案查处']},
+{id:'EQ-008',name:'泰安泰山玻璃制品有限公司',code:'91370900MA3XXXXX8H',industry:'玻璃制造',location:'泰安市泰山区',permit:'PW-2023-008',risk_score:38,risk_level:'low',dims:{compliance:92,monitoring:88,history:25,rectification:35,emergency:42},events:[{type:'green',title:'超低排放改造完成',time:'2026-06-15',desc:'脱硫脱硝除尘全部达标'},{type:'green',title:'环保信用评级AAA',time:'2026-05-01',desc:'获得最高环保信用评级'},{type:'green',title:'排污许可证年度审核通过',time:'2026-04-10',desc:'年度审核无问题'}],advice:['维持超低排放设施运行','保持AAA级环保信用','作为行业环保标杆推广']}
+];
+
+var searchKeyword='';
+
+function doSearch(){
+searchKeyword=document.getElementById('search').value.toLowerCase().trim();
+renderList();
+}
+
+function renderList(){
+var list=ENTERPRISES;
+if(searchKeyword){
+list=ENTERPRISES.filter(function(e){
+return e.name.toLowerCase().indexOf(searchKeyword)>=0||e.code.toLowerCase().indexOf(searchKeyword)>=0||e.industry.toLowerCase().indexOf(searchKeyword)>=0;
+});
+}
+var container=document.getElementById('ent-list');
+if(list.length===0){
+container.innerHTML='<div class="empty">未找到匹配的企业</div>';
+return;
+}
+container.innerHTML=list.map(function(e){
+return '<div class="ent-card" onclick="showDetail(\''+e.id+'\')">'+
+'<div class="ent-header"><span class="ent-name">'+e.name+'</span><span class="ent-risk '+e.risk_level+'">'+(e.risk_level==='high'?'高风险':e.risk_level==='medium'?'中风险':'低风险')+'</span></div>'+
+'<div class="ent-info">'+e.industry+' · '+e.location+' · 风险分:'+e.risk_score+'</div>'+
+'<div class="ent-tags">'+e.events.slice(0,2).map(function(ev){return '<span class="ent-tag">'+ev.title+'</span>'}).join('')+'</div>'+
+'</div>';
+}).join('');
+}
+
+function showDetail(eid){
+var e=ENTERPRISES.filter(function(x){return x.id===eid})[0];
+if(!e)return;
+var riskColor=e.risk_level==='high'?'var(--danger)':e.risk_level==='medium'?'var(--warn)':'var(--accent)';
+var riskText=e.risk_level==='high'?'高风险':e.risk_level==='medium'?'中风险':'低风险';
+var dimNames={compliance:'合规评分',monitoring:'监测评分',history:'历史记录',rectification:'整改进度',emergency:'应急管理'};
+var dimLabels={compliance:'合规',monitoring:'监测',history:'历史',rectification:'整改',emergency:'应急'};
+
+var html='<div class="container">';
+
+// 风险评分卡
+html+='<div class="risk-score-card">'+
+'<div class="risk-score" style="color:'+riskColor+'">'+e.risk_score+'</div>'+
+'<div class="risk-level '+e.risk_level+'">'+riskText+'</div>'+
+'<div class="risk-desc">'+e.name+' · '+e.industry+' · '+e.location+'</div>'+
+'</div>';
+
+// 维度评分
+html+='<div class="section"><div class="section-title">风险维度评分</div><div class="dim-grid">';
+Object.keys(e.dims).forEach(function(k){
+var score=e.dims[k];
+var cls=score>=80?'red':score>=60?'amber':'green';
+html+='<div class="dim-item '+cls+'"><div class="dim-name">'+dimNames[k]+'</div><div class="dim-score">'+score+'</div><div class="dim-bar"><div class="dim-bar-fill" style="width:'+score+'%"></div></div></div>';
+});
+html+='</div></div>';
+
+// 风险事件
+html+='<div class="section"><div class="section-title">风险事件时间线</div><ul class="event-list">';
+e.events.forEach(function(ev){
+var dotCls=ev.type;
+html+='<li class="event-item"><div class="event-dot '+dotCls+'"></div><div class="event-info"><div class="event-title">'+ev.title+'</div><div class="event-meta">'+ev.time+' · '+ev.desc+'</div></div></li>';
+});
+html+='</ul></div>';
+
+// 执法建议
+html+='<div class="section"><div class="section-title">执法建议</div><div class="advice-box"><div class="advice-title">基于风险画像的精准执法建议</div>';
+e.advice.forEach(function(a){
+html+='<div class="advice-item">'+a+'</div>';
+});
+html+='</div></div>';
+
+// 基本信息
+html+='<div class="section"><div class="section-title">企业基本信息</div>'+
+'<div style="font-size:12px;color:var(--muted);line-height:2">'+
+'<div>统一社会信用代码：'+e.code+'</div>'+
+'<div>行业类型：'+e.industry+'</div>'+
+'<div>所在地区：'+e.location+'</div>'+
+'<div>排污许可证号：'+e.permit+'</div>'+
+'</div></div>';
+
+html+='</div>';
+document.getElementById('ent-list').style.display='none';
+document.getElementById('search-bar').style.display='none';
+document.getElementById('detail-area').innerHTML=html+'<div class="container"><button class="btn btn-primary" style="width:100%;padding:14px;border:none;border-radius:10px;background:var(--primary);color:#fff;font-size:15px;font-weight:600" onclick="backToList()">返回企业列表</button></div>';
+}
+
+function backToList(){
+document.getElementById('ent-list').style.display='';
+document.getElementById('search-bar').style.display='';
+document.getElementById('detail-area').innerHTML='';
+}
+
+renderList();
+</script>
+</body>
+</html>
