@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚨 环境举报 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 8px rgba(27,67,50,.06);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+input,select,textarea{font-family:inherit;font-size:14px}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px;flex-shrink:0}
+.top-bar h1{font-size:16px;font-weight:600;flex:1}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);margin:12px;padding:16px}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;color:var(--g);margin-bottom:4px;font-weight:600}
+.form-label .req{color:var(--red)}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--gbg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--gl);background:#fff}
+.form-textarea{min-height:100px;resize:vertical;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checkbox-row{display:flex;align-items:center;gap:8px;padding:8px 0}
+.checkbox-row input{width:18px;height:18px;accent-color:var(--gm)}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.type-chip{padding:8px 4px;text-align:center;border:1px solid var(--border);border-radius:8px;font-size:11px;background:var(--gbg);cursor:pointer;transition:all .15s}
+.type-chip:active{background:var(--gp)}
+.type-chip.selected{background:var(--gm);color:#fff;border-color:var(--gm)}
+.type-chip .icon{display:block;font-size:18px;margin-bottom:2px}
+.upload-area{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;background:var(--gbg);cursor:pointer}
+.upload-area:active{border-color:var(--gl);background:var(--gp)}
+.upload-icon{font-size:30px;margin-bottom:4px}
+.upload-text{font-size:12px;color:var(--muted)}
+.preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.preview-item{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1}
+.preview-item img{width:100%;height:100%;object-fit:cover}
+.preview-remove{position:absolute;top:2px;right:2px;width:20px;height:20px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;font-size:12px}
+.btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--gm),var(--g));color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+.btn-submit:active{opacity:.85}
+.btn-submit:disabled{opacity:.5}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;display:none}
+#toast.show{display:block}
+#toast.error{background:rgba(231,76,60,.92)}
+.success-page{text-align:center;padding:40px 20px}
+.success-icon{font-size:60px;margin-bottom:16px}
+.success-title{font-size:18px;font-weight:700;color:var(--g);margin-bottom:8px}
+.success-desc{font-size:13px;color:var(--muted);margin-bottom:20px}
+.success-id{background:var(--gbg);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px}
+.success-id strong{color:var(--g)}
+.query-section{margin-top:12px}
+.query-input{display:flex;gap:8px}
+.query-input input{flex:1}
+.query-btn{padding:10px 16px;background:var(--gm);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap}
+.query-result{margin-top:10px}
+.query-item{background:var(--gbg);border-radius:8px;padding:10px;margin-bottom:6px;font-size:12px}
+.query-item .qi-id{font-weight:700;color:var(--g)}
+.query-item .qi-status{float:right;padding:2px 8px;border-radius:4px;font-size:11px}
+.st-pending{background:#fff8e1;color:#f57f17}
+.st-accepted{background:#e3f2fd;color:#1565c0}
+.st-processing{background:#e8f5e9;color:#2e7d32}
+.st-closed{background:#f5f5f5;color:#666}
+.footer{text-align:center;padding:16px;color:var(--muted);font-size:11px}
+</style>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/wechat-h5.html" class="back-btn">‹</a>
+  <h1>🚨 环境举报</h1>
+</div>
+
+<div id="main-page">
+  <div class="card">
+    <div class="card-title">📋 举报信息</div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="anonymous">
+      <label for="anonymous" style="font-size:13px;color:var(--muted)">匿名举报</label>
+    </div>
+    <div id="reporter-fields">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">姓名 <span class="req">*</span></label>
+          <input type="text" class="form-input" id="r-name" placeholder="您的姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">电话 <span class="req">*</span></label>
+          <input type="tel" class="form-input" id="r-phone" placeholder="手机号">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏭 被举报对象</div>
+    <div class="form-group">
+      <label class="form-label">企业/单位名称 <span class="req">*</span></label>
+      <input type="text" class="form-input" id="t-company" placeholder="如：某某化工有限公司">
+    </div>
+    <div class="form-group">
+      <label class="form-label">地址（如已知）</label>
+      <input type="text" class="form-input" id="t-address" placeholder="企业/单位地址">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚠️ 污染信息</div>
+    <label class="form-label">污染类型 <span class="req">*</span></label>
+    <div class="type-grid" id="type-grid">
+      <div class="type-chip" data-val="水污染"><span class="icon">💧</span>水污染</div>
+      <div class="type-chip" data-val="大气污染"><span class="icon">💨</span>大气</div>
+      <div class="type-chip" data-val="噪声污染"><span class="icon">🔊</span>噪声</div>
+      <div class="type-chip" data-val="固废危废"><span class="icon">🗑️</span>固废</div>
+      <div class="type-chip" data-val="土壤污染"><span class="icon">🟤</span>土壤</div>
+      <div class="type-chip" data-val="辐射污染"><span class="icon">☢️</span>辐射</div>
+      <div class="type-chip" data-val="生态破坏"><span class="icon">🌿</span>生态</div>
+      <div class="type-chip" data-val="其他"><span class="icon">📋</span>其他</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">详细描述 <span class="req">*</span></label>
+      <textarea class="form-textarea" id="p-desc" placeholder="请描述污染情况：发生时间、频率、具体表现、影响等"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">详细地址 <span class="req">*</span></label>
+      <input type="text" class="form-input" id="l-detail" placeholder="如：某某路某某号厂区东侧">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📷 现场照片（可选）</div>
+    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📸</div>
+      <div class="upload-text">点击上传照片（最多6张）</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)">
+    <div class="preview-grid" id="preview-grid"></div>
+  </div>
+
+  <div style="padding:0 12px 20px">
+    <button class="btn-submit" id="btn-submit" onclick="submitReport()">提交举报</button>
+  </div>
+
+  <div class="card query-section">
+    <div class="card-title">🔍 查询举报进度</div>
+    <div class="query-input">
+      <input type="tel" class="form-input" id="query-phone" placeholder="输入手机号查询">
+      <button class="query-btn" onclick="queryReports()">查询</button>
+    </div>
+    <div class="query-result" id="query-result"></div>
+  </div>
+
+  <div class="footer">© 2026 环保智慧执法平台 · 举报信息受法律保护</div>
+</div>
+
+<div id="success-page" style="display:none">
+  <div class="card success-page">
+    <div class="success-icon">✅</div>
+    <div class="success-title">举报提交成功</div>
+    <div class="success-desc">我们将尽快处理您的举报，请保存举报编号以便查询</div>
+    <div class="success-id">举报编号：<strong id="success-id"></strong></div>
+    <button class="btn-submit" onclick="location.reload()">继续举报</button>
+    <div style="margin-top:10px"><a href="/wechat-h5.html" style="color:var(--gm);font-size:13px">返回首页</a></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+var selectedType='';
+var uploadedImages=[];
+document.querySelectorAll('.type-chip').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.type-chip').forEach(function(c){c.classList.remove('selected')});
+    el.classList.add('selected');
+    selectedType=el.dataset.val;
+  });
+});
+// Auto-select from URL param
+var params=new URLSearchParams(location.search);
+var presetType=params.get('type');
+if(presetType){
+  var chip=document.querySelector('.type-chip[data-val="'+presetType+'"]');
+  if(chip){chip.classList.add('selected');selectedType=presetType;}
+}
+function toggleAnonymous(){
+  var anon=document.getElementById('anonymous').checked;
+  document.getElementById('reporter-fields').style.display=anon?'none':'block';
+}
+document.getElementById('anonymous').addEventListener('change',toggleAnonymous);
+
+function handleFiles(files){
+  for(var i=0;i<files.length&&uploadedImages.length<6;i++){
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        uploadedImages.push(e.target.result);
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+  }
+}
+function renderPreviews(){
+  var html=uploadedImages.map(function(src,idx){
+    return '<div class="preview-item"><img src="'+src+'"><button class="preview-remove" onclick="removeImage('+idx+')">✕</button></div>';
+  }).join('');
+  document.getElementById('preview-grid').innerHTML=html;
+}
+function removeImage(idx){uploadedImages.splice(idx,1);renderPreviews();}
+
+function showToast(msg,isError){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='show'+(isError?' error':'');
+  setTimeout(function(){t.className='';},2500);
+}
+
+function submitReport(){
+  var anon=document.getElementById('anonymous').checked;
+  var name=document.getElementById('r-name').value.trim();
+  var phone=document.getElementById('r-phone').value.trim();
+  var company=document.getElementById('t-company').value.trim();
+  var pDesc=document.getElementById('p-desc').value.trim();
+  var lDetail=document.getElementById('l-detail').value.trim();
+  if(!anon){
+    if(!name){showToast('请输入姓名',true);return;}
+    if(!/^1[3-9]\d{9}$/.test(phone)){showToast('请输入正确手机号',true);return;}
+  }
+  if(!company){showToast('请输入被举报企业名称',true);return;}
+  if(!selectedType){showToast('请选择污染类型',true);return;}
+  if(!pDesc){showToast('请填写污染描述',true);return;}
+  if(!lDetail){showToast('请填写详细地址',true);return;}
+  var data={
+    reporter:{name:anon?'':name,phone:anon?'':phone,anonymous:anon},
+    target:{company:company,address:document.getElementById('t-address').value.trim()},
+    type:selectedType,
+    description:pDesc,
+    location:{province:'',city:'',district:'',detail:lDetail},
+    images:uploadedImages
+  };
+  var btn=document.getElementById('btn-submit');
+  btn.disabled=true;btn.textContent='提交中...';
+  fetch('/api/report',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(r){return r.json()}).then(function(res){
+    if(res.ok){
+      document.getElementById('main-page').style.display='none';
+      document.getElementById('success-page').style.display='block';
+      document.getElementById('success-id').textContent=res.id;
+    }else{
+      showToast('提交失败：'+(res.error||'未知错误'),true);
+    }
+  }).catch(function(err){
+    showToast('网络错误，请重试',true);
+  }).finally(function(){
+    btn.disabled=false;btn.textContent='提交举报';
+  });
+}
+
+function queryReports(){
+  var phone=document.getElementById('query-phone').value.trim();
+  if(!phone){showToast('请输入手机号',true);return;}
+  fetch('/api/report?phone='+encodeURIComponent(phone)).then(function(r){return r.json()}).then(function(res){
+    var reports=res.reports||res.data||[];
+    if(reports.length===0){
+      document.getElementById('query-result').innerHTML='<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">未查询到举报记录</div>';
+      return;
+    }
+    var stMap={pending:'待受理',accepted:'已受理',processing:'处理中',closed:'已办结'};
+    var stClass={pending:'st-pending',accepted:'st-accepted',processing:'st-processing',closed:'st-closed'};
+    var html=reports.map(function(r){
+      return '<div class="query-item"><span class="qi-id">'+r.id+'</span><span class="qi-status '+(stClass[r.status]||'st-pending')+'">'+(stMap[r.status]||r.status)+'</span><br>'+r.type+' | '+(r.description||'').slice(0,40)+'...<br><span style="color:var(--muted)">'+r.created_at+'</span></div>';
+    }).join('');
+    document.getElementById('query-result').innerHTML=html;
+  }).catch(function(){showToast('查询失败',true);});
+}
+</script>
+</body>
+</html>

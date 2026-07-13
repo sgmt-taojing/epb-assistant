@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🏢 企业EHS管理中心 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 12px rgba(27,67,50,.08);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px}
+.top-bar h1{font-size:16px;font-weight:600;flex:1}
+.top-bar .org-name{font-size:12px;opacity:.8;padding:4px 10px;background:rgba(255,255,255,.1);border-radius:12px}
+.tabs{display:flex;gap:0;background:var(--card);border-bottom:2px solid var(--border);overflow-x:auto}
+.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s}
+.tab:hover{color:var(--g)}
+.tab.active{color:var(--g);border-bottom-color:var(--gm);font-weight:700}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+.panel{display:none}
+.panel.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:768px){.overview-grid{grid-template-columns:repeat(2,1fr)}}
+.ov-card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;text-align:center}
+.ov-icon{font-size:28px;margin-bottom:6px}
+.ov-val{font-size:24px;font-weight:700;color:var(--g)}
+.ov-label{font-size:11px;color:var(--muted);margin-top:2px}
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gbg);border-radius:8px;border-left:4px solid var(--border)}
+.check-item.pass{border-left-color:#27ae60}
+.check-item.fail{border-left-color:var(--red)}
+.check-item.warn{border-left-color:var(--amber)}
+.check-item.na{border-left-color:#bbb}
+.check-status{font-size:18px}
+.check-content{flex:1}
+.check-name{font-size:13px;font-weight:600}
+.check-detail{font-size:11px;color:var(--muted)}
+.check-date{font-size:11px;color:var(--muted)}
+.permit-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--gbg);border-radius:8px;margin-bottom:8px}
+.permit-icon{font-size:28px}
+.permit-info{flex:1}
+.permit-name{font-size:13px;font-weight:600}
+.permit-meta{font-size:11px;color:var(--muted)}
+.permit-status{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.st-valid{background:#D5F5E3;color:#27ae60}
+.st-expiring{background:#FFF3E0;color:#E67E22}
+.st-expired{background:#FDEDEC;color:#E74C3C}
+.monitor-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--gbg);border-radius:8px;margin-bottom:6px}
+.monitor-name{flex:1;font-size:13px;font-weight:500}
+.monitor-val{font-size:14px;font-weight:700}
+.monitor-unit{font-size:11px;color:var(--muted);margin-left:2px}
+.monitor-status{width:8px;height:8px;border-radius:50%}
+.st-ok{background:#27ae60}
+.st-warn{background:#E67E22}
+.st-alarm{background:#E74C3C}
+.task-item{padding:10px;background:var(--gbg);border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.task-priority{width:4px;height:32px;border-radius:2px}
+.p-high{background:var(--red)}
+.p-mid{background:var(--amber)}
+.p-low{background:var(--gl)}
+.task-content{flex:1}
+.task-title{font-size:13px;font-weight:600}
+.task-meta{font-size:11px;color:var(--muted)}
+.task-status{font-size:11px;padding:2px 8px;border-radius:4px}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--gm);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--g)}
+.training-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.training-card{background:var(--gbg);border-radius:8px;padding:12px;cursor:pointer;transition:all .15s}
+.training-card:hover{background:var(--gp)}
+.training-icon{font-size:24px;margin-bottom:6px}
+.training-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.training-meta{font-size:11px;color:var(--muted)}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gm);border-radius:3px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;display:none}
+#toast.show{display:block}
+.footer{text-align:center;padding:16px;color:var(--muted);font-size:11px}
+</style>
+<script src="/auth-guard.js"></script>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/index.html" class="back-btn">‹</a>
+  <h1>🏢 企业EHS管理中心</h1>
+  <div class="org-name" id="org-display">未绑定企业</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPanel('overview',this)">📊 概览</div>
+  <div class="tab" onclick="showPanel('compliance',this)">🔍 合规管理</div>
+  <div class="tab" onclick="showPanel('permit',this)">📄 证照管理</div>
+  <div class="tab" onclick="showPanel('monitor',this)">📡 排放监测</div>
+  <div class="tab" onclick="showPanel('task',this)">📋 任务整改</div>
+  <div class="tab" onclick="showPanel('training',this)">🎓 培训管理</div>
+  <div class="tab" onclick="showPanel('report',this)">📊 报告中心</div>
+</div>
+
+<div class="container">
+  <!-- 概览 -->
+  <div class="panel show" id="panel-overview">
+    <div class="overview-grid">
+      <div class="ov-card"><div class="ov-icon">✅</div><div class="ov-val" id="ov-compliance">--</div><div class="ov-label">合规率</div></div>
+      <div class="ov-card"><div class="ov-icon">📄</div><div class="ov-val" id="ov-permits">--</div><div class="ov-label">有效证照</div></div>
+      <div class="ov-card"><div class="ov-icon">📡</div><div class="ov-val" id="ov-monitors">--</div><div class="ov-label">在线监测点</div></div>
+      <div class="ov-card"><div class="ov-icon">📋</div><div class="ov-val" id="ov-tasks">--</div><div class="ov-label">待办任务</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏭 企业环保画像</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:12px">
+        <div><div style="color:var(--muted);margin-bottom:2px">行业类型</div><div style="font-weight:600" id="profile-industry">--</div></div>
+        <div><div style="color:var(--muted);margin-bottom:2px">主要污染物</div><div style="font-weight:600" id="profile-pollutant">--</div></div>
+        <div><div style="color:var(--muted);margin-bottom:2px">环保信用等级</div><div style="font-weight:600;color:#27ae60" id="profile-credit">--</div></div>
+        <div><div style="color:var(--muted);margin-bottom:2px">排污许可证编号</div><div style="font-weight:600" id="profile-permit">--</div></div>
+        <div><div style="color:var(--muted);margin-bottom:2px">最近检查日期</div><div style="font-weight:600" id="profile-check">--</div></div>
+        <div><div style="color:var(--muted);margin-bottom:2px">环境应急预案</div><div style="font-weight:600;color:#27ae60" id="profile-emergency">已备案</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ 风险提醒</div>
+      <div id="risk-list">
+        <div style="padding:8px;background:var(--gbg);border-radius:8px;font-size:12px;color:var(--muted)">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 合规管理 -->
+  <div class="panel" id="panel-compliance">
+    <div class="card">
+      <div class="card-title">🔍 环保合规检查清单</div>
+      <div class="check-list" id="compliance-list"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="location.href='/self-check.html'">开始自查</button>
+        <button class="btn btn-outline" onclick="location.href='/knowledge.html'">查看法规</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 证照管理 -->
+  <div class="panel" id="panel-permit">
+    <div class="card">
+      <div class="card-title">📄 环保证照台账</div>
+      <div id="permit-list"></div>
+    </div>
+  </div>
+
+  <!-- 排放监测 -->
+  <div class="panel" id="panel-monitor">
+    <div class="card">
+      <div class="card-title">📡 实时排放监测</div>
+      <div id="monitor-list"></div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" onclick="location.href='/iot.html'">进入物联感知平台</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 任务整改 -->
+  <div class="panel" id="panel-task">
+    <div class="card">
+      <div class="card-title">📋 待办任务与整改</div>
+      <div id="task-list"></div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" onclick="location.href='/collaboration.html'">进入协同工作台</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 培训管理 -->
+  <div class="panel" id="panel-training">
+    <div class="card">
+      <div class="card-title">🎓 环保培训计划</div>
+      <div class="training-grid" id="training-grid"></div>
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" onclick="location.href='/training.html'">进入培训学院</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 报告中心 -->
+  <div class="panel" id="panel-report">
+    <div class="card">
+      <div class="card-title">📊 环保报告中心</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+        <div style="padding:14px;background:var(--gbg);border-radius:8px;cursor:pointer" onclick="genReport('monthly')">
+          <div style="font-size:20px;margin-bottom:6px">📈</div>
+          <div style="font-weight:600;font-size:13px">月度环保报告</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">自动汇总本月监测、自查、任务数据</div>
+        </div>
+        <div style="padding:14px;background:var(--gbg);border-radius:8px;cursor:pointer" onclick="genReport('compliance')">
+          <div style="font-size:20px;margin-bottom:6px">📋</div>
+          <div style="font-weight:600;font-size:13px">合规评估报告</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">全面合规评估，含整改建议</div>
+        </div>
+        <div style="padding:14px;background:var(--gbg);border-radius:8px;cursor:pointer" onclick="genReport('emergency')">
+          <div style="font-size:20px;margin-bottom:6px">🚨</div>
+          <div style="font-weight:600;font-size:13px">环境应急预案</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">应急预案文档，含演练记录</div>
+        </div>
+        <div style="padding:14px;background:var(--gbg);border-radius:8px;cursor:pointer" onclick="genReport('discharge')">
+          <div style="font-size:20px;margin-bottom:6px">💧</div>
+          <div style="font-weight:600;font-size:13px">排污许可证执行报告</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">执行报告模板，含监测数据</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">© 2026 企业EHS管理中心 · 环保智慧执法平台</div>
+<div id="toast"></div>
+
+<script>
+function showPanel(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('panel-'+name).classList.add('show');
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='show';
+  setTimeout(function(){t.className='';},2500);
+}
+
+// Load user info
+try{
+  var u=JSON.parse(localStorage.getItem('epb_user')||'{}');
+  if(u.org){document.getElementById('org-display').textContent=u.org;}
+}catch(e){}
+
+// Overview stats
+fetch('/api/tasks').then(r=>r.json()).then(data=>{
+  var tasks=data.data||data.tasks||[];
+  var pending=tasks.filter(function(t){return t.status!=='completed';}).length;
+  document.getElementById('ov-tasks').textContent=pending;
+});
+
+// Compliance items
+var complianceItems=[];
+var stMap={pass:{icon:'✅',cls:'pass'},fail:{icon:'❌',cls:'fail'},warn:{icon:'⚠️',cls:'warn'},na:{icon:'—',cls:'na'}};
+
+// 从API加载合规检查项（基于案例库的风险类型生成）
+function loadCompliance(){
+  fetch('/api/law_mapping').then(r=>r.json()).then(data=>{
+    var vt=data.data.violation_types||{};
+    var items=[];
+    Object.keys(vt).slice(0,8).forEach(function(cat){
+      var sub=vt[cat];
+      Object.keys(sub).slice(0,1).forEach(function(k){
+        var v=sub[k];
+        items.push({
+          name:k+'（'+cat.replace('类','')+'）',
+          status:v.risk_level==='高风险'?'warn':'pass',
+          detail:'法条:'+(v.violations||[]).join('; ')+' | 证据:'+(v.evidence||[]).length+'项',
+          date:'2026-06-'
+        });
+      });
+    });
+    if(items.length===0){
+      items=[
+        {name:'环境影响评价',status:'pass',detail:'环评批复已取得',date:'2025-06-15'},
+        {name:'排污许可证',status:'pass',detail:'许可证有效',date:'2026-06-01'},
+        {name:'废水排放',status:'pass',detail:'出水达标',date:'2026-06-20'},
+        {name:'废气排放',status:'warn',detail:'VOCs设施效率偏低',date:'2026-06-22'},
+        {name:'危废管理',status:'pass',detail:'台账完整',date:'2026-06-18'},
+        {name:'噪声防治',status:'pass',detail:'厂界达标',date:'2026-06-10'},
+        {name:'环境应急预案',status:'pass',detail:'已备案',date:'2026-03-20'},
+        {name:'在线监测',status:'warn',detail:'数据传输偶有中断',date:'2026-06-25'}
+      ];
+    }
+    complianceItems=items;
+    renderCompliance();
+  }).catch(function(){
+    complianceItems=[
+      {name:'环境影响评价',status:'pass',detail:'环评批复已取得',date:'2025-06-15'},
+      {name:'排污许可证',status:'pass',detail:'许可证有效',date:'2026-06-01'},
+      {name:'废水排放',status:'pass',detail:'出水达标',date:'2026-06-20'},
+      {name:'废气排放',status:'warn',detail:'VOCs设施效率偏低',date:'2026-06-22'}
+    ];
+    renderCompliance();
+  });
+}
+function renderCompliance(){
+  document.getElementById('compliance-list').innerHTML=complianceItems.map(function(i){
+    var st=stMap[i.status]||stMap.na;
+    return '<div class="check-item '+st.cls+'"><div class="check-status">'+st.icon+'</div><div class="check-content"><div class="check-name">'+i.name+'</div><div class="check-detail">'+i.detail+'</div></div><div class="check-date">'+i.date+'</div></div>';
+  }).join('');
+  var passCount=complianceItems.filter(function(i){return i.status==='pass';}).length;
+  document.getElementById('ov-compliance').textContent=Math.round(passCount/complianceItems.length*100)+'%';
+}
+loadCompliance();
+
+// Permits
+var permits=[
+  {name:'排污许可证',no:'PWX-2024-001',expire:'2027-12-31',status:'valid'},
+  {name:'危险废物经营许可证',no:'GWF-2025-088',expire:'2027-06-30',status:'valid'},
+  {name:'辐射安全许可证',no:'FS-2023-022',expire:'2026-09-15',status:'expiring'},
+  {name:'建设项目环评批复',no:'HP-2022-156',expire:'长期',status:'valid'},
+];
+document.getElementById('ov-permits').textContent=permits.filter(function(p){return p.status==='valid';}).length;
+document.getElementById('permit-list').innerHTML=permits.map(function(p){
+  var stMap={valid:['st-valid','有效'],expiring:['st-expiring','即将到期'],expired:['st-expired','已过期']};
+  var st=stMap[p.status];
+  return '<div class="permit-card"><div class="permit-icon">📄</div><div class="permit-info"><div class="permit-name">'+p.name+'</div><div class="permit-meta">编号:'+p.no+' | 到期:'+p.expire+'</div></div><span class="permit-status '+st[0]+'">'+st[1]+'</span></div>';
+}).join('');
+
+// Monitors
+var monitors=[
+  {name:'废水总排口COD',val:'42',unit:'mg/L',limit:100,status:'ok'},
+  {name:'废水总排口氨氮',val:'8.5',unit:'mg/L',limit:25,status:'ok'},
+  {name:'废气排放口SO₂',val:'85',unit:'mg/m³',limit:200,status:'ok'},
+  {name:'废气排放口NOx',val:'156',unit:'mg/m³',limit:300,status:'ok'},
+  {name:'厂界噪声(昼)',val:'58',unit:'dB(A)',limit:65,status:'ok'},
+  {name:'VOCs排放浓度',val:'45',unit:'mg/m³',limit:50,status:'warn'},
+];
+document.getElementById('ov-monitors').textContent=monitors.length;
+document.getElementById('monitor-list').innerHTML=monitors.map(function(m){
+  return '<div class="monitor-row"><div class="monitor-status st-'+m.status+'"></div><div class="monitor-name">'+m.name+'</div><div class="monitor-val" style="color:'+(m.status==='ok'?'#27ae60':m.status==='warn'?'#E67E22':'#E74C3C')+'">'+m.val+'<span class="monitor-unit">'+m.unit+'</span></div><div style="font-size:10px;color:var(--muted)">限值:'+m.limit+'</div></div>';
+}).join('');
+
+// Tasks
+fetch('/api/tasks').then(r=>r.json()).then(data=>{
+  var tasks=data.data||data.tasks||[];
+  if(tasks.length===0){
+    document.getElementById('task-list').innerHTML='<div style="text-align:center;padding:12px;color:var(--muted);font-size:12px">暂无待办任务</div>';
+    return;
+  }
+  document.getElementById('task-list').innerHTML=tasks.slice(0,6).map(function(t){
+    var prCls=t.priority==='high'?'p-high':t.priority==='low'?'p-low':'p-mid';
+    var stMap={pending:'待处理',assigned:'待接收',processing:'处理中',verifying:'待核查',completed:'已完成'};
+    var stColor={pending:'#E67E22',assigned:'#2980B9',processing:'#8E44AD',verifying:'#E67E22',completed:'#27ae60'};
+    return '<div class="task-item"><div class="task-priority '+prCls+'"></div><div class="task-content"><div class="task-title">'+(t.title||'')+'</div><div class="task-meta">'+(t.type||'')+' | 截止:'+(t.deadline||'未设')+'</div></div><span class="task-status" style="background:'+(stColor[t.status]||'#999')+'20;color:'+(stColor[t.status]||'#999')+'">'+(stMap[t.status]||t.status)+'</span></div>';
+  }).join('');
+});
+
+// Training
+var trainings=[
+  {icon:'📚',name:'环保法律法规培训',meta:'必修 | 2学时',progress:100},
+  {icon:'🔬',name:'危废规范化管理',meta:'必修 | 3学时',progress:80},
+  {icon:'🚨',name:'环境应急预案演练',meta:'必修 | 年度',progress:60},
+  {icon:'🏭',name:'排污许可证执行',meta:'选修 | 1学时',progress:0},
+  {icon:'💧',name:'水污染防治技术',meta:'选修 | 2学时',progress:40},
+  {icon:'💨',name:'VOCs治理技术',meta:'选修 | 2学时',progress:0},
+];
+document.getElementById('training-grid').innerHTML=trainings.map(function(t){
+  return '<div class="training-card" onclick="location.href=\'/training.html\'"><div class="training-icon">'+t.icon+'</div><div class="training-name">'+t.name+'</div><div class="training-meta">'+t.meta+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+t.progress+'%"></div></div></div>';
+}).join('');
+
+// Risk reminders
+var risks=[
+  {level:'warn',text:'辐射安全许可证将于2026年9月到期，请提前办理延续',icon:'⚠️'},
+  {level:'warn',text:'VOCs治理设施效率偏低，建议安排维护保养',icon:'⚠️'},
+  {level:'ok',text:'排污许可证执行报告已按时提交',icon:'✅'},
+];
+document.getElementById('risk-list').innerHTML=risks.map(function(r){
+  return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--gbg);border-radius:8px;margin-bottom:6px;font-size:12px"><span style="font-size:16px">'+r.icon+'</span><span>'+r.text+'</span></div>';
+}).join('');
+
+// Profile
+// Profile — 从配置API加载行业信息
+fetch('/api/config').then(r=>r.json()).then(cfg=>{
+  var industries=cfg.industry_types||[];
+  var ind=industries[0]||{name:'未知',pollutants:['未配置']};
+  document.getElementById('profile-industry').textContent=ind.name;
+  document.getElementById('profile-pollutant').textContent=ind.pollutants.join('/');
+  // 更新自查模板
+  var templates=cfg.checklist_templates||{};
+  if(templates[ind.name]){
+    // 可以动态更新合规检查项
+  }
+}).catch(()=>{
+  document.getElementById('profile-industry').textContent='未配置';
+  document.getElementById('profile-pollutant').textContent='请配置行业信息';
+});
+document.getElementById('profile-pollutant').textContent='COD/氨氮/VOCs';
+document.getElementById('profile-credit').textContent='B级（良好）';
+document.getElementById('profile-permit').textContent='PWX-2024-001';
+document.getElementById('profile-check').textContent='2026-06-20';
+
+function genReport(type){
+  showToast('正在生成报告，请稍候...');
+  setTimeout(function(){
+    showToast('报告生成完成！');
+  },2000);
+}
+</script>
+</body>
+</html>

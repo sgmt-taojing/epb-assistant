@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📚 开源环保知识库</title>
+<style>
+:root{--green:#1B4332;--green-mid:#2D6A4F;--green-light:#52B788;--green-pale:#D8E8DC;--green-bg:#F2F8F4;--red:#C0392B;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--bg:#F8FAF8;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 12px rgba(27,67,50,.08);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+.nav{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.nav h1{font-size:17px;font-weight:600}
+.nav a{color:rgba(255,255,255,.8);text-decoration:none;font-size:12px;margin-left:auto}
+.ctn{max-width:960px;margin:0 auto;padding:14px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border:1px solid var(--border)}
+.card-t{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;transition:all .2s;display:flex;align-items:center;gap:4px}
+.tab:hover{border-color:var(--green-light)}
+.tab.active{border-color:var(--green);background:var(--green-bg);font-weight:600}
+.section{display:none}.section.show{display:block}
+.search-input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:8px;font-size:15px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--green-light)}
+.search-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{padding:4px 10px;border-radius:14px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--green-bg);color:var(--green-mid);transition:all .2s}
+.tag:hover,.tag.active{background:var(--green);color:#fff;border-color:var(--green)}
+.categories{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.cat-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border:1px solid var(--border);cursor:pointer;transition:all .2s}
+.cat-card:hover{transform:translate(-2px);box-shadow:0 4px 20px rgba(27,67,50,.15)}
+.cat-card .icon{font-size:28px;margin-bottom:6px}
+.cat-card .title{font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px}
+.cat-card .desc{font-size:12px;color:var(--muted);line-height:1.5}
+.cat-card .count{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:10px;font-size:11px;background:var(--green-pale);color:var(--green-mid)}
+.detail-panel{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);display:none}
+.detail-panel.show{display:block}
+.detail-panel h2{font-size:18px;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title{font-size:14px;font-weight:700;color:var(--green-mid);margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--green-pale)}
+.item-list{list-style:none}
+.item-list li{padding:6px 0;font-size:13px;display:flex;align-items:flex-start;gap:6px;border-bottom:1px solid var(--green-bg)}
+.law-item{background:var(--green-bg);padding:8px 12px;border-radius:6px;margin:4px 0;font-size:13px}
+.law-item .law-name{font-weight:600;color:var(--green)}
+.law-item .law-article{font-size:12px;color:var(--muted);margin-top:2px}
+.violation-tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600}
+.violation-tag.severe{background:#FDEDEC;color:var(--red)}
+.violation-tag.moderate{background:#FEF5E7;color:var(--amber)}
+.violation-tag.special{background:#F5B7B1;color:#922B21}
+.opensource-banner{background:linear-gradient(135deg,var(--green),var(--green-mid));color:#fff;border-radius:var(--r);padding:18px;margin-bottom:12px;text-align:center}
+.opensource-banner h3{font-size:16px;margin-bottom:6px}
+.opensource-banner p{font-size:13px;opacity:.9}
+.opensource-banner .badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:14px;font-size:12px;margin-top:8px}
+/* 数据来源 */
+.source-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:all .2s}
+.source-row:hover{border-color:var(--green-light);background:var(--green-bg)}
+.source-icon{font-size:18px;width:24px;text-align:center}
+.source-info{flex:1}
+.source-name{font-size:13px;font-weight:600}
+.source-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.source-status{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+.source-status.on{background:#D5F5E3;color:var(--green)}
+.source-status.off{background:#EEE;color:#999}
+.source-status.partial{background:#FEF5E7;color:var(--amber)}
+/* 进度 */
+.progress-card{padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.progress-title{font-size:13px;font-weight:600;margin-bottom:6px}
+.progress-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .3s}
+.progress-fill.green{background:linear-gradient(90deg,var(--green-light),var(--green))}
+.progress-fill.amber{background:linear-gradient(90deg,#F0B27A,var(--amber))}
+.progress-fill.red{background:linear-gradient(90deg,#E74C3C,var(--red))}
+.progress-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px}
+/* 条目列表 */
+.list-table{width:100%;border-collapse:collapse;font-size:12px}
+.list-table th{background:var(--green-bg);padding:8px;text-align:left;font-weight:600;border-bottom:2px solid var(--border)}
+.list-table td{padding:8px;border-bottom:1px solid var(--border)}
+.list-table tr:hover td{background:var(--green-bg)}
+.list-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.list-badge.green{background:#D5F5E3;color:var(--green)}
+.list-badge.amber{background:#FEF5E7;color:var(--amber)}
+.list-badge.red{background:#FDEDEC;color:var(--red)}
+.list-badge.blue{background:#EBF5FB;color:var(--blue)}
+.filter-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;font-size:11px;cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--green-bg);border-color:var(--green)}
+.form-input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+.form-input:focus{border-color:var(--green-light)}
+.form-label{font-size:12px;font-weight:600;margin-bottom:3px;display:block}
+select.form-input{appearance:auto}
+@media(max-width:600px){.categories{grid-template-columns:1fr}}
+
+/* ===== 优化样式 ===== */
+
+/* 导航栏升级 */
+.nav{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.nav h1{font-size:17px;font-weight:600;margin:0}
+.nav-back{color:rgba(255,255,255,.85);text-decoration:none;font-size:13px;margin-left:8px;transition:color .2s}
+.nav-back:hover{color:#fff}
+.nav-actions{display:flex;gap:6px;margin-left:auto}
+.nav-btn{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px}
+.nav-btn:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5)}
+@media(max-width:640px){
+  .nav-btn-text{display:none}
+  .nav-btn{padding:6px 8px;font-size:14px}
+}
+
+/* Ctrl+K 全局搜索模态框 */
+.search-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:9999;justify-content:center;align-items:flex-start;padding-top:10vh}
+.search-modal.show{display:flex}
+.search-modal-content{background:#fff;border-radius:16px;width:90%;max-width:640px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;animation:slideDown .2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.search-modal-input{padding:20px;font-size:18px;border:none;border-bottom:2px solid var(--green-light);outline:none;width:100%}
+.search-modal-results{max-height:400px;overflow-y:auto;padding:8px}
+.search-result-item{padding:12px 16px;border-radius:8px;cursor:pointer;transition:background .2s;border-bottom:1px solid var(--green-bg)}
+.search-result-item:hover{background:var(--green-bg)}
+.search-result-item .result-title{font-size:14px;font-weight:600;color:var(--green)}
+.search-result-item .result-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.search-result-item .result-type{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-right:6px}
+.result-type.law{background:#D5F5E3;color:#1B4332}
+.result-type.case{background:#FEF5E7;color:#E67E22}
+.result-type.standard{background:#EBF5FB;color:#2980B9}
+.result-type.industry{background:#F5EEF8;color:#8E44AD}
+
+/* 快捷模板区 */
+.quick-templates{display:flex;gap:8px;padding:10px 14px;background:linear-gradient(135deg,var(--green-pale),#E8F5E9);border-radius:var(--r);margin-bottom:12px;overflow-x:auto;flex-wrap:wrap}
+.template-tag{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.template-tag.green{background:var(--green);color:#fff}
+.template-tag.green:hover{background:var(--green-mid)}
+.template-tag.light{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+.template-tag.light:hover{background:var(--green-bg)}
+.template-tag.amber{background:var(--amber);color:#fff}
+.template-tag.amber:hover{background:#D68910}
+
+/* 浮动快捷面板 */
+.fab-container{position:fixed;bottom:80px;right:20px;z-index:1000}
+.fab-main{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-mid));color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(27,67,50,.4);transition:all .3s;display:flex;align-items:center;justify-content:center}
+.fab-main:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(27,67,50,.5)}
+.fab-main.active{transform:rotate(45deg)}
+.fab-menu{position:absolute;bottom:70px;right:0;display:none;flex-direction:column;gap:8px}
+.fab-menu.show{display:flex}
+.fab-item{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.15);cursor:pointer;font-size:13px;transition:all .2s;white-space:nowrap;text-decoration:none;color:var(--text)}
+.fab-item:hover{transform:translateX(-4px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.fab-item-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.fab-item-icon.contribute{background:#E8F5E9;color:var(--green)}
+.fab-item-icon.import{background:#E3F2FD;color:#1565C0}
+.fab-item-icon.export{background:#FFF3E0;color:#E65100}
+.fab-item-icon.stats{background:#F3E5F5;color:#6A1B9A}
+.fab-item-icon.settings{background:#ECEFF1;color:#37474F}
+.fab-item-icon.home{background:var(--green-pale);color:var(--green-mid)}
+
+/* 返回顶部按钮 */
+.back-to-top{position:fixed;bottom:140px;right:20px;width:40px;height:40px;border-radius:50%;background:var(--green-mid);color:#fff;border:none;font-size:18px;cursor:pointer;opacity:0;transition:all .3s;z-index:999;box-shadow:0 2px 8px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center}
+.back-to-top.show{opacity:1}
+.back-to-top:hover{background:var(--green);transform:translateY(-2px)}
+
+/* 底部快捷栏 */
+.bottom-bar{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:calc(8px + env(safe-area-inset-bottom));z-index:1000;box-shadow:0 -2px 12px rgba(0,0,0,.08)}
+.bar-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--muted);cursor:pointer;transition:color .2s;text-decoration:none;padding:4px 12px;border-radius:8px;transition:all .2s}
+.bar-item:hover,.bar-item.active{color:var(--green);background:var(--green-bg)}
+.bar-item-icon{font-size:20px}
+.bar-item-label{font-size:10px;font-weight:600}
+@media(max-width:600px){
+  .bottom-bar{padding:6px 0}
+  .bar-item{padding:4px 8px}
+}
+
+</style>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="nav"><span style="font-size:20px">📚</span><h1>开源环保知识库</h1><a href="/" class="nav-back">← 返回首页</a><div class="nav-actions"><button class="nav-btn" onclick="toggleSearchModal()" title="搜索 (Ctrl+K)">🔍 <span class="nav-btn-text">搜索</span></button><button class="nav-btn" onclick="showTab('contribute',document.querySelectorAll('.tab')[4])" title="新建条目">＋ <span class="nav-btn-text">新建条目</span></button></div></div>
+
+<div class="ctn">
+<div class="opensource-banner">
+<h3>🌐 开源共建 · 知识共享</h3>
+<p>知识库基于MIT协议开源，欢迎贡献法律法规、执法案例、技术规范</p>
+<span class="badge">GitHub: epb-assistant/knowledge-base</span>
+</div>
+
+
+<!-- 快捷模板区 -->
+<div class="quick-templates">
+  <a class="template-tag green" href="#" onclick="epbToast('快速立案功能开发中');return false">⚡ 快速立案</a>
+  <a class="template-tag light" href="#" onclick="epbToast('企业查询功能开发中');return false">🏢 企业查询</a>
+  <a class="template-tag amber" href="#" onclick="epbToast('现场执法终端功能开发中');return false">📱 现场执法终端</a>
+  <a class="template-tag light" href="#" onclick="showTab('list',document.querySelectorAll('.tab')[3]);return false">📋 条目列表</a>
+  <a class="template-tag light" href="#" onclick="showTab('contribute',document.querySelectorAll('.tab')[4]);return false">✏️ 贡献投稿</a>
+  <a class="template-tag green" href="#" onclick="filterTag(document.querySelector('.tag'),'law');return false">⚖️ 法律法规</a>
+</div>
+
+<div class="card">
+<input class="search-input" id="searchInput" placeholder="搜索法律法规、案例、技术规范、行业知识..." oninput="handleSearch()">
+<div class="search-tags">
+<span class="tag active" onclick="filterTag(this,'all')">全部</span>
+<span class="tag" onclick="filterTag(this,'law')">法律法规</span>
+<span class="tag" onclick="filterTag(this,'case')">执法案例</span>
+<span class="tag" onclick="filterTag(this,'standard')">技术标准</span>
+<span class="tag" onclick="filterTag(this,'industry')">行业知识</span>
+<span class="tag" onclick="filterTag(this,'evidence')">证据规范</span>
+</div>
+</div>
+
+<!-- 主Tab -->
+<div class="tabs">
+<div class="tab active" onclick="showTab('browse',this)">📚 知识浏览</div>
+<div class="tab" onclick="showTab('sources',this)">📡 数据来源</div>
+<div class="tab" onclick="showTab('progress',this)">📊 采集进度</div>
+<div class="tab" onclick="showTab('list',this)">📋 条目列表</div>
+<div class="tab" onclick="showTab('contribute',this)">✏️ 贡献投稿</div>
+</div>
+
+<!-- 知识浏览 -->
+<div class="section show" id="sec-browse">
+<div class="categories" id="categories">
+<div class="cat-card" onclick="showDetail('water')"><div class="icon">💧</div><div class="title">水污染防治</div><div class="desc">地表水、污水排放、暗管排查、水样检测</div><span class="count">2部法律 · 3项标准 · 4类违法</span></div>
+<div class="cat-card" onclick="showDetail('air')"><div class="icon">🏭</div><div class="title">大气污染防治</div><div class="desc">废气排放、VOCs治理、扬尘防控</div><span class="count">2部法律 · 3项标准 · 3类违法</span></div>
+<div class="cat-card" onclick="showDetail('solid')"><div class="icon">🗑</div><div class="title">固体废物</div><div class="desc">危废管理、转移联单、鉴别标准</div><span class="count">1部法律 · 2项标准 · 3类违法</span></div>
+<div class="cat-card" onclick="showDetail('eia')"><div class="icon">📋</div><div class="title">环评与排污许可</div><div class="desc">环评审批、验收、排污许可证</div><span class="count">2部法律 · 3类违法</span></div>
+<div class="cat-card" onclick="showDetail('monitor')"><div class="icon">📡</div><div class="title">自动监控</div><div class="desc">在线监测、数据有效性、弄虚作假</div><span class="count">2部规章 · 3类违法</span></div>
+<div class="cat-card" onclick="showDetail('noise')"><div class="icon">🔊</div><div class="title">噪声污染防治</div><div class="desc">厂界噪声、夜间施工、降噪措施</div><span class="count">1部法律 · 1项标准</span></div>
+<div class="cat-card" onclick="showDetail('criminal')"><div class="icon">⚖️</div><div class="title">涉刑移送</div><div class="desc">污染环境罪、刑事门槛、移送标准</div><span class="count">刑法第338条 · 5项标准</span></div>
+<div class="cat-card" onclick="showDetail('industry')"><div class="icon">🏗</div><div class="title">行业检查要点</div><div class="desc">化工、印染、电镀、制药、钢铁</div><span class="count">5个行业 · 20+要点</span></div>
+</div>
+<div class="detail-panel" id="detailPanel"><h2 id="detailTitle"></h2><div id="detailContent"></div></div>
+</div>
+
+<!-- 数据来源 -->
+<div class="section" id="sec-sources">
+<div class="card">
+<div class="card-t">📡 数据采集来源</div>
+<div class="source-row"><div class="source-icon">🏛</div><div class="source-info"><div class="source-name">生态环境部官网</div><div class="source-meta">法律法规/政策文件/处罚公示 · 采集频率:每日 · 最后采集:2026-05-26</div></div><span class="source-status on">● 运行</span></div>
+<div class="source-row"><div class="source-icon">⚖️</div><div class="source-info"><div class="source-name">裁判文书网</div><div class="source-meta">环境犯罪判例 · 采集频率:每周 · 最后采集:2026-05-20</div></div><span class="source-status on">● 运行</span></div>
+<div class="source-row"><div class="source-icon">📋</div><div class="source-info"><div class="source-name">山东省生态环境厅</div><div class="source-meta">地方标准/行政处罚决定 · 采集频率:每日 · 最后采集:2026-05-26</div></div><span class="source-status on">● 运行</span></div>
+<div class="source-row"><div class="source-icon">📊</div><div class="source-info"><div class="source-name">国家标准全文公开系统</div><div class="source-meta">GB排放标准/监测方法标准 · 采集频率:每月 · 最后采集:2026-05-01</div></div><span class="source-status partial">● 部分运行</span></div>
+<div class="source-row"><div class="source-icon">🌐</div><div class="source-info"><div class="source-name">济南市生态环境局</div><div class="source-meta">市级法规/处罚公示/典型案例 · 采集频率:每日 · 最后采集:2026-05-26</div></div><span class="source-status on">● 运行</span></div>
+<div class="source-row"><div class="source-icon">🔬</div><div class="source-info"><div class="source-name">环保行业技术文献</div><div class="source-meta">行业工艺/产排污环节/治理技术 · 采集频率:每月 · 最后采集:2026-04-30</div></div><span class="source-status off">● 待配置</span></div>
+<div class="source-row"><div class="source-icon">📝</div><div class="source-info"><div class="source-name">社区贡献(GitHub)</div><div class="source-meta">执法经验/检查技巧/案例投稿 · 审核机制:PR审核 · 最后更新:2026-05-25</div></div><span class="source-status on">● 运行</span></div>
+<div class="source-row"><div class="source-icon">🤖</div><div class="source-info"><div class="source-name">AI联网搜索</div><div class="source-meta">实时搜索补充/最新政策/热点案例 · 采集频率:按需 · 最后采集:2026-05-26</div></div><span class="source-status on">● 运行</span></div>
+</div>
+
+<div class="card">
+<div class="card-t">⚙️ 采集配置</div>
+<div class="filter-bar">
+<div class="filter-btn active" onclick="toggleSource('all',this)">全部启用</div>
+<div class="filter-btn" onclick="toggleSource('auto',this)">自动采集</div>
+<div class="filter-btn" onclick="toggleSource('manual',this)">手动采集</div>
+<div class="filter-btn" onclick="toggleSource('ai',this)">AI搜索</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div><label class="form-label">采集频率</label><select class="form-input"><option>每日</option><option>每周</option><option>每月</option><option>按需</option></select></div>
+<div><label class="form-label">优先级</label><select class="form-input"><option>高(法律法规)</option><option>中(技术标准)</option><option>低(行业知识)</option></select></div>
+</div>
+<button style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-top:8px" onclick="epbToast('采集配置已更新')">💾 保存配置</button>
+</div>
+</div>
+
+<!-- 采集进度 -->
+<div class="section" id="sec-progress">
+<div class="card">
+<div class="card-t">📊 各类别采集进度</div>
+<div class="progress-card"><div class="progress-title">🏛 法律法规（国家+省+市）</div><div class="progress-bar"><div class="progress-fill green" style="width:85%"></div></div><div class="progress-meta"><span>已采集 86/102条</span><span>85%</span></div></div>
+<div class="progress-card"><div class="progress-title">📋 执法案例</div><div class="progress-bar"><div class="progress-fill amber" style="width:42%"></div></div><div class="progress-meta"><span>已采集 15/36类</span><span>42%</span></div></div>
+<div class="progress-card"><div class="progress-title">📐 技术标准</div><div class="progress-bar"><div class="progress-fill green" style="width:72%"></div></div><div class="progress-meta"><span>已采集 18/25项</span><span>72%</span></div></div>
+<div class="progress-card"><div class="progress-title">🏗 行业检查要点</div><div class="progress-bar"><div class="progress-fill amber" style="width:40%"></div></div><div class="progress-meta"><span>已采集 5/12行业</span><span>40%</span></div></div>
+<div class="progress-card"><div class="progress-title">📝 证据规范</div><div class="progress-bar"><div class="progress-fill red" style="width:20%"></div></div><div class="progress-meta"><span>已采集 4/20类</span><span>20%</span></div></div>
+<div class="progress-card"><div class="progress-title">🧠 专家经验（社区贡献）</div><div class="progress-bar"><div class="progress-fill amber" style="width:30%"></div></div><div class="progress-meta"><span>已采集 8/26篇</span><span>30%</span></div></div>
+</div>
+
+<div class="card">
+<div class="card-t">📈 总体进度</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:22px;font-weight:700;color:var(--green)">136</div><div style="font-size:11px;color:var(--muted)">已采集条目</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:22px;font-weight:700;color:var(--amber)">214</div><div style="font-size:11px;color:var(--muted)">目标条目</div></div>
+<div style="padding:10px;border-radius:8px;border:1px solid var(--border)"><div style="font-size:22px;font-weight:700;color:var(--blue)">55%</div><div style="font-size:11px;color:var(--muted)">完成率</div></div>
+</div>
+<div style="margin-top:10px;padding:10px;background:var(--green-bg);border-radius:8px;font-size:12px">
+<b>📌 采集优先级排序：</b><br>
+1️⃣ 法律法规（85%→目标100%）→ 补齐市级地方法规<br>
+2️⃣ 技术标准（72%→目标90%）→ 补齐最新修订标准<br>
+3️⃣ 执法案例（42%→目标80%）→ 加大裁判文书采集<br>
+4️⃣ 行业要点（40%→目标70%）→ 补齐制药/钢铁行业<br>
+5️⃣ 证据规范（20%→目标60%）→ 优先补齐取证要点<br>
+6️⃣ 专家经验（30%→目标50%）→ 社区激励+定向邀请
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">⏱ 最近采集记录</div>
+<div style="font-size:12px">
+<div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ 2026-05-26 08:00 · 生态环境部 · 新增3条处罚公示 → 济南市</div>
+<div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ 2026-05-26 07:30 · 山东省厅 · 新增1条地方标准 → DB37/...</div>
+<div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ 2026-05-25 18:00 · 裁判文书网 · 新增2条环境犯罪判例 → 污染环境罪</div>
+<div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ 2026-05-25 14:00 · GitHub社区 · 审核通过1篇执法经验 → 危废检查技巧</div>
+<div style="padding:6px 0;border-bottom:1px solid var(--border)">⚠️ 2026-05-24 · 国家标准系统 · 采集超时，降级为手动模式</div>
+<div style="padding:6px 0">🔄 2026-05-23 · AI搜索 · 补充2条最新VOCs治理政策</div>
+</div>
+</div>
+</div>
+
+<!-- 条目列表 -->
+<div class="section" id="sec-list">
+<div class="card">
+<div class="card-t">📋 知识条目列表</div>
+<div class="filter-bar">
+<div class="filter-btn active" onclick="filterList('all',this)">全部</div>
+<div class="filter-btn" onclick="filterList('law',this)">法律</div>
+<div class="filter-btn" onclick="filterList('standard',this)">标准</div>
+<div class="filter-btn" onclick="filterList('case',this)">案例</div>
+<div class="filter-btn" onclick="filterList('industry',this)">行业</div>
+<div class="filter-btn" onclick="filterList('experience',this)">经验</div>
+</div>
+<input class="form-input" placeholder="搜索条目..." style="margin-bottom:8px" oninput="filterListSearch(this.value)">
+<table class="list-table">
+<thead><tr><th>编号</th><th>类型</th><th>标题</th><th>来源</th><th>状态</th><th>更新日期</th></tr></thead>
+<tbody id="listBody">
+<tr><td>KB-001</td><td><span class="list-badge green">法律</span></td><td>水污染防治法(2017修正)</td><td>生态环境部</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-20</td></tr>
+<tr><td>KB-002</td><td><span class="list-badge green">法律</span></td><td>大气污染防治法(2018修正)</td><td>生态环境部</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-20</td></tr>
+<tr><td>KB-003</td><td><span class="list-badge blue">标准</span></td><td>GB 3838-2002 地表水环境质量标准</td><td>国家标准系统</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-01</td></tr>
+<tr><td>KB-004</td><td><span class="list-badge blue">标准</span></td><td>GB 8978-1996 污水综合排放标准</td><td>国家标准系统</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-01</td></tr>
+<tr><td>KB-005</td><td><span class="list-badge amber">案例</span></td><td>某化工厂私设暗管排放废水案</td><td>济南市环保局</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-26</td></tr>
+<tr><td>KB-006</td><td><span class="list-badge amber">案例</span></td><td>跨区域非法倾倒危废涉刑案</td><td>裁判文书网</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-25</td></tr>
+<tr><td>KB-007</td><td><span class="list-badge amber">案例</span></td><td>某钢铁烧结脱硫设施停运案</td><td>济南市环保局</td><td><span class="list-badge amber">🔄 采集中</span></td><td>2026-05-26</td></tr>
+<tr><td>KB-008</td><td><span class="list-badge red">行业</span></td><td>化工行业产排污环节与检查要点</td><td>环保行业文献</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-04-30</td></tr>
+<tr><td>KB-009</td><td><span class="list-badge red">行业</span></td><td>印染行业执法检查指南</td><td>社区贡献</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-25</td></tr>
+<tr><td>KB-010</td><td><span class="list-badge red">行业</span></td><td>钢铁行业执法检查要点</td><td>环保行业文献</td><td><span class="list-badge amber">⏳ 待采集</span></td><td>—</td></tr>
+<tr><td>KB-011</td><td><span class="list-badge blue">标准</span></td><td>GB 3096-2008 声环境质量标准</td><td>国家标准系统</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-01</td></tr>
+<tr><td>KB-012</td><td><span class="list-badge green">经验</span></td><td>危废现场检查取证技巧</td><td>社区贡献</td><td><span class="list-badge green">✅ 已入库</span></td><td>2026-05-25</td></tr>
+<tr><td>KB-013</td><td><span class="list-badge green">经验</span></td><td>暗管排查实用方法汇总</td><td>社区贡献</td><td><span class="list-badge amber">🔄 审核中</span></td><td>2026-05-26</td></tr>
+</tbody></table>
+<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">显示 13/136 条 · <a href="#" style="color:var(--green)">加载更多</a></div>
+</div>
+</div>
+
+<!-- 贡献投稿 -->
+<div class="section" id="sec-contribute">
+<div class="card">
+<div class="card-t">✏️ 贡献知识</div>
+<div style="padding:10px;background:var(--green-bg);border-radius:8px;font-size:12px;margin-bottom:12px">
+💡 欢迎贡献执法经验、典型案例、行业知识。投稿经审核后入库，贡献者将在知识库中署名。
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+<div><label class="form-label">类型</label><select class="form-input" id="contribType"><option>执法经验</option><option>典型案例</option><option>行业知识</option><option>技术标准解读</option><option>执法技巧</option></select></div>
+<div><label class="form-label">分类</label><select class="form-input" id="contribCat"><option>水污染防治</option><option>大气污染防治</option><option>固废</option><option>自动监控</option><option>涉刑移送</option><option>其他</option></select></div>
+</div>
+<div style="margin-bottom:8px"><label class="form-label">标题</label><input class="form-input" id="contribTitle" placeholder="简明扼要"></div>
+<div style="margin-bottom:8px"><label class="form-label">内容</label><textarea class="form-input" id="contribContent" style="min-height:120px" placeholder="详细描述..."></textarea></div>
+<div style="margin-bottom:8px"><label class="form-label">署名（可选）</label><input class="form-input" id="contribAuthor" placeholder="姓名/单位"></div>
+<button style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer" onclick="submitContrib()">📤 提交投稿</button>
+</div>
+</div>
+</div>
+
+<script>
+function showTab(name,el){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
+  document.getElementById('sec-'+name).classList.add('show');
+}
+function filterTag(el,tag){
+  document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  handleSearch();
+}
+function handleSearch(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.cat-card').forEach(c=>{c.style.display=(!q||c.textContent.toLowerCase().includes(q))?'':'none'});
+}
+function toggleSource(type,el){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function filterList(cat,el){
+  document.querySelectorAll('#sec-list .filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function filterListSearch(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#listBody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none'});
+}
+function submitContrib(){
+  const t=document.getElementById('contribTitle').value;
+  if(!t){epbToast('请填写标题');return}
+  epbToast('投稿已提交，审核通过后将入库。感谢贡献！');
+  document.getElementById('contribTitle').value='';
+  document.getElementById('contribContent').value='';
+}
+
+// 知识详情
+function showDetail(type){
+  const panel=document.getElementById('detailPanel');
+  const details={water:{icon:'💧',name:'水污染防治'},air:{icon:'🏭',name:'大气污染防治'},solid:{icon:'🗑',name:'固体废物'},eia:{icon:'📋',name:'环评与排污许可'},monitor:{icon:'📡',name:'自动监控'},noise:{icon:'🔊',name:'噪声污染防治'},criminal:{icon:'⚖️',name:'涉刑移送'},industry:{icon:'🏗',name:'行业检查要点'}};
+  const d=details[type];
+  document.getElementById('detailTitle').textContent=d.icon+' '+d.name;
+  let html='';
+  if(type==='criminal'){
+    html+='<div class="section-title">⚖️ 刑事门槛</div><div class="law-item"><div class="law-name">刑法第338条 — 污染环境罪</div><div class="law-article">严重污染环境，处3年以下；后果特别严重，处3-7年</div></div><ul class="item-list">';
+    ['饮用水一级保护区排放有毒物质','非法排放危废3吨以上','排放含重金属超标3倍','私设暗管排放有毒物质','两年内两次行政处罚又实施'].forEach(c=>{html+=`<li>${c} <span class="violation-tag special">涉刑</span></li>`});
+    html+='</ul>';
+  }else if(type==='industry'){
+    [{n:'化工',i:'🧪'},{n:'印染',i:'🎨'},{n:'电镀',i:'⚡'},{n:'制药',i:'💊'},{n:'钢铁',i:'🔥'}].forEach(ind=>{
+      html+=`<div class="section-title">${ind.i} ${ind.n}行业</div><ul class="item-list"><li>关键工艺流程</li><li>主要产排污环节</li><li>检查重点</li><li>常见违法问题</li></ul>`;
+    });
+  }else{
+    // 从API加载知识图谱数据
+    html+='<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px"><div style="margin-bottom:8px">📡 正在从知识库加载...</div></div>';
+    fetch('/api/knowledge_graph').then(r=>r.json()).then(kg=>{
+      var data=kg.data||kg;
+      var cats=data.law_categories||data.categories||{};
+      var key=type;
+      if(type==='water')key='水';
+      else if(type==='air')key='大气';
+      else if(type==='solid')key='固废';
+      else if(type==='noise')key='噪声';
+      else if(type==='eia')key='环评';
+      else if(type==='monitor')key='监控';
+      var catData=cats[key]||cats[type]||{};
+      var laws=catData.laws||catData.items||[];
+      if(laws.length>0){
+        html='<div class="section-title">📋 相关法规 ('+laws.length+'条)</div><ul class="item-list">';
+        laws.forEach(function(l){
+          var name=l.title||l.name||l;
+          html+='<li>'+name+'</li>';
+        });
+        html+='</ul>';
+      }else{
+        html='<div style="padding:16px;text-align:center;color:var(--muted)">该分类暂无详细数据<br><small>知识图谱持续更新中</small></div>';
+      }
+      document.getElementById('detailContent').innerHTML=html;
+    }).catch(function(){
+      document.getElementById('detailContent').innerHTML='<div style="padding:16px;text-align:center;color:var(--muted)">数据加载失败</div>';
+    });
+  }
+  document.getElementById('detailContent').innerHTML=html;
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth'});
+}
+</script>
+
+<!-- Ctrl+K 全局搜索模态框 -->
+<div class="search-modal" id="searchModal">
+  <div class="search-modal-content">
+    <input type="text" class="search-modal-input" id="globalSearchInput" placeholder="搜索知识库... (支持标题/类型/来源)" oninput="globalSearch(this.value)" autocomplete="off">
+    <div class="search-modal-results" id="globalSearchResults">
+      <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">输入关键词开始搜索...</div>
+    </div>
+  </div>
+</div>
+
+<!-- 浮动快捷面板 -->
+<div class="fab-container">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" onclick="showTab('contribute',document.querySelectorAll('.tab')[4]);toggleFab()">
+      <div class="fab-item-icon contribute">📤</div>
+      <span>贡献投稿</span>
+    </div>
+    <div class="fab-item" onclick="epbToast('批量导入功能开发中')">
+      <div class="fab-item-icon import">📥</div>
+      <span>批量导入</span>
+    </div>
+    <div class="fab-item" onclick="epbToast('导出列表功能开发中')">
+      <div class="fab-item-icon export">📤</div>
+      <span>导出列表</span>
+    </div>
+    <div class="fab-item" onclick="showTab('progress',document.querySelectorAll('.tab')[2])">
+      <div class="fab-item-icon stats">📊</div>
+      <span>数据统计</span>
+    </div>
+    <div class="fab-item" onclick="epbToast('管理设置功能开发中')">
+      <div class="fab-item-icon settings">⚙️</div>
+      <span>管理设置</span>
+    </div>
+    <div class="fab-item" href="/">
+      <div class="fab-item-icon home">🏠</div>
+      <span>返回首页</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabMain" onclick="toggleFab()">＋</button>
+</div>
+
+<!-- 返回顶部按钮 -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- 底部快捷栏 -->
+<div class="bottom-bar">
+  <a class="bar-item" href="/">
+    <span class="bar-item-icon">🏠</span>
+    <span class="bar-item-label">首页</span>
+  </a>
+  <a class="bar-item active" href="/knowledge.html">
+    <span class="bar-item-icon">📚</span>
+    <span class="bar-item-label">知识库</span>
+  </a>
+  <a class="bar-item" href="/field-terminal.html">
+    <span class="bar-item-icon">⚖️</span>
+    <span class="bar-item-label">执法</span>
+  </a>
+  <a class="bar-item" href="/analysis.html">
+    <span class="bar-item-icon">📊</span>
+    <span class="bar-item-label">分析</span>
+  </a>
+  <a class="bar-item" href="/workspace.html">
+    <span class="bar-item-icon">🖥</span>
+    <span class="bar-item-label">工作台</span>
+  </a>
+</div>
+
+<script>
+// Ctrl+K 全局搜索
+function toggleSearchModal(){
+  const modal=document.getElementById('searchModal');
+  if(modal.classList.contains('show')){
+    modal.classList.remove('show');
+  }else{
+    modal.classList.add('show');
+    document.getElementById('globalSearchInput').focus();
+  }
+}
+
+// 点击模态框背景关闭
+document.getElementById('searchModal').addEventListener('click',function(e){
+  if(e.target===this)this.classList.remove('show');
+});
+
+// ESC关闭模态框
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')document.getElementById('searchModal').classList.remove('show');
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){
+    e.preventDefault();
+    toggleSearchModal();
+  }
+});
+
+// 全局搜索函数
+function globalSearch(query){
+  const resultsDiv=document.getElementById('globalSearchResults');
+  query=query.toLowerCase().trim();
+  if(!query){
+    resultsDiv.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">输入关键词开始搜索...</div>';
+    return;
+  }
+  // 调用真实API搜索
+  fetch('/api/search?q='+encodeURIComponent(query)).then(r=>r.json()).then(data=>{
+    var results=data.results||[];
+    if(results.length===0){
+      resultsDiv.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">未找到相关结果</div>';
+      return;
+    }
+    var html='';
+    results.forEach(function(r){
+      var typeClass=r.type==='法规'?'law':r.type==='典型案例'?'case':r.type==='法规分类'?'standard':'industry';
+      html+='<div class="search-result-item" onclick="selectSearchResult(\''+r.title.replace(/'/g,'')+'\')">'+
+        '<div class="result-title"><span class="result-type '+typeClass+'">'+r.type+'</span>'+r.title+'</div>'+
+        '<div class="result-meta">'+(r.desc||'').slice(0,60)+'</div>'+
+      '</div>';
+    });
+    resultsDiv.innerHTML=html;
+  }).catch(function(){
+    resultsDiv.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">搜索失败，请重试</div>';
+  });
+}
+
+function selectSearchResult(title){
+  document.getElementById('searchModal').classList.remove('show');
+  // 切换到条目列表并搜索
+  showTab('list',document.querySelectorAll('.tab')[3]);
+  document.querySelector('#sec-list input[placeholder*=搜索]').value=title;
+  filterListSearch(title);
+}
+
+// 浮动快捷面板
+function toggleFab(){
+  const fabMain=document.getElementById('fabMain');
+  const fabMenu=document.getElementById('fabMenu');
+  fabMain.classList.toggle('active');
+  fabMenu.classList.toggle('show');
+}
+
+// 返回顶部按钮
+window.addEventListener('scroll',function(){
+  const btn=document.getElementById('backToTop');
+  if(window.scrollY>100){
+    btn.classList.add('show');
+  }else{
+    btn.classList.remove('show');
+  }
+});
+
+// 点击搜索模态框外关闭
+document.addEventListener('click',function(e){
+  const modal=document.getElementById('searchModal');
+  if(e.target.classList.contains('search-modal')){
+    modal.classList.remove('show');
+  }
+});
+</script>
+
+</body>
+</html>

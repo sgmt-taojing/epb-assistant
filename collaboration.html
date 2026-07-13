@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>协同工作台 — 环保智能体</title>
+<style>
+:root{--green:#1B4332;--green-mid:#2D6A4F;--green-light:#52B788;--green-pale:#D8E8DC;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#777;--red:#C0392B;--amber:#E67E22;--blue:#2471A3;--radius:14px;--shadow:0 2px 12px rgba(27,67,50,0.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.top-bar h1{font-size:17px;font-weight:600}
+.top-bar .sub{font-size:11px;opacity:.75}
+.role-tabs{display:flex;gap:4px;margin-left:auto}
+.role-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);transition:all .2s}
+.role-tab.active{background:#fff;color:var(--green)}
+.container{padding:12px;max-width:1200px;margin:0 auto}
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+.kanban-col{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.kanban-header{padding:10px 12px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.kanban-header .count{background:var(--green-pale);color:var(--green);padding:2px 8px;border-radius:10px;font-size:11px}
+.kanban-body{padding:6px;min-height:120px}
+.task-card{background:var(--green-pale);border-radius:8px;padding:10px;margin-bottom:6px;cursor:pointer;transition:all .15s;border-left:3px solid var(--green-light)}
+.task-card:hover{transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.1)}
+.task-card.priority-high{border-left-color:var(--red)}
+.task-card.priority-medium{border-left-color:var(--amber)}
+.task-card .tc-title{font-size:13px;font-weight:600;margin-bottom:4px}
+.task-card .tc-meta{font-size:11px;color:var(--muted);display:flex;gap:8px}
+.task-card .tc-type{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:var(--green);color:#fff}
+.task-list{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px}
+.task-list-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.task-list-header h2{font-size:15px;font-weight:700;color:var(--green)}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-mid)}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 12px;text-align:left;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);background:var(--bg)}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--green-pale)}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+.status-pending{background:#FDEDEC;color:var(--red)}
+.status-assigned{background:#FEF5E7;color:var(--amber)}
+.status-processing{background:#EBF5FB;color:var(--blue)}
+.status-verifying{background:#F4ECF7;color:#7D3C98}
+.status-completed{background:#D5F5E3;color:var(--green)}
+.status-overdue{background:#C0392B;color:#fff}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;width:600px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h2{font-size:16px;font-weight:700;color:var(--green)}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+.modal-body{padding:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.timeline{margin-top:12px}
+.timeline-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.timeline-item:last-child{border-bottom:none}
+.timeline-dot{width:10px;height:10px;border-radius:50%;background:var(--green-light);margin-top:4px;flex-shrink:0}
+.timeline-content{flex:1}
+.timeline-time{font-size:11px;color:var(--muted)}
+.timeline-text{font-size:13px;margin-top:2px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.back-link{display:block;text-align:center;padding:16px;color:var(--green);font-size:13px;text-decoration:none;font-weight:500}
+@media(max-width:768px){.kanban{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+<script src="/auth-guard.js"></script>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar">
+  <div>
+    <h1>🤝 协同工作台</h1>
+    <div class="sub">环保智能体 · 全行业协同平台</div>
+  </div>
+  <div class="role-tabs">
+    <div class="role-tab active" onclick="switchRole('gov',this)">🏛 政府</div>
+    <div class="role-tab" onclick="switchRole('ent',this)">🏢 企业</div>
+    <div class="role-tab" onclick="switchRole('third',this)">🔍 第三方</div>
+    <div class="role-tab" onclick="switchRole('pub',this)">👥 群众</div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- 看板 -->
+  <div class="kanban" id="kanban">
+    <div class="kanban-col"><div class="kanban-header" style="color:var(--red)">⏳ 待派发 <span class="count" id="cnt-pending">0</span></div><div class="kanban-body" id="col-pending"></div></div>
+    <div class="kanban-col"><div class="kanban-header" style="color:var(--amber)">📋 待处理 <span class="count" id="cnt-assigned">0</span></div><div class="kanban-body" id="col-assigned"></div></div>
+    <div class="kanban-col"><div class="kanban-header" style="color:var(--blue)">🔄 处理中 <span class="count" id="cnt-processing">0</span></div><div class="kanban-body" id="col-processing"></div></div>
+    <div class="kanban-col"><div class="kanban-header" style="color:#7D3C98">✅ 待核查 <span class="count" id="cnt-verifying">0</span></div><div class="kanban-body" id="col-verifying"></div></div>
+    <div class="kanban-col"><div class="kanban-header" style="color:var(--green)">📦 已完成 <span class="count" id="cnt-completed">0</span></div><div class="kanban-body" id="col-completed"></div></div>
+  </div>
+
+  <!-- 新建任务按钮（仅政府端显示） -->
+  <div id="createSection" style="margin-bottom:16px;text-align:right">
+    <button class="btn btn-primary" onclick="openCreateModal()">➕ 新建任务</button>
+  </div>
+
+  <!-- 任务列表 -->
+  <div class="task-list">
+    <div class="task-list-header">
+      <h2>📋 任务列表</h2>
+      <div style="display:flex;gap:6px">
+        <select id="filterType" onchange="renderTaskList()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+          <option value="">全部类型</option>
+          <option value="inspection">执法检查</option>
+          <option value="rectification">整改通知</option>
+          <option value="supervision">督查核查</option>
+          <option value="self_check">自查要求</option>
+        </select>
+        <select id="filterStatus" onchange="renderTaskList()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px">
+          <option value="">全部状态</option>
+          <option value="pending">待派发</option>
+          <option value="assigned">待处理</option>
+          <option value="processing">处理中</option>
+          <option value="verifying">待核查</option>
+          <option value="completed">已完成</option>
+          <option value="overdue">已逾期</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>编号</th><th>类型</th><th>标题</th><th>来源→目标</th><th>截止</th><th>优先级</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody id="taskTableBody"></tbody>
+    </table>
+  </div>
+
+  <a href="index.html" class="back-link">← 返回首页</a>
+</div>
+
+<!-- 任务详情弹窗 -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal">
+    <div class="modal-header"><h2 id="detailTitle">任务详情</h2><button class="modal-close" onclick="closeModal('detailModal')">✕</button></div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- 新建任务弹窗 -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header"><h2>新建任务</h2><button class="modal-close" onclick="closeModal('createModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>任务类型</label><select id="newType"><option value="inspection">执法检查</option><option value="rectification">整改通知</option><option value="supervision">督查核查</option><option value="self_check">自查要求</option></select></div>
+      <div class="form-group"><label>任务标题</label><input id="newTitle" placeholder="请输入任务标题"></div>
+      <div class="form-row">
+        <div class="form-group"><label>目标企业</label><input id="newTarget" placeholder="企业名称"></div>
+        <div class="form-group"><label>截止日期</label><input id="newDeadline" type="date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>优先级</label><select id="newPriority"><option value="high">高</option><option value="medium" selected>中</option><option value="low">低</option></select></div>
+        <div class="form-group"><label>指派给</label><input id="newAssignee" placeholder="处理人"></div>
+      </div>
+      <div class="form-group"><label>任务内容</label><textarea id="newContent" rows="4" placeholder="详细描述任务要求..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" onclick="createTask()">创建任务</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var API_BASE='/api';
+var currentRole='gov';
+var allTasks=[];
+
+// 角色切换
+function switchRole(role,el){
+  currentRole=role;
+  document.querySelectorAll('.role-tab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('createSection').style.display=(role==='gov')?'block':'none';
+  renderKanban();renderTaskList();
+}
+
+// 加载任务
+function loadTasks(){
+  fetch(API_BASE+'/tasks').then(function(r){return r.json();}).then(function(res){
+    allTasks=(res&&res.data)||res||[];
+    renderKanban();renderTaskList();
+  }).catch(function(e){allTasks=[];renderKanban();renderTaskList();});
+}
+
+// 渲染看板
+function renderKanban(){
+  var statuses=['pending','assigned','processing','verifying','completed'];
+  statuses.forEach(function(st){
+    var filtered=allTasks.filter(function(t){
+      if(currentRole==='gov') return t.status===st;
+      if(currentRole==='ent') return t.status===st&&t.target;
+      if(currentRole==='third') return st==='verifying';
+      if(currentRole==='pub') return true;
+      return t.status===st;
+    });
+    document.getElementById('cnt-'+st).textContent=filtered.length;
+    var html=filtered.map(function(t){
+      return '<div class="task-card priority-'+t.priority+'" onclick="showDetail(\''+t.id+'\')">'+
+        '<div class="tc-title">'+t.title+'</div>'+
+        '<div class="tc-meta"><span class="tc-type">'+typeLabel(t.type)+'</span>'+
+        '<span>📅 '+(t.deadline||'无')+'</span></div></div>';
+    }).join('');
+    document.getElementById('col-'+st).innerHTML=html||'<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">暂无任务</div>';
+  });
+}
+
+// 渲染列表
+function renderTaskList(){
+  var ft=document.getElementById('filterType').value;
+  var fs=document.getElementById('filterStatus').value;
+  var filtered=allTasks.filter(function(t){
+    if(ft&&t.type!==ft)return false;
+    if(fs&&t.status!==fs)return false;
+    return true;
+  });
+  var html=filtered.map(function(t){
+    return '<tr>'+
+      '<td>'+t.id+'</td>'+
+      '<td>'+typeLabel(t.type)+'</td>'+
+      '<td style="cursor:pointer;color:var(--green);font-weight:600" onclick="showDetail(\''+t.id+'\')">'+t.title+'</td>'+
+      '<td>'+(t.source||'')+' → '+(t.target||'')+'</td>'+
+      '<td>'+(t.deadline||'')+'</td>'+
+      '<td><span class="status-badge status-'+t.priority+'">'+priorityLabel(t.priority)+'</span></td>'+
+      '<td><span class="status-badge status-'+t.status+'">'+statusLabel(t.status)+'</span></td>'+
+      '<td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="advanceTask(\''+t.id+'\')">推进→</button></td>'+
+      '</tr>';
+  }).join('');
+  document.getElementById('taskTableBody').innerHTML=html||'<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">暂无任务</td></tr>';
+}
+
+function typeLabel(t){return {inspection:'执法检查',rectification:'整改通知',supervision:'督查核查',self_check:'自查要求'}[t]||t;}
+function priorityLabel(p){return {high:'高',medium:'中',low:'低'}[p]||p;}
+function statusLabel(s){return {pending:'待派发',assigned:'待处理',processing:'处理中',verifying:'待核查',completed:'已完成',overdue:'已逾期'}[s]||s;}
+
+// 详情
+function showDetail(id){
+  var t=allTasks.find(function(x){return x.id===id;});
+  if(!t)return;
+  document.getElementById('detailTitle').textContent=t.title;
+  var logsHtml=(t.logs||[]).map(function(l){
+    return '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-time">'+l.time+'</div><div class="timeline-text"><b>'+l.actor+'</b> '+l.action+(l.note?'：'+l.note:'')+'</div></div></div>';
+  }).join('');
+  document.getElementById('detailBody').innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">'+
+    '<div><b>编号：</b>'+t.id+'</div><div><b>类型：</b>'+typeLabel(t.type)+'</div>'+
+    '<div><b>来源：</b>'+(t.source||'')+'</div><div><b>目标：</b>'+(t.target||'')+'</div>'+
+    '<div><b>截止：</b>'+(t.deadline||'')+'</div><div><b>优先级：</b>'+priorityLabel(t.priority)+'</div>'+
+    '<div><b>状态：</b><span class="status-badge status-'+t.status+'">'+statusLabel(t.status)+'</span></div>'+
+    '<div><b>指派：</b>'+(t.assigned_to||'未指派')+'</div></div>'+
+    '<div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:12px;font-size:13px;line-height:1.6">'+(t.content||'')+'</div>'+
+    '<h3 style="font-size:14px;font-weight:700;margin-bottom:8px;color:var(--green)">📋 流转记录</h3>'+
+    '<div class="timeline">'+(logsHtml||'<div style="color:var(--muted);font-size:13px">暂无记录</div>')+'</div>';
+  document.getElementById('detailModal').classList.add('show');
+}
+
+// 新建
+function openCreateModal(){document.getElementById('createModal').classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+function createTask(){
+  var task={
+    type:document.getElementById('newType').value,
+    title:document.getElementById('newTitle').value,
+    target:document.getElementById('newTarget').value,
+    deadline:document.getElementById('newDeadline').value,
+    priority:document.getElementById('newPriority').value,
+    assigned_to:document.getElementById('newAssignee').value,
+    content:document.getElementById('newContent').value,
+    source:'环保局'
+  };
+  if(!task.title||!task.content){showToast('请填写标题和内容');return;}
+  fetch(API_BASE+'/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(task)}).then(function(r){return r.json();}).then(function(){
+    closeModal('createModal');showToast('任务创建成功');loadTasks();
+  }).catch(function(){showToast('创建失败，请检查服务');});
+}
+
+// 推进状态
+function advanceTask(id){
+  var t=allTasks.find(function(x){return x.id===id;});
+  if(!t)return;
+  var flow={pending:'assigned',assigned:'processing',processing:'verifying',verifying:'completed',completed:'completed'};
+  var next=flow[t.status]||'completed';
+  fetch(API_BASE+'/task/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})}).then(function(r){return r.json();}).then(function(){
+    showToast('状态已更新为：'+statusLabel(next));loadTasks();
+  }).catch(function(){showToast('更新失败');});
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+loadTasks();
+</script>
+</body>
+</html>

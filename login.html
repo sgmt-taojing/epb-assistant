@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🔐 环保智慧执法平台 — 登录</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 4px 24px rgba(27,67,50,.1);--r:12px;--r-lg:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#1B4332 0%,#2D6A4F 50%,#1B4332 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.wrap{background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:640px;width:100%;overflow:hidden}
+.header{background:linear-gradient(135deg,var(--g),var(--gm));color:#fff;padding:28px;text-align:center}
+.logo{font-size:36px;margin-bottom:6px}
+.title{font-size:18px;font-weight:700;letter-spacing:1px}
+.subtitle{font-size:12px;opacity:.7;margin-top:2px}
+.mode-tabs{display:flex;border-bottom:2px solid var(--border)}
+.mode-tab{flex:1;padding:14px;text-align:center;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.mode-tab.active{color:var(--g);border-bottom-color:var(--gm)}
+.body{padding:24px 28px 28px}
+.section-label{font-size:13px;font-weight:700;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.role-card{border:2px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;transition:all .2s;background:var(--gbg)}
+.role-card:hover{border-color:var(--gl);background:var(--gp)}
+.role-card.selected{border-color:var(--gm);background:var(--gp);box-shadow:0 2px 12px rgba(45,106,79,.15)}
+.role-icon{font-size:24px;margin-bottom:4px}
+.role-name{font-size:13px;font-weight:700;color:var(--g);margin-bottom:1px}
+.role-desc{font-size:10px;color:var(--muted);line-height:1.3}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--g);margin-bottom:5px}
+.form-input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:var(--r);font-size:14px;background:var(--gbg);color:var(--text);font-family:inherit}
+.form-input:focus{outline:none;border-color:var(--gl);background:#fff;box-shadow:0 0 0 3px rgba(82,183,136,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:13px;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--gm),var(--g));color:#fff}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--muted)}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+.step-dots{display:flex;justify-content:center;gap:8px;margin-bottom:18px}
+.dot{width:28px;height:4px;border-radius:2px;background:var(--border);transition:background .3s}
+.dot.active{background:var(--gm)}
+.dot.done{background:var(--gl)}
+.step{display:none}
+.step.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.err{color:var(--red);font-size:12px;margin-top:6px;display:none}
+.err.show{display:block}
+.result-box{background:var(--gbg);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.result-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.result-av{width:44px;height:44px;border-radius:12px;background:var(--gm);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0}
+.result-name{font-size:15px;font-weight:700;color:var(--g)}
+.result-org{font-size:12px;color:var(--muted)}
+.cl-title{font-size:12px;font-weight:700;color:var(--g);margin:10px 0 6px}
+.cl-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;line-height:1.5}
+.cl-num{width:18px;height:18px;border-radius:50%;background:var(--gm);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-top:10px}
+.mod-card{border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;text-decoration:none;color:var(--text);transition:all .15s;background:#fff}
+.mod-card:hover{border-color:var(--gl);background:var(--gbg)}
+.mod-card .ic{font-size:20px;margin-bottom:2px}
+.mod-card .nm{font-size:10px;font-weight:500}
+.mod-card .tag{font-size:8px;padding:1px 4px;border-radius:3px;margin-top:2px;display:inline-block}
+.tag-p1{background:#e8f5e9;color:#2e7d32}
+.tag-p2{background:#fff3e0;color:#e65100}
+.tag-p3{background:#f5f5f5;color:#999}
+.foot{text-align:center;padding:14px 28px;background:var(--gbg);font-size:11px;color:var(--muted)}
+.foot a{color:var(--gm)}
+.login-hint{text-align:center;font-size:12px;color:var(--muted);margin-top:14px}
+.login-hint a{color:var(--gm);cursor:pointer;text-decoration:none}
+</style>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">🌿</div>
+    <div class="title">环保智慧执法平台</div>
+    <div class="subtitle">EPB-Agent · 服务全社会环保职能体系</div>
+  </div>
+
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-register" onclick="switchMode('register')">注册新账号</button>
+    <button class="mode-tab" id="tab-login" onclick="switchMode('login')">已注册登录</button>
+  </div>
+
+  <div class="body">
+    <!-- 注册模式 -->
+    <div id="register-mode">
+      <div class="step-dots">
+        <div class="dot active" id="d1"></div>
+        <div class="dot" id="d2"></div>
+        <div class="dot" id="d3"></div>
+      </div>
+
+      <div class="step show" id="s1">
+        <div class="section-label">① 选择您的身份类型</div>
+        <div class="role-grid" id="role-grid"></div>
+        <div class="err" id="e1"></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="toStep2()">下一步</button></div>
+      </div>
+
+      <div class="step" id="s2">
+        <div class="section-label">② 录入单位与联系人信息</div>
+        <div id="role-preview" style="margin-bottom:14px"></div>
+        <div class="form-group">
+          <label class="form-label" id="org-label">单位名称</label>
+          <input type="text" class="form-input" id="org-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">联系人</label>
+            <input type="text" class="form-input" id="person-name" placeholder="姓名">
+          </div>
+          <div class="form-group">
+            <label class="form-label">手机号</label>
+            <input type="tel" class="form-input" id="person-phone" placeholder="11位手机号">
+          </div>
+        </div>
+        <div class="err" id="e2"></div>
+        <div class="btn-row" style="margin-top:6px">
+          <button class="btn btn-outline" onclick="toStep(1)">返回</button>
+          <button class="btn btn-primary" onclick="toStep3()">注册并进入</button>
+        </div>
+      </div>
+
+      <div class="step" id="s3">
+        <div class="section-label">③ 您的个性化工作台</div>
+        <div class="result-box">
+          <div class="result-head">
+            <div class="result-av" id="r-icon">🚔</div>
+            <div><div class="result-name" id="r-name">角色名</div><div class="result-org" id="r-org">单位名</div></div>
+          </div>
+          <div class="cl-title">📋 今日工作清单</div>
+          <div id="r-checklist"></div>
+        </div>
+        <div class="section-label" style="margin-top:12px">推荐系统模块</div>
+        <div class="mod-grid" id="r-modules"></div>
+        <div style="margin-top:16px"><button class="btn btn-primary" onclick="enterSystem()">进入工作台</button></div>
+      </div>
+    </div>
+
+    <!-- 登录模式 -->
+    <div id="login-mode" style="display:none">
+      <div class="section-label">手机号登录</div>
+      <div class="form-group">
+        <label class="form-label">手机号</label>
+        <input type="tel" class="form-input" id="login-phone" placeholder="注册时的手机号">
+      </div>
+      <div class="err" id="le1"></div>
+      <div style="margin-top:6px"><button class="btn btn-primary" id="btn-login" onclick="doLogin()">登录</button></div>
+      <div class="login-hint">还没账号？<a onclick="switchMode('register')">立即注册</a></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="/wechat-h5.html">移动端入口</a> · <a href="/knowledge.html">直接访问知识库</a> · © 2026 环保智慧执法平台
+  </div>
+</div>
+
+<script>
+var selectedRole='', rolesData={};
+
+fetch('/api/roles').then(r=>r.json()).then(d=>{
+  rolesData=d.roles||{};
+  renderRoles();
+}).catch(()=>{
+  rolesData={};
+  document.getElementById('role-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:12px">角色配置加载失败</div>';
+});
+
+function renderRoles(){
+  var h='';
+  Object.keys(rolesData).forEach(function(k){
+    var r=rolesData[k];
+    h+='<div class="role-card" data-role="'+k+'" onclick="pickRole(\''+k+'\')">'+
+      '<div class="role-icon">'+r.icon+'</div>'+
+      '<div class="role-name">'+r.name+'</div>'+
+      '<div class="role-desc">'+r.desc+'</div></div>';
+  });
+  document.getElementById('role-grid').innerHTML=h;
+}
+
+function pickRole(k){
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  document.querySelector('[data-role="'+k+'"]').classList.add('selected');
+  selectedRole=k;
+  document.getElementById('e1').classList.remove('show');
+}
+
+function switchMode(m){
+  if(m==='register'){
+    document.getElementById('register-mode').style.display='block';
+    document.getElementById('login-mode').style.display='none';
+    document.getElementById('tab-register').classList.add('active');
+    document.getElementById('tab-login').classList.remove('active');
+  }else{
+    document.getElementById('register-mode').style.display='none';
+    document.getElementById('login-mode').style.display='block';
+    document.getElementById('tab-register').classList.remove('active');
+    document.getElementById('tab-login').classList.add('active');
+  }
+}
+
+function toStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('show'));
+  document.getElementById('s'+n).classList.add('show');
+  for(var i=1;i<=3;i++){
+    var d=document.getElementById('d'+i);
+    d.classList.remove('active','done');
+    if(i<n)d.classList.add('done');
+    if(i===n)d.classList.add('active');
+  }
+}
+
+function toStep2(){
+  if(!selectedRole){
+    var e=document.getElementById('e1'); e.textContent='请选择身份类型'; e.classList.add('show'); return;
+  }
+  var r=rolesData[selectedRole];
+  document.getElementById('role-preview').innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--gp);border-radius:8px">'+
+    '<div style="font-size:26px">'+r.icon+'</div><div><div style="font-weight:700;color:var(--g);font-size:13px">'+r.name+'</div>'+
+    '<div style="font-size:10px;color:var(--muted)">'+r.desc+'</div></div></div>';
+  document.getElementById('org-label').textContent=r.org_label||'单位名称';
+  document.getElementById('org-name').placeholder=r.org_placeholder||'请输入';
+  toStep(2);
+}
+
+function toStep3(){
+  var r=rolesData[selectedRole];
+  var org=document.getElementById('org-name').value.trim();
+  var name=document.getElementById('person-name').value.trim();
+  var phone=document.getElementById('person-phone').value.trim();
+  if(r.org_required && !org){ showErr('e2','请输入'+(r.org_label||'单位名称')); return; }
+  if(!name){ showErr('e2','请输入姓名'); return; }
+  if(!/^1[3-9]\d{9}$/.test(phone)){ showErr('e2','请输入正确的11位手机号'); return; }
+
+  var userData={
+    role:selectedRole, roleName:r.name, roleIcon:r.icon,
+    org:org||name, name:name, phone:phone,
+    permissions:r.permissions||[], loginAt:new Date().toISOString()
+  };
+
+  // 注册到服务器
+  fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(userData)})
+  .then(r=>r.json()).then(data=>{
+    if(data.ok){
+      localStorage.setItem('epb_user',JSON.stringify(userData));
+      showResult(r,org||name);
+      toStep(3);
+    }else{
+      showErr('e2',data.message||data.error||'注册失败');
+    }
+  }).catch(()=>{
+    localStorage.setItem('epb_user',JSON.stringify(userData));
+    showResult(r,org||name);
+    toStep(3);
+  });
+}
+
+function showResult(r,org){
+  document.getElementById('r-icon').textContent=r.icon;
+  document.getElementById('r-name').textContent=r.name;
+  document.getElementById('r-org').textContent=org;
+  document.getElementById('r-checklist').innerHTML=(r.checklist||[]).map(function(item,idx){
+    return '<div class="cl-item"><div class="cl-num">'+(idx+1)+'</div><div>'+item+'</div></div>';
+  }).join('');
+  document.getElementById('r-modules').innerHTML=(r.modules||[]).map(function(m){
+    var pc=m.priority===1?'tag-p1':m.priority===2?'tag-p2':'tag-p3';
+    var pt=m.priority===1?'常用':m.priority===2?'次要':'辅助';
+    return '<a href="'+m.url+'" class="mod-card"><div class="ic">'+m.icon+'</div><div class="nm">'+m.name+'</div><span class="tag '+pc+'">'+pt+'</span></a>';
+  }).join('');
+}
+
+function enterSystem(){
+  var r=rolesData[selectedRole];
+  var p1=(r.modules||[]).find(m=>m.priority===1);
+  location.href=p1?p1.url:'/index.html';
+}
+
+function doLogin(){
+  var phone=document.getElementById('login-phone').value.trim();
+  if(!/^1[3-9]\d{9}$/.test(phone)){ showErr('le1','请输入正确的手机号'); return; }
+  var btn=document.getElementById('btn-login');
+  btn.disabled=true; btn.textContent='登录中...';
+  fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone})})
+  .then(r=>{
+    if(r.status===404){
+      showErr('le1','该手机号尚未注册，请先注册');
+      btn.disabled=false; btn.textContent='登录';
+      return null;
+    }
+    return r.json();
+  }).then(data=>{
+    if(!data){return;}
+    if(data.ok){
+      localStorage.setItem('epb_user',JSON.stringify(data.user));
+      // 跳转到工作台
+      location.href='/m-workspace.html';
+    }else{
+      showErr('le1',data.message||'登录失败');
+      btn.disabled=false; btn.textContent='登录';
+    }
+  }).catch(()=>{
+    showErr('le1','网络错误，请重试');
+    btn.disabled=false; btn.textContent='登录';
+  });
+}
+
+function showErr(id,msg){
+  var e=document.getElementById(id);
+  e.textContent=msg; e.classList.add('show');
+  setTimeout(function(){e.classList.remove('show');},3000);
+}
+
+// 检查已登录
+try{
+  var u=JSON.parse(localStorage.getItem('epb_user')||'{}');
+  if(u&&u.phone){
+    document.getElementById('login-phone').value=u.phone;
+  }
+}catch(e){}
+</script>
+</body>
+</html>

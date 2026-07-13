@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>🌿 环保智慧执法平台</title>
+<style>
+:root{
+  --g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;
+  --red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;
+  --bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;
+  --shadow:0 2px 12px rgba(27,67,50,.08);--r:12px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* Header */
+.header{
+  background:linear-gradient(135deg,#1B4332 0%,#2D6A4F 50%,#1B4332 100%);
+  color:#fff;padding:20px 16px 24px;position:relative;overflow:hidden;
+}
+.header::after{
+  content:'';position:absolute;bottom:-30px;left:-10%;right:-10%;height:60px;
+  background:var(--bg);border-radius:50% 50% 0 0;
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1}
+.header-logo{display:flex;align-items:center;gap:8px}
+.header-logo-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:18px}
+.header-logo-text{font-size:16px;font-weight:700;letter-spacing:1px}
+.header-status{display:flex;align-items:center;gap:4px;background:rgba(76,175,80,.2);border:1px solid rgba(76,175,80,.4);border-radius:12px;padding:3px 8px;font-size:10px}
+.header-status-dot{width:6px;height:6px;border-radius:50%;background:#4caf50;box-shadow:0 0 4px #4caf50;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* Banner */
+.banner{position:relative;z-index:2;margin:0 16px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px}
+.banner-icon{width:48px;height:48px;border-radius:12px;background:rgba(82,183,136,.3);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.banner-text{flex:1}
+.banner-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.banner-desc{font-size:11px;opacity:.8;line-height:1.4}
+.banner-stats{display:flex;gap:12px;margin-top:8px}
+.banner-stat{font-size:10px;opacity:.7}
+.banner-stat strong{font-size:16px;font-weight:700;display:block;color:#fff;opacity:1}
+
+/* Section */
+.section{margin:16px;background:var(--card);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.section-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:6px}
+.section-title .dot{width:4px;height:16px;background:var(--gm);border-radius:2px}
+.section-more{font-size:12px;color:var(--muted)}
+
+/* Quick Services */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.quick-item{background:var(--card);padding:16px 8px 14px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .15s}
+.quick-item:active{background:var(--gbg)}
+.quick-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff}
+.quick-label{font-size:12px;font-weight:600;color:var(--text)}
+.quick-desc{font-size:10px;color:var(--muted);line-height:1.3}
+
+/* Report Types */
+.report-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px 16px}
+.report-card{display:flex;align-items:center;gap:10px;padding:12px;background:var(--gbg);border-radius:var(--r);border:1px solid var(--border);transition:all .15s}
+.report-card:active{background:var(--gp);border-color:var(--gl)}
+.report-card-icon{font-size:24px;flex-shrink:0}
+.report-card-info{flex:1;min-width:0}
+.report-card-title{font-size:13px;font-weight:600;margin-bottom:1px}
+.report-card-desc{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Laws */
+.law-list{padding:0 16px 14px}
+.law-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.law-item:last-child{border-bottom:none}
+.law-icon{width:32px;height:32px;border-radius:8px;background:var(--gbg);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.law-name{flex:1;font-size:13px;font-weight:500}
+.law-arrow{color:var(--muted);font-size:12px}
+
+/* Cases */
+.case-list{padding:0 16px 14px}
+.case-item{padding:10px 0;border-bottom:1px solid var(--border)}
+.case-item:last-child{border-bottom:none}
+.case-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:4px;margin-right:4px}
+.case-tag-water{background:#e3f2fd;color:#1565c0}
+.case-tag-air{background:#fff3e0;color:#e65100}
+.case-tag-solid{background:#f3e5f5;color:#6a1b9a}
+.case-tag-noise{background:#fce4ec;color:#c62828}
+.case-tag-soil{background:#efebe9;color:#5d4037}
+.case-tag-other{background:#e8f5e9;color:#2e7d32}
+.case-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:2px}
+.case-meta{font-size:10px;color:var(--muted);display:flex;gap:8px}
+.case-risk{font-size:10px;padding:1px 5px;border-radius:3px}
+.case-risk-high{background:#ffebee;color:#c62828}
+.case-risk-mid{background:#fff8e1;color:#f57f17}
+.case-risk-low{background:#e8f5e9;color:#2e7d32}
+
+/* News Card */
+.news-card{margin:16px;background:linear-gradient(135deg,#1B4332,#2D6A4F);border-radius:var(--r-lg);padding:20px;color:#fff;position:relative;overflow:hidden}
+.news-card::before{content:'📢';position:absolute;top:10px;right:16px;font-size:40px;opacity:.1}
+.news-title{font-size:15px;font-weight:700;margin-bottom:8px;position:relative}
+.news-text{font-size:12px;opacity:.85;line-height:1.6;position:relative}
+.news-btn{display:inline-block;margin-top:12px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:6px 16px;font-size:12px;color:#fff}
+
+/* Footer */
+.footer{text-align:center;padding:20px 16px 32px;color:var(--muted);font-size:11px}
+.footer-logo{font-size:20px;margin-bottom:6px}
+.footer-text{margin-bottom:4px}
+.footer-link{color:var(--gm);margin:0 4px}
+
+/* Toast */
+#toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;z-index:2000;display:none;max-width:80%;text-align:center}
+#toast.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.loading{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+</style>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="header-logo-icon">🌿</div>
+      <div class="header-logo-text">环保智慧执法平台</div>
+    </div>
+    <div class="header-status">
+      <div class="header-status-dot"></div>
+      <span>系统运行中</span>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-icon">🤖</div>
+    <div class="banner-text">
+      <div class="banner-title">AI 环保智能体</div>
+      <div class="banner-desc">服务政府 · 企业 · 第三方 · 群众，全行业协同闭环</div>
+      <div class="banner-stats">
+        <div class="banner-stat"><strong>101</strong>执法案例</div>
+        <div class="banner-stat"><strong>28</strong>部法规</div>
+        <div class="banner-stat"><strong>8</strong>大领域</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Services -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title"><span class="dot"></span>快捷服务</div>
+  </div>
+  <div class="quick-grid">
+    <a href="/m-workspace.html" class="quick-item">
+      <div class="quick-icon" style="background:#1B4332">📋</div>
+      <div class="quick-label">我的工作台</div>
+      <div class="quick-desc">角色定制工作台</div>
+    </a>
+    <a href="/m-report.html" class="quick-item">
+      <div class="quick-icon" style="background:#e74c3c">🚨</div>
+      <div class="quick-label">群众举报</div>
+      <div class="quick-desc">一键举报环境违法</div>
+    </a>
+    <a href="/m-self-check.html" class="quick-item">
+      <div class="quick-icon" style="background:#27ae60">🏢</div>
+      <div class="quick-label">企业自查</div>
+      <div class="quick-desc">企业合规自检自纠</div>
+    </a>
+    <a href="/m-cases.html" class="quick-item">
+      <div class="quick-icon" style="background:#2980b9">📚</div>
+      <div class="quick-label">案例查询</div>
+      <div class="quick-desc">执法案例库检索</div>
+    </a>
+    <a href="/dashboard.html" class="quick-item">
+      <div class="quick-icon" style="background:#8e44ad">📊</div>
+      <div class="quick-label">数据驾驶舱</div>
+      <div class="quick-desc">全局态势感知</div>
+    </a>
+    <a href="/login.html" class="quick-item">
+      <div class="quick-icon" style="background:#e67e22">🔐</div>
+      <div class="quick-label">登录引导</div>
+      <div class="quick-desc">选择身份获取服务</div>
+    </a>
+  </div>
+</div>
+
+<!-- News Card -->
+<div class="news-card">
+  <div class="news-title">📋 环保知识库持续更新中</div>
+  <div class="news-text">平台已收录 101 条执法案例、28 部环保法规，覆盖水、大气、固废、噪声、土壤、辐射、生态、环评 8 大领域。AI 智能检索支持关键词语义匹配，助力环保执法精准高效。</div>
+  <a href="/knowledge.html" class="news-btn">进入知识库 →</a>
+</div>
+
+<!-- Report Entry -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title"><span class="dot" style="background:var(--red)"></span>群众举报</div>
+    <a href="/report.html" class="section-more">全部 →</a>
+  </div>
+  <div class="report-grid">
+    <div class="report-card" onclick="location.href='/m-report.html?type=水污染'">
+      <div class="report-card-icon">💧</div>
+      <div class="report-card-info">
+        <div class="report-card-title">水污染</div>
+        <div class="report-card-desc">废水直排、暗管偷排、水体变色等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=大气污染'">
+      <div class="report-card-icon">💨</div>
+      <div class="report-card-info">
+        <div class="report-card-title">大气污染</div>
+        <div class="report-card-desc">废气排放、烟尘异味、VOCs等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=噪声污染'">
+      <div class="report-card-icon">🔊</div>
+      <div class="report-card-info">
+        <div class="report-card-title">噪声污染</div>
+        <div class="report-card-desc">工业噪声、施工噪声、社会生活噪声</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=固废危废'">
+      <div class="report-card-icon">🗑️</div>
+      <div class="report-card-info">
+        <div class="report-card-title">固废危废</div>
+        <div class="report-card-desc">非法倾倒、危废违规处置等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=土壤污染'">
+      <div class="report-card-icon">🟤</div>
+      <div class="report-card-info">
+        <div class="report-card-title">土壤污染</div>
+        <div class="report-card-desc">土壤污染、农用地污染等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=辐射污染'">
+      <div class="report-card-icon">☢️</div>
+      <div class="report-card-info">
+        <div class="report-card-title">辐射污染</div>
+        <div class="report-card-desc">电磁辐射、电离辐射等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=生态破坏'">
+      <div class="report-card-icon">🌿</div>
+      <div class="report-card-info">
+        <div class="report-card-title">生态破坏</div>
+        <div class="report-card-desc">破坏生态、非法采伐等</div>
+      </div>
+    </div>
+    <div class="report-card" onclick="location.href='/m-report.html?type=其他'">
+      <div class="report-card-icon">📋</div>
+      <div class="report-card-info">
+        <div class="report-card-title">其他</div>
+        <div class="report-card-desc">其他环境违法行为</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hot Laws -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title"><span class="dot" style="background:var(--blue)"></span>常用法规</div>
+    <a href="/knowledge.html" class="section-more">全部 →</a>
+  </div>
+  <div class="law-list">
+    <a href="/knowledge.html#水" class="law-item">
+      <div class="law-icon">💧</div>
+      <div class="law-name">水污染防治法</div>
+      <div class="law-arrow">›</div>
+    </a>
+    <a href="/knowledge.html#大气" class="law-item">
+      <div class="law-icon">💨</div>
+      <div class="law-name">大气污染防治法</div>
+      <div class="law-arrow">›</div>
+    </a>
+    <a href="/knowledge.html#固废" class="law-item">
+      <div class="law-icon">🗑️</div>
+      <div class="law-name">固废防治法</div>
+      <div class="law-arrow">›</div>
+    </a>
+    <a href="/knowledge.html#噪声" class="law-item">
+      <div class="law-icon">🔊</div>
+      <div class="law-name">噪声污染防治法</div>
+      <div class="law-arrow">›</div>
+    </a>
+    <a href="/knowledge.html#排污" class="law-item">
+      <div class="law-icon">📄</div>
+      <div class="law-name">排污许可管理条例</div>
+      <div class="law-arrow">›</div>
+    </a>
+    <a href="/knowledge.html#环评" class="law-item">
+      <div class="law-icon">📋</div>
+      <div class="law-name">环境影响评价法</div>
+      <div class="law-arrow">›</div>
+    </a>
+  </div>
+</div>
+
+<!-- Hot Cases -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title"><span class="dot" style="background:var(--purple)"></span>典型案例</div>
+    <a href="/knowledge.html" class="section-more">全部 →</a>
+  </div>
+  <div class="case-list" id="hot-cases">
+    <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-logo">🌿</div>
+  <div class="footer-text">环保智慧执法平台 · EPB-Agent</div>
+  <div class="footer-text" style="margin-top:4px;opacity:.6">
+    <a class="footer-link" href="/">PC端</a>|
+    <a class="footer-link" href="/m-report.html">举报</a>|
+    <a class="footer-link" href="/m-cases.html">案例</a>|
+    <a class="footer-link" href="/m-self-check.html">自查</a>|
+    <a class="footer-link" href="/knowledge.html">知识库</a>
+  </div>
+  <div class="footer-text" style="margin-top:8px;opacity:.5">© 2026 环保智能体平台 · 服务全社会环保职能体系</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+function showToast(msg, duration) {
+  duration = duration || 2000;
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, duration);
+}
+
+var tagMap = {
+  '水污染类': 'case-tag-water',
+  '大气污染类': 'case-tag-air',
+  '固体废物污染类': 'case-tag-solid',
+  '噪声污染类': 'case-tag-noise',
+  '土壤污染类': 'case-tag-soil',
+  '危险废物类': 'case-tag-solid',
+  '自动监控类': 'case-tag-other',
+  '排污许可类': 'case-tag-other',
+  '环评类': 'case-tag-other',
+  '移动源监管类': 'case-tag-other',
+  '其他': 'case-tag-other'
+};
+
+var riskMap = {
+  '高风险': 'case-risk-high',
+  '中风险': 'case-risk-mid',
+  '低风险': 'case-risk-low'
+};
+
+// Load hot cases
+fetch('/api/search?type=all&limit=5')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var cases = data.cases || data.results || data.data || [];
+    if (!Array.isArray(cases) || cases.length === 0) {
+      return fetch('/api/cases?limit=5').then(function(r) { return r.json(); });
+    }
+    return cases;
+  })
+  .then(function(cases) {
+    if (!Array.isArray(cases) || cases.length === 0) {
+      document.getElementById('hot-cases').innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">暂无案例数据</div>';
+      return;
+    }
+    var html = cases.slice(0, 5).map(function(c) {
+      var tagCls = tagMap[c.type] || 'case-tag-other';
+      var riskCls = riskMap[c.risk_level] || 'case-risk-low';
+      var riskText = c.risk_level || '低风险';
+      return '<div class="case-item">' +
+        '<span class="case-tag ' + tagCls + '">' + (c.type || '其他') + '</span>' +
+        '<span class="case-risk ' + riskCls + '">' + riskText + '</span>' +
+        '<div class="case-title">' + (c.title || '') + '</div>' +
+        '<div class="case-meta">' +
+          '<span>' + (c.source || '未知来源') + '</span>' +
+          '<span>' + (c.date || '') + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('hot-cases').innerHTML = html;
+  })
+  .catch(function(err) {
+    document.getElementById('hot-cases').innerHTML = '<div style="text-align:center;padding:16px;color:var(--muted);font-size:12px">案例加载失败</div>';
+  });
+
+// Prevent double tap zoom
+var lastTouch = 0;
+document.addEventListener('touchend', function(e) {
+  var now = Date.now();
+  if (now - lastTouch < 300) { e.preventDefault(); }
+  lastTouch = now;
+}, { passive: false });
+
+// WeChat welcome
+document.addEventListener('DOMContentLoaded', function() {
+  var ua = navigator.userAgent.toLowerCase();
+  if (ua.indexOf('micromessenger') !== -1) {
+    showToast('欢迎使用环保智慧执法平台');
+  }
+});
+</script>
+
+</body>
+</html>

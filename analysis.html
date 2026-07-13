@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧠 AI智能分析</title>
+<style>
+:root { --green: #1B4332; --green-mid: #2D6A4F; --green-light: #52B788; --green-pale: #D8E8DC; --green-bg: #F2F8F4; --red: #C0392B; --amber: #E67E22; --blue: #2980B9; --purple: #8E44AD; --bg: #F8FAF8; --card: #FFFFFF; --border: #D0E0D4; --text: #1A1A1A; --text-muted: #666; --shadow: 0 2px 12px rgba(27,67,50,0.08); --radius: 12px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); }
+.top-bar { background: linear-gradient(135deg, #1B4332, #2D6A4F); color: white; padding: 14px 20px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; }
+.top-bar h1 { font-size: 18px; font-weight: 600; }
+.top-bar .back { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; margin-left: auto; }
+.container { max-width: 800px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; border: 1px solid var(--border); }
+.card-title { font-size: 15px; font-weight: 700; color: var(--green-mid); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.func-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.func-btn { padding: 16px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
+.func-btn:hover { border-color: var(--green-light); background: var(--green-bg); transform: translateY(-2px); }
+.func-btn .icon { font-size: 28px; margin-bottom: 4px; }
+.func-btn .name { font-size: 13px; font-weight: 600; }
+.func-btn .desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+textarea { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; resize: vertical; min-height: 100px; }
+textarea:focus { border-color: var(--green-light); }
+.analyze-btn { width: 100%; padding: 12px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+.analyze-btn:hover { background: var(--green-mid); }
+.result-panel { background: var(--green-bg); padding: 16px; border-radius: 10px; margin-top: 12px; display: none; font-size: 13px; line-height: 1.7; }
+.result-panel.show { display: block; }
+.risk-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+.risk-badge.high { background: #FDEDEC; color: var(--red); }
+.risk-badge.mid { background: #FEF5E7; color: var(--amber); }
+.risk-badge.low { background: #D5F5E3; color: var(--green); }
+</style>
+<script>
+function epbToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,0.95);color:#f1f5f9;padding:16px 28px;border-radius:12px;font-size:14px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(230,200,110,0.3);max-width:80vw;text-align:center;line-height:1.6';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t)},300)},2000);
+}
+</script>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar"><span style="font-size:22px">🧠</span><h1>AI智能分析</h1><a href="/" class="back">← 返回平台</a></div>
+<div class="container">
+  <div class="card">
+    <div class="card-title">🔍 案件智能分析</div>
+    <textarea id="caseInput" placeholder="输入案件描述，AI自动识别违法类型、匹配法条、评估风险、推荐证据...&#10;&#10;示例：某化工厂私设暗管排放含重金属废水，经检测铅超标5倍，现场发现暗管连接至厂区围墙外河道"></textarea>
+    <button class="analyze-btn" onclick="smartAnalyze()">🧠 开始智能分析</button>
+    <div class="result-panel" id="resultPanel"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚡ 快捷功能</div>
+    <div class="func-grid">
+      <div class="func-btn" onclick="quickAnalyze('risk')"><div class="icon">⚠️</div><div class="name">风险评估</div><div class="desc">风险等级判定</div></div>
+      <div class="func-btn" onclick="quickAnalyze('law')"><div class="icon">📜</div><div class="name">法条匹配</div><div class="desc">精准推荐法条</div></div>
+      <div class="func-btn" onclick="quickAnalyze('evidence')"><div class="icon">📋</div><div class="name">证据检查</div><div class="desc">证据链完整性</div></div>
+      <div class="func-btn" onclick="quickAnalyze('penalty')"><div class="icon">💰</div><div class="name">裁量计算</div><div class="desc">处罚金额区间</div></div>
+      <div class="func-btn" onclick="quickAnalyze('criminal')"><div class="icon">⚖️</div><div class="name">涉刑判断</div><div class="desc">是否移送公安</div></div>
+      <div class="func-btn" onclick="quickAnalyze('similar')"><div class="icon">🔍</div><div class="name">相似案例</div><div class="desc">类似案例推送</div></div>
+    </div>
+  </div>
+</div>
+<script>
+async function smartAnalyze() {
+  const text = document.getElementById('caseInput').value.trim();
+  if (!text) { epbToast('请输入案件描述'); return; }
+  const panel = document.getElementById('resultPanel');
+  panel.classList.add('show');
+  panel.innerHTML = '🧠 分析中...';
+  try {
+    const resp = await fetch('/api/smart_analyze', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({text: text}) });
+    const data = await resp.json();
+    if (data.ok) {
+      const r = data.result || data;
+      let html = '';
+      if (r.violation_type) html += `<div style="margin-bottom:8px"><b>违法类型：</b>${r.violation_type}</div>`;
+      if (r.risk_assessment) { const rk = r.risk_assessment; const cls = rk.level==='高风险'?'high':(rk.level==='中风险'?'mid':'low'); html += `<div style="margin-bottom:8px"><b>风险等级：</b><span class="risk-badge ${cls}">${rk.level}</span> 评分：${rk.score||'N/A'}</div>`; }
+      if (r.law_recommendations && r.law_recommendations.length) { html += '<div style="margin-bottom:8px"><b>📋 适用法条：</b></div>'; r.law_recommendations.forEach(l => html += `<div style="padding:4px 8px;margin:2px 0;background:white;border-radius:4px">${l.law} ${l.article||''}</div>`); }
+      if (r.criminal_referral) html += `<div style="margin-top:8px;padding:8px;background:#FDEDEC;border-radius:6px"><b>⚠️ 涉刑移送提示：</b>${r.criminal_referral}</div>`;
+      if (r.evidence_checklist) { html += '<div style="margin-top:8px"><b>📋 证据清单：</b></div>'; r.evidence_checklist.forEach(e => html += `<div style="font-size:12px">• ${e}</div>`); }
+      panel.innerHTML = html || '<pre>' + JSON.stringify(r, null, 2) + '</pre>';
+    } else { panel.innerHTML = '❌ 分析失败：' + (data.error || '未知错误'); }
+  } catch(e) { panel.innerHTML = '❌ 网络错误：' + e.message; }
+}
+function quickAnalyze(type) {
+  const names = {risk:'风险评估',law:'法条匹配',evidence:'证据检查',penalty:'裁量计算',criminal:'涉刑判断',similar:'相似案例'};
+  epbToast(`🔍 ${names[type]}功能\n\n请先在上方输入案件描述，然后点击"开始智能分析"。\n\n该快捷功能将作为分析流程的独立步骤，后续版本将支持单独调用。`);
+}
+</script>
+</body>
+</html>

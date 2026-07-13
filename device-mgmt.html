@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>📡 设备管理平台 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 12px rgba(27,67,50,.08);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px}
+.top-bar h1{font-size:16px;font-weight:600;flex:1}
+.top-bar .live{font-size:11px;display:flex;align-items:center;gap:4px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--gl);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tabs{display:flex;gap:0;background:var(--card);border-bottom:2px solid var(--border);overflow-x:auto}
+.tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
+.tab:hover{color:var(--g)}
+.tab.active{color:var(--g);border-bottom-color:var(--gm);font-weight:700}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+.panel{display:none}
+.panel.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;text-align:center}
+.stat-icon{font-size:28px;margin-bottom:4px}
+.stat-val{font-size:24px;font-weight:700;color:var(--g)}
+.stat-label{font-size:11px;color:var(--muted)}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.device-card{background:var(--gbg);border-radius:var(--r);padding:14px;border-left:4px solid var(--border);transition:all .2s}
+.device-card:hover{box-shadow:var(--shadow)}
+.device-card.online{border-left-color:#27ae60}
+.device-card.offline{border-left-color:#bbb}
+.device-card.alarm{border-left-color:var(--red)}
+.device-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.device-icon{font-size:24px}
+.device-name{font-weight:700;font-size:14px;flex:1}
+.device-status{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600}
+.st-online{background:#D5F5E3;color:#27ae60}
+.st-offline{background:#f5f5f5;color:#999}
+.st-alarm{background:#FDEDEC;color:var(--red)}
+.device-info{font-size:11px;color:var(--muted);line-height:1.6}
+.device-actions{margin-top:8px;display:flex;gap:6px}
+.device-actions button{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;background:#fff}
+.device-actions button:hover{border-color:var(--gm);color:var(--gm)}
+.type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.type-card{border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:all .15s;background:var(--gbg)}
+.type-card:hover{border-color:var(--gl);background:var(--gp)}
+.type-icon{font-size:32px;margin-bottom:6px}
+.type-name{font-size:13px;font-weight:600;color:var(--g)}
+.type-count{font-size:11px;color:var(--muted);margin-top:2px}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-primary{background:var(--gm);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--g)}
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--g);margin-bottom:4px}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--gbg)}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--gl);background:#fff}
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table th{text-align:left;padding:8px;background:var(--gbg);color:var(--g);font-weight:600;border-bottom:2px solid var(--border)}
+.table td{padding:8px;border-bottom:1px solid var(--border)}
+.table tr:hover{background:var(--gbg)}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;background:var(--gl);border-radius:2px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(27,67,50,.92);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;z-index:9999;display:none}
+#toast.show{display:block}
+</style>
+<script src="/auth-guard.js"></script>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/index.html" class="back-btn">‹</a>
+  <h1>📡 设备管理平台</h1>
+  <div class="live"><div class="live-dot"></div><span id="live-time"></span></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPanel('overview',this)">📊 设备总览</div>
+  <div class="tab" onclick="showPanel('list',this)">📋 设备台账</div>
+  <div class="tab" onclick="showPanel('register',this)">➕ 设备注册</div>
+  <div class="tab" onclick="showPanel('data',this)">📈 数据监控</div>
+  <div class="tab" onclick="showPanel('types',this)">🔧 设备类型</div>
+</div>
+
+<div class="container">
+  <!-- 总览 -->
+  <div class="panel show" id="panel-overview">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">📡</div><div class="stat-val" id="stat-total">--</div><div class="stat-label">设备总数</div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" id="stat-online" style="color:#27ae60">--</div><div class="stat-label">在线设备</div></div>
+      <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-val" id="stat-offline" style="color:#999">--</div><div class="stat-label">离线设备</div></div>
+      <div class="stat-card"><div class="stat-icon">🚨</div><div class="stat-val" id="stat-alarm" style="color:var(--red)">--</div><div class="stat-label">异常告警</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 设备状态分布</div>
+      <div class="device-grid" id="overview-devices"></div>
+    </div>
+  </div>
+
+  <!-- 设备台账 -->
+  <div class="panel" id="panel-list">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" class="form-input" id="device-search" placeholder="搜索设备名称/编号/型号..." style="flex:1" oninput="filterDevices()">
+      <select class="form-select" id="type-filter" onchange="filterDevices()" style="width:140px">
+        <option value="">全部类型</option>
+      </select>
+      <select class="form-select" id="status-filter" onchange="filterDevices()" style="width:110px">
+        <option value="">全部状态</option>
+        <option value="online">在线</option>
+        <option value="offline">离线</option>
+      </select>
+    </div>
+    <div class="card">
+      <table class="table">
+        <thead><tr>
+          <th>设备名称</th><th>类型</th><th>厂商型号</th><th>编号</th><th>分配</th><th>状态</th><th>电量</th><th>最后活跃</th><th>操作</th>
+        </tr></thead>
+        <tbody id="device-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 设备注册 -->
+  <div class="panel" id="panel-register">
+    <div class="card">
+      <div class="card-title">➕ 注册新设备</div>
+      <div class="form-group">
+        <label class="form-label">设备名称 *</label>
+        <input type="text" class="form-input" id="reg-name" placeholder="如：执法眼镜-HMT1-02号">
+      </div>
+      <div class="form-group">
+        <label class="form-label">设备类型 *</label>
+        <select class="form-select" id="reg-type" onchange="updateVendors()">
+          <option value="">请选择</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">厂商/型号</label>
+        <select class="form-select" id="reg-model">
+          <option value="">先选择设备类型</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">设备编号（SN）</label>
+        <input type="text" class="form-input" id="reg-sn" placeholder="如：RW2026002">
+      </div>
+      <div class="form-group">
+        <label class="form-label">分配部门/人员</label>
+        <input type="text" class="form-input" id="reg-assign" placeholder="如：执法大队/张三">
+      </div>
+      <button class="btn btn-primary" onclick="registerDevice()">注册设备</button>
+    </div>
+  </div>
+
+  <!-- 数据监控 -->
+  <div class="panel" id="panel-data">
+    <div class="card">
+      <div class="card-title">📈 实时设备数据</div>
+      <div id="data-display" style="min-height:200px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">
+        选择设备查看实时数据
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 最近数据记录</div>
+      <div id="data-log" style="max-height:300px;overflow-y:auto;font-size:12px"></div>
+    </div>
+  </div>
+
+  <!-- 设备类型 -->
+  <div class="panel" id="panel-types">
+    <div class="type-grid" id="type-grid"></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+var allDevices=[], deviceTypes={}, vendorModels={};
+
+function showPanel(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('panel-'+name).classList.add('show');
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.className='show';
+  setTimeout(function(){t.className='';},2500);
+}
+
+function updateTime(){
+  document.getElementById('live-time').textContent=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateTime,1000);updateTime();
+
+// Load all data
+function loadDevices(){
+  fetch('/api/devices').then(r=>r.json()).then(data=>{
+    allDevices=data.devices||[];
+    deviceTypes=data.device_types||{};
+    var online=allDevices.filter(function(d){return d.status==='online';}).length;
+    var offline=allDevices.filter(function(d){return d.status==='offline';}).length;
+    document.getElementById('stat-total').textContent=allDevices.length;
+    document.getElementById('stat-online').textContent=online;
+    document.getElementById('stat-offline').textContent=offline;
+    document.getElementById('stat-alarm').textContent='0';
+    renderOverviewDevices();
+    renderDeviceTable();
+    updateFilters();
+  });
+}
+
+function loadDeviceTypes(){
+  fetch('/api/device_types').then(r=>r.json()).then(data=>{
+    deviceTypes=data.device_types||{};
+    vendorModels=data.vendor_models||{};
+    renderTypeGrid();
+    updateRegTypeSelect();
+  });
+}
+
+function renderOverviewDevices(){
+  var html=allDevices.map(function(d){
+    var t=deviceTypes[d.type]||{};
+    var cls=d.status==='online'?'online':d.status==='alarm'?'alarm':'offline';
+    var st=d.status==='online'?'在线':d.status==='alarm'?'异常':'离线';
+    var stCls=d.status==='online'?'st-online':d.status==='alarm'?'st-alarm':'st-offline';
+    return '<div class="device-card '+cls+'">'+
+      '<div class="device-head"><div class="device-icon">'+t.icon+'</div><div class="device-name">'+d.name+'</div><span class="device-status '+stCls+'">'+st+'</span></div>'+
+      '<div class="device-info">类型：'+(t.name||d.type)+' | 型号：'+(d.model||'')+'<br>编号：'+(d.serial_no||'')+' | 分配：'+(d.assigned_to||'未分配')+'</div>'+
+      '<div class="device-info" style="margin-top:4px">电量：'+(d.health?d.health.battery+'%':'未知')+' | 存储：'+(d.health?Math.round(d.health.storage_free||0/1024)+'GB':'未知')+'</div>'+
+    '</div>';
+  }).join('');
+  if(!html) html='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted)">暂无设备，请先注册设备</div>';
+  document.getElementById('overview-devices').innerHTML=html;
+}
+
+function renderDeviceTable(filtered){
+  var devices=filtered||allDevices;
+  var html=devices.map(function(d){
+    var t=deviceTypes[d.type]||{};
+    var st=d.status==='online'?'在线':d.status==='offline'?'离线':'异常';
+    var stCls=d.status==='online'?'st-online':d.status==='offline'?'st-offline':'st-alarm';
+    var battery=(d.health?d.health.battery:0)||0;
+    var bColor=battery>50?'#27ae60':battery>20?'#E67E22':'#E74C3C';
+    return '<tr><td><b>'+d.name+'</b></td><td>'+t.icon+' '+(t.name||'')+'</td>'+
+      '<td>'+(d.vendor||'')+' '+(d.model||'')+'</td><td>'+(d.serial_no||'')+'</td>'+
+      '<td>'+(d.assigned_to||'未分配')+'</td>'+
+      '<td><span class="device-status '+stCls+'">'+st+'</span></td>'+
+      '<td><div class="progress-bar"><div class="progress-fill" style="width:'+battery+'%;background:'+bColor+'"></div></div><span style="font-size:10px;color:'+bColor+'">'+battery+'%</span></td>'+
+      '<td style="font-size:10px;color:var(--muted)">'+(d.last_active||'未激活').slice(0,16)+'</td>'+
+      '<td><button onclick="viewDeviceData(\''+d.id+'\')" style="padding:2px 6px;font-size:10px;border:1px solid var(--border);border-radius:4px;cursor:pointer">数据</button></td></tr>';
+  }).join('');
+  if(!html) html='<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted)">暂无设备</td></tr>';
+  document.getElementById('device-table-body').innerHTML=html;
+}
+
+function updateFilters(){
+  var typeSel=document.getElementById('type-filter');
+  var currentVal=typeSel.value;
+  typeSel.innerHTML='<option value="">全部类型</option>';
+  Object.keys(deviceTypes).forEach(function(k){
+    typeSel.innerHTML+='<option value="'+k+'">'+deviceTypes[k].icon+' '+deviceTypes[k].name+'</option>';
+  });
+  typeSel.value=currentVal;
+  var regType=document.getElementById('reg-type');
+  regType.innerHTML='<option value="">请选择</option>';
+  Object.keys(deviceTypes).forEach(function(k){
+    regType.innerHTML+='<option value="'+k+'">'+deviceTypes[k].icon+' '+deviceTypes[k].name+'</option>';
+  });
+}
+
+function filterDevices(){
+  var q=(document.getElementById('device-search').value||'').toLowerCase();
+  var type=document.getElementById('type-filter').value;
+  var status=document.getElementById('status-filter').value;
+  var filtered=allDevices.filter(function(d){
+    if(type && d.type!==type) return false;
+    if(status && d.status!==status) return false;
+    if(q){
+      var searchStr=(d.name+d.serial_no+d.model+d.vendor+d.assigned_to).toLowerCase();
+      if(searchStr.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  renderDeviceTable(filtered);
+}
+
+function updateRegTypeSelect(){
+  var sel=document.getElementById('reg-type');
+  sel.innerHTML='<option value="">请选择</option>';
+  Object.keys(deviceTypes).forEach(function(k){
+    sel.innerHTML+='<option value="'+k+'">'+deviceTypes[k].icon+' '+deviceTypes[k].name+'</option>';
+  });
+}
+
+function updateVendors(){
+  var type=document.getElementById('reg-type').value;
+  var sel=document.getElementById('reg-model');
+  sel.innerHTML='<option value="">自定义</option>';
+  var models=vendorModels[type]||[];
+  models.forEach(function(m){
+    sel.innerHTML+='<option value="'+m.vendor+'|'+m.model+'|'+m.ref_price+'">'+m.vendor+' '+m.model+' (约¥'+m.ref_price+')</option>';
+  });
+}
+
+function registerDevice(){
+  var name=document.getElementById('reg-name').value.trim();
+  var type=document.getElementById('reg-type').value;
+  var modelVal=document.getElementById('reg-model').value;
+  var sn=document.getElementById('reg-sn').value.trim();
+  var assign=document.getElementById('reg-assign').value.trim();
+  if(!name){showToast('请输入设备名称');return;}
+  if(!type){showToast('请选择设备类型');return;}
+  var parts=modelVal.split('|');
+  var device={
+    name:name, type:type, vendor:parts[0]||'', model:parts[1]||'', serial_no:sn,
+    assigned_to:assign, status:'offline',
+    health:{battery:100, storage_free:0, temperature:25, last_report:''}
+  };
+  fetch('/api/devices',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(device)})
+  .then(r=>r.json()).then(data=>{
+    if(data.ok){
+      showToast('设备注册成功: '+data.device.id);
+      loadDevices();
+      document.getElementById('reg-name').value='';
+      document.getElementById('reg-sn').value='';
+    }else{showToast('注册失败: '+data.error);}
+  });
+}
+
+function viewDeviceData(devId){
+  showToast('设备数据功能开发中... ID: '+devId);
+}
+
+function renderTypeGrid(){
+  var html='';
+  Object.keys(deviceTypes).forEach(function(k){
+    var t=deviceTypes[k];
+    var count=allDevices.filter(function(d){return d.type===k;}).length;
+    html+='<div class="type-card" onclick="showTypeDetail(\''+k+'\')"><div class="type-icon">'+t.icon+'</div><div class="type-name">'+t.name+'</div><div class="type-count">'+count+'台设备 | '+t.protocol+'</div></div>';
+  });
+  document.getElementById('type-grid').innerHTML=html;
+}
+
+function showTypeDetail(type){
+  var t=deviceTypes[type]||{};
+  var models=vendorModels[type]||[];
+  var html='<b>'+t.icon+' '+t.name+'</b><br>';
+  html+='通信协议：'+t.protocol+' | 类型：'+t.category+'<br>';
+  html+='可选厂商型号：<br>';
+  models.forEach(function(m){
+    html+='• '+m.vendor+' '+m.model+' — '+m.features+' (约¥'+m.ref_price+')<br>';
+  });
+  html+='<br>已注册设备：<br>';
+  var devs=allDevices.filter(function(d){return d.type===type;});
+  if(devs.length===0) html+='暂无';
+  devs.forEach(function(d){
+    html+='• '+d.name+' ('+d.serial_no+') ['+(d.status==='online'?'在线':'离线')+']<br>';
+  });
+  document.getElementById('data-display').innerHTML=html;
+  showPanel('data',document.querySelectorAll('.tab')[3]);
+}
+
+loadDevices();
+loadDeviceTypes();
+
+// Auto-refresh device list every 30s
+setInterval(loadDevices,30000);
+</script>
+</body>
+</html>

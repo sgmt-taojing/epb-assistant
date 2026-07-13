@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>📚 案例查询 — 环保智慧执法平台</title>
+<style>
+:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--bg:#F0F2F0;--card:#FFF;--border:#D0E0D4;--text:#1A1A1A;--muted:#666;--shadow:0 2px 8px rgba(27,67,50,.06);--r:12px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+.top-bar{background:linear-gradient(135deg,#1B4332,#2D6A4F);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.back-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:18px;flex-shrink:0}
+.top-bar h1{font-size:16px;font-weight:600;flex:1}
+.search-bar{padding:12px;background:var(--card);border-bottom:1px solid var(--border)}
+.search-row{display:flex;gap:8px}
+.search-input{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;background:var(--gbg);font-size:14px;color:var(--text)}
+.search-input:focus{outline:none;border-color:var(--gl);background:#fff}
+.search-btn{padding:10px 16px;background:var(--gm);color:#fff;border:none;border-radius:20px;font-size:13px;cursor:pointer}
+.filter-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--border)}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-chip{padding:6px 12px;border:1px solid var(--border);border-radius:16px;font-size:12px;background:var(--gbg);white-space:nowrap;cursor:pointer;transition:all .15s}
+.filter-chip:active{background:var(--gp)}
+.filter-chip.active{background:var(--gm);color:#fff;border-color:var(--gm)}
+.case-list{padding:8px 12px 60px}
+.case-item{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin-bottom:10px;cursor:pointer;transition:transform .1s}
+.case-item:active{transform:scale(.98)}
+.case-tags{margin-bottom:6px}
+.case-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:4px}
+.tag-water{background:#e3f2fd;color:#1565c0}
+.tag-air{background:#fff3e0;color:#e65100}
+.tag-solid{background:#f3e5f5;color:#6a1b9a}
+.tag-noise{background:#fce4ec;color:#c62828}
+.tag-soil{background:#efebe9;color:#5d4037}
+.tag-hazw{background:#ffebee;color:#c62828}
+.tag-other{background:#e8f5e9;color:#2e7d32}
+.case-risk{font-size:10px;padding:2px 6px;border-radius:4px}
+.risk-high{background:#ffebee;color:#c62828}
+.risk-mid{background:#fff8e1;color:#f57f17}
+.risk-low{background:#e8f5e9;color:#2e7d32}
+.case-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:4px;color:var(--text)}
+.case-fact{font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.case-meta{display:flex;gap:8px;margin-top:6px;font-size:11px;color:var(--muted)}
+.case-meta .source{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.load-more{text-align:center;padding:16px;color:var(--muted);font-size:12px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:flex-end;justify-content:center}
+.detail-overlay.show{display:flex}
+.detail-panel{background:#fff;width:100%;max-width:500px;border-radius:20px 20px 0 0;max-height:85vh;overflow-y:auto}
+.detail-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff}
+.detail-header h2{font-size:15px;font-weight:700;flex:1}
+.detail-close{width:30px;height:30px;border:none;background:var(--gbg);border-radius:50%;font-size:18px;cursor:pointer}
+.detail-body{padding:16px}
+.detail-section{margin-bottom:16px}
+.detail-label{font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px}
+.detail-text{font-size:13px;color:var(--text);line-height:1.6}
+.law-list{list-style:none;padding:0}
+.law-list li{padding:4px 0;font-size:13px;color:var(--text);border-bottom:1px solid var(--border)}
+</style>
+
+<script>
+// API 降级：当后端不可用时自动使用静态 JSON 数据
+var _apiFallbackMap = {
+  '/api/health': '/api-data/health.json',
+  '/api/tasks': '/api-data/tasks.json',
+  '/api/cases': '/api-data/cases.json',
+  '/api/cases?limit=200': '/api-data/cases.json',
+  '/api/cases?limit=5': '/api-data/cases.json',
+  '/api/cases?limit=50': '/api-data/cases.json',
+  '/api/law_index': '/api-data/law_index.json',
+  '/api/law_mapping': '/api-data/law_mapping.json',
+  '/api/knowledge_graph': '/api-data/knowledge_graph.json',
+  '/api/enterprises': '/api-data/enterprises.json',
+  '/api/devices': '/api-data/devices.json',
+  '/api/device_types': '/api-data/device_types.json',
+  '/api/roles': '/api-data/roles.json',
+  '/api/users': '/api-data/users.json',
+  '/api/tenant': '/api-data/tenant.json',
+  '/api/config': '/api-data/config.json',
+  '/api/report': '/api-data/health.json',
+  '/api/search?type=all&limit=5': '/api-data/cases.json'
+};
+var _origFetch = window.fetch;
+window.fetch = function(url, opts) {
+  return _origFetch(url, opts).catch(function() {
+    var fb = _apiFallbackMap[url] || _apiFallbackMap[url.split('?')[0]];
+    if (fb) {
+      console.log('[fallback] ' + url + ' -> ' + fb);
+      return _origFetch(fb);
+    }
+    throw new Error('API unavailable: ' + url);
+  });
+};
+</script>
+</head>
+<body>
+<div class="top-bar">
+  <a href="/wechat-h5.html" class="back-btn">‹</a>
+  <h1>📚 案例查询</h1>
+</div>
+
+<div class="search-bar">
+  <div class="search-row">
+    <input type="text" class="search-input" id="search-input" placeholder="搜索案例（如：偷排、超标、VOCs）">
+    <button class="search-btn" onclick="doSearch()">搜索</button>
+  </div>
+</div>
+
+<div class="filter-bar" id="filter-bar">
+  <div class="filter-chip active" data-type="">全部</div>
+  <div class="filter-chip" data-type="水污染类">💧 水污染</div>
+  <div class="filter-chip" data-type="大气污染类">💨 大气</div>
+  <div class="filter-chip" data-type="固体废物污染类">🗑️ 固废</div>
+  <div class="filter-chip" data-type="危险废物类">☣️ 危废</div>
+  <div class="filter-chip" data-type="噪声污染类">🔊 噪声</div>
+  <div class="filter-chip" data-type="土壤污染类">🟤 土壤</div>
+  <div class="filter-chip" data-type="环评类">📋 环评</div>
+  <div class="filter-chip" data-type="排污许可类">📄 排污</div>
+  <div class="filter-chip" data-type="自动监控类">📡 监控</div>
+  <div class="filter-chip" data-type="移动源监管类">🚛 移动源</div>
+</div>
+
+<div class="case-list" id="case-list">
+  <div class="empty">加载中...</div>
+</div>
+
+<div class="detail-overlay" id="detail-overlay">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<script>
+var allCases=[];
+var currentFilter='';
+var currentKeyword='';
+var displayed=0;
+var PAGE_SIZE=10;
+
+function getTagClass(type){
+  var m={'水污染类':'tag-water','大气污染类':'tag-air','固体废物污染类':'tag-solid','噪声污染类':'tag-noise','土壤污染类':'tag-soil','危险废物类':'tag-hazw'};
+  return m[type]||'tag-other';
+}
+function getRiskClass(risk){
+  if(risk==='高风险')return 'risk-high';
+  if(risk==='中风险')return 'risk-mid';
+  return 'risk-low';
+}
+
+function renderCases(){
+  var filtered=allCases.filter(function(c){
+    if(currentFilter&&c.type!==currentFilter)return false;
+    if(currentKeyword){
+      var kw=currentKeyword.toLowerCase();
+      return (c.title||'').toLowerCase().indexOf(kw)>=0||(c.fact||'').toLowerCase().indexOf(kw)>=0||(c.type||'').toLowerCase().indexOf(kw)>=0;
+    }
+    return true;
+  });
+  if(filtered.length===0){
+    document.getElementById('case-list').innerHTML='<div class="empty">未找到相关案例</div>';
+    return;
+  }
+  var show=filtered.slice(0,displayed+PAGE_SIZE);
+  displayed=show.length;
+  var html=show.map(function(c,idx){
+    return '<div class="case-item" onclick="showDetail('+idx+')">'+
+      '<div class="case-tags"><span class="case-tag '+getTagClass(c.type)+'">'+c.type+'</span>'+
+      '<span class="case-risk '+getRiskClass(c.risk_level)+'">'+c.risk_level+'</span></div>'+
+      '<div class="case-title">'+c.title+'</div>'+
+      '<div class="case-fact">'+(c.fact||'').slice(0,100)+'</div>'+
+      '<div class="case-meta"><span class="source">'+(c.source||'')+'</span><span>'+(c.date||'')+'</span></div>'+
+      '<input type="hidden" id="case-data-'+idx+'" value=\''+JSON.stringify(c).replace(/'/g,"&#39;")+'\'>'+
+    '</div>';
+  }).join('');
+  if(displayed<filtered.length){
+    html+='<div class="load-more">下拉加载更多（'+displayed+'/'+filtered.length+'）</div>';
+  }
+  document.getElementById('case-list').innerHTML=html;
+  window._filtered=filtered;
+}
+
+function showDetail(idx){
+  var c=window._filtered[idx];
+  if(!c)return;
+  var laws=(c.law||[]).map(function(l){return '<li>'+l+'</li>';}).join('');
+  var tags=(c.tags||[]).map(function(t){return '<span class="case-tag tag-other">#'+t+'</span>';}).join(' ');
+  document.getElementById('detail-panel').innerHTML=
+    '<div class="detail-header"><h2>案件详情</h2><button class="detail-close" onclick="closeDetail()">✕</button></div>'+
+    '<div class="detail-body">'+
+    '<div class="detail-section"><div class="detail-label">案件标题</div><div class="detail-text">'+c.title+'</div></div>'+
+    '<div class="detail-section"><div class="detail-label">类型 / 风险</div><div class="detail-text"><span class="case-tag '+getTagClass(c.type)+'">'+c.type+'</span> <span class="case-risk '+getRiskClass(c.risk_level)+'">'+c.risk_level+'</span>'+(c.criminal?' ⚖️ 涉刑':'')+'</div></div>'+
+    '<div class="detail-section"><div class="detail-label">违法事实</div><div class="detail-text">'+c.fact+'</div></div>'+
+    '<div class="detail-section"><div class="detail-label">适用法条</div><ul class="law-list">'+laws+'</ul></div>'+
+    '<div class="detail-section"><div class="detail-label">处罚结果</div><div class="detail-text">'+c.result+'</div></div>'+
+    '<div class="detail-section"><div class="detail-label">标签</div><div class="detail-text">'+tags+'</div></div>'+
+    '<div class="detail-section"><div class="detail-label">来源 / 日期</div><div class="detail-text">'+(c.source||'')+' | '+(c.date||'')+'</div></div>'+
+    '</div>';
+  document.getElementById('detail-overlay').classList.add('show');
+}
+function closeDetail(){document.getElementById('detail-overlay').classList.remove('show');}
+
+document.querySelectorAll('.filter-chip').forEach(function(el){
+  el.addEventListener('click',function(){
+    document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+    el.classList.add('active');
+    currentFilter=el.dataset.type;
+    displayed=0;
+    renderCases();
+  });
+});
+
+function doSearch(){
+  currentKeyword=document.getElementById('search-input').value.trim();
+  displayed=0;
+  renderCases();
+}
+document.getElementById('search-input').addEventListener('keypress',function(e){if(e.key==='Enter')doSearch();});
+
+// Load all cases
+fetch('/api/cases?limit=200').then(function(r){return r.json()}).then(function(res){
+  allCases=res.cases||res.data||[];
+  document.getElementById('case-list').innerHTML='<div class="load-more">共'+allCases.length+'条案例</div>';
+  setTimeout(function(){displayed=0;renderCases();},100);
+}).catch(function(){
+  document.getElementById('case-list').innerHTML='<div class="empty">案例加载失败</div>';
+});
+
+// Infinite scroll
+window.addEventListener('scroll',function(){
+  if(window.innerHeight+window.scrollY>=document.body.offsetHeight-100){
+    if(displayed<allCases.length){renderCases();}
+  }
+});
+</script>
+</body>
+</html>
