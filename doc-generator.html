@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>执法文书AI生成 · 环保执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+/* 文书类型选择 */
+.doc-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.doc-type{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.doc-type:active{transform:scale(.97)}
+.doc-type.selected{border-color:var(--primary);background:rgba(59,130,246,.08)}
+.doc-type .dt-icon{font-size:28px;margin-bottom:6px}
+.doc-type .dt-name{font-size:13px;font-weight:600}
+.doc-type .dt-desc{font-size:10px;color:var(--muted);margin-top:2px}
+/* 表单 */
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.form-select,.form-input,.form-textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
+.form-textarea{min-height:80px;resize:vertical;line-height:1.6}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.5}
+/* 生成结果 */
+.doc-output{background:#f8fafc;color:#1e293b;border-radius:12px;padding:24px;margin-top:16px;font-family:'SimSun','STSong',serif;line-height:2;display:none}
+.doc-output.show{display:block}
+.doc-output h2{text-align:center;font-size:18px;margin-bottom:16px}
+.doc-output .doc-meta{text-align:right;font-size:12px;color:var(--muted);margin-bottom:12px}
+.doc-output p{text-indent:2em;margin-bottom:8px;font-size:13px}
+.doc-output .doc-seal{text-align:center;margin-top:20px;font-size:14px;color:#999}
+.doc-output table{width:100%;border-collapse:collapse;margin:8px 0}
+.doc-output td{border:1px solid #ddd;padding:6px 8px;font-size:12px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>执法文书 <span>AI生成</span></h1>
+<p>输入案件要素 · AI自动生成标准执法文书</p>
+</div>
+
+<div class="container">
+<div class="section">
+<div class="section-title">选择文书类型</div>
+<div class="doc-types">
+<div class="doc-type selected" onclick="selectType('inspection_record',this)">
+<div class="dt-icon">📋</div><div class="dt-name">现场检查笔录</div><div class="dt-desc">现场执法记录</div>
+</div>
+<div class="doc-type" onclick="selectType('inquiry_record',this)">
+<div class="dt-icon">💬</div><div class="dt-name">询问笔录</div><div class="dt-desc">当事人询问记录</div>
+</div>
+<div class="doc-type" onclick="selectType('penalty_decision',this)">
+<div class="dt-icon">⚖️</div><div class="dt-name">行政处罚决定书</div><div class="dt-desc">处罚决定正式文书</div>
+</div>
+<div class="doc-type" onclick="selectType('rectification_notice',this)">
+<div class="dt-icon">📝</div><div class="dt-name">责令改正通知书</div><div class="dt-desc">限期整改通知</div>
+</div>
+</div>
+</div>
+
+<div class="section" id="form-section">
+<div class="section-title">案件信息</div>
+
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">被检查单位/个人</label>
+<input class="form-input" id="target-name" placeholder="如：山东华源化工有限公司">
+</div>
+<div class="form-group">
+<label class="form-label">法定代表人</label>
+<input class="form-input" id="legal-rep" placeholder="如：张三">
+</div>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">统一社会信用代码</label>
+<input class="form-input" id="credit-code" placeholder="如：91370100MA3XXXXX1A">
+</div>
+<div class="form-group">
+<label class="form-label">检查日期</label>
+<input class="form-input" id="check-date" type="date">
+</div>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">检查地点</label>
+<input class="form-input" id="check-location" placeholder="如：济南市历下区工业南路88号">
+</div>
+<div class="form-group">
+<label class="form-label">执法人员</label>
+<input class="form-input" id="inspector" placeholder="如：李执法、王执法">
+</div>
+</div>
+
+<div class="form-group">
+<label class="form-label">违法事实描述</label>
+<textarea class="form-textarea" id="violation-fact" placeholder="详细描述检查中发现的违法事实，如：现场检查发现该单位生产废水处理设施正在运行，但调节池pH调节剂投加装置未开启，导致后续生化处理单元进水pH偏低，曝气池污泥活性受到抑制。在线监测数据显示COD排放浓度达到185mg/L，超过《污水综合排放标准》(GB8978-1996)一级标准限值100mg/L的0.85倍。"></textarea>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">适用法条</label>
+<select class="form-select" id="law-article">
+<option value="">AI自动匹配</option>
+<option value="water83">《水污染防治法》第八十三条</option>
+<option value="air99">《大气污染防治法》第九十九条</option>
+<option value="solid102">《固体废物污染环境防治法》第一百零二条</option>
+<option value="permit33">《排污许可管理条例》第三十三条</option>
+<option value="env63">《环境保护法》第六十三条</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">拟处罚金额（万元）</label>
+<input class="form-input" id="penalty-amount" type="number" placeholder="如：25" step="0.1">
+</div>
+</div>
+
+<div class="form-group">
+<label class="form-label">整改要求</label>
+<textarea class="form-textarea" id="rectification-req" placeholder="如：1.立即开启pH调节剂投加装置；2.30日内完成废水处理设施全面检修；3.建立治污设施运行台账电子化管理系统"></textarea>
+</div>
+</div>
+
+<button class="btn btn-primary" onclick="generateDoc()" id="gen-btn">生成执法文书</button>
+
+<div class="doc-output" id="doc-output"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/doc-generator.html"><span class="icon">📄</span>文书</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var currentType='inspection_record';
+
+function selectType(type,el){
+currentType=type;
+document.querySelectorAll('.doc-type').forEach(function(t){t.classList.remove('selected')});
+el.classList.add('selected');
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+function generateDoc(){
+var name=document.getElementById('target-name').value.trim();
+if(!name){epbToast('请填写被检查单位');return}
+var rep=document.getElementById('legal-rep').value.trim()||'——';
+var code=document.getElementById('credit-code').value.trim()||'——';
+var date=document.getElementById('check-date').value||new Date().toISOString().slice(0,10);
+var loc=document.getElementById('check-location').value.trim()||'——';
+var inspector=document.getElementById('inspector').value.trim()||'——';
+var fact=document.getElementById('violation-fact').value.trim();
+if(!fact){epbToast('请描述违法事实');return}
+var lawSel=document.getElementById('law-article').value;
+var amount=document.getElementById('penalty-amount').value;
+var rectReq=document.getElementById('rectification-req').value.trim();
+
+// 自动匹配法条
+var lawText='';
+if(!lawSel){
+if(fact.indexOf('水')>=0||fact.indexOf('废水')>=0||fact.indexOf('COD')>=0){
+lawText='《中华人民共和国水污染防治法》第八十三条';
+}else if(fact.indexOf('气')>=0||fact.indexOf('粉尘')>=0||fact.indexOf('VOCs')>=0){
+lawText='《中华人民共和国大气污染防治法》第九十九条';
+}else if(fact.indexOf('危废')>=0||fact.indexOf('固废')>=0){
+lawText='《中华人民共和国固体废物污染环境防治法》第一百零二条';
+}else{
+lawText='《中华人民共和国环境保护法》第六十条';
+}
+}else{
+var lawMap={water83:'《水污染防治法》第八十三条',air99:'《大气污染防治法》第九十九条',solid102:'《固体废物污染环境防治法》第一百零二条',permit33:'《排污许可管理条例》第三十三条',env63:'《环境保护法》第六十三条'};
+lawText=lawMap[lawSel];
+}
+
+var btn=document.getElementById('gen-btn');
+btn.disabled=true;btn.textContent='生成中...';
+
+setTimeout(function(){
+var html='';
+var dateStr=date.replace(/-/g,'年').replace(/年(?=\d{2}$)/,'年')+'月'+'日';
+var dateFormatted=date.replace(/-/g,'/');
+
+if(currentType==='inspection_record'){
+html='<h2>现场检查笔录</h2>'+
+'<div class="doc-meta">检查时间：'+dateFormatted+'</div>'+
+'<table><tr><td>被检查单位</td><td>'+name+'</td></tr>'+
+'<tr><td>法定代表人</td><td>'+rep+'</td></tr>'+
+'<tr><td>统一社会信用代码</td><td>'+code+'</td></tr>'+
+'<tr><td>检查地点</td><td>'+loc+'</td></tr>'+
+'<tr><td>执法人员</td><td>'+inspector+'</td></tr></table>'+
+'<p style="margin-top:16px;font-weight:600">检查情况记录：</p>'+
+'<p>'+date+'，'+inspector+'对'+name+'进行了现场检查。检查情况如下：</p>'+
+'<p>'+fact+'</p>'+
+'<p>上述事实有现场照片、在线监测数据、检查记录等证据为证。</p>'+
+'<p style="margin-top:16px">被检查单位（签名）：________________　　日期：'+dateFormatted+'</p>'+
+'<p>执法人员（签名）：________________　　________________</p>'+
+'<p>记录人（签名）：________________</p>'+
+'<div class="doc-seal">（生态环境主管部门印章）</div>'+
+'<p style="text-align:center;margin-top:12px">——本笔录一式两份，一份交被检查单位，一份存档——</p>';
+}else if(currentType==='inquiry_record'){
+html='<h2>询问笔录</h2>'+
+'<div class="doc-meta">询问时间：'+dateFormatted+'</div>'+
+'<table><tr><td>被询问人</td><td>'+rep+'</td></tr>'+
+'<tr><td>所在单位</td><td>'+name+'</td></tr>'+
+'<tr><td>统一社会信用代码</td><td>'+code+'</td></tr>'+
+'<tr><td>询问地点</td><td>'+loc+'</td></tr>'+
+'<tr><td>询问人</td><td>'+inspector+'</td></tr></table>'+
+'<p style="margin-top:16px">我们是'+loc+'生态环境局执法人员'+inspector+'，今天依法对你（单位）进行询问调查。请你如实回答我们的问题，隐瞒或提供虚假陈述将承担相应的法律责任。你听清楚了吗？</p>'+
+'<p>答：听清楚了，我愿意如实回答。</p>'+
+'<p style="font-weight:600">问：请介绍一下你单位的基本情况。</p>'+
+'<p>答：我单位是'+name+'，主要从事'+(fact.match(/(\S+?)制造|加工|生产/)||['','生产经营'])[1]+'业务，法定代表人是'+rep+'，统一社会信用代码'+code+'。</p>'+
+'<p style="font-weight:600">问：请介绍'+dateFormatted+'检查中发现的违法情况。</p>'+
+'<p>答：'+fact+'</p>'+
+'<p style="font-weight:600">问：你单位上述行为违反了哪些规定？是否知晓？</p>'+
+'<p>答：知道了。根据'+lawText+'的规定，我单位的行为构成了违法。我们愿意接受处理，并尽快整改。</p>'+
+'<p style="font-weight:600">问：还有什么需要补充的吗？</p>'+
+'<p>答：没有了。</p>'+
+'<p style="margin-top:16px">被询问人（签名）：________________　　日期：'+dateFormatted+'</p>'+
+'<p>询问人（签名）：________________　　________________</p>'+
+'<p>记录人（签名）：________________</p>'+
+'<div class="doc-seal">（生态环境主管部门印章）</div>';
+}else if(currentType==='penalty_decision'){
+var amt=amount?amount+'万元':'——';
+html='<h2>行政处罚决定书</h2>'+
+'<div class="doc-meta">文号：环罚〔'+date.slice(0,4)+'〕第___号</div>'+
+'<p style="text-indent:0">被处罚单位：'+name+'</p>'+
+'<p style="text-indent:0">法定代表人：'+rep+'</p>'+
+'<p style="text-indent:0">统一社会信用代码：'+code+'</p>'+
+'<p style="text-indent:0">地址：'+loc+'</p>'+
+'<p style="margin-top:12px">经调查查明，你（单位）存在以下环境违法行为：</p>'+
+'<p>'+fact+'</p>'+
+'<p>上述行为违反了'+lawText+'的规定。</p>'+
+'<p>依据'+lawText+'的规定，我局决定对你（单位）作出如下行政处罚：</p>'+
+'<p style="text-align:center;font-size:16px;font-weight:700">罚款人民币 '+amt+'（大写：——）</p>';
+if(rectReq){
+html+='<p>同时责令你（单位）：</p><p>'+rectReq+'</p>';
+}
+html+='<p style="margin-top:12px">限你（单位）自收到本决定书之日起十五日内，将罚款缴至指定银行。逾期不缴纳的，每日按罚款数额的3%加处罚款。</p>'+
+'<p>如不服本处罚决定，可在收到本决定书之日起六十日内向上一级生态环境主管部门申请行政复议，或者在六个月内依法向人民法院提起行政诉讼。</p>'+
+'<p style="margin-top:16px;text-align:right">'+loc+'生态环境局</p>'+
+'<p style="text-align:right">'+date.replace(/-/g,'年')+'月'+'日</p>'+
+'<div class="doc-seal">（生态环境主管部门印章）</div>';
+}else if(currentType==='rectification_notice'){
+html='<h2>责令改正违法行为决定书</h2>'+
+'<div class="doc-meta">文号：环改〔'+date.slice(0,4)+'〕第___号</div>'+
+'<p style="text-indent:0">被责令改正单位：'+name+'</p>'+
+'<p style="text-indent:0">法定代表人：'+rep+'</p>'+
+'<p style="text-indent:0">统一社会信用代码：'+code+'</p>'+
+'<p style="text-indent:0">地址：'+loc+'</p>'+
+'<p style="margin-top:12px">经我局于'+dateFormatted+'现场检查，发现你（单位）存在以下环境违法行为：</p>'+
+'<p>'+fact+'</p>'+
+'<p>上述行为违反了'+lawText+'的规定。</p>'+
+'<p>现责令你（单位）在收到本决定书之日起立即改正上述违法行为，具体要求如下：</p>';
+if(rectReq){
+var reqs=rectReq.split(/[;；\n]/).filter(function(s){return s.trim()});
+reqs.forEach(function(r,i){
+html+='<p>'+(i+1)+'. '+r.replace(/^\d+\.\s*/,'')+'</p>';
+});
+}else{
+html+='<p>1. 立即停止违法行为；2. 限期完成整改；3. 提交整改报告。</p>';
+}
+html+='<p style="margin-top:12px">我局将在三十日内对你（单位）改正违法行为的情况进行复查。逾期未改正的，将依法进一步处理。</p>'+
+'<p>如不服本决定，可在收到本决定书之日起六十日内申请行政复议，或者在六个月内提起行政诉讼。</p>'+
+'<p style="margin-top:16px;text-align:right">'+loc+'生态环境局</p>'+
+'<p style="text-align:right">'+date.replace(/-/g,'年')+'月'+'日</p>'+
+'<div class="doc-seal">（生态环境主管部门印章）</div>';
+}
+
+document.getElementById('doc-output').innerHTML=html;
+document.getElementById('doc-output').classList.add('show');
+btn.disabled=false;btn.textContent='重新生成文书';
+document.getElementById('doc-output').scrollIntoView({behavior:'smooth'});
+},800);
+}
+</script>
+</body>
+</html>
