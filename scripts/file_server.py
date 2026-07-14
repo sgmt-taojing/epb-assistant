@@ -125,6 +125,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'smart-alert.html'))
         elif path == '/drone-patrol.html':
             self._serve_static(os.path.join(WEB_DIR, 'drone-patrol.html'))
+        elif path == '/overview.html':
+            self._serve_static(os.path.join(WEB_DIR, 'overview.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
