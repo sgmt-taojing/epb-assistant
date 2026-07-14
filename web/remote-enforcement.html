@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>非现场执法 · 在线监测分析</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.stat-card .num{font-size:22px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.red .num{color:var(--danger)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.green .num{color:var(--accent)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.alert-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid}
+.alert-item.red{border-color:var(--danger)}
+.alert-item.amber{border-color:var(--warn)}
+.alert-item.green{border-color:var(--accent)}
+.alert-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.alert-title{font-size:13px;font-weight:600}
+.alert-level{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.alert-level.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.alert-level.amber{background:rgba(245,158,11,.15);color:#fcd34d}
+.alert-level.green{background:rgba(16,185,129,.15);color:#6ee7b7}
+.alert-meta{font-size:11px;color:var(--muted)}
+.alert-detail{font-size:12px;margin-top:6px;line-height:1.6}
+.alert-actions{display:flex;gap:8px;margin-top:8px}
+.alert-btn{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text)}
+.alert-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.filter-chip{padding:6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.filter-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* 企业监控状态 */
+.ent-monitor{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.ent-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ent-status-dot.green{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.ent-status-dot.amber{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.ent-status-dot.red{background:var(--danger);box-shadow:0 0 8px var(--danger)}
+.ent-info{flex:1}
+.ent-name{font-size:13px;font-weight:500}
+ ent-detail{font-size:11px;color:var(--muted)}
+.ent-data{font-size:11px;text-align:right}
+.ent-data .val{font-weight:600;font-size:14px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>非现场执法 <span>在线监测分析</span></h1>
+<p>实时监控 · 智能预警 · 数据异常自动识别 · 精准执法</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num" id="stat-normal">8</div><div class="label">正常企业</div></div>
+<div class="stat-card amber"><div class="num" id="stat-warn">3</div><div class="label">预警企业</div></div>
+<div class="stat-card red"><div class="num" id="stat-alarm">2</div><div class="label">超标企业</div></div>
+</div>
+
+<div class="filter-bar">
+<div class="filter-chip active" onclick="filterAlert('all',this)">全部</div>
+<div class="filter-chip" onclick="filterAlert('exceed',this)">超标预警</div>
+<div class="filter-chip" onclick="filterAlert('abnormal',this)">数据异常</div>
+<div class="filter-chip" onclick="filterAlert('offline',this)">设备离线</div>
+<div class="filter-chip" onclick="filterAlert('resolved',this)">已处理</div>
+</div>
+
+<div class="section">
+<div class="section-title">实时预警列表</div>
+<div id="alert-list"></div>
+</div>
+
+<div class="section">
+<div class="section-title">企业监控状态</div>
+<div id="ent-monitor-list"></div>
+</div>
+
+<div class="section">
+<div class="section-title">AI智能分析</div>
+<div style="background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--primary)">
+<div style="font-size:13px;font-weight:600;color:var(--primary2);margin-bottom:8px">数据分析结论</div>
+<div style="font-size:12px;line-height:1.8">
+<div>1. 华源化工COD连续超标3天，疑似治污设施故障，建议立即现场核查</div>
+<div>2. 海润电镀在线监测数据呈"恒值"特征，存在数据篡改嫌疑，建议突击检查</div>
+<div>3. 运达金属用电监控显示治污设施夜间停运2小时，建议夜间突击执法</div>
+<div>4. 渤海印染氨氮数据波动异常，可能与生产工况变化有关，建议持续观察</div>
+</div>
+</div>
+<div style="background:var(--card2);border-radius:10px;padding:14px;margin-top:10px;border-left:3px solid var(--accent)">
+<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px">执法建议</div>
+<div style="font-size:12px;line-height:1.8">
+<div>① 优先级P0：华源化工、海润电镀 — 24小时内现场核查</div>
+<div>② 优先级P1：运达金属 — 48小时内夜间突击检查</div>
+<div>③ 优先级P2：渤海印染 — 持续监控，下周例行检查</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/iot.html"><span class="icon">📡</span>物联</a>
+<a class="nav-item active" href="/remote-enforcement.html"><span class="icon">👁️</span>非现场</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var ALERTS=[
+{id:'ALM-001',ent:'山东华源化工有限公司',type:'exceed',level:'red',param:'COD',value:'185mg/L',limit:'100mg/L',time:'2026-07-14 06:30',detail:'COD排放浓度连续3天超标，7月12日160mg/L→7月13日172mg/L→7月14日185mg/L，呈持续升高趋势。疑似废水处理设施MBR膜堵塞或曝气系统故障。',suggestion:'立即派员现场核查治污设施运行状态，检查MBR膜组件和曝气系统',days:3},
+{id:'ALM-002',ent:'青岛海润电镀有限公司',type:'abnormal',level:'red',param:'Cr⁶⁺',value:'0.48mg/L',limit:'0.5mg/L',time:'2026-07-14 05:00',detail:'在线监测Cr⁶⁺数据连续7天稳定在0.47-0.49mg/L（限值0.5mg/L），数据呈"恒值"特征，标准差仅0.008。正常生产数据应有波动，恒值高度疑似人为干预监测数据。',suggestion:'建议突击检查，核实在线监测设备是否被人为修改，调取设备操作日志'},
+{id:'ALM-003',ent:'济宁运达金属加工有限公司',type:'abnormal',level:'amber',param:'用电',value:'停运2h',limit:'连续运行',time:'2026-07-14 02:00-04:00',detail:'用电监控显示治污设施（酸雾塔循环泵）在凌晨2:00-4:00停止运行2小时，期间生产设施正常运行。涉嫌治污设施停运偷排。',suggestion:'夜间突击执法，调取用电记录、生产记录，检查是否存在夜间偷排行为'},
+{id:'ALM-004',ent:'烟台渤海印染有限公司',type:'exceed',level:'amber',param:'氨氮',value:'14.2mg/L',limit:'15mg/L',time:'2026-07-14 04:15',detail:'氨氮排放浓度达到限值的94.7%，接近超标临界值。近一周数据波动较大（8-14mg/L），可能与生产工艺调整或进水水质变化有关。',suggestion:'持续监控，通知企业排查原因，下周例行检查时重点关注'},
+{id:'ALM-005',ent:'潍坊绿洲纸业有限公司',type:'offline',level:'amber',param:'COD',value:'离线',limit:'100mg/L',time:'2026-07-14 03:00',detail:'在线监测设备已离线5小时，最后上传数据时间为7月14日03:00。可能是设备故障、网络中断或人为断电。',suggestion:'联系企业核实设备状况，要求24小时内恢复上传，逾期转为现场核查'},
+{id:'ALM-006',ent:'淄博新华制药股份有限公司',type:'resolved',level:'green',param:'VOCs',value:'达标',limit:'80mg/L',time:'2026-07-13 16:00',detail:'7月12日VOCs预警（浓度76mg/L，接近限值），企业主动排查发现活性炭吸附箱密封垫老化，已更换并恢复达标排放。',suggestion:'预警已闭环处理，记录企业主动整改表现'}
+];
+
+var ENT_LIST=[
+{name:'山东华源化工有限公司',status:'red',param:'COD',value:'185',limit:'100',unit:'mg/L'},
+{name:'青岛海润电镀有限公司',status:'red',param:'Cr⁶⁺',value:'0.48',limit:'0.5',unit:'mg/L'},
+{name:'济宁运达金属加工有限公司',status:'amber',param:'用电',value:'停运',limit:'正常',unit:''},
+{name:'烟台渤海印染有限公司',status:'amber',param:'氨氮',value:'14.2',limit:'15',unit:'mg/L'},
+{name:'潍坊绿洲纸业有限公司',status:'amber',param:'COD',value:'离线',limit:'100',unit:'mg/L'},
+{name:'淄博新华制药股份有限公司',status:'green',param:'VOCs',value:'42',limit:'80',unit:'mg/L'},
+{name:'临沂市建材集团股份有限公司',status:'green',param:'PM10',value:'28',limit:'50',unit:'mg/m³'},
+{name:'泰安泰山玻璃制品有限公司',status:'green',param:'SO₂',value:'15',limit:'35',unit:'mg/m³'},
+{name:'济南某食品加工厂',status:'green',param:'COD',value:'45',limit:'100',unit:'mg/L'},
+{name:'德州某纺织有限公司',status:'green',param:'氨氮',value:'8',limit:'15',unit:'mg/L'},
+{name:'聊城某化工有限公司',status:'green',param:'VOCs',value:'55',limit:'80',unit:'mg/L'},
+{name:'滨州某建材有限公司',status:'green',param:'PM2.5',value:'18',limit:'35',unit:'mg/m³'}
+];
+
+var currentFilter='all';
+
+function filterAlert(type,el){
+currentFilter=type;
+document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+el.classList.add('active');
+renderAlerts();
+}
+
+function renderAlerts(){
+var list=ALERTS;
+if(currentFilter!=='all'){
+list=ALERTS.filter(function(a){return a.type===currentFilter});
+}
+var html='';
+if(list.length===0){html='<div style="text-align:center;padding:20px;color:var(--muted)">暂无预警</div>'}
+list.forEach(function(a){
+var levelText={red:'紧急',amber:'预警',green:'正常'}[a.level];
+html+='<div class="alert-item '+a.level+'">'+
+'<div class="alert-header"><span class="alert-title">'+a.ent+'</span><span class="alert-level '+a.level+'">'+levelText+'</span></div>'+
+'<div class="alert-meta">'+a.param+'：'+a.value+(a.limit?' / 限值:'+a.limit:'')+' · '+a.time+'</div>'+
+'<div class="alert-detail">'+a.detail+'</div>';
+if(a.suggestion){
+html+='<div style="margin-top:6px;font-size:11px;color:var(--primary2)">💡 '+a.suggestion+'</div>';
+}
+html+='<div class="alert-actions"><button class="alert-btn primary" onclick="handleAlert(\''+a.id+'\')">派单核查</button><button class="alert-btn" onclick="dismissAlert(\''+a.id+'\')">标记已读</button></div>'+
+'</div>';
+});
+document.getElementById('alert-list').innerHTML=html;
+}
+
+function renderEntList(){
+var html='';
+ENT_LIST.forEach(function(e){
+var statusText={red:'超标',amber:'预警',green:'正常'}[e.status];
+html+='<div class="ent-monitor">'+
+'<div class="ent-status-dot '+e.status+'"></div>'+
+'<div class="ent-info"><div class="ent-name">'+e.name+'</div><div class="ent-detail" style="font-size:11px;color:var(--muted)">'+e.param+' · '+statusText+'</div></div>'+
+'<div class="ent-data"><div class="val" style="color:'+(e.status==='red'?'var(--danger)':e.status==='amber'?'var(--warn)':'var(--accent)')+'">'+e.value+(e.unit?' '+e.unit:'')+'</div><div style="font-size:10px;color:var(--muted)">限值:'+e.limit+(e.unit?' '+e.unit:'')+'</div></div>'+
+'</div>';
+});
+document.getElementById('ent-monitor-list').innerHTML=html;
+}
+
+function handleAlert(id){
+epbToast('已派发核查任务：'+id+'，执法人员将在24小时内到达现场');
+}
+function dismissAlert(id){
+epbToast('已标记已读：'+id);
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderAlerts();
+renderEntList();
+</script>
+</body>
+</html>

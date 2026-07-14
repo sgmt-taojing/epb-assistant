@@ -113,6 +113,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'risk-profile.html'))
         elif path == '/doc-generator.html':
             self._serve_static(os.path.join(WEB_DIR, 'doc-generator.html'))
+        elif path == '/ai-report.html':
+            self._serve_static(os.path.join(WEB_DIR, 'ai-report.html'))
+        elif path == '/remote-enforcement.html':
+            self._serve_static(os.path.join(WEB_DIR, 'remote-enforcement.html'))
+        elif path == '/credit-rating.html':
+            self._serve_static(os.path.join(WEB_DIR, 'credit-rating.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
