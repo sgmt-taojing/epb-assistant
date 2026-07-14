@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>执法流程引导 · 环保执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+/* 流程时间线 */
+.flow-timeline{position:relative;padding-left:32px}
+.flow-timeline::before{content:'';position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--border)}
+.flow-step{position:relative;margin-bottom:20px;cursor:pointer}
+.flow-step::before{content:'';position:absolute;left:-26px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--primary);transition:all .2s;z-index:1}
+.flow-step.done::before{background:var(--accent);border-color:var(--accent)}
+.flow-step.active::before{background:var(--primary);border-color:var(--primary);box-shadow:0 0 8px var(--primary)}
+.flow-step.alert::before{background:var(--danger);border-color:var(--danger)}
+.flow-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .2s}
+.flow-card:hover{border-color:var(--primary)}
+.flow-card.selected{border-color:var(--primary);background:rgba(59,130,246,.05)}
+.flow-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.flow-title{font-size:14px;font-weight:600}
+.flow-status{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.flow-status.done{background:rgba(16,185,129,.15);color:#6ee7b7}
+.flow-status.active{background:rgba(59,130,246,.15);color:#93c5fd}
+.flow-status.pending{background:rgba(100,116,139,.15);color:var(--muted)}
+.flow-status.alert{background:rgba(239,68,68,.15);color:#fca5a5}
+.flow-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.flow-detail{font-size:12px;line-height:1.6;display:none}
+.flow-detail.show{display:block}
+.flow-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.flow-action{padding:4px 10px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:var(--card2);color:var(--text);cursor:pointer;text-decoration:none}
+.flow-action.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* 案件信息卡 */
+.case-info{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+.case-info h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.case-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.case-row:last-child{border-bottom:none}
+.case-row .key{color:var(--muted)}
+.case-row .val{font-weight:500}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.checklist-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:12px}
+.checklist-item .check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px}
+.checklist-item .check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.checklist-item .text{flex:1}
+.checklist-item.done .text{color:var(--muted);text-decoration:line-through}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>执法流程 <span>引导</span></h1>
+<p>线索发现 → 立案审批 → 现场检查 → 证据固定 → 案件审查 → 处罚决定 → 执行监督 → 结案归档</p>
+</div>
+
+<div class="container">
+<div class="case-info">
+<h3>📌 当前案件：华源化工COD超标案</h3>
+<div class="case-row"><span class="key">案件编号</span><span class="val">CASE-2026-0714-001</span></div>
+<div class="case-row"><span class="key">案件类型</span><span class="val">水污染超标排放</span></div>
+<div class="case-row"><span class="key">被检查单位</span><span class="val">山东华源化工有限公司</span></div>
+<div class="case-row"><span class="key">线索来源</span><span class="val">在线监测预警 + 群众举报</span></div>
+<div class="case-row"><span class="key">发现时间</span><span class="val">2026-07-12</span></div>
+<div class="case-row"><span class="key">当前阶段</span><span class="val" style="color:var(--primary)">证据固定 → 案件审查</span></div>
+</div>
+
+<div class="section">
+<div class="section-title">执法流程进度</div>
+<div class="flow-timeline" id="flow-timeline"></div>
+</div>
+
+<div class="section">
+<div class="section-title">证据清单（勾选已采集）</div>
+<div id="evidence-list"></div>
+</div>
+
+<div class="section">
+<div class="section-title">AI流程建议</div>
+<div style="background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--primary)">
+<div style="font-size:12px;line-height:1.8">
+<div>1. 当前阶段已完成现场检查和部分证据采集，建议补充<b>在线监测数据导出</b>和<b>企业用电记录</b></div>
+<div>2. COD连续3天超标趋势明显，建议加快案件审查进度</div>
+<div>3. 涉嫌治污设施不正常运行，可依据《环境保护法》第六十三条移送行政拘留</div>
+<div>4. 建议同步调取企业环评报告和排污许可证，核实许可范围</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/field-terminal.html"><span class="icon">🚔</span>执法</a>
+<a class="nav-item active" href="/enforcement-guide.html"><span class="icon">📋</span>流程</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📱</span>工作台</a>
+</div>
+
+<script>
+var FLOW_STEPS=[
+{id:1,title:'线索发现',status:'done',meta:'2026-07-12 · 在线监测预警 + 12369举报',detail:'在线监测系统自动预警：COD连续超标3天（160→172→185mg/L）。同时收到群众举报反映该企业夜间排放异味废水。',actions:[{label:'查看预警详情',url:'/smart-alert.html'},{label:'查看举报记录',url:'/report.html'}]},
+{id:2,title:'立案审批',status:'done',meta:'2026-07-12 · 执法大队审批',detail:'执法大队负责人审批立案，确定案件类型为"水污染物超标排放"，指定李执法、王执法为承办人。',actions:[]},
+{id:3,title:'现场检查',status:'done',meta:'2026-07-13 09:00-11:30 · 李执法、王执法',detail:'现场检查发现：①MBR膜组件堵塞，曝气不均匀；②pH调节剂投加装置未开启；③在线监测设备运行正常；④污泥处置台账不完整。已制作现场检查笔录。',actions:[{label:'查看现场笔录',url:'/doc-generator.html'},{label:'查看执法终端',url:'/field-terminal.html'}]},
+{id:4,title:'证据固定',status:'active',meta:'进行中 · 已采集6/9项',detail:'已采集：现场照片、在线监测数据导出、水质采样送检报告、现场检查笔录、企业排污许可证复印件、治污设施运行记录。\n待采集：用电记录、环评报告、污泥处置合同。',actions:[{label:'生成询问笔录',url:'/doc-generator.html'},{label:'生成采样单',url:'#'}]},
+{id:5,title:'案件审查',status:'pending',meta:'待前序完成后进行',detail:'案件审查要点：①违法事实是否清楚；②证据是否确实充分；③适用法律是否正确；④程序是否合法；⑤自由裁量是否适当。',actions:[]},
+{id:6,title:'处罚决定',status:'pending',meta:'待前序完成后进行',detail:'依据《水污染防治法》第八十三条，处罚金额10-100万元。使用自由裁量计算器计算建议金额。',actions:[{label:'自由裁量计算',url:'/penalty-calculator.html'}]},
+{id:7,title:'执行监督',status:'pending',meta:'待前序完成后进行',detail:'跟踪企业罚款缴纳和整改落实情况，30日内复查。',actions:[]},
+{id:8,title:'结案归档',status:'pending',meta:'待前序完成后进行',detail:'整理全部案件材料，归档保存。生成案件结案报告。',actions:[{label:'生成结案报告',url:'/ai-report.html'}]}
+];
+
+var EVIDENCE=[
+{name:'现场照片（厂区全景+排放口+治污设施）',done:true},
+{name:'在线监测数据导出（COD 7天趋势）',done:true},
+{name:'水质采样送检报告',done:true},
+{name:'现场检查笔录',done:true},
+{name:'企业排污许可证复印件',done:true},
+{name:'治污设施运行记录（近3个月）',done:true},
+{name:'企业用电记录（证明治污设施运行状态）',done:false},
+{name:'环评报告及批复文件',done:false},
+{name:'污泥处置合同及转移联单',done:false}
+];
+
+function renderFlow(){
+var html='';
+FLOW_STEPS.forEach(function(s){
+html+='<div class="flow-step '+s.status+'" onclick="toggleDetail('+s.id+')">';
+html+='<div class="flow-card'+(s.status==='active'?' selected':'')+'">';
+html+='<div class="flow-header"><span class="flow-title">'+s.title+'</span><span class="flow-status '+s.status+'">'+{done:'已完成',active:'进行中',pending:'待处理'}[s.status]+'</span></div>';
+html+='<div class="flow-meta">'+s.meta+'</div>';
+html+='<div class="flow-detail" id="detail-'+s.id+'">'+s.detail.replace(/\n/g,'<br>');
+if(s.actions.length>0){
+html+='<div class="flow-actions">';
+s.actions.forEach(function(a){html+='<a class="flow-action primary" href="'+a.url+'">'+a.label+'</a>'});
+html+='</div>';
+}
+html+='</div>';
+html+='</div></div>';
+});
+document.getElementById('flow-timeline').innerHTML=html;
+}
+
+function toggleDetail(id){
+var el=document.getElementById('detail-'+id);
+el.classList.toggle('show');
+}
+
+function renderEvidence(){
+var html='';
+EVIDENCE.forEach(function(e,i){
+html+='<div class="checklist-item'+(e.done?' done':'')+'">';
+html+='<div class="check'+(e.done?' done':'')+'" onclick="toggleEvidence('+i+')">'+(e.done?'✓':'')+'</div>';
+html+='<div class="text">'+e.name+'</div>';
+html+='</div>';
+});
+document.getElementById('evidence-list').innerHTML=html;
+}
+
+function toggleEvidence(i){
+EVIDENCE[i].done=!EVIDENCE[i].done;
+renderEvidence();
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderFlow();
+renderEvidence();
+</script>
+</body>
+</html>

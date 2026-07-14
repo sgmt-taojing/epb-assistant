@@ -1,9 +1,35 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.DS_Store
-*.db-shm
-*.db-wal
+*.egg-info/
+dist/
+build/
+
+# Database (keep epb.db in repo for demo data)
+# epb.db-journal
+# epb.db-wal
+
+# Uploads and outputs (runtime data)
 uploads/
 outputs/
-.openclaw/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Node (if added later)
+node_modules/
