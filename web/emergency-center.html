@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>应急指挥中心 · 环保突发事件</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#7c2d12 0%,#1e293b 100%);padding:24px 20px;text-align:center;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 50% 50%,rgba(239,68,68,.1),transparent 70%);animation:alert-bg 3s ease-in-out infinite}
+@keyframes alert-bg{0%,100%{opacity:.5}50%{opacity:1}}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px;position:relative;z-index:1}
+.hero h1 span{color:#fca5a5}
+.hero p{color:var(--muted);font-size:12px;position:relative;z-index:1}
+.container{padding:16px}
+.alert.banner{background:linear-gradient(135deg,rgba(239,68,68,.1),rgba(245,158,11,.05));border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:16px;margin-bottom:12px}
+.alert-title{font-size:16px;font-weight:700;color:#fca5a5;margin-bottom:4px}
+.alert-info{font-size:12px;color:var(--muted);line-height:1.8}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.red .num{color:var(--danger)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.timeline-item{position:relative;margin-bottom:16px}
+.timeline-item::before{content:'';position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--primary)}
+.timeline-item.alert::before{border-color:var(--danger);background:rgba(239,68,68,.2)}
+.timeline-item.done::before{border-color:var(--accent);background:var(--accent)}
+.timeline-time{font-size:10px;color:var(--muted);margin-bottom:2px}
+.timeline-title{font-size:13px;font-weight:600}
+.timeline-desc{font-size:11px;color:var(--muted)}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.team-card{background:var(--card2);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px}
+.team-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.team-info{flex:1}
+.team-name{font-size:13px;font-weight:500}
+.team-role{font-size:10px;color:var(--muted)}
+.team-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.team-status.online{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.team-status.busy{background:var(--warn)}
+.resource-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.resource-card{background:var(--card2);border-radius:10px;padding:12px}
+.resource-name{font-size:13px;font-weight:500}
+.resource-qty{font-size:11px;color:var(--muted);margin-top:2px}
+.resource-card.ok{border-left:2px solid var(--accent)}
+.resource-card.low{border-left:2px solid var(--warn)}
+.resource-card.critical{border-left:2px solid var(--danger)}
+.comm-item{background:var(--card2);border-radius:8px;padding:10px;margin-bottom:4px;font-size:12px;border-left:2px solid var(--primary)}
+.comm-time{font-size:10px;color:var(--muted)}
+.comm-from{font-weight:600;color:var(--primary2)}
+.comm-msg{color:var(--text);margin-top:2px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>应急指挥 <span>中心</span></h1>
+<p>突发事件响应 · 资源调度 · 实时通讯 · 处置闭环</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card red"><div class="num">1</div><div class="label">进行中事件</div></div>
+<div class="stat-card amber"><div class="num">2</div><div class="label">待响应事件</div></div>
+<div class="stat-card blue"><div class="num">8</div><div class="label">应急人员就位</div></div>
+<div class="stat-card green"><div class="num">95%</div><div class="label">资源就绪率</div></div>
+</div>
+
+<!-- 当前事件 -->
+<div class="alert banner">
+<div class="alert-title">⚠️ 当前应急事件：华源化工废水泄漏</div>
+<div class="alert-info">
+时间：2026-07-14 06:30 · 级别：Ⅱ级（较大环境突发事件）<br>
+位置：济南市历下区工业南路88号华源化工厂区<br>
+概况：生产废水处理设施MBR膜组件破裂，COD超标废水（浓度185mg/L）泄漏至雨水管网，危及下游沂河支流水质<br>
+影响范围：下游3km河道，涉及1个饮用水取水口
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">事件处置时间线</div>
+<div class="timeline">
+<div class="timeline-item alert"><div class="timeline-time">06:30</div><div class="timeline-title">事件触发</div><div class="timeline-desc">在线监测预警COD连续超标，自动关联降雨数据判断雨水管网风险</div></div>
+<div class="timeline-item done"><div class="timeline-time">06:32</div><div class="timeline-title">自动通知</div><div class="timeline-desc">短信+APP通知应急指挥中心值班人员，同步推送至区环保局</div></div>
+<div class="timeline-item done"><div class="timeline-time">06:35</div><div class="timeline-title">响应启动</div><div class="timeline-desc">值班领导启动Ⅱ级应急响应，通知应急队伍集合</div></div>
+<div class="timeline-item done"><div class="timeline-time">06:45</div><div class="timeline-title">第一梯队出发</div><div class="timeline-desc">4人应急处置小队携带便携监测设备前往现场</div></div>
+<div class="timeline-item done"><div class="timeline-time">07:00</div><div class="timeline-title">到场核实</div><div class="timeline-desc">确认MBR膜破裂，废水已进入雨水管，立即通知水厂加密监测</div></div>
+<div class="timeline-item alert"><div class="timeline-time">07:15</div><div class="timeline-title">正在处置</div><div class="timeline-desc">企业关闭废水外排阀门，应急队投放应急药剂拦截污染扩散，环境监测车已到位</div></div>
+<div class="timeline-item"><div class="timeline-time">待定</div><div class="timeline-title">下一步</div><div class="timeline-desc">①水质监测车持续监测 <br>②通知下游水厂加强预处理 <br>③协调吸污车抽运管网内废水 <br>④MBR膜维修方案制定</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">应急队伍</div>
+<div class="team-grid">
+<div class="team-card"><div class="team-avatar" style="background:rgba(59,130,246,.2)">👤</div><div class="team-info"><div class="team-name">李队长</div><div class="team-role">应急指挥长 · 现场指挥</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(16,185,129,.2)">👤</div><div class="team-info"><div class="team-name">王执法</div><div class="team-role">应急处置 · 现场监测</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(16,185,129,.2)">👤</div><div class="team-info"><div class="team-name">张技术</div><div class="team-role">技术专家 · 污染控制</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(245,158,11,.2)">👤</div><div class="team-info"><div class="team-name">赵监测</div><div class="team-role">环境监测 · 水质分析</div></div><div class="team-status busy"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(16,185,129,.2)">👤</div><div class="team-info"><div class="team-name">刘司机</div><div class="team-role">物资运输 · 吸污车</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(100,116,139,.2)">👤</div><div class="team-info"><div class="team-name">周值班</div><div class="team-role">后勤保障 · 物资协调</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(100,116,139,.2)">👤</div><div class="team-info"><div class="team-name">孙水厂</div><div class="team-role">下游水厂 · 加密监测</div></div><div class="team-status online"></div></div>
+<div class="team-card"><div class="team-avatar" style="background:rgba(100,116,139,.2)">👤</div><div class="team-info"><div class="team-name">郑信息</div><div class="team-role">信息报送 · 舆情监控</div></div><div class="team-status online"></div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">应急资源</div>
+<div class="resource-grid">
+<div class="resource-card ok"><div class="resource-name">便携式多参数监测仪</div><div class="resource-qty">数量：3台 · 可用：3台</div></div>
+<div class="resource-card ok"><div class="resource-name">环境监测车</div><div class="resource-qty">数量：2辆 · 可用：2辆</div></div>
+<div class="resource-card ok"><div class="resource-name">活性炭应急包</div><div class="resource-qty">数量：500kg · 可用：500kg</div></div>
+<div class="resource-card ok"><div class="resource-name">吸污转运车</div><div class="resource-qty">数量：2辆 · 可用：2辆</div></div>
+<div class="resource-card low"><div class="resource-name">拦油索/围油栏</div><div class="resource-qty">数量：200m · 可用：120m</div></div>
+<div class="resource-card ok"><div class="resource-name">便携式无人机</div><div class="resource-qty">数量：3架 · 可用：3架</div></div>
+<div class="resource-card low"><div class="resource-name">COD快速检测试纸</div><div class="resource-qty">数量：200条 · 可用：85条</div></div>
+<div class="resource-card critical"><div class="resource-name">应急照明设备</div><div class="resource-qty">数量：4套 · 可用：1套</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">应急通讯</div>
+<div class="comm-item"><div class="comm-time">07:15</div><div class="comm-from">李队长→全体</div><div class="comm-msg">拦截药剂已投放完成，水质监测车正在下游采样，预计15分钟出初步结果。吸污车已出发请加快到位。</div></div>
+<div class="comm-item"><div class="comm-time">07:10</div><div class="comm-from">赵监测→李队长</div><div class="comm-msg">下游水质监测点pH异常（6.2→5.8），COD初步检测约55mg/L，水流速度减少，请加快处置。</div></div>
+<div class="comm-item"><div class="comm-time">07:05</div><div class="comm-from">郑信息→李队长</div><div class="comm-msg">已通知下游水厂加密监测，拟定舆情信息通稿。</div></div>
+<div class="comm-item"><div class="comm-time">07:00</div><div class="comm-from">王执法→指挥中心</div><div class="comm-msg">确认MBR膜组件破裂，已责令企业关闭废水外排阀门，雨水管正在加装临时截流设施。</div></div>
+<div class="comm-item"><div class="comm-time">06:45</div><div class="comm-from">指挥中心→第一梯队</div><div class="comm-msg">立即出发前往华源化工，携带便携监测设备和应急药剂，注意安全防护。</div></div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/smart-alert.html"><span class="icon">🚨</span>预警</a>
+<a class="nav-item active" href="/emergency-center.html"><span class="icon">🆘</span>应急</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+</body>
+</html>
