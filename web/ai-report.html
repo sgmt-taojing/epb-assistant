@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>AI周报月报 · 环保执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}
+.tab{flex:1;padding:10px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;transition:all .2s}
+.tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.form-select,.form-input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
+.form-input:focus,.form-select:focus{border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.5}
+/* 报告预览 */
+.report-preview{background:#f8fafc;color:#1e293b;border-radius:12px;padding:24px;margin-top:16px;display:none;font-family:'SimSun','STSong',serif;line-height:2}
+.report-preview.show{display:block}
+.report-preview h2{text-align:center;font-size:18px;margin-bottom:16px}
+.report-preview h3{font-size:15px;margin:16px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
+.report-preview p{text-indent:2em;font-size:13px;margin-bottom:6px}
+.report-preview table{width:100%;border-collapse:collapse;margin:8px 0}
+.report-preview td,.report-preview th{border:1px solid #ddd;padding:6px 8px;font-size:12px;text-align:center}
+.report-preview th{background:#f1f5f9;font-weight:600}
+.metric-card{background:var(--card2);border-radius:10px;padding:14px;text-align:center}
+.metric-card .num{font-size:24px;font-weight:700;color:var(--accent)}
+.metric-card .label{font-size:11px;color:var(--muted);margin-top:2px}
+.metrics-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>AI<span>周报月报</span>生成</h1>
+<p>自动汇总工作数据 · 智能分析薄弱环节 · 一键生成报告</p>
+</div>
+
+<div class="container">
+<div class="tabs">
+<div class="tab active" onclick="switchTab('weekly',this)">周报</div>
+<div class="tab" onclick="switchTab('monthly',this)">月报</div>
+<div class="tab" onclick="switchTab('annual',this)">年报</div>
+</div>
+
+<div class="section">
+<div class="section-title">报告参数</div>
+<div class="form-row">
+<div class="form-group">
+<label class="form-label">报告周期</label>
+<select class="form-select" id="period">
+<option value="2026-W28">2026年第28周（7.8-7.14）</option>
+<option value="2026-W27">2026年第27周（7.1-7.7）</option>
+<option value="2026-W26">2026年第26周（6.24-6.30）</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">辖区范围</label>
+<select class="form-select" id="district">
+<option value="all">全部辖区</option>
+<option value="lixia">历下区</option>
+<option value="huaiyin">槐荫区</option>
+<option value="licheng">历城区</option>
+<option value="tianqiao">天桥区</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">报告重点（可多选）</label>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" checked value="执法检查"> 执法检查</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" checked value="案件查处"> 案件查处</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" checked value="在线监测"> 在线监测</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" value="信访投诉"> 信访投诉</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" value="整改验收"> 整改验收</label>
+<label style="display:flex;align-items:center;gap:4px;font-size:13px;padding:6px 10px;background:var(--card2);border-radius:6px;cursor:pointer"><input type="checkbox" value="培训宣传"> 培训宣传</label>
+</div>
+</div>
+</div>
+
+<button class="btn btn-primary" id="gen-btn" onclick="generate()">生成报告</button>
+
+<div id="report-output"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/ai-report.html"><span class="icon">📊</span>报告</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var currentTab='weekly';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');var sel=document.getElementById('period');if(tab==='weekly'){sel.innerHTML='<option value="2026-W28">2026年第28周（7.8-7.14）</option><option value="2026-W27">2026年第27周（7.1-7.7）</option><option value="2026-W26">2026年第26周（6.24-6.30）</option>'}else if(tab==='monthly'){sel.innerHTML='<option value="2026-07">2026年7月</option><option value="2026-06">2026年6月</option><option value="2026-05">2026年5月</option>'}else{sel.innerHTML='<option value="2026">2026年度</option><option value="2025">2025年度</option>'}}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+function generate(){
+var btn=document.getElementById('gen-btn');btn.disabled=true;btn.textContent='AI生成中...';
+var period=document.getElementById('period').value;
+var district=document.getElementById('district').selectedOptions[0].text;
+var checks=Array.from(document.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value});
+setTimeout(function(){
+var data=generateData(currentTab,period);
+var html=renderReport(currentTab,period,district,checks,data);
+document.getElementById('report-output').innerHTML=html;
+document.querySelector('.report-preview').scrollIntoView({behavior:'smooth'});
+btn.disabled=false;btn.textContent='重新生成';
+},1000);
+}
+
+function generateData(tab,period){
+var base={weekly:{inspections:47,violations:12,penalties:8,amount:135.5,online_alerts:23,complaints:15,resolved:13,training:2},monthly:{inspections:186,violations:38,penalties:25,amount:520.3,online_alerts:89,complaints:62,resolved:55,training:6},annual:{inspections:2150,violations:412,penalties:280,amount:6850,online_alerts:1080,complaints:720,resolved:680,training:48}};
+var d=base[tab]||base.weekly;
+// 加随机波动
+Object.keys(d).forEach(function(k){if(k!=='amount'){d[k]=Math.round(d[k]*(0.9+Math.random()*0.2))}else{d[k]=Math.round(d[k]*(0.9+Math.random()*0.2)*10)/10}});
+return d;
+}
+
+function renderReport(tab,period,district,checks,d){
+var periodText={weekly:'周报',monthly:'月报',annual:'年报'}[tab]||'周报';
+var title={weekly:'生态环境执法周报',monthly:'生态环境执法月报',annual:'生态环境执法年报'}[tab];
+var dateRange={weekly:'2026年7月8日—7月14日',monthly:'2026年7月1日—7月31日',annual:'2026年1月1日—12月31日'}[tab];
+
+var html='<div class="report-preview show">';
+html+='<h2>'+title+'</h2>';
+html+='<div style="text-align:center;font-size:12px;color:#666;margin-bottom:16px">'+dateRange+' | '+district+'</div>';
+
+// 核心指标
+html+='<div class="metrics-row">';
+html+='<div class="metric-card"><div class="num" style="color:#3b82f6">'+d.inspections+'</div><div class="label">执法检查(次)</div></div>';
+html+='<div class="metric-card"><div class="num" style="color:#f59e0b">'+d.violations+'</div><div class="label">发现问题(个)</div></div>';
+html+='<div class="metric-card"><div class="num" style="color:#ef4444">'+d.penalties+'</div><div class="label">立案处罚(件)</div></div>';
+html+='<div class="metric-card"><div class="num" style="color:#10b981">'+d.amount+'</div><div class="label">罚款金额(万)</div></div>';
+html+='</div>';
+
+html+='<h3>一、执法检查情况</h3>';
+html+='<p>本'+periodText.replace('报','')+'共开展执法检查<strong>'+d.inspections+'</strong>次，其中双随机检查'+Math.round(d.inspections*0.6)+'次、专项检查'+Math.round(d.inspections*0.25)+'次、暗查暗访'+Math.round(d.inspections*0.15)+'次。检查企业'+Math.round(d.inspections*1.8)+'家次，发现环境违法行为'+d.violations+'起，违法行为发现率'+(d.violations/d.inspections*100).toFixed(1)+'%。</p>';
+html+='<table><tr><th>检查类型</th><th>次数</th><th>发现问题</th><th>发现率</th></tr>';
+html+='<tr><td>双随机检查</td><td>'+Math.round(d.inspections*0.6)+'</td><td>'+Math.round(d.violations*0.5)+'</td><td>'+(Math.round(d.violations*0.5)/Math.round(d.inspections*0.6)*100).toFixed(1)+'%</td></tr>';
+html+='<tr><td>专项检查</td><td>'+Math.round(d.inspections*0.25)+'</td><td>'+Math.round(d.violations*0.35)+'</td><td>'+(Math.round(d.violations*0.35)/Math.round(d.inspections*0.25)*100).toFixed(1)+'%</td></tr>';
+html+='<tr><td>暗查暗访</td><td>'+Math.round(d.inspections*0.15)+'</td><td>'+Math.round(d.violations*0.15)+'</td><td>'+(Math.round(d.violations*0.15)/Math.round(d.inspections*0.15)*100).toFixed(1)+'%</td></tr></table>';
+
+if(checks.indexOf('案件查处')>=0){
+html+='<h3>二、案件查处情况</h3>';
+html+='<p>本'+periodText.replace('报','')+'立案查处环境违法案件<strong>'+d.penalties+'</strong>件，处罚金额'+d.amount+'万元。其中水污染案件'+Math.round(d.penalties*0.35)+'件、大气污染案件'+Math.round(d.penalties*0.3)+'件、固废危废案件'+Math.round(d.penalties*0.2)+'件、其他案件'+Math.round(d.penalties*0.15)+'件。涉嫌环境污染犯罪移送公安机关'+Math.round(d.penalties*0.05)+'件。</p>';
+}
+
+if(checks.indexOf('在线监测')>=0){
+html+='<h3>三、在线监测预警</h3>';
+html+='<p>在线监测平台共产生预警<strong>'+d.online_alerts+'</strong>次，其中超标预警'+Math.round(d.online_alerts*0.4)+'次、数据异常预警'+Math.round(d.online_alerts*0.35)+'次、设备故障预警'+Math.round(d.online_alerts*0.25)+'次。预警响应率100%，平均响应时间'+(8+Math.random()*4).toFixed(1)+'分钟。</p>';
+}
+
+if(checks.indexOf('信访投诉')>=0){
+html+='<h3>四、信访投诉处理</h3>';
+html+='<p>本'+periodText.replace('报','')+'共受理环境信访投诉<strong>'+d.complaints+'</strong>件，已办结'+d.resolved+'件，办结率'+(d.resolved/d.complaints*100).toFixed(1)+'%。其中大气污染投诉占'+Math.round(Math.random()*15+35)+'%、噪声投诉占'+Math.round(Math.random()*10+25)+'%、水污染投诉占'+Math.round(Math.random*10+20)+'%。</p>';
+}
+
+html+='<h3>五、AI分析与建议</h3>';
+html+='<p>基于本'+periodText.replace('报','')+'数据分析：</p>';
+html+='<p>1. <strong>执法效能</strong>：违法行为发现率'+(d.violations/d.inspections*100).toFixed(1)+'%，'+(d.violations/d.inspections*100>25?'高于':'低于')+'上'+periodText.replace('报','')+'平均水平。建议'+(d.violations/d.inspections*100>25?'加大整改督办力度，对屡查屡犯企业提级监管':'保持当前执法频次，重点关注高风险企业')+'。</p>';
+html+='<p>2. <strong>在线监测</strong>：预警'+d.online_alerts+'次，超标预警占比'+(Math.round(d.online_alerts*0.4)/d.online_alerts*100).toFixed(1)+'%。建议对频繁预警企业开展现场核查，核实治污设施运行状况。</p>';
+html+='<p>3. <strong>薄弱环节</strong>：'+(d.complaints>d.resolved*1.2?'信访投诉积压较多，建议加派人力加快办理':'信访投诉办理及时，保持当前水平')+'。'+(d.penalties<d.violations*0.6?'立案率偏低，建议加强证据固定工作':'立案率正常，执法规范性良好')+'。</p>';
+html+='<p>4. <strong>下步重点</strong>：建议持续关注涉水企业排放达标情况，加强对VOCs排放企业的夏季执法检查，推进危废规范化管理专项整治。</p>';
+
+html+='<div style="text-align:right;margin-top:24px;font-size:12px;color:#999">'+district+'生态环境局<br>'+dateRange.split('—')[1].trim()+'</div>';
+html+='</div>';
+
+return html;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保信用评级 · 企业环境信用</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.search-bar{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.search-input{width:100%;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:14px;outline:none}
+.search-input:focus{border-color:var(--primary)}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.yellow .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.ent-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.ent-card:active{transform:scale(.98)}
+.ent-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ent-name{font-size:14px;font-weight:600}
+.ent-badge{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px}
+.ent-badge.green{background:rgba(16,185,129,.15);color:#6ee7b7}
+.ent-badge.blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.ent-badge.yellow{background:rgba(245,158,11,.15);color:#fcd34d}
+.ent-badge.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.ent-meta{font-size:11px;color:var(--muted)}
+.ent-score-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.ent-score-fill{height:100%;border-radius:2px}
+.ent-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.ent-tag{padding:2px 6px;background:var(--card2);border-radius:3px;font-size:10px;color:var(--muted)}
+/* 详情 */
+.detail-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;display:none;backdrop-filter:blur(4px)}
+.detail-overlay.show{display:flex;align-items:flex-end;justify-content:center}
+.detail-modal{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.detail-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1}
+.detail-header h2{font-size:18px;font-weight:700}
+.detail-close{position:absolute;right:20px;top:20px;width:32px;height:32px;border-radius:50%;background:var(--card2);border:none;color:var(--text);font-size:16px;cursor:pointer}
+.detail-body{padding:20px}
+.score-section{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(16,185,129,.08));border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
+.score-big{font-size:48px;font-weight:700;line-height:1}
+.score-grade{font-size:16px;font-weight:600;margin-top:4px}
+.score-desc{font-size:11px;color:var(--muted);margin-top:6px}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.dim-item{background:var(--card);border-radius:10px;padding:12px;border:1px solid var(--border)}
+.dim-item .dim-name{font-size:11px;color:var(--muted)}
+.dim-item .dim-score{font-size:18px;font-weight:700;margin-top:2px}
+.dim-item .dim-bar{height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.dim-item .dim-bar-fill{height:100%;border-radius:2px}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.credit-factor{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.credit-factor:last-child{border-bottom:none}
+.credit-factor .name{color:var(--text)}
+.credit-factor .value{font-weight:600}
+.credit-factor .value.pos{color:var(--accent)}
+.credit-factor .value.neg{color:var(--danger)}
+.incentive-box{background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--accent);margin-top:8px}
+.incentive-box .title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:6px}
+.incentive-box .item{font-size:12px;padding:3px 0;padding-left:14px;position:relative;color:var(--text)}
+.incentive-box .item::before{content:'→';position:absolute;left:0;color:var(--accent)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保信用 <span>评级</span></h1>
+<p>企业环境信用评价 · 绿蓝黄红标 · 联合奖惩</p>
+</div>
+
+<div class="search-bar">
+<input class="search-input" id="search" placeholder="搜索企业名称..." oninput="doSearch()">
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">3</div><div class="label">绿牌(环保诚信)</div></div>
+<div class="stat-card blue"><div class="num">2</div><div class="label">蓝牌(环保良好)</div></div>
+<div class="stat-card yellow"><div class="num">2</div><div class="label">黄牌(环保警示)</div></div>
+<div class="stat-card red"><div class="num">3</div><div class="label">红牌(环保不良)</div></div>
+</div>
+<div id="ent-list"></div>
+</div>
+
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+<div class="detail-modal" id="detail-modal"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/risk-profile.html"><span class="icon">🎯</span>风险</a>
+<a class="nav-item active" href="/credit-rating.html"><span class="icon">⭐</span>信用</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var ENTERPRISES=[
+{id:'EQ-008',name:'泰安泰山玻璃制品有限公司',industry:'玻璃制造',location:'泰安市',score:95,grade:'green',gradeText:'绿牌（环保诚信）',dims:{compliance:96,monitoring:94,emission:97,management:93,public:95},factors:[{name:'排污许可证合规',val:'+10',dir:'pos'},{name:'在线监测稳定达标',val:'+8',dir:'pos'},{name:'环保信用AA级保持',val:'+5',dir:'pos'},{name:'主动公开环境信息',val:'+3',dir:'pos'},{name:'环保违规投诉',val:'0',dir:'pos'}],incentive:['优先安排环保专项资金','银行信贷绿色通道','减少检查频次','环境影响评价审批绿色通道']},
+{id:'EQ-004',name:'淄博新华制药股份有限公司',industry:'制药',location:'淄博市',score:88,grade:'green',gradeText:'绿牌（环保诚信）',dims:{compliance:90,monitoring:85,emission:89,management:87,public:88},factors:[{name:'排污许可证合规',val:'+10',dir:'pos'},{name:'自行监测全部达标',val:'+6',dir:'pos'},{name:'环保信用AA级',val:'+5',dir:'pos'},{name:'VOCs偶有波动',val:'-3',dir:'neg'}],incentive:['优先安排环保专项资金','银行信贷绿色通道','减少检查频次']},
+{id:'EQ-006',name:'潍坊绿洲纸业有限公司',industry:'造纸',location:'潍坊市',score:82,grade:'blue',gradeText:'蓝牌（环保良好）',dims:{compliance:85,monitoring:80,emission:83,management:80,public:78},factors:[{name:'排污许可证合规',val:'+10',dir:'pos'},{name:'COD接近限值',val:'-4',dir:'neg'},{name:'台账不完整',val:'-3',dir:'neg'},{name:'排污许可续展完成',val:'+2',dir:'pos'}],incentive:['正常安排环保专项资金','保持当前环保管理水准','关注COD排放趋势']},
+{id:'EQ-002',name:'临沂市建材集团股份有限公司',industry:'建材制造',location:'临沂市',score:76,grade:'blue',gradeText:'蓝牌（环保良好）',dims:{compliance:78,monitoring:75,emission:78,management:74,public:72},factors:[{name:'粉尘排放偏高',val:'-5',dir:'neg'},{name:'危废防渗不达标',val:'-4',dir:'neg'},{name:'完成脱硫脱硝改造',val:'+8',dir:'pos'},{name:'排污许可证合规',val:'+8',dir:'pos'}],incentive:['正常安排环保专项资金','加强粉尘治理设施维护','30日内完成危废间整改']},
+{id:'EQ-005',name:'烟台渤海印染有限公司',industry:'印染',location:'烟台市',score:62,grade:'yellow',gradeText:'黄牌（环保警示）',dims:{compliance:60,monitoring:65,emission:62,management:58,public:63},factors:[{name:'雨水管网偷排',val:'-15',dir:'neg'},{name:'污泥处置不规范',val:'-5',dir:'neg'},{name:'安装在线监测',val:'+5',dir:'pos'},{name:'排污许可证合规',val:'+5',dir:'pos'}],incentive:['加大检查频次（每月不少于1次）','限制环保专项资金申请','责令限期整改违法行为','暂停各类环保表彰资格']},
+{id:'EQ-001',name:'山东华源化工有限公司',industry:'化工制造',location:'济南市',score:55,grade:'yellow',gradeText:'黄牌（环保警示）',dims:{compliance:58,monitoring:52,emission:55,management:56,public:52},factors:[{name:'COD连续超标3天',val:'-12',dir:'neg'},{name:'危废标识不全',val:'-3',dir:'neg'},{name:'治污设施运行记录不完整',val:'-4',dir:'neg'},{name:'排污许可证合规',val:'+5',dir:'pos'},{name:'配合调查',val:'+3',dir:'pos'}],incentive:['加大检查频次（每月不少于2次）','限制环保专项资金申请','责令限期整改','重点监管对象']},
+{id:'EQ-007',name:'济宁运达金属加工有限公司',industry:'金属加工',location:'济宁市',score:35,grade:'red',gradeText:'红牌（环保不良）',dims:{compliance:30,monitoring:32,emission:35,management:38,public:40},factors:[{name:'危险废物非法倾倒3.5吨',val:'-25',dir:'neg'},{name:'危废贮存间严重不达标',val:'-10',dir:'neg'},{name:'噪声超标扰民',val:'-5',dir:'neg'},{name:'治污设施夜间停运',val:'-8',dir:'neg'},{name:'排污许可证合规',val:'+3',dir:'pos'}],incentive:['列入严重失信名单','联合惩戒：限制贷款、禁止招投标','高频检查（每周不少于1次）','暂停环保专项资金申请资格','涉嫌犯罪移送公安机关']},
+{id:'EQ-003',name:'青岛海润电镀有限公司',industry:'电镀加工',location:'青岛市',score:28,grade:'red',gradeText:'红牌（环保不良）',dims:{compliance:22,monitoring:25,emission:30,management:30,public:32},factors:[{name:'含铬废水渗坑排放',val:'-30',dir:'neg'},{name:'在线监测数据篡改',val:'-20',dir:'neg'},{name:'危废转移联证缺失',val:'-5',dir:'neg'},{name:'排污许可证合规',val:'+2',dir:'pos'}],incentive:['列入严重失信名单','联合惩戒：限制贷款、禁止招投标','高频检查','涉嫌犯罪移送公安机关','吊销排污许可证']},
+{id:'EQ-009',name:'德州某化工有限公司',industry:'化工',location:'德州市',score:42,grade:'red',gradeText:'红牌（环保不良）',dims:{compliance:38,monitoring:40,emission:45,management:42,public:44},factors:[{name:'无证排污',val:'-20',dir:'neg'},{name:'治污设施不正常运行',val:'-10',dir:'neg'},{name:'拒绝检查',val:'-8',dir:'neg'},{name:'限期整改中',val:'+0',dir:'pos'}],incentive:['列入失信名单','联合惩戒','高频检查','责令停业整顿']}
+];
+
+var searchKw='';
+function doSearch(){searchKw=document.getElementById('search').value.toLowerCase().trim();renderList()}
+
+function renderList(){
+var list=ENTERPRISES;
+if(searchKw){list=ENTERPRISES.filter(function(e){return e.name.toLowerCase().indexOf(searchKw)>=0||e.industry.toLowerCase().indexOf(searchKw)>=0})}
+var html='';
+list.forEach(function(e){
+var colorMap={green:'var(--accent)',blue:'var(--primary2)',yellow:'var(--warn)',red:'var(--danger)'};
+var color=colorMap[e.grade];
+html+='<div class="ent-card" onclick="showDetail(\''+e.id+'\')">'+
+'<div class="ent-header"><span class="ent-name">'+e.name+'</span><span class="ent-badge '+e.grade+'">'+e.gradeText+'</span></div>'+
+'<div class="ent-meta">'+e.industry+' · '+e.location+' · 信用分: '+e.score+'</div>'+
+'<div class="ent-score-bar"><div class="ent-score-fill" style="width:'+e.score+'%;background:'+color+'"></div></div>'+
+'</div>';
+});
+document.getElementById('ent-list').innerHTML=html;
+}
+
+function showDetail(eid){
+var e=ENTERPRISES.filter(function(x){return x.id===eid})[0];
+if(!e)return;
+var colorMap={green:'var(--accent)',blue:'var(--primary2)',yellow:'var(--warn)',red:'var(--danger)'};
+var color=colorMap[e.grade];
+var dimNames={compliance:'合规评分',monitoring:'监测评分',emission:'排放评分',management:'管理评分',public:'公开评分'};
+var html='<div class="detail-header"><h2>'+e.name+'</h2><button class="detail-close" onclick="closeDetail()">✕</button></div><div class="detail-body">';
+html+='<div class="score-section"><div class="score-big" style="color:'+color+'">'+e.score+'</div><div class="score-grade" style="color:'+color+'">'+e.gradeText+'</div><div class="score-desc">'+e.industry+' · '+e.location+' · 评价周期：2026年上半年</div></div>';
+html+='<div class="dim-grid">';
+Object.keys(e.dims).forEach(function(k){
+var s=e.dims[k];
+var c=s>=80?'var(--accent)':s>=60?'var(--warn)':'var(--danger)';
+html+='<div class="dim-item"><div class="dim-name">'+dimNames[k]+'</div><div class="dim-score" style="color:'+c+'">'+s+'</div><div class="dim-bar"><div class="dim-bar-fill" style="width:'+s+'%;background:'+c+'"></div></div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">信用评价因子</div>';
+e.factors.forEach(function(f){
+html+='<div class="credit-factor"><span class="name">'+f.name+'</span><span class="value '+f.dir+'">'+f.val+'</span></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">奖惩措施</div><div class="incentive-box"><div class="title">'+(e.grade==='green'?'激励措施':e.grade==='blue'?'维持措施':e.grade==='yellow'?'约束措施':'惩戒措施')+'</div>';
+e.incentive.forEach(function(i){html+='<div class="item">'+i+'</div>'});
+html+='</div></div>';
+html+='</div>';
+document.getElementById('detail-modal').innerHTML=html;
+document.getElementById('detail-overlay').classList.add('show');
+}
+
+function closeDetail(ev){if(ev&&ev.target!==document.getElementById('detail-overlay'))return;document.getElementById('detail-overlay').classList.remove('show')}
+
+renderList();
+</script>
+</body>
+</html>
