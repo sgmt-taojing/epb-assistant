@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>智能预警系统 · 环保执法</title>
+<style>
+:var(--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#7c2d12 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:#f59e0b}
+.hero p{color:#64748b;font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:#64748b;margin-top:2px}
+.stat-card.red .num{color:#ef4444}
+.stat-card.amber .num{color:#f59e0b}
+.stat-card.blue .num{color:#60a5fa}
+.stat-card.green .num{color:#10b981}
+.filter-bar{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.filter-chip{padding:6px 12px;border-radius:16px;background:#111827;border:1px solid #1e293b;font-size:12px;color:#64748b;cursor:pointer;flex-shrink:0}
+.filter-chip.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.section{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:#60a5fa;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:#3b82f6;border-radius:2px}
+.alert-item{background:#1a2332;border-radius:10px;padding:14px;margin-bottom:10px;border-left:3px solid}
+.alert-item.red{border-color:#ef4444}
+.alert-item.amber{border-color:#f59e0b}
+.alert-item.blue{border-color:#3b82f6}
+.alert-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.alert-title{font-size:13px;font-weight:600}
+.alert-level{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.alert-level.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.alert-level.amber{background:rgba(245,158,11,.15);color:#fcd34d}
+.alert-level.blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.alert-meta{font-size:11px;color:#64748b;margin-bottom:4px}
+.alert-detail{font-size:12px;line-height:1.6}
+.alert-source{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.source-tag{padding:2px 6px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:3px;font-size:10px;color:#93c5fd}
+.alert-actions{display:flex;gap:8px;margin-top:8px}
+.alert-btn{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid #1e293b;background:#111827;color:#e2e8f0}
+.alert-btn.primary{background:#3b82f6;color:#fff;border-color:#3b82f6}
+/* 规则引擎 */
+.rule-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1e293b}
+.rule-item:last-child{border-bottom:none}
+.rule-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:rgba(59,130,246,.1)}
+.rule-info{flex:1}
+.rule-name{font-size:13px;font-weight:500}
+.rule-desc{font-size:11px;color:#64748b}
+.rule-count{font-size:12px;font-weight:600;color:#f59e0b}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111827;border-top:1px solid #1e293b;display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:#64748b;text-decoration:none;font-size:10px}
+.nav-item.active{color:#3b82f6}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>智能预警 <span>系统</span></h1>
+<p>多源融合 · AI研判 · 自动分级 · 精准推送</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card red"><div class="num">7</div><div class="label">紧急预警</div></div>
+<div class="stat-card amber"><div class="num">15</div><div class="label">一般预警</div></div>
+<div class="stat-card blue"><div class="num">23</div><div class="label">提示信息</div></div>
+<div class="stat-card green"><div class="num">96%</div><div class="label">处置率</div></div>
+</div>
+
+<div class="filter-bar">
+<div class="filter-chip active" onclick="filterAlert('all',this)">全部(45)</div>
+<div class="filter-chip" onclick="filterAlert('red',this)">紧急(7)</div>
+<div class="filter-chip" onclick="filterAlert('amber',this)">一般(15)</div>
+<div class="filter-chip" onclick="filterAlert('blue',this)">提示(23)</div>
+<div class="filter-chip" onclick="filterAlert('fusion',this)">融合预警</div>
+</div>
+
+<div class="section">
+<div class="section-title">实时预警</div>
+<div id="alert-list"></div>
+</div>
+
+<div class="section">
+<div class="section-title">预警规则引擎</div>
+<div class="rule-item"><div class="rule-icon">📏</div><div class="rule-info"><div class="rule-name">超标预警规则</div><div class="rule-desc">排放浓度>限值×1.0触发，>限值×1.5升级紧急</div></div><div class="rule-count">触发12次</div></div>
+<div class="rule-item"><div class="rule-icon">📊</div><div class="rule-info"><div class="rule-name">数据异常规则</div><div class="rule-desc">标准差<0.01(恒值)或>3σ(突变)自动识别</div></div><div class="rule-count">触发8次</div></div>
+<div class="rule-item"><div class="rule-icon">⚡</div><div class="rule-info"><div class="rule-name">用电停运规则</div><div class="rule-desc">治污设施用电=0且生产用电>0，10分钟确认</div></div><div class="rule-count">触发5次</div></div>
+<div class="rule-item"><div class="rule-icon">🗺️</div><div class="rule-info"><div class="rule-name">空间关联规则</div><div class="rule-desc">多站点同时超标→区域污染事件，自动升级</div></div><div class="rule-count">触发3次</div></div>
+<div class="rule-item"><div class="rule-icon">🔄</div><div class="rule-info"><div class="rule-name">趋势预测规则</div><div class="rule-desc">连续3天上升趋势→预测超标预警</div></div><div class="rule-count">触发4次</div></div>
+<div class="rule-item"><div class="rule-icon">🛰️</div><div class="rule-info"><div class="rule-name">遥感识别规则</div><div class="rule-desc">卫星/无人机图像AI识别异常→推送核查</div></div><div class="rule-count">触发2次</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">预警处置统计</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<div style="background:#1a2332;border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:#10b981">43</div><div style="font-size:10px;color:#64748b">已处置</div></div>
+<div style="background:#1a2332;border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:#f59e0b">2</div><div style="font-size:10px;color:#64748b">处置中</div></div>
+<div style="background:#1a2332;border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:700;color:#ef4444">0</div><div style="font-size:10px;color:#64748b">超时未处置</div></div>
+</div>
+<div style="margin-top:12px;background:#1a2332;border-radius:10px;padding:14px;border-left:3px solid #3b82f6">
+<div style="font-size:13px;font-weight:600;color:#60a5fa;margin-bottom:8px">平均响应时间</div>
+<div style="font-size:24px;font-weight:700">12.5<span style="font-size:14px;color:#64748b;font-weight:400"> 分钟</span></div>
+<div style="font-size:11px;color:#64748b;margin-top:4px">目标：< 30分钟 · 达标率 100%</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/remote-enforcement.html"><span class="icon">👁️</span>非现场</a>
+<a class="nav-item active" href="/smart-alert.html"><span class="icon">🚨</span>预警</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var ALERTS=[
+{id:'WRN-001',level:'red',title:'华源化工COD连续3天超标升级',sources:['在线监测','趋势预测'],detail:'7月12日160→7月13日172→7月14日185mg/L，持续上升趋势，已从一般预警升级为紧急预警。结合卫星遥感发现该区域水体颜色异常。',time:'2026-07-14 06:35',area:'济南市历下区'},
+{id:'WRN-002',level:'red',title:'海润电镀监测数据恒值疑似篡改',sources:['数据异常','视频AI'],detail:'Cr⁶⁺数据7天恒定在0.47-0.49mg/L，标准差仅0.008。视频AI识别到监测站房有人进入操作。',time:'2026-07-14 05:10',area:'青岛市城阳区'},
+{id:'WRN-003',level:'red',title:'运达金属治污设施夜间停运2小时',sources:['用电监控','噪声监测'],detail:'酸雾塔循环泵2:00-4:00停运，期间噪声站记录到异常金属撞击声。',time:'2026-07-14 04:00',area:'济宁市任城区'},
+{id:'WRN-004',level:'amber',title:'渤海印染氨氮接近限值',sources:['在线监测'],detail:'氨氮14.2mg/L（限值15mg/L），近一周波动较大8-14mg/L。',time:'2026-07-14 04:15',area:'烟台市福山区'},
+{id:'WRN-005',level:'amber',title:'绿洲纸业在线监测设备离线5小时',sources:['在线监测'],detail:'设备7月14日03:00后无数据上传，疑似设备故障或人为断电。',time:'2026-07-14 03:00',area:'潍坊市奎文区'},
+{id:'WRN-006',level:'amber',title:'建材集团粉尘排放持续偏高',sources:['在线监测','趋势预测'],detail:'PM10连续5天接近限值（45-48mg/m³，限值50），预测下周可能超标。',time:'2026-07-13 16:00',area:'临沂市河东区'},
+{id:'WRN-007',level:'blue',title:'新华制药VOCs预警已闭环',sources:['在线监测'],detail:'7月12日VOCs浓度76mg/L，企业主动排查发现密封垫老化已更换，恢复达标。',time:'2026-07-13 16:00',area:'淄博市张店区'},
+{id:'WRN-008',level:'blue',title:'泰山玻璃超低排放改造完成',sources:['在线监测'],detail:'SO₂从35mg/m³降至15mg/m³，脱硫脱硝除尘全部达标。',time:'2026-07-13 10:00',area:'泰安市泰山区'}
+];
+
+var currentFilter='all';
+function filterAlert(type,el){
+currentFilter=type;
+document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+el.classList.add('active');
+renderAlerts();
+}
+
+function renderAlerts(){
+var list=ALERTS;
+if(currentFilter==='red'){list=ALERTS.filter(function(a){return a.level==='red'})}
+else if(currentFilter==='amber'){list=ALERTS.filter(function(a){return a.level==='amber'})}
+else if(currentFilter==='blue'){list=ALERTS.filter(function(a){return a.level==='blue'})}
+else if(currentFilter==='fusion'){list=ALERTS.filter(function(a){return a.sources.length>1})}
+
+var levelText={red:'紧急',amber:'一般',blue:'提示'};
+var html='';
+list.forEach(function(a){
+html+='<div class="alert-item '+a.level+'">'+
+'<div class="alert-header"><span class="alert-title">'+a.title+'</span><span class="alert-level '+a.level+'">'+levelText[a.level]+'</span></div>'+
+'<div class="alert-meta">'+a.time+' · '+a.area+'</div>'+
+'<div class="alert-detail">'+a.detail+'</div>'+
+'<div class="alert-source">'+a.sources.map(function(s){return '<span class="source-tag">'+s+'</span>'}).join('')+'</div>'+
+'<div class="alert-actions"><button class="alert-btn primary" onclick="handleAlert(\''+a.id+'\')">派单核查</button><button class="alert-btn" onclick="escalate(\''+a.id+'\')">升级预警</button><button class="alert-btn" onclick="closeAlert(\''+a.id+'\')">闭环处理</button></div>'+
+'</div>';
+});
+document.getElementById('alert-list').innerHTML=html||'<div style="text-align:center;padding:20px;color:#64748b">暂无预警</div>';
+}
+
+function handleAlert(id){epbToast('已派发核查任务：'+id+'，执法人员将在30分钟内到达')}
+function escalate(id){epbToast('预警'+id+'已升级，已通知分管领导')}
+function closeAlert(id){epbToast('预警'+id+'已标记闭环')}
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderAlerts();
+</script>
+</body>
+</html>
