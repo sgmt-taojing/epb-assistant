@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>传感器数据可视化 · 天地一体感知</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 图表用CSS bar */
+.chart-container{position:relative;height:160px;display:flex;align-items:flex-end;gap:4px;padding:0 4px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.chart-bar{flex:1;background:linear-gradient(to top,var(--primary),var(--primary2));border-radius:2px 2px 0 0;min-height:4px;position:relative;transition:height .3s}
+.chart-bar.amber{background:linear-gradient(to top,var(--warn),#fcd34d)}
+.chart-bar.red{background:linear-gradient(to top,var(--danger),#fca5a5)}
+.chart-bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+.chart-bar-val{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text);font-weight:600}
+.chart-yaxis{position:absolute;left:-30px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;font-size:9px;color:var(--muted)}
+/* 传感器卡片 */
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sensor-card{background:var(--card2);border-radius:10px;padding:12px;border:1px solid var(--border)}
+.sensor-card .s-name{font-size:11px;color:var(--muted);margin-bottom:4px}
+.sensor-card .s-value{font-size:22px;font-weight:700}
+.sensor-card .s-unit{font-size:11px;color:var(--muted)}
+.sensor-card .s-status{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;margin-left:4px}
+.sensor-card .s-status.ok{background:rgba(16,185,129,.15);color:#6ee7b7}
+.sensor-card .s-status.warn{background:rgba(245,158,11,.15);color:#fcd34d}
+.sensor-card .s-status.alarm{background:rgba(239,68,68,.15);color:#fca5a5}
+.sensor-card .s-trend{font-size:10px;color:var(--muted);margin-top:4px}
+.sensor-card.red .s-value{color:var(--danger)}
+.sensor-card.amber .s-value{color:var(--warn)}
+.sensor-card.green .s-value{color:var(--accent)}
+/* 数据源 */
+.source-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.source-item:last-child{border-bottom:none}
+.source-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.source-info{flex:1}
+.source-name{font-size:13px;font-weight:500}
+.source-detail{font-size:11px;color:var(--muted)}
+.source-status{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.source-status.online{background:rgba(16,185,129,.15);color:#6ee7b7}
+.source-status.offline{background:rgba(100,116,139,.15);color:var(--muted)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>天地一体 <span>感知中心</span></h1>
+<p>卫星遥感 · 无人机 · 传感器网格 · 在线监测 · 用电监控</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">156</div><div class="label">传感器总数</div></div>
+<div class="stat-card green"><div class="num">148</div><div class="label">在线设备</div></div>
+<div class="stat-card amber"><div class="num">5</div><div class="label">预警设备</div></div>
+<div class="stat-card red"><div class="num">3</div><div class="label">离线设备</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('air',this)">空气质量</div>
+<div class="tab" onclick="switchTab('water',this)">水质监测</div>
+<div class="tab" onclick="switchTab('noise',this)">噪声监测</div>
+<div class="tab" onclick="switchTab('source',this)">数据源</div>
+</div>
+
+<div id="content-area"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/iot.html"><span class="icon">📡</span>物联</a>
+<a class="nav-item active" href="/sensor-dashboard.html"><span class="icon">🌐</span>感知</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var currentTab='air';
+
+var AIR_STATIONS=[
+{name:'开发区监测站',pm25:35,pm10:58,so2:12,no2:28,co:0.8,o3:65,status:'ok'},
+{name:'化工园区站',pm25:42,pm10:72,so2:25,no2:35,co:1.2,o3:85,status:'warn'},
+{name:'城区中心站',pm25:28,pm10:45,so2:8,no2:22,co:0.6,o3:55,status:'ok'},
+{name:'工业区站',pm25:55,pm10:95,so2:38,no2:48,co:1.8,o3:92,status:'alarm'},
+{name:'居民区站',pm25:22,pm10:38,so2:6,no2:18,co:0.5,o3:48,status:'ok'},
+{name:'交通枢纽站',pm25:48,pm10:82,so2:15,no2:52,co:1.5,o3:78,status:'warn'}
+];
+
+var WATER_STATIONS=[
+{name:'沂河上游断面',ph:7.2,cod:18,nh3n:0.8,tp:0.12,tn:2.1,do_level:7.5,status:'ok'},
+{name:'沂河下游断面',ph:7.8,cod:42,nh3n:1.8,tp:0.35,tn:4.5,do_level:4.2,status:'warn'},
+{name:'工业排放口',ph:6.5,cod:185,nh3n:3.2,tp:0.85,tn:12.5,do_level:2.8,status:'alarm'},
+{name:'饮用水源地',ph:7.0,cod:12,nh3n:0.3,tp:0.05,tn:1.2,do_level:8.5,status:'ok'},
+{name:'污水处理排口',ph:7.5,cod:35,nh3n:1.5,tp:0.25,tn:3.8,do_level:5.5,status:'ok'},
+{name:'河流交汇处',ph:7.3,cod:28,nh3n:1.2,tp:0.18,tn:2.8,do_level:6.8,status:'ok'}
+];
+
+var NOISE_STATIONS=[
+{name:'城东工业园边界',night:52,day:65,status:'warn'},
+{name:'建材厂边界',night:48,day:62,status:'ok'},
+{name:'居民区(临近公路)',night:45,day:58,status:'ok'},
+{name:'施工工地边界',night:55,day:72,status:'alarm'},
+{name:'商业区',night:50,day:63,status:'ok'},
+{name:'学校周边',night:42,day:55,status:'ok'}
+];
+
+var DATA_SOURCES=[
+{icon:'🛰️',name:'卫星遥感',detail:'Sentinel-2 / GF-1 / 高分系列',status:'online',count:'覆盖全市域'},
+{icon:'🚁',name:'无人机巡查',detail:'DJI M300 RTK × 3架',status:'online',count:'本周飞行12架次'},
+{icon:'🌊',name:'无人船水质采样',detail:'USV-2000 自动采样船',status:'online',count:'3条河流'},
+{icon:'📡',name:'空气微站网格',detail:'6参数微型站 × 86台',status:'online',count:'500m网格覆盖'},
+{icon:'💧',name:'水质自动站',detail:'7参数水质站 × 24台',status:'online',count:'重点断面全覆盖'},
+{icon:'🔊',name:'噪声监测站',detail:'噪声自动站 × 18台',status:'online',count:'工业+交通+施工'},
+{icon:'🏭',name:'企业在线监测',detail:'CEMS + 水质在线 × 42套',status:'online',count:'重点排污企业'},
+{icon:'⚡',name:'用电监控系统',detail:'用电智能终端 × 200套',status:'online',count:'200家企业全覆盖'},
+{icon:'🌡️',name:'辐射监测站',detail:'γ辐射剂量率监测 × 4台',status:'offline',count:'2台离线'},
+{icon:'📷',name:'视频AI监控',detail:'排放口摄像头 × 56路',status:'online',count:'AI自动识别'}
+];
+
+function switchTab(tab,el){
+currentTab=tab;
+document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+el.classList.add('active');
+render();
+}
+
+function render(){
+var area=document.getElementById('content-area');
+if(currentTab==='air'){area.innerHTML=renderAir()}
+else if(currentTab==='water'){area.innerHTML=renderWater()}
+else if(currentTab==='noise'){area.innerHTML=renderNoise()}
+else if(currentTab==='source'){area.innerHTML=renderSource()}
+}
+
+function statusText(s){return{ok:'正常',warn:'预警',alarm:'超标'}[s]||'正常'}
+
+function renderAir(){
+var html='<div class="section"><div class="section-title">PM2.5 实时浓度 (μg/m³)</div>';
+html+='<div class="chart-container">';
+var maxVal=60;
+AIR_STATIONS.forEach(function(s,i){
+var h=s.pm25/maxVal*100;
+var cls=s.pm25>50?'red':s.pm25>35?'amber':'';
+html+='<div class="chart-bar '+cls+'" style="height:'+h+'%"><div class="chart-bar-val">'+s.pm25+'</div><div class="chart-bar-label">'+s.name.substring(0,4)+'</div></div>';
+});
+html+='</div><div style="margin-top:20px;font-size:10px;color:var(--muted)">限值：35μg/m³（24h平均） · 红色=超标 · 黄色=接近限值</div></div>';
+
+html+='<div class="section"><div class="section-title">各站详细数据</div><div class="sensor-grid">';
+AIR_STATIONS.forEach(function(s){
+var cls=s.status;
+html+='<div class="sensor-card '+cls+'"><div class="s-name">'+s.name+'</div><div class="s-value">'+s.pm25+'<span class="s-unit"> μg/m³</span><span class="s-status '+s.status+'">'+statusText(s.status)+'</span></div><div class="s-trend">PM10:'+s.pm10+' | SO₂:'+s.so2+' | NO₂:'+s.no2+' | O₃:'+s.o3+'</div></div>';
+});
+html+='</div></div>';
+return html;
+}
+
+function renderWater(){
+var html='<div class="section"><div class="section-title">COD 实时浓度 (mg/L)</div>';
+html+='<div class="chart-container">';
+var maxVal=200;
+WATER_STATIONS.forEach(function(s){
+var h=s.cod/maxVal*100;
+var cls=s.cod>50?'red':s.cod>30?'amber':'';
+html+='<div class="chart-bar '+cls+'" style="height:'+h+'%"><div class="chart-bar-val">'+s.cod+'</div><div class="chart-bar-label">'+s.name.substring(0,4)+'</div></div>';
+});
+html+='</div><div style="margin-top:20px;font-size:10px;color:var(--muted)">限值：30mg/L（IV类水） · 红色=超标</div></div>';
+
+html+='<div class="section"><div class="section-title">各断面详细数据</div><div class="sensor-grid">';
+WATER_STATIONS.forEach(function(s){
+html+='<div class="sensor-card '+s.status+'"><div class="s-name">'+s.name+'</div><div class="s-value">'+s.cod+'<span class="s-unit"> mg/L</span><span class="s-status '+s.status+'">'+statusText(s.status)+'</span></div><div class="s-trend">pH:'+s.ph+' | 氨氮:'+s.nh3n+' | 总磷:'+s.tp+' | DO:'+s.do_level+'</div></div>';
+});
+html+='</div></div>';
+return html;
+}
+
+function renderNoise(){
+var html='<div class="section"><div class="section-title">厂界噪声 Leq dB(A)</div>';
+html+='<div class="chart-container">';
+var maxVal=80;
+NOISE_STATIONS.forEach(function(s){
+var h=s.day/maxVal*100;
+var cls=s.day>70?'red':s.day>60?'amber':'';
+html+='<div class="chart-bar '+cls+'" style="height:'+h+'%"><div class="chart-bar-val">'+s.day+'</div><div class="chart-bar-label">'+s.name.substring(0,4)+'</div></div>';
+});
+html+='</div><div style="margin-top:20px;font-size:10px;color:var(--muted)">昼间限值：60dB(A) · 夜间限值：50dB(A)</div></div>';
+
+html+='<div class="section"><div class="section-title">各站详细数据</div><div class="sensor-grid">';
+NOISE_STATIONS.forEach(function(s){
+html+='<div class="sensor-card '+s.status+'"><div class="s-name">'+s.name+'</div><div class="s-value">'+s.day+'<span class="s-unit"> / '+s.night+' dB(A)</span><span class="s-status '+s.status+'">'+statusText(s.status)+'</span></div><div class="s-trend">昼间:'+s.day+'dB | 夜间:'+s.night+'dB</div></div>';
+});
+html+='</div></div>';
+return html;
+}
+
+function renderSource(){
+var html='<div class="section"><div class="section-title">数据源接入状态</div>';
+DATA_SOURCES.forEach(function(s){
+var bg=s.status==='online'?'rgba(16,185,129,.1)':'rgba(100,116,139,.1)';
+html+='<div class="source-item"><div class="source-icon" style="background:'+bg+'">'+s.icon+'</div><div class="source-info"><div class="source-name">'+s.name+'</div><div class="source-detail">'+s.detail+' · '+s.count+'</div></div><div class="source-status '+s.status+'">'+(s.status==='online'?'在线':'离线')+'</div></div>';
+});
+html+='</div>';
+
+html+='<div class="section"><div class="section-title">AI融合分析</div>';
+html+='<div style="background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--primary)">';
+html+='<div style="font-size:13px;font-weight:600;color:var(--primary2);margin-bottom:8px">多源数据融合结论</div>';
+html+='<div style="font-size:12px;line-height:1.8">';
+html+='<div>1. 卫星遥感发现沂河下游段水体颜色异常，与水质站COD超标数据吻合</div>';
+html+='<div>2. 无人机热成像发现工业区夜间温度异常区域，疑似排放口</div>';
+html+='<div>3. 用电监控显示3家企业治污设施夜间停运，与噪声站夜间超标时间吻合</div>';
+html+='<div>4. 视频AI识别到工业排放口2处烟气颜色异常，已自动推送预警</div>';
+html+='<div>5. 辐射监测站2台离线，需安排现场检查设备状态</div>';
+html+='</div></div></div>';
+return html;
+}
+
+render();
+</script>
+</body>
+</html>

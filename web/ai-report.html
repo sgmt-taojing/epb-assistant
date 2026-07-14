@@ -133,7 +133,7 @@ function generateData(tab,period){
 var base={weekly:{inspections:47,violations:12,penalties:8,amount:135.5,online_alerts:23,complaints:15,resolved:13,training:2},monthly:{inspections:186,violations:38,penalties:25,amount:520.3,online_alerts:89,complaints:62,resolved:55,training:6},annual:{inspections:2150,violations:412,penalties:280,amount:6850,online_alerts:1080,complaints:720,resolved:680,training:48}};
 var d=base[tab]||base.weekly;
 // 加随机波动
-Object.keys(d).forEach(function(k){if(k!=='amount'){d[k]=Math.round(d[k]*(0.9+Math.random()*0.2))}else{d[k]=Math.round(d[k]*(0.9+Math.random()*0.2)*10)/10}});
+Object.keys(d).forEach(function(k){if(k!=='amount'){d[k]=Math.round(d[k]*1.0)}else{d[k]=Math.round(d[k]*1.0*10)/10}});
 return d;
 }
 
@@ -168,12 +168,12 @@ html+='<p>本'+periodText.replace('报','')+'立案查处环境违法案件<stro
 
 if(checks.indexOf('在线监测')>=0){
 html+='<h3>三、在线监测预警</h3>';
-html+='<p>在线监测平台共产生预警<strong>'+d.online_alerts+'</strong>次，其中超标预警'+Math.round(d.online_alerts*0.4)+'次、数据异常预警'+Math.round(d.online_alerts*0.35)+'次、设备故障预警'+Math.round(d.online_alerts*0.25)+'次。预警响应率100%，平均响应时间'+(8+Math.random()*4).toFixed(1)+'分钟。</p>';
+html+='<p>在线监测平台共产生预警<strong>'+d.online_alerts+'</strong>次，其中超标预警'+Math.round(d.online_alerts*0.4)+'次、数据异常预警'+Math.round(d.online_alerts*0.35)+'次、设备故障预警'+Math.round(d.online_alerts*0.25)+'次。预警响应率100%，平均响应时间'+(8+4).toFixed(1)+'分钟。</p>';
 }
 
 if(checks.indexOf('信访投诉')>=0){
 html+='<h3>四、信访投诉处理</h3>';
-html+='<p>本'+periodText.replace('报','')+'共受理环境信访投诉<strong>'+d.complaints+'</strong>件，已办结'+d.resolved+'件，办结率'+(d.resolved/d.complaints*100).toFixed(1)+'%。其中大气污染投诉占'+Math.round(Math.random()*15+35)+'%、噪声投诉占'+Math.round(Math.random()*10+25)+'%、水污染投诉占'+Math.round(Math.random*10+20)+'%。</p>';
+html+='<p>本'+periodText.replace('报','')+'共受理环境信访投诉<strong>'+d.complaints+'</strong>件，已办结'+d.resolved+'件，办结率'+(d.resolved/d.complaints*100).toFixed(1)+'%。其中大气污染投诉占42%、噪声投诉占28%、水污染投诉占24%。</p>';
 }
 
 html+='<h3>五、AI分析与建议</h3>';
