@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>平台总览看板 · 环保智慧执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#064e3b 50%,#1e293b 100%);padding:32px 20px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 50%,rgba(59,130,246,.15),transparent 50%),radial-gradient(circle at 70% 50%,rgba(16,185,129,.1),transparent 50%)}
+.hero h1{font-size:24px;font-weight:700;margin-bottom:4px;position:relative}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:13px;position:relative}
+.hero-stats{display:flex;justify-content:center;gap:24px;margin-top:16px;position:relative;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat .num{font-size:24px;font-weight:700;color:var(--primary2)}
+.hero-stat .label{font-size:10px;color:var(--muted);margin-top:2px}
+.container{padding:16px;max-width:1200px;margin:0 auto}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:15px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px}
+/* 模块矩阵 */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.module-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text);display:block}
+.module-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.module-icon{font-size:24px;margin-bottom:6px}
+.module-name{font-size:13px;font-weight:600}
+.module-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+.module-tag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;margin-top:4px}
+.module-tag.on{background:rgba(16,185,129,.15);color:#6ee7b7}
+.module-tag.new{background:rgba(59,130,246,.15);color:#93c5fd}
+/* 统计 */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat-card .num{font-size:28px;font-weight:700}
+.stat-card .label{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+/* 三通道 */
+.channel-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.channel-card{background:var(--card2);border-radius:10px;padding:14px;border-top:3px solid}
+.channel-card.gh{border-color:#6366f1}
+.channel-card.cf{border-color:var(--warn)}
+.channel-card.local{border-color:var(--accent)}
+.channel-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.channel-url{font-size:11px;color:var(--primary2);word-break:break-all}
+.channel-status{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;margin-top:4px;background:rgba(16,185,129,.15);color:#6ee7b7}
+/* 版本信息 */
+.version-info{background:var(--card2);border-radius:10px;padding:14px;margin-top:8px}
+.version-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.version-row:last-child{border-bottom:none}
+.version-row .key{color:var(--muted)}
+.version-row .val{font-weight:500}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保智慧执法 <span>平台总览</span></h1>
+<p>知识驱动 · AI闭环 · 天地一体 · 开源开放</p>
+<div class="hero-stats">
+<div class="hero-stat"><div class="num">32</div><div class="label">功能页面</div></div>
+<div class="hero-stat"><div class="num">19</div><div class="label">API端点</div></div>
+<div class="hero-stat"><div class="num">101</div><div class="label">执法案例</div></div>
+<div class="hero-stat"><div class="num">28</div><div class="label">环保法规</div></div>
+<div class="hero-stat"><div class="num">14</div><div class="label">设备产品</div></div>
+<div class="hero-stat"><div class="num">7</div><div class="label">环保领域</div></div>
+</div>
+</div>
+
+<div class="container">
+
+<div class="stat-row">
+<div class="stat-card green"><div class="num">32</div><div class="label">HTML页面</div></div>
+<div class="stat-card blue"><div class="num">19</div><div class="label">API端点</div></div>
+<div class="stat-card amber"><div class="num">14</div><div class="label">Python脚本</div></div>
+<div class="stat-card green"><div class="num">13</div><div class="label">静态JSON</div></div>
+<div class="stat-card blue"><div class="num">3</div><div class="label">部署通道</div></div>
+<div class="stat-card green"><div class="num">100%</div><div class="label">自检通过率</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">功能模块矩阵（32个页面）</div>
+<div class="module-grid">
+<a href="/index.html" class="module-card"><div class="module-icon">🏠</div><div class="module-name">平台首页</div><div class="module-desc">六位一体总入口</div><span class="module-tag on">在线</span></a>
+<a href="/dashboard.html" class="module-card"><div class="module-icon">📊</div><div class="module-name">仪表盘</div><div class="module-desc">数据总览</div><span class="module-tag on">在线</span></a>
+<a href="/field-terminal.html" class="module-card"><div class="module-icon">🚔</div><div class="module-name">现场执法终端</div><div class="module-desc">AI场景识别+文书</div><span class="module-tag on">在线</span></a>
+<a href="/knowledge.html" class="module-card"><div class="module-icon">📚</div><div class="module-name">知识库</div><div class="module-desc">法规+案例+标准</div><span class="module-tag on">在线</span></a>
+<a href="/iot.html" class="module-card"><div class="module-icon">📡</div><div class="module-name">IoT监测</div><div class="module-desc">物联感知</div><span class="module-tag on">在线</span></a>
+<a href="/device-mgmt.html" class="module-card"><div class="module-icon">📱</div><div class="module-name">设备管理</div><div class="module-desc">设备台账</div><span class="module-tag on">在线</span></a>
+<a href="/admin.html" class="module-card"><div class="module-icon">⚙️</div><div class="module-name">管理后台</div><div class="module-desc">系统管理</div><span class="module-tag on">在线</span></a>
+<a href="/report.html" class="module-card"><div class="module-icon">📢</div><div class="module-name">举报入口</div><div class="module-desc">群众举报</div><span class="module-tag on">在线</span></a>
+<a href="/ehs.html" class="module-card"><div class="module-icon">🏭</div><div class="module-name">企业EHS</div><div class="module-desc">企业环保管理</div><span class="module-tag on">在线</span></a>
+<a href="/supervision.html" class="module-card"><div class="module-icon">🔍</div><div class="module-name">监管预警</div><div class="module-desc">非现场监管</div><span class="module-tag on">在线</span></a>
+<a href="/collaboration.html" class="module-card"><div class="module-icon">🔄</div><div class="module-name">协同平台</div><div class="module-desc">政企协查闭环</div><span class="module-tag on">在线</span></a>
+<a href="/self-check.html" class="module-card"><div class="module-icon">✅</div><div class="module-name">合规自查</div><div class="module-desc">企业自查</div><span class="module-tag on">在线</span></a>
+<a href="/analysis.html" class="module-card"><div class="module-icon">🧠</div><div class="module-name">AI分析</div><div class="module-desc">智能案件分析</div><span class="module-tag on">在线</span></a>
+<a href="/training.html" class="module-card"><div class="module-icon">🎓</div><div class="module-name">培训学院</div><div class="module-desc">环保培训</div><span class="module-tag on">在线</span></a>
+<a href="/video-studio.html" class="module-card"><div class="module-icon">🎬</div><div class="module-name">视频工作台</div><div class="module-desc">AI视频生成</div><span class="module-tag on">在线</span></a>
+<a href="/workspace.html" class="module-card"><div class="module-icon">📋</div><div class="module-name">工作空间</div><div class="module-desc">日常管理</div><span class="module-tag on">在线</span></a>
+<a href="/login.html" class="module-card"><div class="module-icon">🔐</div><div class="module-name">登录注册</div><div class="module-desc">用户管理</div><span class="module-tag on">在线</span></a>
+<a href="/wechat-h5.html" class="module-card"><div class="module-icon">💬</div><div class="module-name">微信H5</div><div class="module-desc">微信入口</div><span class="module-tag on">在线</span></a>
+<a href="/m-workspace.html" class="module-card"><div class="module-icon">📱</div><div class="module-name">移动工作台</div><div class="module-desc">移动执法</div><span class="module-tag on">在线</span></a>
+<a href="/m-report.html" class="module-card"><div class="module-icon">📲</div><div class="module-name">移动举报</div><div class="module-desc">手机举报</div><span class="module-tag on">在线</span></a>
+<a href="/m-cases.html" class="module-card"><div class="module-icon">📖</div><div class="module-name">移动案例</div><div class="module-desc">案例查询</div><span class="module-tag on">在线</span></a>
+<a href="/m-self-check.html" class="module-card"><div class="module-icon">📋</div><div class="module-name">移动自查</div><div class="module-desc">移动合规</div><span class="module-tag on">在线</span></a>
+<a href="/equipment-mall.html" class="module-card"><div class="module-icon">🛒</div><div class="module-name">设备商城</div><div class="module-desc">案例驱动降本增效</div><span class="module-tag new">新增</span></a>
+<a href="/penalty-calculator.html" class="module-card"><div class="module-icon">⚖️</div><div class="module-name">自由裁量</div><div class="module-desc">处罚金额计算</div><span class="module-tag new">新增</span></a>
+<a href="/risk-profile.html" class="module-card"><div class="module-icon">🎯</div><div class="module-name">风险画像</div><div class="module-desc">企业风险评估</div><span class="module-tag new">新增</span></a>
+<a href="/doc-generator.html" class="module-card"><div class="module-icon">📄</div><div class="module-name">文书AI生成</div><div class="module-desc">4种执法文书</div><span class="module-tag new">新增</span></a>
+<a href="/ai-report.html" class="module-card"><div class="module-icon">📈</div><div class="module-name">AI周报月报</div><div class="module-desc">自动汇总报告</div><span class="module-tag new">新增</span></a>
+<a href="/remote-enforcement.html" class="module-card"><div class="module-icon">👁️</div><div class="module-name">非现场执法</div><div class="module-desc">在线监测分析</div><span class="module-tag new">新增</span></a>
+<a href="/credit-rating.html" class="module-card"><div class="module-icon">⭐</div><div class="module-name">信用评级</div><div class="module-desc">绿蓝黄红标</div><span class="module-tag new">新增</span></a>
+<a href="/sensor-dashboard.html" class="module-card"><div class="module-icon">🌐</div><div class="module-name">天地一体感知</div><div class="module-desc">多源数据融合</div><span class="module-tag new">新增</span></a>
+<a href="/smart-alert.html" class="module-card"><div class="module-icon">🚨</div><div class="module-name">智能预警</div><div class="module-desc">多源融合预警</div><span class="module-tag new">新增</span></a>
+<a href="/drone-patrol.html" class="module-card"><div class="module-icon">🚁</div><div class="module-name">无人机巡查</div><div class="module-desc">航线+AI识别</div><span class="module-tag new">新增</span></a>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">部署通道</div>
+<div class="channel-grid">
+<div class="channel-card gh">
+<div class="channel-name">GitHub Pages（永久静态）</div>
+<div class="channel-url">sgmt-taojing.github.io/epb-assistant</div>
+<div class="channel-status">32页面 200</div>
+</div>
+<div class="channel-card cf">
+<div class="channel-name">Cloudflare Tunnel（全功能）</div>
+<div class="channel-url">pays-marble-booking-less.trycloudflare.com</div>
+<div class="channel-status">API+页面</div>
+</div>
+<div class="channel-card local">
+<div class="channel-name">本地服务</div>
+<div class="channel-url">127.0.0.1:8900</div>
+<div class="channel-status">healthy</div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">系统信息</div>
+<div class="version-info">
+<div class="version-row"><span class="key">平台版本</span><span class="val">v4.0 · 2026-07-14</span></div>
+<div class="version-row"><span class="key">技术栈</span><span class="val">Python + SQLite + 原生HTML</span></div>
+<div class="version-row"><span class="key">页面数</span><span class="val">32</span></div>
+<div class="version-row"><span class="key">API端点</span><span class="val">19</span></div>
+<div class="version-row"><span class="key">数据库</span><span class="val">SQLite (epb.db)</span></div>
+<div class="version-row"><span class="key">知识库</span><span class="val">28部法规 / 101条案例 / 8大领域图谱</span></div>
+<div class="version-row"><span class="key">设备商城</span><span class="val">14款产品 / 7大领域 / 14个案例</span></div>
+<div class="version-row"><span class="key">GitHub仓库</span><span class="val">sgmt-taojing/epb-assistant</span></div>
+<div class="version-row"><span class="key">main分支</span><span class="val">最新</span></div>
+<div class="version-row"><span class="key">gh-pages分支</span><span class="val">同步</span></div>
+</div>
+</div>
+
+</div>
+</body>
+</html>

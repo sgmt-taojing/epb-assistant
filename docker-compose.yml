@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  epb-assistant:
+    build: .
+    container_name: epb-assistant
+    ports:
+      - "8900:8900"
+    volumes:
+      - ./db:/app/db
+      - ./outputs:/app/outputs
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PORT=8900
+      - HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8900/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # 可选：Nginx反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: epb-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - epb-assistant
+    restart: unless-stopped
+    profiles:
+      - production
