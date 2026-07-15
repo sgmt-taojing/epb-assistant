@@ -153,6 +153,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'approval-service.html'))
         elif path == '/m-portal.html':
             self._serve_static(os.path.join(WEB_DIR, 'm-portal.html'))
+        elif path == '/open-data.html':
+            self._serve_static(os.path.join(WEB_DIR, 'open-data.html'))
+        elif path == '/sys-console.html':
+            self._serve_static(os.path.join(WEB_DIR, 'sys-console.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
