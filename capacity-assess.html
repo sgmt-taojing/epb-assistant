@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>执法能力评估 · 团队效能分析</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 人员评估 */
+.person-card{background:var(--card2);border-radius:12px;padding:14px;margin-bottom:10px}
+.person-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.person-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.person-info{flex:1}
+.person-name{font-size:14px;font-weight:600}
+.person-role{font-size:11px;color:var(--muted)}
+.person-score{text-align:right}
+.person-score .v{font-size:22px;font-weight:700}
+.person-score .l{font-size:10px;color:var(--muted)}
+.dim-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:8px}
+.dim-box{background:var(--card);border-radius:6px;padding:6px;text-align:center}
+.dim-box .dv{font-size:14px;font-weight:600}
+.dim-box .dl{font-size:9px;color:var(--muted)}
+.dim-box.green .dv{color:var(--accent)}
+.dim-box.amber .dv{color:var(--warn)}
+.dim-box.red .dv{color:var(--danger)}
+/* 雷达图模拟 */
+.radar-container{background:var(--card2);border-radius:12px;padding:20px;text-align:center;margin-bottom:12px}
+.radar-label{font-size:12px;color:var(--muted);margin-bottom:8px}
+.radar-avg{font-size:36px;font-weight:700;color:var(--primary2)}
+/* 建议 */
+.advice-box{background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--primary);margin-bottom:8px}
+.advice-title{font-size:13px;font-weight:600;color:var(--primary2);margin-bottom:6px}
+.advice-item{font-size:12px;padding:3px 0;padding-left:14px;position:relative;color:var(--text)}
+.advice-item::before{content:'→';position:absolute;left:0;color:var(--primary)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>执法<span>能力评估</span></h1>
+<p>团队效能分析 · 人员能力画像 · 薄弱环节识别 · 培训建议</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">12</div><div class="label">执法人员</div></div>
+<div class="stat-card green"><div class="num">82.5</div><div class="label">团队平均分</div></div>
+<div class="stat-card amber"><div class="num">3</div><div class="label">需提升人员</div></div>
+</div>
+
+<div class="radar-container">
+<div class="radar-label">团队综合能力评分</div>
+<div class="radar-avg">82.5</div>
+<div style="display:flex;justify-content:space-around;margin-top:12px;font-size:11px">
+<div><div style="color:var(--accent);font-weight:700;font-size:16px">85</div><div style="color:var(--muted)">执法效率</div></div>
+<div><div style="color:var(--primary2);font-weight:700;font-size:16px">80</div><div style="color:var(--muted)">案件质量</div></div>
+<div><div style="color:var(--warn);font-weight:700;font-size:16px">72</div><div style="color:var(--muted)">法规掌握</div></div>
+<div><div style="color:var(--accent);font-weight:700;font-size:16px">88</div><div style="color:var(--muted)">技术能力</div></div>
+<div><div style="color:var(--primary2);font-weight:700;font-size:16px">83</div><div style="color:var(--muted)">协同配合</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">人员能力画像</div>
+
+<div class="person-card">
+<div class="person-header">
+<div class="person-avatar" style="background:rgba(16,185,129,.2)">👤</div>
+<div class="person-info"><div class="person-name">李执法</div><div class="person-role">高级执法员 · 8年经验</div></div>
+<div class="person-score"><div class="v" style="color:var(--accent)">91</div><div class="l">综合评分</div></div>
+</div>
+<div class="dim-row">
+<div class="dim-box green"><div class="dv">95</div><div class="dl">执法效率</div></div>
+<div class="dim-box green"><div class="dv">90</div><div class="dl">案件质量</div></div>
+<div class="dim-box green"><div class="dv">85</div><div class="dl">法规掌握</div></div>
+<div class="dim-box green"><div class="dv">92</div><div class="dl">技术能力</div></div>
+</div>
+</div>
+
+<div class="person-card">
+<div class="person-header">
+<div class="person-avatar" style="background:rgba(59,130,246,.2)">👤</div>
+<div class="person-info"><div class="person-name">王执法</div><div class="person-role">中级执法员 · 5年经验</div></div>
+<div class="person-score"><div class="v" style="color:var(--primary2)">85</div><div class="l">综合评分</div></div>
+</div>
+<div class="dim-row">
+<div class="dim-box green"><div class="dv">88</div><div class="dl">执法效率</div></div>
+<div class="dim-box green"><div class="dv">85</div><div class="dl">案件质量</div></div>
+<div class="dim-box amber"><div class="dv">78</div><div class="dl">法规掌握</div></div>
+<div class="dim-box green"><div class="dv">89</div><div class="dl">技术能力</div></div>
+</div>
+</div>
+
+<div class="person-card">
+<div class="person-header">
+<div class="person-avatar" style="background:rgba(245,158,11,.2)">👤</div>
+<div class="person-info"><div class="person-name">张执法</div><div class="person-role">初级执法员 · 2年经验</div></div>
+<div class="person-score"><div class="v" style="color:var(--warn)">68</div><div class="l">综合评分</div></div>
+</div>
+<div class="dim-row">
+<div class="dim-box amber"><div class="dv">72</div><div class="dl">执法效率</div></div>
+<div class="dim-box amber"><div class="dv">65</div><div class="dl">案件质量</div></div>
+<div class="dim-box red"><div class="dv">58</div><div class="dl">法规掌握</div></div>
+<div class="dim-box green"><div class="dv">75</div><div class="dl">技术能力</div></div>
+</div>
+</div>
+
+<div class="person-card">
+<div class="person-header">
+<div class="person-avatar" style="background:rgba(245,158,11,.2)">👤</div>
+<div class="person-info"><div class="person-name">赵监测</div><div class="person-role">环境监测员 · 3年经验</div></div>
+<div class="person-score"><div class="v" style="color:var(--warn)">72</div><div class="l">综合评分</div></div>
+</div>
+<div class="dim-row">
+<div class="dim-box green"><div class="dv">80</div><div class="dl">执法效率</div></div>
+<div class="dim-box amber"><div class="dv">70</div><div class="dl">案件质量</div></div>
+<div class="dim-box amber"><div class="dv">65</div><div class="dl">法规掌握</div></div>
+<div class="dim-box amber"><div class="dv">73</div><div class="dl">技术能力</div></div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">团队薄弱环节分析</div>
+<div class="advice-box">
+<div class="advice-title">法规掌握（团队均分72，最低58）</div>
+<div class="advice-item">张执法法规掌握仅58分，需重点加强</div>
+<div class="advice-item">建议组织《水污染防治法》《固废法》专项培训</div>
+<div class="advice-item">利用平台法规库（law-library.html）进行自学</div>
+</div>
+<div class="advice-box" style="border-left-color:var(--warn)">
+<div class="advice-title" style="color:var(--warn)">案件质量（团队均分80，2人低于70）</div>
+<div class="advice-item">张执法案件质量65分，文书规范性不足</div>
+<div class="advice-item">建议使用执法文书AI生成工具辅助学习</div>
+<div class="advice-item">安排老带新结对，李执法帮带张执法</div>
+</div>
+<div class="advice-box" style="border-left-color:var(--accent)">
+<div class="advice-title" style="color:var(--accent)">优势：技术能力（团队均分88）</div>
+<div class="advice-item">团队技术能力整体优秀，在线监测数据分析能力强</div>
+<div class="advice-item">无人机操作、AI工具使用熟练</div>
+<div class="advice-item">建议由技术能力强的队员分享经验</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">培训计划建议</div>
+<div class="advice-box">
+<div class="advice-title">本月培训计划</div>
+<div class="advice-item">第1周：《水污染防治法》专项学习（法规库+考试）</div>
+<div class="advice-item">第2周：执法文书规范培训（文书AI生成工具实操）</div>
+<div class="advice-item">第3周：在线监测数据分析能力提升（非现场执法模块）</div>
+<div class="advice-item">第4周：综合演练（模拟案件全流程+互评）</div>
+</div>
+<div class="advice-box" style="border-left-color:var(--accent)">
+<div class="advice-title" style="color:var(--accent)">个人发展建议</div>
+<div class="advice-item">李执法：培养为培训讲师，负责帮带新人</div>
+<div class="advice-item">王执法：参加高级执法资格认证考试</div>
+<div class="advice-item">张执法：重点提升法规和文书，3个月内目标75分</div>
+<div class="advice-item">赵监测：参加监测技术认证培训</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/data-cockpit.html"><span class="icon">📊</span>驾驶舱</a>
+<a class="nav-item active" href="/capacity-assess.html"><span class="icon">👥</span>能力</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+</body>
+</html>

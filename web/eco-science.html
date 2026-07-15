@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保科普 · 公众环境教育</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 知识卡片 */
+.knowledge-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px;border-left:3px solid var(--primary)}
+.knowledge-card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.knowledge-card .meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.knowledge-card p{font-size:13px;line-height:1.7;color:var(--text)}
+.knowledge-card .tips{background:rgba(16,185,129,.08);border-radius:8px;padding:10px;margin-top:10px;border-left:2px solid var(--accent)}
+.knowledge-card .tips .tip-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.knowledge-card .tips .tip-item{font-size:11px;color:var(--text);padding:2px 0;padding-left:12px;position:relative}
+.knowledge-card .tips .tip-item::before{content:'→';position:absolute;left:0;color:var(--accent)}
+/* AQI */
+.aqi-gauge{background:var(--card2);border-radius:12px;padding:20px;text-align:center;margin-bottom:12px}
+.aqi-value{font-size:48px;font-weight:700;line-height:1}
+.aqi-level{font-size:16px;font-weight:600;margin-top:4px}
+.aqi-desc{font-size:12px;color:var(--muted);margin-top:8px}
+.aqi-bar{height:8px;border-radius:4px;margin-top:12px;background:linear-gradient(90deg,#00e400 0%,#ffff00 20%,#ff7e00 40%,#ff0000 60%,#99004c 80%,#7e0023 100%);position:relative}
+.aqi-pointer{position:absolute;top:-4px;width:2px;height:16px;background:#fff;box-shadow:0 0 4px #fff}
+/* 举报指南 */
+.guide-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--warn)}
+.guide-item h4{font-size:13px;font-weight:600;color:var(--warn);margin-bottom:6px}
+.guide-item p{font-size:12px;line-height:1.6}
+.guide-item .step{font-size:11px;color:var(--text);padding:3px 0;padding-left:16px;position:relative}
+.guide-item .step::before{content:attr(data-n);position:absolute;left:0;width:14px;height:14px;border-radius:50%;background:var(--warn);color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;top:4px}
+/* FAQ */
+.faq-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;cursor:pointer}
+.faq-q{font-size:13px;font-weight:600;color:var(--primary2);display:flex;align-items:flex-start;gap:6px}
+.faq-q::before{content:'Q';flex-shrink:0;width:18px;height:18px;border-radius:4px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.faq-a{font-size:12px;line-height:1.6;margin-top:8px;display:none;padding-left:24px;color:var(--text)}
+.faq-a.show{display:block}
+.faq-a::before{content:'A: ';color:var(--accent);font-weight:600}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>科普</span>中心</h1>
+<p>公众环境教育 · 空气质量解读 · 举报指南 · 常见问题</p>
+</div>
+
+<div class="container">
+<div class="tabs">
+<div class="tab active" onclick="switchTab('aqi',this)">空气质量</div>
+<div class="tab" onclick="switchTab('water',this)">水环境</div>
+<div class="tab" onclick="switchTab('waste',this)">固废分类</div>
+<div class="tab" onclick="switchTab('report',this)">举报指南</div>
+<div class="tab" onclick="switchTab('faq',this)">常见问题</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/eco-science.html"><span class="icon">🌱</span>科普</a>
+<a class="nav-item" href="/m-report.html"><span class="icon">📢</span>举报</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var currentTab='aqi';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');render()}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='aqi'){area.innerHTML=renderAQI()}
+else if(currentTab==='water'){area.innerHTML=renderWater()}
+else if(currentTab==='waste'){area.innerHTML=renderWaste()}
+else if(currentTab==='report'){area.innerHTML=renderReport()}
+else if(currentTab==='faq'){area.innerHTML=renderFAQ()}
+}
+
+function renderAQI(){
+var html='<div class="aqi-gauge"><div class="aqi-value" style="color:var(--warn)">85</div><div class="aqi-level" style="color:var(--warn)">良（二级）</div><div class="aqi-desc">首要污染物：O₃（臭氧）· 适合户外活动，敏感人群应注意</div><div class="aqi-bar"><div class="aqi-pointer" style="left:30%"></div></div></div>';
+html+='<div class="section"><div class="section-title">AQI等级解读</div>';
+var levels=[{range:'0-50',level:'优（一级）',color:'var(--accent)',desc:'空气质量令人满意，无污染',advice:'各类人群可正常活动'},
+{range:'51-100',level:'良（二级）',color:'var(--warn)',desc:'空气质量可接受，某些污染物可能对极少数敏感人群有较弱影响',advice:'极少数敏感人群应减少户外活动'},
+{range:'101-150',level:'轻度污染（三级）',color:'#ff7e00',desc:'易感人群症状有轻度加剧，健康人群出现刺激症状',advice:'儿童、老人及心脏病、呼吸系统疾病患者应减少长时间户外锻炼'},
+{range:'151-200',level:'中度污染（四级）',color:'var(--danger)',desc:'进一步加剧易感人群症状，可能对健康人群心脏、呼吸系统有影响',advice:'儿童、老人及心脏病、呼吸系统疾病患者避免长时间户外锻炼'},
+{range:'201-300',level:'重度污染（五级）',color:'#99004c',desc:'心脏病和肺病患者症状显著加剧，运动耐受力降低',advice:'儿童、老人和心脏病、肺病患者应停留在室内'},
+{range:'>300',level:'严重污染（六级）',color:'#7e0023',desc:'健康人群运动耐受力降低，有明显强烈症状',advice:'所有人群应避免户外活动'}];
+levels.forEach(function(l){
+html+='<div class="knowledge-card" style="border-left-color:'+l.color+'"><h3 style="color:'+l.color+'">AQI '+l.range+' · '+l.level+'</h3><p>'+l.desc+'</p><div class="tips"><div class="tip-title">建议</div><div class="tip-item">'+l.advice+'</div></div></div>';
+});
+html+='</div>';
+html+='<div class="knowledge-card"><h3>🏠 室内空气净化建议</h3><div class="meta">日常防护 · 全年适用</div><p>AQI>100时建议关闭门窗，使用空气净化器（HEPA滤芯）。AQI>200时避免开窗通风，室内可放置绿植（绿萝、吊兰等）辅助净化。</p><div class="tips"><div class="tip-title">防护建议</div><div class="tip-item">AQI 0-100：正常开窗通风</div><div class="tip-item">AQI 101-200：减少开窗，开启净化器</div><div class="tip-item">AQI>200：关闭门窗，净化器最大档</div><div class="tip-item">外出佩戴口罩（N95/KN95）</div></div></div>';
+return html;
+}
+
+function renderWater(){
+var html='<div class="section"><div class="section-title">地表水质量等级</div>';
+var grades=[{grade:'Ⅰ类',color:'var(--accent)',desc:'源头水、国家自然保护区',cod:'≤15',nh3n:'≤0.15'},
+{grade:'Ⅱ类',color:'var(--accent)',desc:'集中式饮用水源地一级保护区',cod:'≤15',nh3n:'≤0.5'},
+{grade:'Ⅲ类',color:'var(--primary2)',desc:'集中式饮用水源地二级保护区',cod:'≤20',nh3n:'≤1.0'},
+{grade:'Ⅳ类',color:'var(--warn)',desc:'一般工业用水区',cod:'≤30',nh3n:'≤1.5'},
+{grade:'Ⅴ类',color:'var(--danger)',desc:'农业用水区及一般景观要求水域',cod:'≤40',nh3n:'≤2.0'}];
+grades.forEach(function(g){
+html+='<div class="knowledge-card" style="border-left-color:'+g.color+'"><h3 style="color:'+g.color+'">'+g.grade+' '+g.desc+'</h3><p>COD '+g.cod+'mg/L | 氨氮 '+g.nh3n+'mg/L</p></div>';
+});
+html+='</div>';
+html+='<div class="knowledge-card"><h3>💧 如何判断水体是否受污染</h3><div class="meta">公众识别指南</div><p>通过"看、闻、测"三步判断水体是否可能受到污染：</p><div class="tips"><div class="tip-title">识别方法</div><div class="tip-item">看：水体颜色异常（红色、黑色、乳白色等）</div><div class="tip-item">看：水面有大量泡沫、油膜、浮渣</div><div class="tip-item">闻：水体散发刺鼻异味（化学味、腥臭味）</div><div class="tip-item">看：水生生物（鱼虾）大量死亡</div><div class="tip-item">测：使用简易水质检测试纸（可网购）</div></div></div>';
+return html;
+}
+
+function renderWaste(){
+var html='<div class="section"><div class="section-title">固体废物分类</div>';
+var types=[{name:'生活垃圾',icon:'🗑️',desc:'日常生活中产生的废弃物',examples:'厨余垃圾、废纸、塑料袋、废旧衣物',disposal:'分类投放→环卫收运→焚烧/填埋'},
+{name:'工业固废',icon:'🏭',desc:'工业生产过程中产生的固废',examples:'粉煤灰、炉渣、尾矿、废石',disposal:'资源化利用→安全填埋'},
+{name:'危险废物',icon:'⚠️',desc:'具有腐蚀性、毒性、易燃性、反应性、感染性的固废',examples:'废酸、废碱、废矿物油、电镀污泥、医疗废物',disposal:'交有资质单位处置→危废转移联单'},
+{name:'建筑垃圾',icon:'🧱',desc:'建设、施工过程中产生的废弃物',examples:'混凝土碎块、砖瓦、木材、金属',disposal:'分类回收→资源化利用'},
+{name:'农业固废',icon:'🌾',desc:'农业生产过程中产生的废弃物',examples:'秸秆、农膜、农药包装物、畜禽粪污',disposal:'资源化利用→堆肥→生物质能'},
+{name:'医疗废物',icon:'🏥',desc:'医疗卫生机构产生的感染性、损伤性废物',examples:'注射器、纱布、药品、病原体培养基',disposal:'专用容器→集中处置→高温焚烧'}];
+types.forEach(function(t){
+html+='<div class="knowledge-card"><h3>'+t.icon+' '+t.name+'</h3><div class="meta">'+t.desc+'</div><p><b>常见：</b>'+t.examples+'</p><div class="tips"><div class="tip-title">处置方式</div><div class="tip-item">'+t.disposal+'</div></div></div>';
+});
+html+='</div>';
+html+='<div class="knowledge-card" style="border-left-color:var(--danger)"><h3 style="color:var(--danger)">⚠️ 发现危废怎么办</h3><p>如发现非法倾倒、堆放危险废物的情况，请立即举报：</p><div class="tips"><div class="tip-title">举报步骤</div><div class="tip-item">1. 不要接触不明废物（可能有毒）</div><div class="tip-item">2. 拍照记录位置和外观</div><div class="tip-item">3. 拨打12369环保举报热线</div><div class="tip-item">4. 或通过本平台一键举报</div></div></div>';
+return html;
+}
+
+function renderReport(){
+var html='<div class="section"><div class="section-title">环保举报指南</div>';
+html+='<div class="guide-item"><h4>📞 举报渠道</h4><div class="step" data-n="1">12369 环保举报热线（24小时）</div><div class="step" data-n="2">全国生态环境信访投诉举报平台</div><div class="step" data-n="3">本平台在线举报（点击"一键举报"）</div><div class="step" data-n="4">微信小程序"环保举报"</div></div>';
+html+='<div class="guide-item"><h4>📝 举报应包含的信息</h4><div class="step" data-n="1">被举报对象（企业名称或地址）</div><div class="step" data-n="2">污染类型（水/气/噪声/固废/辐射）</div><div class="step" data-n="3">污染发生时间和频率</div><div class="step" data-n="4">具体位置（地址或经纬度）</div><div class="step" data-n="5">照片或视频证据（如有）</div><div class="step" data-n="6">您的联系方式（可选，便于反馈）</div></div>';
+html+='<div class="guide-item"><h4>⏱️ 举报处理流程</h4><div class="step" data-n="1">受理：收到举报后1个工作日内登记</div><div class="step" data-n="2">分派：3个工作日内分派至辖区执法部门</div><div class="step" data-n="3">核查：10个工作日内完成现场核查</div><div class="step" data-n="4">反馈：处理结果及时反馈举报人</div><div class="step" data-n="5">督办：重大举报由上级部门督办</div></div>';
+html+='<div class="guide-item"><h4>🔒 举报人保护</h4><p>举报人信息严格保密，未经举报人同意不得公开。对打击报复举报人的行为依法严惩。</p></div>';
+html+='</div>';
+return html;
+}
+
+function renderFAQ(){
+var faqs=[
+{q:'工厂排放的烟是什么？有害吗？',a:'烟囱排放的"烟"分几种：白色的是水蒸气（无害）；灰色/黑色的是粉尘（含颗粒物，有害）；黄色/绿色的是含硫/含氯废气（有毒）。如看到黑色或彩色烟气，建议举报。'},
+{q:'河水变红了是怎么回事？',a:'河水变红可能原因：①工厂偷排染料/印染废水 ②铁离子氧化（地下水含铁高）③赤潮藻类。如伴有刺鼻气味或大面积变色，很可能是工业废水偷排，请立即举报。'},
+{q:'夜间闻到刺鼻气味怎么办？',a:'夜间刺鼻气味通常是工厂偷排VOCs（挥发性有机物）或化工废气。建议：①关闭门窗②记录时间和气味特征③拨打12369举报④不要长时间在室外停留。'},
+{q:'邻居装修/商铺噪声太大可以举报吗？',a:'社会生活噪声（装修、商铺、广场舞等）由公安机关管理，拨打110。工业噪声和建筑施工噪声由环保部门管理，拨打12369。'},
+{q:'危废和普通垃圾有什么区别？',a:'危险废物具有毒性、腐蚀性、易燃性等危险特性（如废电池、废机油、废油漆桶），需要交有资质单位专门处置，不能与生活垃圾混放。家庭产生的少量危废（废电池、过期药品等）应投放到指定回收点。'},
+{q:'企业排污许可证在哪里可以查？',a:'排污许可证信息可在"全国排污许可证管理信息平台"（permit.mee.gov.cn）查询，输入企业名称即可查看其许可证状态、许可排放量、监测要求等信息。'},
+{q:'什么是"三同时"制度？',a:'"三同时"是指建设项目的环保设施必须与主体工程同时设计、同时施工、同时投产使用。新建、改建、扩建项目必须执行"三同时"，否则不得投入生产。'},
+{q:'AQI达到多少需要戴口罩？',a:'AQI>150（中度污染）时建议佩戴N95/KN95口罩；AQI>200（重度污染）时必须佩戴N95口罩，普通医用口罩无法有效过滤PM2.5。'}
+];
+var html='<div class="section"><div class="section-title">常见问题</div>';
+faqs.forEach(function(f,i){
+html+='<div class="faq-item" onclick="toggleFAQ('+i+')"><div class="faq-q">'+f.q+'</div><div class="faq-a" id="faq-'+i+'">'+f.a+'</div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function toggleFAQ(i){document.getElementById('faq-'+i).classList.toggle('show')}
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>
