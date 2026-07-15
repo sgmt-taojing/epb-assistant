@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>公众互动中心 · 环保积分志愿者</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 积分卡 */
+.points-card{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(59,130,246,.08));border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:20px;text-align:center;margin-bottom:12px}
+.points-value{font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+.points-label{font-size:12px;color:var(--muted);margin-top:4px}
+.points-rank{font-size:13px;margin-top:8px}
+.points-rank b{color:var(--warn)}
+/* 任务列表 */
+.task-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.task-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.task-info{flex:1}
+.task-name{font-size:13px;font-weight:600}
+.task-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.task-points{padding:4px 10px;border-radius:6px;background:rgba(16,185,129,.15);color:#6ee7b7;font-size:12px;font-weight:700;flex-shrink:0}
+/* 活动卡片 */
+.activity-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px}
+.activity-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.activity-name{font-size:14px;font-weight:600;flex:1}
+.activity-status{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;margin-left:8px}
+.activity-status.ongoing{background:rgba(16,185,129,.15);color:#6ee7b7}
+.activity-status.upcoming{background:rgba(59,130,246,.15);color:#93c5fd}
+.activity-status.ended{background:rgba(100,116,139,.15);color:var(--muted)}
+.activity-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.activity-desc{font-size:12px;line-height:1.6}
+.activity-stats{display:flex;gap:12px;margin-top:8px;font-size:11px}
+.activity-stat{color:var(--muted)}
+.activity-stat b{color:var(--text);font-weight:600}
+.activity-btn{display:block;text-align:center;padding:8px;margin-top:10px;background:var(--primary);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none}
+/* 排行榜 */
+.rank-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.rank-item:last-child{border-bottom:none}
+.rank-num{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.rank-num.r1{background:rgba(245,158,11,.2);color:#fcd34d}
+.rank-num.r2{background:rgba(100,116,139,.2);color:#cbd5e1}
+.rank-num.r3{background:rgba(180,83,9,.2);color:#fdba74}
+.rank-num.r4{background:var(--card2);color:var(--muted)}
+.rank-info{flex:1}
+.rank-name{font-weight:500}
+.rank-meta{font-size:10px;color:var(--muted)}
+.rank-val{font-weight:700;font-size:14px;color:var(--accent)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>公众<span>互动</span>中心</h1>
+<p>环保积分 · 志愿者活动 · 举报奖励 · 绿色生活</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">1,256</div><div class="label">注册志愿者</div></div>
+<div class="stat-card blue"><div class="num">38</div><div class="label">活动总数</div></div>
+<div class="stat-card amber"><div class="num">86,500</div><div class="label">累计积分</div></div>
+<div class="stat-card red"><div class="num">152</div><div class="label">举报奖励(次)</div></div>
+</div>
+
+<div class="points-card">
+<div class="points-value">2,350</div>
+<div class="points-label">我的环保积分</div>
+<div class="points-rank">当前等级：<b>环保达人</b> · 排名第 <b>28</b> / 1,256</div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('tasks',this)">积分任务</div>
+<div class="tab" onclick="switchTab('activities',this)">志愿活动</div>
+<div class="tab" onclick="switchTab('ranking',this)">排行榜</div>
+<div class="tab" onclick="switchTab('rewards',this)">积分兑换</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/eco-science.html"><span class="icon">🌱</span>科普</a>
+<a class="nav-item active" href="/public-interact.html"><span class="icon">👥</span>互动</a>
+<a class="nav-item" href="/m-report.html"><span class="icon">📢</span>举报</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var currentTab='tasks';
+function switchTab(tab,el){
+currentTab=tab;
+document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+el.classList.add('active');
+render();
+}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='tasks'){area.innerHTML=renderTasks()}
+else if(currentTab==='activities'){area.innerHTML=renderActivities()}
+else if(currentTab==='ranking'){area.innerHTML=renderRanking()}
+else if(currentTab==='rewards'){area.innerHTML=renderRewards()}
+}
+
+function renderTasks(){
+var tasks=[
+{icon:'📢',name:'提交环保举报',desc:'经核实有效后奖励积分',points:'+50'},
+{icon:'📸',name:'上传环境问题照片',desc:'拍摄身边环境问题并上传',points:'+10'},
+{icon:'📚',name:'学习环保知识',desc:'完成环保科普阅读',points:'+5'},
+{icon:'✅',name:'完成环保问卷',desc:'参与环保调查问卷',points:'+15'},
+{icon:'🌳',name:'参加植树活动',desc:'参加义务植树',points:'+100'},
+{icon:'♻️',name:'参与垃圾分类',desc:'每月垃圾分类打卡',points:'+30'},
+{icon:'🚲',name:'绿色出行打卡',desc:'骑行/步行/公交出行',points:'+5/天'},
+{icon:'💡',name:'节能减碳打卡',desc:'记录家庭节能行动',points:'+3/天'}
+];
+var html='<div class="section"><div class="section-title">积分任务（每日/每周更新）</div>';
+tasks.forEach(function(t){
+html+='<div class="task-item"><div class="task-icon" style="background:rgba(16,185,129,.1)">'+t.icon+'</div><div class="task-info"><div class="task-name">'+t.name+'</div><div class="task-desc">'+t.desc+'</div></div><div class="task-points">'+t.points+'</div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderActivities(){
+var activities=[
+{name:'沂河沿岸垃圾清理志愿活动',status:'upcoming',statusText:'报名中',meta:'7月20日 08:00-11:00 · 沂河公园东门 · 已报名32/50人',desc:'清理沂河沿岸塑料垃圾和杂物，保护水生态环境。提供工具和手套，参与者奖励100积分+环保志愿者证书。',stats:{registered:32,capacity:50,points:100}},
+{name:'社区环保科普宣传',status:'upcoming',statusText:'报名中',meta:'7月22日 14:00-17:00 · 历下区3个社区 · 已报名15/30人',desc:'在社区开展环保知识宣传，发放科普手册，讲解垃圾分类、低碳生活知识。奖励80积分。',stats:{registered:15,capacity:30,points:80}},
+{name:'企业环保开放日',status:'upcoming',statusText:'报名中',meta:'7月25日 09:00-12:00 · 泰山玻璃制品有限公司 · 已报名45/60人',desc:'参观环保信用AAA级企业，了解超低排放设施运行和环保管理经验。奖励50积分。',stats:{registered:45,capacity:60,points:50}},
+{name:'夏季臭氧污染防治宣传',status:'ongoing',statusText:'进行中',meta:'7月10日-31日 · 全市 · 已参与186人',desc:'线上+线下宣传臭氧污染防治知识，倡导减少VOCs排放（少用油漆、涂料等）。参与即得30积分。',stats:{registered:186,capacity:999,points:30}},
+{name:'水质监测公众开放日',status:'ended',statusText:'已结束',meta:'7月6日 · 城区水质监测站 · 参与48人',desc:'参观水质自动监测站，了解水质监测原理和数据解读。已颁发48份志愿者证书。',stats:{registered:48,capacity:50,points:50}}
+];
+var html='<div class="section"><div class="section-title">志愿者活动</div>';
+activities.forEach(function(a){
+html+='<div class="activity-card"><div class="activity-header"><span class="activity-name">'+a.name+'</span><span class="activity-status '+a.status+'">'+a.statusText+'</span></div><div class="activity-meta">'+a.meta+'</div><div class="activity-desc">'+a.desc+'</div><div class="activity-stats"><span class="activity-stat">已报名 <b>'+a.stats.registered+'/'+a.stats.capacity+'</b></span><span class="activity-stat">奖励 <b>'+a.stats.points+'积分</b></span></div>';
+if(a.status!=='ended'){html+='<a class="activity-btn" href="#" onclick="epbToast(\'已报名：'+a.name+'\');return false">立即报名</a>'}
+html+='</div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderRanking(){
+var ranks=[
+{name:'张环保',meta:'环保大使 · 156项任务',points:'8,650'},
+{name:'李绿色',meta:'环保达人 · 128项任务',points:'7,200'},
+{name:'王生态',meta:'环保达人 · 102项任务',points:'5,800'},
+{name:'赵低碳',meta:'环保先锋 · 86项任务',points:'4,320'},
+{name:'孙自然',meta:'环保先锋 · 72项任务',points:'3,950'},
+{name:'我',meta:'环保达人 · 42项任务',points:'2,350'},
+{name:'刘绿水',meta:'环保参与者 · 38项任务',points:'1,860'},
+{name:'陈青山',meta:'环保参与者 · 25项任务',points:'1,200'}
+];
+var html='<div class="section"><div class="section-title">积分排行榜（本月）</div>';
+ranks.forEach(function(r,i){
+var n=i+1;
+var cls=n<=3?'r'+n:'r4';
+html+='<div class="rank-item"><div class="rank-num '+cls+'">'+n+'</div><div class="rank-info"><div class="rank-name">'+r.name+(r.name==='我'?' (我)':'')+'</div><div class="rank-meta">'+r.meta+'</div></div><div class="rank-val">'+r.points+'</div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">等级体系</div>';
+var levels=[{name:'环保新星',range:'0-500',color:'var(--muted)'},{name:'环保参与者',range:'500-2000',color:'var(--primary2)'},{name:'环保先锋',range:'2000-4000',color:'var(--warn)'},{name:'环保达人',range:'4000-8000',color:'var(--accent)'},{name:'环保大使',range:'8000+',color:'var(--danger)'}];
+levels.forEach(function(l){
+html+='<div class="task-item"><div class="task-icon" style="background:rgba(16,185,129,.1)">⭐</div><div class="task-info"><div class="task-name" style="color:'+l.color+'">'+l.name+'</div><div class="task-desc">积分区间：'+l.range+'</div></div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderRewards(){
+var rewards=[
+{name:'环保帆布袋',points:'200',desc:'可折叠环保购物袋',icon:'🎒'},
+{name:'不锈钢吸管套装',points:'150',desc:'减少塑料吸管使用',icon:'🥤'},
+{name:'环保科普图书',points:'500',desc:'《公民环保行为指南》',icon:'📖'},
+{name:'植物种子套装',points:'300',desc:'阳台绿植种子礼盒',icon:'🌱'},
+{name:'环保T恤',points:'800',desc:'有机棉环保主题T恤',icon:'👕'},
+{name:'空气净化器滤芯',points:'1500',desc:'通用型HEPA滤芯',icon:'🌫️'},
+{name:'共享单车月卡',points:'600',desc:'30天免费骑行',icon:'🚲'},
+{name:'环保志愿者证书',points:'1000',desc:'年度优秀志愿者证书',icon:'📜'}
+];
+var html='<div class="section"><div class="section-title">积分兑换商城</div>';
+rewards.forEach(function(r){
+html+='<div class="task-item"><div class="task-icon" style="background:rgba(59,130,246,.1)">'+r.icon+'</div><div class="task-info"><div class="task-name">'+r.name+'</div><div class="task-desc">'+r.desc+'</div></div><div class="task-points" style="background:rgba(59,130,246,.15);color:#93c5fd">'+r.points+'分</div></div>';
+});
+html+='<a class="activity-btn" href="#" onclick="epbToast(\'兑换功能开发中\');return false" style="margin-top:8px">兑换商品</a></div>';
+return html;
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>

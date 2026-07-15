@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>绿色金融 · 环保投融资对接</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#0c4a6e 50%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 产品卡片 */
+.product-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px;border-top:3px solid var(--accent)}
+.product-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.product-name{font-size:14px;font-weight:600;flex:1}
+.product-tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;margin-left:8px;background:rgba(16,185,129,.15);color:#6ee7b7}
+.product-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.product-desc{font-size:12px;line-height:1.6}
+.product-terms{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.term-box{background:var(--card);border-radius:6px;padding:6px;text-align:center}
+.term-box .v{font-size:14px;font-weight:600;color:var(--accent)}
+.term-box .l{font-size:9px;color:var(--muted);margin-top:2px}
+.product-btn{display:block;text-align:center;padding:8px;margin-top:10px;background:var(--primary);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none}
+/* 融资需求 */
+.demand-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--warn)}
+.demand-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.demand-name{font-size:13px;font-weight:600}
+.demand-amount{font-size:14px;font-weight:700;color:var(--warn)}
+.demand-meta{font-size:11px;color:var(--muted)}
+/* 政策 */
+.policy-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.policy-name{font-size:13px;font-weight:600;color:var(--primary2);margin-bottom:4px}
+.policy-desc{font-size:12px;color:var(--text);line-height:1.6}
+.policy-meta{font-size:11px;color:var(--muted);margin-top:6px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>绿色<span>金融</span>对接</h1>
+<p>环保专项贷款 · 绿色债券 · 补贴申领 · 融资需求撮合</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">3.2亿</div><div class="label">绿色信贷余额(元)</div></div>
+<div class="stat-card blue"><div class="num">8款</div><div class="label">金融产品</div></div>
+<div class="stat-card amber"><div class="num">5条</div><div class="label">融资需求</div></div>
+<div class="stat-card green"><div class="num">6800万</div><div class="label">补贴已发放(元)</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">绿色金融产品</div>
+
+<div class="product-card">
+<div class="product-header"><span class="product-name">环保技改专项贷</span><span class="product-tag">推荐</span></div>
+<div class="product-meta">合作银行：工商银行济南分行 · 适合：环保技术改造企业</div>
+<div class="product-desc">面向进行污染治理设施改造、节能降碳技术升级的企业，提供低息贷款支持。可用于设备采购、工程施工、技术服务等。</div>
+<div class="product-terms"><div class="term-box"><div class="v">3.85%</div><div class="l">年利率</div></div><div class="term-box"><div class="v">≤500万</div><div class="l">贷款额度</div></div><div class="term-box"><div class="v">1-5年</div><div class="l">期限</div></div></div>
+<a class="product-btn" href="#" onclick="epbToast('已提交贷款意向申请');return false">申请贷款</a>
+</div>
+
+<div class="product-card" style="border-top-color:var(--primary)">
+<div class="product-header"><span class="product-name">绿色供应链票据贴现</span><span class="product-tag" style="background:rgba(59,130,246,.15);color:#93c5fd">票据</span></div>
+<div class="product-meta">合作银行：建设银行 · 适合：环保设备供应商</div>
+<div class="product-desc">环保设备采购应收账款票据快速贴现，T+1到账。降低环保设备供应商资金周转压力。</div>
+<div class="product-terms"><div class="term-box"><div class="v">2.95%</div><div class="l">贴现利率</div></div><div class="term-box"><div class="v">T+1</div><div class="l">到账时间</div></div><div class="term-box"><div class="v">≤2000万</div><div class="l">单笔额度</div></div></div>
+<a class="product-btn" href="#" onclick="epbToast('已提交贴现申请');return false">申请贴现</a>
+</div>
+
+<div class="product-card" style="border-top-color:var(--warn)">
+<div class="product-header"><span class="product-name">排污权抵押贷款</span><span class="product-tag" style="background:rgba(245,158,11,.15);color:#fcd34d">创新</span></div>
+<div class="product-meta">合作银行：农业银行 · 适合：持有排污许可证企业</div>
+<div class="product-desc">以企业排污权作为抵押物获得贷款，盘活企业无形资产。已有3家企业成功获批。</div>
+<div class="product-terms"><div class="term-box"><div class="v">4.20%</div><div class="l">年利率</div></div><div class="term-box"><div class="v">≤300万</div><div class="l">贷款额度</div></div><div class="term-box"><div class="v">1-3年</div><div class="l">期限</div></div></div>
+<a class="product-btn" href="#" onclick="epbToast('已提交排污权抵押申请');return false">申请贷款</a>
+</div>
+
+<div class="product-card" style="border-top-color:var(--accent)">
+<div class="product-header"><span class="product-name">碳排放配额质押融资</span><span class="product-tag">创新</span></div>
+<div class="product-meta">合作银行：中国银行 · 适合：纳入碳交易企业</div>
+<div class="product-desc">以全国碳市场碳排放配额（CEA）为质押物，获取融资资金。配额所有权不变，企业仍可正常交易。</div>
+<div class="product-terms"><div class="term-box"><div class="v">4.50%</div><div class="l">年利率</div></div><div class="term-box"><div class="v">配额70%</div><div class="l">质押率</div></div><div class="term-box"><div class="v">1年</div><div class="l">期限</div></div></div>
+<a class="product-btn" href="#" onclick="epbToast('已提交配额质押申请');return false">申请融资</a>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">企业融资需求</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-name">华源化工MBR膜改造</span><span class="demand-amount">200万</span></div>
+<div class="demand-meta">贷款期限3年 · 用途：MBR膜组件更换+曝气系统升级 · 预计年减碳800t · 7月12日发布</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-name">建材集团窑炉煤改气</span><span class="demand-amount">500万</span></div>
+<div class="demand-meta">贷款期限5年 · 用途：天然气窑炉改造 · 预计年减碳2000t · 7月8日发布</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-name">渤海印染中水回用系统</span><span class="demand-amount">150万</span></div>
+<div class="demand-meta">贷款期限3年 · 用途：中水回用设施建设 · 年节水30万吨 · 7月5日发布</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-name">绿洲纸业污泥干化设备</span><span class="demand-amount">300万</span></div>
+<div class="demand-meta">贷款期限3年 · 用途：污泥低温干化设备采购 · 年减量70% · 7月1日发布</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-name">运达金属危废标准化改造</span><span class="demand-amount">80万</span></div>
+<div class="demand-meta">贷款期限2年 · 用途：危废贮存间标准化改造 · 环保合规需求 · 6月28日发布</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">环保补贴政策</div>
+<div class="policy-card">
+<div class="policy-name">绿色低碳高质量发展专项资金</div>
+<div class="policy-desc">对企业实施节能降碳、清洁生产改造的项目给予资金支持，单个项目最高补贴200万元。</div>
+<div class="policy-meta">补贴比例：项目投资10-20% · 截止：2026年12月31日 · 主管部门：省发改委</div>
+</div>
+<div class="policy-card">
+<div class="policy-name">大气污染防治专项资金</div>
+<div class="policy-desc">支持超低排放改造、VOCs治理、清洁取暖等项目，单个项目最高补贴500万元。</div>
+<div class="policy-meta">补贴比例：项目投资15-30% · 截止：2026年10月31日 · 主管部门：省生态环境厅</div>
+</div>
+<div class="policy-card">
+<div class="policy-name">水污染防治专项资金</div>
+<div class="policy-desc">支持污水处理设施提标改造、管网建设、水源地保护等项目，单个项目最高补贴300万元。</div>
+<div class="policy-meta">补贴比例：项目投资20-40% · 截止：2026年11月30日 · 主管部门：省生态环境厅</div>
+</div>
+<div class="policy-card">
+<div class="policy-name">环保信用绿牌企业奖励</div>
+<div class="policy-desc">环保信用评级为绿牌的企业，可享受专项资金优先安排、税收优惠、信贷利率下浮等激励政策。</div>
+<div class="policy-meta">激励对象：绿牌企业 · 长期有效 · 主管部门：省生态环境厅</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/carbon-mgmt.html"><span class="icon">🌱</span>碳管理</a>
+<a class="nav-item active" href="/green-finance.html"><span class="icon">💰</span>金融</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+</body>
+</html>
