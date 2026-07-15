@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保法规库 · 智能检索</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg:#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.search-bar{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.search-row{display:flex;gap:8px}
+.search-input{flex:1;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:14px;outline:none}
+.search-input:focus{border-color:var(--primary)}
+.search-btn{padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600}
+.cat-bar{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;white-space:nowrap;background:var(--card)}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-chip{padding:6px 14px;border-radius:16px;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:12px;cursor:pointer;flex-shrink:0}
+.cat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700;color:var(--primary2)}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.law-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.law-card:active{transform:scale(.98)}
+.law-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.law-name{font-size:14px;font-weight:600;flex:1}
+.law-level{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;margin-left:8px}
+.law-level.national{background:rgba(239,68,68,.15);color:#fca5a5}
+.law-level.ministry{background:rgba(59,130,246,.15);color:#93c5fd}
+.law-level.local{background:rgba(16,185,129,.15);color:#6ee7b7}
+.law-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.law-desc{font-size:12px;line-height:1.6;color:var(--text)}
+.law-tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.law-tag{padding:2px 6px;background:var(--card2);border-radius:3px;font-size:10px;color:var(--muted)}
+.law-tag.hot{background:rgba(239,68,68,.1);color:#fca5a5}
+.law-related{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--primary2)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>法规库</span></h1>
+<p>28部法规 · 智能检索 · 关联推荐 · 案例链接</p>
+</div>
+
+<div class="search-bar">
+<div class="search-row">
+<input class="search-input" id="search" placeholder="搜索法规名称/条款/关键词..." oninput="doSearch()">
+<button class="search-btn" onclick="doSearch()">搜索</button>
+</div>
+</div>
+
+<div class="cat-bar" id="cat-bar"></div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card"><div class="num">28</div><div class="label">法规总数</div></div>
+<div class="stat-card"><div class="num">12</div><div class="label">国家法律</div></div>
+<div class="stat-card"><div class="num">16</div><div class="label">部门/地方</div></div>
+</div>
+
+<div id="law-list"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/law-library.html"><span class="icon">📖</span>法规库</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var LAWS=[
+{name:'《中华人民共和国环境保护法》',level:'national',levelText:'国家法律',date:'2014-04-24修订',cat:'综合',desc:'环境保护的基本法，规定环境保护的基本原则、管理制度和法律责任。第六十三条规定了通过暗管、渗井等逃避监管方式排放污染物的行政拘留条款。',tags:['基本法','行政拘留','逃避监管','热门'],hot:true,related:'关联案例：海润电镀监测数据篡改案、运达金属危废倾倒案'},
+{name:'《中华人民共和国水污染防治法》',level:'national',levelText:'国家法律',date:'2017-06-27修订',cat:'水',desc:'水污染防治的专项法律，第八十三条规定超标排放水污染物的处罚标准（10万-100万元）。涵盖排污许可、监测、应急处置等制度。',tags:['水污染','超标排放','10-100万','热门'],hot:true,related:'关联案例：华源化工COD超标案、渤海印染氨氮超标案'},
+{name:'《中华人民共和国大气污染防治法》',level:'national',levelText:'国家法律',date:'2018-10-26修订',cat:'大气',desc:'大气污染防治专项法律，第九十九条规定超标排放大气污染物的处罚标准。涵盖VOCs治理、扬尘管控、机动车排放等。',tags:['大气','VOCs','超标排放','热门'],hot:true,related:'关联案例：建材集团粉尘超标案'},
+{name:'《中华人民共和国固体废物污染环境防治法》',level:'national',levelText:'国家法律',date:'2020-04-29修订',cat:'固废',desc:'固废污染防治专项法律，第一百零二条规定危废违法的处罚标准。涵盖危废贮存、转移、处置全过程管理。',tags:['固废','危废','贮存','热门'],hot:true,related:'关联案例：运达金属危废倾倒案、海润电镀危废转移联证缺失案'},
+{name:'《中华人民共和国噪声污染防治法》',level:'national',levelText:'国家法律',date:'2021-12-24修订',cat:'噪声',desc:'噪声污染防治专项法律，第七十五条规定工业噪声超标的处罚标准（2万-20万元）。',tags:['噪声','厂界','2-20万'],hot:false,related:'关联案例：运达金属噪声超标扰民案'},
+{name:'《中华人民共和国土壤污染防治法》',level:'national',levelText:'国家法律',date:'2018-08-31通过',cat:'土壤',desc:'土壤污染防治专项法律，规定土壤污染状况调查、风险评估、风险管控和修复等制度。',tags:['土壤','调查','修复'],hot:false,related:'关联案例：搬迁化工厂场地调查案'},
+{name:'《排污许可管理条例》',level:'national',levelText:'行政法规',date:'2021-03-01施行',cat:'许可',desc:'排污许可管理的核心法规，第三十三条规定无证排污的处罚标准（20万-100万元）。涵盖排污许可证申请、审批、执行、监管全流程。',tags:['排污许可','无证排污','20-100万','热门'],hot:true,related:'关联案例：德州某化工无证排污案'},
+{name:'《建设项目环境保护管理条例》',level:'national',levelText:'行政法规',date:'2017-07-16修订',cat:'综合',desc:'建设项目环评和环保设施"三同时"管理制度。',tags:['环评','三同时','建设项目'],hot:false,related:''},
+{name:'《危险废物经营许可证管理办法》',level:'ministry',levelText:'部门规章',date:'2004-05-30颁布',cat:'固废',desc:'危废经营许可管理，规定危废收集、贮存、处置的许可条件和程序。',tags:['危废','许可证','经营'],hot:false,related:''},
+{name:'《环境监测管理办法》',level:'ministry',levelText:'部门规章',date:'2007-07-25颁布',cat:'监测',desc:'环境监测管理，规定监测数据质量和监测机构管理要求。',tags:['监测','数据质量'],hot:false,related:''},
+{name:'《企业事业单位环境信息公开办法》',level:'ministry',levelText:'部门规章',date:'2015-01-01施行',cat:'综合',desc:'重点排污单位环境信息公开要求，促进公众监督。',tags:['信息公开','重点排污'],hot:false,related:''},
+{name:'《环境保护法实施办法》（山东省）',level:'local',levelText:'地方法规',date:'2015-修改',cat:'综合',desc:'山东省环境保护法实施细则，结合山东省实际情况细化管理要求。',tags:['山东','实施办法'],hot:false,related:''},
+{name:'《山东省水污染防治条例》',level:'local',levelText:'地方法规',date:'2018-修改',cat:'水',desc:'山东省水污染防治地方性法规，细化水污染物排放管理。',tags:['山东','水污染'],hot:false,related:''},
+{name:'《环境行政处罚办法》',level:'ministry',levelText:'部门规章',date:'2010-03-01施行',cat:'执法',desc:'环境行政处罚程序规定，涵盖立案、调查、审查、告知、决定、执行全流程。',tags:['处罚程序','立案','执行','热门'],hot:true,related:'关联工具：自由裁量计算器、执法文书AI生成'},
+{name:'《行政执法公示制度》',level:'ministry',levelText:'部门规章',date:'2019-施行',cat:'执法',desc:'行政执法"三项制度"之一，要求执法信息主动公开。',tags:['三项制度','公示','公开'],hot:false,related:''},
+{name:'《执法全过程记录制度》',level:'ministry',levelText:'部门规章',date:'2019-施行',cat:'执法',desc:'要求通过文字、音像等方式对执法全过程进行记录。',tags:['三项制度','记录','音像'],hot:false,related:''},
+{name:'《重大执法决定法制审核制度》',level:'ministry',levelText:'部门规章',date:'2019-施行',cat:'执法',desc:'重大执法决定前须进行法制审核，确保执法合法合规。',tags:['三项制度','法制审核'],hot:false,related:''},
+{name:'《突发环境事件应急管理办法》',level:'ministry',levelText:'部门规章',date:'2015-06-05施行',cat:'应急',desc:'突发环境事件应急管理，涵盖预案、演练、响应、处置、恢复全流程。',tags:['应急','预案','响应','热门'],hot:true,related:'关联工具：应急指挥中心'},
+{name:'《企业环境信用评价办法（试行）》',level:'ministry',levelText:'部门规章',date:'2013-12-18印发',cat:'信用',desc:'企业环境信用评价制度，规定绿蓝黄红四色评级标准和联合奖惩措施。',tags:['信用','绿蓝黄红','评价','热门'],hot:true,related:'关联工具：环保信用评级'},
+{name:'《污染源自动监控管理办法》',level:'ministry',levelText:'部门规章',date:'2015-08-施',cat:'监测',desc:'污染源自动监控设备安装、运行、数据管理要求。',tags:['自动监控','CEMS','在线监测'],hot:false,related:'关联工具：非现场执法、智能预警'},
+{name:'《环境保护综合行政执法事项指导目录》',level:'ministry',levelText:'部门规章',date:'2020-发布',cat:'执法',desc:'生态环境保护综合行政执法事项清单，明确执法职责和权限。',tags:['执法事项','目录'],hot:false,related:''},
+{name:'《关于办理环境污染刑事案件适用法律若干问题的解释》',level:'ministry',levelText:'司法解释',date:'2023-08-15施行',cat:'执法',desc:'环境污染刑事案件法律适用标准，明确"严重污染环境"的认定标准（入罪门槛）。',tags:['刑事','入罪','司法解释','热门'],hot:true,related:'关联工具：自由裁量计算器（涉刑移送预警）'},
+{name:'《生态环境损害赔偿管理规定》',level:'ministry',levelText:'部门规章',date:'2022-05-施行',cat:'综合',desc:'生态环境损害赔偿制度，规定索赔范围、程序和资金管理。',tags:['损害赔偿','索赔'],hot:false,related:''},
+{name:'《黄河保护法》',level:'national',levelText:'国家法律',date:'2023-04-01施行',cat:'综合',desc:'黄河流域生态保护和高质量发展专项法律。',tags:['黄河','流域','生态保护'],hot:false,related:''},
+{name:'《湿地保护法》',level:'national',levelText:'国家法律',date:'2022-06-01施行',cat:'综合',desc:'湿地保护专项法律，规定湿地分类管理和保护措施。',tags:['湿地','保护'],hot:false,related:''},
+{name:'《长江保护法》',level:'national',levelText:'国家法律',date:'2021-03-01施行',cat:'综合',desc:'长江流域生态保护专项法律。',tags:['长江','流域','生态保护'],hot:false,related:''},
+{name:'《碳排放权交易管理办法》',level:'ministry',levelText:'部门规章',date:'2021-05-14施行',cat:'大气',desc:'全国碳排放权交易市场管理，涵盖配额分配、排放报告、核查、交易等。',tags:['碳排放','碳交易','双碳','热门'],hot:true,related:''},
+{name:'《新污染物治理行动方案》',level:'ministry',levelText:'部门规章',date:'2022-05-24印发',cat:'综合',desc:'新污染物（抗生素、微塑料等）治理行动计划。',tags:['新污染物','抗生素','微塑料'],hot:false,related:''}
+];
+
+var currentCat='all';
+var searchKw='';
+
+var CATS=[{key:'all',name:'全部'},{key:'综合',name:'综合'},{key:'水',name:'水污染'},{key:'大气',name:'大气'},{key:'固废',name:'固废危废'},{key:'执法',name:'执法程序'},{key:'监测',name:'监测'},{key:'应急',name:'应急'},{key:'信用',name:'信用'},{key:'许可',name:'排污许可'}];
+
+function renderCats(){
+var html=CATS.map(function(c){
+return '<div class="cat-chip'+(c.key===currentCat?' active':'')+'" onclick="selectCat(\''+c.key+'\')">'+c.name+'</div>';
+}).join('');
+document.getElementById('cat-bar').innerHTML=html;
+}
+
+function selectCat(cat){
+currentCat=cat;
+renderCats();
+renderList();
+}
+
+function doSearch(){
+searchKw=document.getElementById('search').value.toLowerCase().trim();
+renderList();
+}
+
+function renderList(){
+var list=LAWS;
+if(currentCat!=='all'){list=list.filter(function(l){return l.cat===currentCat})}
+if(searchKw){
+list=list.filter(function(l){
+return l.name.toLowerCase().indexOf(searchKw)>=0||
+l.desc.toLowerCase().indexOf(searchKw)>=0||
+l.tags.some(function(t){return t.toLowerCase().indexOf(searchKw)>=0});
+});
+}
+var html='';
+if(list.length===0){
+html='<div class="empty">未找到匹配的法规<br>试试其他关键词</div>';
+}else{
+list.forEach(function(l){
+var tagsHtml=l.tags.map(function(t){return '<span class="law-tag'+(l.hot?' hot':'')+'">'+t+'</span>'}).join('');
+html+='<div class="law-card" onclick="showDetail(\''+l.name.replace(/'/g,"\\'")+'\')">'+
+'<div class="law-header"><span class="law-name">'+l.name+'</span><span class="law-level '+l.level+'">'+l.levelText+'</span></div>'+
+'<div class="law-meta">颁布/修订：'+l.date+' · 分类：'+l.cat+'</div>'+
+'<div class="law-desc">'+l.desc+'</div>'+
+'<div class="law-tags">'+tagsHtml+'</div>'+
+(l.related?'<div class="law-related">'+l.related+'</div>':'')+
+'</div>';
+});
+}
+document.getElementById('law-list').innerHTML=html;
+}
+
+function showDetail(name){
+var l=LAWS.filter(function(x){return x.name===name})[0];
+if(!l)return;
+epbToast(l.name+' | '+l.date+' | '+l.levelText);
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:12px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderCats();
+renderList();
+</script>
+</body>
+</html>
