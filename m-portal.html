@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>环保智慧执法 · 移动端</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#064e3b 50%,#1e293b 100%);padding:32px 20px 24px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 30%,rgba(59,130,246,.12),transparent 50%),radial-gradient(circle at 70% 70%,rgba(16,185,129,.1),transparent 50%)}
+.hero h1{font-size:24px;font-weight:700;position:relative}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:13px;position:relative;margin-top:4px}
+.hero-search{margin:16px 20px 0;position:relative}
+.hero-search input{width:100%;padding:12px 16px 12px 40px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:24px;color:var(--text);font-size:14px;outline:none;backdrop-filter:blur(10px)}
+.hero-search input::placeholder{color:var(--muted)}
+.hero-search .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted)}
+.container{padding:16px}
+/* 快捷功能 */
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.quick-item{text-align:center;text-decoration:none;color:var(--text);display:block}
+.quick-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 4px;background:var(--card);border:1px solid var(--border)}
+.quick-label{font-size:10px;color:var(--muted)}
+/* 分类入口 */
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:10px;padding-left:4px}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.cat-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text)}
+.cat-row:last-child{border-bottom:none}
+.cat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cat-info{flex:1}
+.cat-name{font-size:14px;font-weight:600}
+.cat-desc{font-size:11px;color:var(--muted)}
+.cat-arrow{color:var(--muted);font-size:14px}
+/* 统计 */
+.stat-bar{display:flex;gap:8px;margin-bottom:16px}
+.stat-pill{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-pill .num{font-size:18px;font-weight:700;color:var(--accent)}
+.stat-pill .label{font-size:10px;color:var(--muted);margin-top:2px}
+/* 公告 */
+.notice-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.notice-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;margin-bottom:4px}
+.notice-tag.urgent{background:rgba(239,68,68,.15);color:#fca5a5}
+.notice-tag.normal{background:rgba(59,130,246,.15);color:#93c5fd}
+.notice-title{font-size:13px;font-weight:500}
+.notice-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:6px 0;z-index:100;max-width:600px;margin:0 auto}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:20px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>智慧执法</span></h1>
+<p>44个功能模块 · 一部手机搞定环保全流程</p>
+<div class="hero-search">
+<span class="icon">🔍</span>
+<input placeholder="搜索功能/法规/案例..." oninput="epbToast('搜索功能演示')">
+</div>
+</div>
+
+<div class="container">
+<div class="stat-bar">
+<div class="stat-pill"><div class="num">44</div><div class="label">功能模块</div></div>
+<div class="stat-pill"><div class="num">101</div><div class="label">执法案例</div></div>
+<div class="stat-pill"><div class="num">28</div><div class="label">环保法规</div></div>
+<div class="stat-pill"><div class="num">14</div><div class="label">设备产品</div></div>
+</div>
+
+<div class="quick-grid">
+<a href="/m-report.html" class="quick-item"><div class="quick-icon" style="background:rgba(239,68,68,.1)">📢</div><div class="quick-label">一键举报</div></a>
+<a href="/m-cases.html" class="quick-item"><div class="quick-icon" style="background:rgba(59,130,246,.1)">📖</div><div class="quick-label">案例查询</div></a>
+<a href="/m-self-check.html" class="quick-item"><div class="quick-icon" style="background:rgba(16,185,129,.1)">✅</div><div class="quick-label">合规自查</div></a>
+<a href="/eco-science.html" class="quick-item"><div class="quick-icon" style="background:rgba(245,158,11,.1)">🌱</div><div class="quick-label">环保科普</div></a>
+<a href="/equipment-mall.html" class="quick-item"><div class="quick-icon" style="background:rgba(16,185,129,.1)">🛒</div><div class="quick-label">设备商城</div></a>
+<a href="/public-interact.html" class="quick-item"><div class="quick-icon" style="background:rgba(59,130,246,.1)">👥</div><div class="quick-label">互动中心</div></a>
+<a href="/law-library.html" class="quick-item"><div class="quick-icon" style="background:rgba(245,158,11,.1)">📖</div><div class="quick-label">法规库</div></a>
+<a href="/green-finance.html" class="quick-item"><div class="quick-icon" style="background:rgba(16,185,129,.1)">💰</div><div class="quick-label">绿色金融</div></a>
+</div>
+
+<div class="section-title">执法辅助</div>
+<div class="cat-card">
+<a href="/field-terminal.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">🚔</div><div class="cat-info"><div class="cat-name">现场执法终端</div><div class="cat-desc">AI场景识别 · 证据采集 · 文书生成</div></div><div class="cat-arrow">›</div></a>
+<a href="/enforcement-guide.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">📋</div><div class="cat-info"><div class="cat-name">执法流程引导</div><div class="cat-desc">线索→立案→检查→证据→审查→处罚→执行→结案</div></div><div class="cat-arrow">›</div></a>
+<a href="/penalty-calculator.html" class="cat-row"><div class="cat-icon" style="background:rgba(245,158,11,.1)">⚖️</div><div class="cat-info"><div class="cat-name">自由裁量计算</div><div class="cat-desc">8类违法×8因子 · 自动计算处罚区间</div></div><div class="cat-arrow">›</div></a>
+<a href="/doc-generator.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">📄</div><div class="cat-info"><div class="cat-name">执法文书AI</div><div class="cat-desc">现场笔录/询问笔录/处罚决定/整改通知</div></div><div class="cat-arrow">›</div></a>
+</div>
+
+<div class="section-title">监管与感知</div>
+<div class="cat-card">
+<a href="/remote-enforcement.html" class="cat-row"><div class="cat-icon" style="background:rgba(0,150,136,.1)">👁️</div><div class="cat-info"><div class="cat-name">非现场执法</div><div class="cat-desc">在线监测分析 · 数据异常识别</div></div><div class="cat-arrow">›</div></a>
+<a href="/smart-alert.html" class="cat-row"><div class="cat-icon" style="background:rgba(239,68,68,.1)">🚨</div><div class="cat-info"><div class="cat-name">智能预警系统</div><div class="cat-desc">多源融合 · 规则引擎 · AI研判</div></div><div class="cat-arrow">›</div></a>
+<a href="/sensor-dashboard.html" class="cat-row"><div class="cat-icon" style="background:rgba(0,150,136,.1)">🌐</div><div class="cat-info"><div class="cat-name">天地一体感知</div><div class="cat-desc">空气/水质/噪声 · 10种数据源</div></div><div class="cat-arrow">›</div></a>
+<a href="/drone-patrol.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">🚁</div><div class="cat-info"><div class="cat-name">无人机巡查</div><div class="cat-desc">航线规划 · AI识别 · 热成像</div></div><div class="cat-arrow">›</div></a>
+<a href="/env-map.html" class="cat-row"><div class="cat-icon" style="background:rgba(16,185,129,.1)">🗺️</div><div class="cat-info"><div class="cat-name">环境一张图</div><div class="cat-desc">GIS风险热力 · 企业分布</div></div><div class="cat-arrow">›</div></a>
+<a href="/emergency-center.html" class="cat-row"><div class="cat-icon" style="background:rgba(239,68,68,.1)">🆘</div><div class="cat-info"><div class="cat-name">应急指挥中心</div><div class="cat-desc">突发事件 · 资源调度 · 通讯</div></div><div class="cat-arrow">›</div></a>
+</div>
+
+<div class="section-title">企业服务</div>
+<div class="cat-card">
+<a href="/risk-profile.html" class="cat-row"><div class="cat-icon" style="background:rgba(239,68,68,.1)">🎯</div><div class="cat-info"><div class="cat-name">企业风险画像</div><div class="cat-desc">5维度评估 · 精准执法靶向</div></div><div class="cat-arrow">›</div></a>
+<a href="/credit-rating.html" class="cat-row"><div class="cat-icon" style="background:rgba(16,185,129,.1)">⭐</div><div class="cat-info"><div class="cat-name">环保信用评级</div><div class="cat-desc">绿蓝黄红标 · 联合奖惩</div></div><div class="cat-arrow">›</div></a>
+<a href="/approval-service.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">📋</div><div class="cat-info"><div class="cat-name">环保审批服务</div><div class="cat-desc">环评/排污许可/竣工验收流程</div></div><div class="cat-arrow">›</div></a>
+<a href="/carbon-mgmt.html" class="cat-row"><div class="cat-icon" style="background:rgba(16,185,129,.1)">🌱</div><div class="cat-info"><div class="cat-name">碳排放管理</div><div class="cat-desc">排放核算 · 碳交易 · 减碳路径</div></div><div class="cat-arrow">›</div></a>
+<a href="/green-finance.html" class="cat-row"><div class="cat-icon" style="background:rgba(16,185,129,.1)">💰</div><div class="cat-info"><div class="cat-name">绿色金融</div><div class="cat-desc">专项贷款 · 补贴申领</div></div><div class="cat-arrow">›</div></a>
+<a href="/eco-manager.html" class="cat-row"><div class="cat-icon" style="background:rgba(245,158,11,.1)">🔧</div><div class="cat-info"><div class="cat-name">环保管家</div><div class="cat-desc">第三方服务商对接</div></div><div class="cat-arrow">›</div></a>
+</div>
+
+<div class="section-title">决策与分析</div>
+<div class="cat-card">
+<a href="/data-cockpit.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">📊</div><div class="cat-info"><div class="cat-name">数据驾驶舱</div><div class="cat-desc">8项KPI · 趋势 · AI决策建议</div></div><div class="cat-arrow">›</div></a>
+<a href="/ai-report.html" class="cat-row"><div class="cat-icon" style="background:rgba(142,68,173,.1)">📈</div><div class="cat-info"><div class="cat-name">AI周报月报</div><div class="cat-desc">自动汇总 · 智能分析</div></div><div class="cat-arrow">›</div></a>
+<a href="/capacity-assess.html" class="cat-row"><div class="cat-icon" style="background:rgba(59,130,246,.1)">👥</div><div class="cat-info"><div class="cat-name">执法能力评估</div><div class="cat-desc">团队效能 · 人员画像 · 培训</div></div><div class="cat-arrow">›</div></a>
+<a href="/overview.html" class="cat-row"><div class="cat-icon" style="background:rgba(99,102,241,.1)">🗺️</div><div class="cat-info"><div class="cat-name">平台总览看板</div><div class="cat-desc">44模块总入口 · 系统信息</div></div><div class="cat-arrow">›</div></a>
+</div>
+
+<div class="section-title">最新公告</div>
+<div class="notice-item"><span class="notice-tag urgent">紧急</span><div class="notice-title">华源化工废水泄漏应急响应（Ⅱ级）</div><div class="notice-meta">2026-07-14 · 应急指挥中心</div></div>
+<div class="notice-item"><span class="notice-tag normal">通知</span><div class="notice-title">2026年夏季臭氧污染防治专项行动</div><div class="notice-meta">2026-07-10 · 监管科</div></div>
+<div class="notice-item"><span class="notice-tag normal">通知</span><div class="notice-title">排污许可证年度执行报告提交提醒</div><div class="notice-meta">2026-07-05 · 许可科</div></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item active" href="/m-portal.html"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+<a class="nav-item" href="/m-cases.html"><span class="icon">📖</span>案例</a>
+<a class="nav-item" href="/m-report.html"><span class="icon">📢</span>举报</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识</a>
+</div>
+
+<script>
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+</body>
+</html>

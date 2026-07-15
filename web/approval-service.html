@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保审批服务 · 建设项目环评与排污许可</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 流程步骤 */
+.step-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.step-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.step-name{font-size:13px;font-weight:600}
+.step-time{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(59,130,246,.15);color:#93c5fd}
+.step-desc{font-size:12px;color:var(--text);line-height:1.6}
+.step-detail{font-size:11px;color:var(--muted);margin-top:6px}
+/* 事项列表 */
+.item-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px}
+.item-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.item-name{font-size:13px;font-weight:600;flex:1}
+.item-tag{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;margin-left:8px}
+.item-tag.required{background:rgba(239,68,68,.15);color:#fca5a5}
+.item-tag.optional{background:rgba(100,116,139,.15);color:var(--muted)}
+.item-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+.item-desc{font-size:12px;line-height:1.6}
+.item-actions{display:flex;gap:6px;margin-top:8px}
+.item-btn{padding:4px 10px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:var(--card);color:var(--text);text-decoration:none;text-align:center}
+.item-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* 材料清单 */
+.material-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.material-item:last-child{border-bottom:none}
+.material-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.material-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.material-text{flex:1}
+.material-item.done .material-text{text-decoration:line-through;color:var(--muted)}
+/* 时限 */
+.timeline-info{background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--warn)}
+.timeline-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+.timeline-row .key{color:var(--muted)}
+.timeline-row .val{font-weight:500}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>审批</span>服务</h1>
+<p>建设项目环评 · 排污许可申领 · 竣工环保验收 · 一站式指引</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">6</div><div class="label">审批事项</div></div>
+<div class="stat-card green"><div class="num">85%</div><div class="label">网上办理率</div></div>
+<div class="stat-card amber"><div class="num">15</div><div class="label">平均工作日</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('eia',this)">环评审批</div>
+<div class="tab" onclick="switchTab('permit',this)">排污许可</div>
+<div class="tab" onclick="switchTab('acceptance',this)">竣工验收</div>
+<div class="tab" onclick="switchTab('materials',this)">材料清单</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/knowledge.html"><span class="icon">📚</span>知识库</a>
+<a class="nav-item active" href="/approval-service.html"><span class="icon">📋</span>审批</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📱</span>工作台</a>
+</div>
+
+<script>
+var currentTab='eia';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');render()}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='eia'){area.innerHTML=renderEIA()}
+else if(currentTab==='permit'){area.innerHTML=renderPermit()}
+else if(currentTab==='acceptance'){area.innerHTML=renderAcceptance()}
+else if(currentTab==='materials'){area.innerHTML=renderMaterials()}
+}
+
+function renderEIA(){
+var html='<div class="section"><div class="section-title">建设项目环境影响评价流程</div>';
+var steps=[
+{name:'项目备案',time:'1-3工作日',desc:'企业在投资项目在线审批监管平台完成项目备案',detail:'提交项目基本信息、投资额、建设内容等'},
+{name:'确定环评等级',time:'1工作日',desc:'根据项目性质和环境影响程度确定环评等级（报告书/报告表/登记表）',detail:'报告书：重大影响 · 报告表：轻度影响 · 登记表：影响很小（网上备案即可）'},
+{name:'委托环评编制',time:'20-60工作日',desc:'委托有资质的环评机构编制环境影响报告书/表',detail:'需提供：项目可行性研究报告、工艺流程、原辅材料、排放情况等'},
+{name:'公众参与（报告书）',time:'10工作日',desc:'编制环境影响报告书的项目需进行公众参与',detail:'包括：信息公开→公众意见调查→公众参与说明'},
+{name:'报送审批',time:'1工作日',desc:'向审批部门提交环评报告及相关材料',detail:'通过政务服务网在线提交或线下窗口提交'},
+{name:'技术评估',time:'15-30工作日',desc:'审批部门组织专家进行技术评估（报告书需要）',detail:'报告表一般不需技术评估，直接审查'},
+{name:'审批决定',time:'15工作日',desc:'审批部门作出准予/不予批准的决定',detail:'准予批准的发放环评批复文件'},
+{name:'环保"三同时"建设',time:'与主体同步',desc:'环保设施与主体工程同时设计、同时施工、同时投产',detail:'建设过程中接受环保部门监督检查'}
+];
+steps.forEach(function(s,i){
+html+='<div class="step-card"><div class="step-header"><span class="step-name">'+(i+1)+'. '+s.name+'</span><span class="step-time">'+s.time+'</span></div><div class="step-desc">'+s.desc+'</div><div class="step-detail">'+s.detail+'</div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">审批时限</div><div class="timeline-info">';
+html+='<div class="timeline-row"><span class="key">报告书审批</span><span class="val">60工作日（含技术评估）</span></div>';
+html+='<div class="timeline-row"><span class="key">报告表审批</span><span class="val">30工作日</span></div>';
+html+='<div class="timeline-row"><span class="key">登记表备案</span><span class="val">即办（网上备案）</span></div>';
+html+='<div class="timeline-row"><span class="key">绿色通道（绿牌企业）</span><span class="val" style="color:var(--accent)">优先审批</span></div>';
+html+='</div></div>';
+return html;
+}
+
+function renderPermit(){
+var html='<div class="section"><div class="section-title">排污许可证申领流程</div>';
+var steps=[
+{name:'判断管理类别',time:'1工作日',desc:'根据行业类型和排放量判断重点管理/简化管理/登记管理',detail:'重点管理：排污量大 · 简化管理：排污量中等 · 登记管理：排污量小（网上登记即可）'},
+{name:'在全国平台注册',time:'1工作日',desc:'在全国排污许可证管理信息平台注册企业账号',detail:'网址：permit.mee.gov.cn'},
+{name:'填报申请材料',time:'5-15工作日',desc:'在线填报排污许可申请表及相关附件',detail:'包括：基本信息、主要生产设施、排放口、排放浓度/量、自行监测要求等'},
+{name:'提交申请',time:'1工作日',desc:'通过平台提交申请，由核发部门受理',detail:'重点/简化管理需审批核发，登记管理自动生成登记回执'},
+{name:'技术审查',time:'15-20工作日',desc:'核发部门组织技术审查（重点管理需要）',detail:'审查申请材料的完整性和规范性'},
+{name:'核发许可证',time:'15工作日',desc:'核发部门作出准予/不予核发决定',detail:'准予核发的生成电子排污许可证'},
+{name:'变更/延续',time:'20工作日',desc:'许可证有效期届满前30日申请延续；信息变化时申请变更',detail:'有效期：重点管理5年 · 简化管理5年 · 登记管理长期有效'}
+];
+steps.forEach(function(s,i){
+html+='<div class="step-card"><div class="step-header"><span class="step-name">'+(i+1)+'. '+s.name+'</span><span class="step-time">'+s.time+'</span></div><div class="step-desc">'+s.desc+'</div><div class="step-detail">'+s.detail+'</div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">许可管理要点</div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">自行监测</span><span class="item-tag required">必须</span></div><div class="item-desc">持证企业须按许可证要求开展自行监测，包括手工监测和自动监测，数据上传至全国平台。</div></div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">环境管理台账</span><span class="item-tag required">必须</span></div><div class="item-desc">记录生产设施运行、污染防治设施运行、监测数据等信息，保存期不少于3年。</div></div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">执行报告</span><span class="item-tag required">必须</span></div><div class="item-desc">按季度/年度提交排污许可证执行报告，包括排放数据、合规情况等。</div></div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">信息公开</span><span class="item-tag required">必须</span></div><div class="item-desc">重点排污单位须按规 定公开环境信息，接受公众监督。</div></div>';
+html+='</div>';
+return html;
+}
+
+function renderAcceptance(){
+var html='<div class="section"><div class="section-title">建设项目竣工环保验收流程</div>';
+var steps=[
+{name:'编制验收监测方案',time:'15-30工作日',desc:'委托有资质的监测机构编制验收监测方案',detail:'包括：监测因子、频次、点位布设等'},
+{name:'实施验收监测',time:'5-10工作日',desc:'按方案进行现场监测，出具验收监测报告',detail:'需确保生产负荷达到75%以上'},
+{name:'编制验收报告',time:'10工作日',desc:'建设单位编制竣工环境保护验收报告',detail:'包括：验收监测报告、环保设施建设情况、环境管理情况等'},
+{name:'成立验收工作组',time:'5工作日',desc:'建设单位、设计单位、施工单位、环评单位、监测单位等组成',detail:'可邀请专家参与'},
+{name:'现场核查验收',time:'1-2工作日',desc:'验收工作组现场检查环保设施建设和运行情况',detail:'核查：环保设施是否按"三同时"要求建设、运行是否达标'},
+{name:'公开验收报告',time:'5工作日',desc:'验收报告在平台公开，公示期不少于5个工作日',detail:'公示网站：全国建设项目竣工环境保护验收信息系统'},
+{name:'备案',time:'5工作日',desc:'公示期满后向审批部门备案',detail:'提交验收报告、验收意见等材料'}
+];
+steps.forEach(function(s,i){
+html+='<div class="step-card"><div class="step-header"><span class="step-name">'+(i+1)+'. '+s.name+'</span><span class="step-time">'+s.time+'</span></div><div class="step-desc">'+s.desc+'</div><div class="step-detail">'+s.detail+'</div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderMaterials(){
+var materials=[
+{name:'建设项目立项/备案文件',required:true,done:true},
+{name:'营业执照副本复印件',required:true,done:true},
+{name:'法定代表人身份证复印件',required:true,done:true},
+{name:'项目可行性研究报告',required:true,done:true},
+{name:'环境影响评价报告书/表',required:true,done:false},
+{name:'公众参与说明（报告书项目）',required:false,done:false},
+{name:'项目厂区平面布置图',required:true,done:true},
+{name:'工艺流程图及物料平衡图',required:true,done:false},
+{name:'原辅材料清单及用量',required:true,done:true},
+{name:'排放污染物种类及排放量计算',required:true,done:false},
+{name:'污染防治设施设计方案',required:true,done:false},
+{name:'监测点位布设图',required:true,done:false},
+{name:'用地证明/租赁合同',required:true,done:true},
+{name:'规划部门选址意见',required:false,done:false}
+];
+var html='<div class="section"><div class="section-title">环评审批材料清单（可勾选）</div>';
+var required=materials.filter(function(m){return m.required}).length;
+var done=materials.filter(function(m){return m.done}).length;
+html+='<div style="font-size:12px;color:var(--muted);margin-bottom:12px">已完成 '+done+'/'+materials.length+' 项（必备材料：'+required+'项）</div>';
+materials.forEach(function(m,i){
+html+='<div class="material-item'+(m.done?' done':'')+'"><div class="material-check'+(m.done?' done':'')+'" onclick="toggleMaterial('+i+')">'+(m.done?'✓':'')+'</div><div class="material-text">'+m.name+(m.required?' <span style="color:var(--danger);font-size:10px">*必备</span>':' <span style="color:var(--muted);font-size:10px">选备</span>')+'</div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">办理渠道</div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">政务服务网在线办理</span><span class="item-tag" style="background:rgba(16,185,129,.15);color:#6ee7b7">推荐</span></div><div class="item-desc">登录山东政务服务网，选择"建设项目环境影响评价审批"，在线提交申请材料。</div><div class="item-actions"><a class="item-btn primary" href="#" onclick="epbToast(\'跳转政务服务网\');return false">去办理</a></div></div>';
+html+='<div class="item-card"><div class="item-header"><span class="item-name">线下窗口办理</span><span class="item-tag">可选</span></div><div class="item-desc">携带纸质材料至济南市政务服务中心环保窗口办理。地址：济南市历下区经十路9999号。</div></div>';
+html+='</div>';
+return html;
+}
+
+function toggleMaterial(i){
+var items=document.querySelectorAll('.material-item');
+var check=items[i].querySelector('.material-check');
+var text=items[i].querySelector('.material-text');
+if(check.classList.contains('done')){
+check.classList.remove('done');check.innerHTML='';items[i].classList.remove('done')
+}else{
+check.classList.add('done');check.innerHTML='✓';items[i].classList.add('done')
+}
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>
