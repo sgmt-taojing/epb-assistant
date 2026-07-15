@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保管家服务 · 第三方服务商对接</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#1e3a5f 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.search-bar{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.search-input{width:100%;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:14px;outline:none}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.cat-bar{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.cat-chip{padding:6px 12px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.cat-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.provider-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px}
+.provider-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.provider-name{font-size:14px;font-weight:600;flex:1}
+.provider-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;margin-left:8px}
+.provider-badge.verified{background:rgba(16,185,129,.15);color:#6ee7b7}
+.provider-badge.new{background:rgba(59,130,246,.15);color:#93c5fd}
+.provider-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.provider-desc{font-size:12px;line-height:1.6}
+.provider-tags{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.provider-tag{padding:2px 6px;background:var(--card);border-radius:3px;font-size:10px;color:var(--muted)}
+.provider-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.provider-stat{text-align:center;background:var(--card);border-radius:6px;padding:6px}
+.provider-stat .v{font-size:14px;font-weight:600}
+.provider-stat .l{font-size:9px;color:var(--muted);margin-top:2px}
+.provider-actions{display:flex;gap:6px;margin-top:10px}
+.provider-btn{padding:6px 12px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;text-decoration:none;text-align:center}
+.provider-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.demand-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--warn)}
+.demand-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.demand-title{font-size:13px;font-weight:600}
+.demand-status{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.demand-status.urgent{background:rgba(239,68,68,.15);color:#fca5a5}
+.demand-status.normal{background:rgba(59,130,246,.15);color:#93c5fd}
+.demand-meta{font-size:11px;color:var(--muted)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>管家</span>服务</h1>
+<p>第三方服务商对接 · 一站式环保解决方案</p>
+</div>
+
+<div class="search-bar">
+<input class="search-input" placeholder="搜索服务商/服务类型/区域..." oninput="epbToast('搜索功能演示')">
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">28</div><div class="label">服务商</div></div>
+<div class="stat-card green"><div class="num">15</div><div class="label">已认证</div></div>
+<div class="stat-card amber"><div class="num">6</div><div class="label">待对接需求</div></div>
+<div class="stat-card red"><div class="num">2</div><div class="label">紧急需求</div></div>
+</div>
+
+<div class="cat-bar">
+<div class="cat-chip active" onclick="filterCat('all',this)">全部</div>
+<div class="cat-chip" onclick="filterCat('monitoring',this)">监测检测</div>
+<div class="cat-chip" onclick="filterCat('treatment',this)">污染治理</div>
+<div class="cat-chip" onclick="filterCat('consulting',this)">环评咨询</div>
+<div class="cat-chip" onclick="filterCat('operation',this)">运维服务</div>
+<div class="cat-chip" onclick="filterCat('training',this)">培训服务</div>
+</div>
+
+<div class="section">
+<div class="section-title">推荐服务商</div>
+<div id="provider-list"></div>
+</div>
+
+<div class="section">
+<div class="section-title">企业需求大厅</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-title">华源化工废水处理设施运维</span><span class="demand-status urgent">紧急</span></div>
+<div class="demand-meta">济南历下区 · 预算15-20万/年 · MBR膜维护+日常运维 · 截止7月20日</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-title">建材集团CEMS安装与运维</span><span class="demand-status normal">正常</span></div>
+<div class="demand-meta">临沂河东区 · 预算25万 · CEMS安装+年度运维 · 截止8月15日</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-title">运达金属危废规范化整改</span><span class="demand-status urgent">紧急</span></div>
+<div class="demand-meta">济宁任城区 · 预算10-15万 · 危废贮存间改造+台账系统 · 截止7月18日</div>
+</div>
+<div class="demand-card">
+<div class="demand-header"><span class="demand-title">渤海印染自行监测方案编制</span><span class="demand-status normal">正常</span></div>
+<div class="demand-meta">烟台福山区 · 预算3-5万 · 2026年度自行监测方案 · 截止8月30日</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item active" href="/eco-manager.html"><span class="icon">🔧</span>管家</a>
+<a class="nav-item" href="/m-report.html"><span class="icon">📢</span>举报</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+
+<script>
+var PROVIDERS=[
+{name:'清源环保科技有限公司',cat:'treatment',verified:true,meta:'成立12年 · 资质甲级 · 济南',desc:'专业水污染治理服务商，提供工业废水处理设施设计、建设、运维一站式服务。MBR膜技术、催化氧化、混凝沉淀等工艺经验丰富。',tags:['废水治理','MBR膜','设施运维','甲级资质'],stats:{projects:186,rate:4.8,response:'2h'}},
+{name:'蓝天卫士环境监测公司',cat:'monitoring',verified:true,meta:'成立8年 · CMA认证 · 青岛',desc:'专业环境监测服务商，提供水质、大气、土壤、噪声等多要素监测服务。CMA资质，在线监测设备安装与运维。',tags:['环境监测','CMA','CEMS安装','在线监测'],stats:{projects:320,rate:4.7,response:'4h'}},
+{name:'安环科技咨询有限公司',cat:'consulting',verified:true,meta:'成立6年 · 环评乙级 · 淄博',desc:'环保综合咨询服务，环评报告编制、排污许可证申报、环保验收、应急预案编制、危废规范化管理咨询。',tags:['环评','排污许可','应急预案','危废管理'],stats:{projects:245,rate:4.6,response:'6h'}},
+{name:'干源环保工程有限公司',cat:'treatment',verified:true,meta:'成立10年 · 资质乙级 · 潍坊',desc:'污泥干化减量、固废处理工程设计与施工。热泵低温干化技术，已为30+污水处理厂提供污泥减量方案。',tags:['污泥干化','固废处理','减量70%'],stats:{projects:32,rate:4.9,response:'8h'}},
+{name:'静源环保设备工程公司',cat:'treatment',verified:false,meta:'成立5年 · 资质丙级 · 烟台',desc:'工业噪声治理专家，隔声罩、消声器、减振基座设计制作安装。已服务50+企业噪声扰民整改。',tags:['噪声治理','隔声','消声','减振'],stats:{projects:52,rate:4.5,response:'12h'}},
+{name:'管网卫士智能科技公司',cat:'operation',verified:true,meta:'成立4年 · 高新技术企业 · 临沂',desc:'雨污分流智能管控系统，AI视觉识别+智能截流。已为15个工业园区提供管网改造方案。',tags:['雨污分流','智能截流','AI识别'],stats:{projects:15,rate:4.8,response:'4h'}},
+{name:'环信通软件科技有限公司',cat:'operation',verified:true,meta:'成立3年 · SaaS服务商 · 全省',desc:'环保信息化解决方案，排污许可自行监测平台、用电监控系统、环保台账管理系统。',tags:['SaaS','排污许可','用电监控','台账'],stats:{projects:200,rate:4.4,response:'1h'}},
+{name:'绿创除尘设备有限公司',cat:'treatment',verified:true,meta:'成立15年 · 资质甲级 · 唐山',desc:'超低排放布袋除尘器专业制造商，PTFE覆膜滤袋，排放<5mg/m³。水泥、钢铁、锅炉行业300+案例。',tags:['布袋除尘','超低排放','PTFE覆膜'],stats:{projects:320,rate:4.9,response:'24h'}},
+{name:'中环测控仪器有限公司',cat:'monitoring',verified:true,meta:'成立18年 · CPA认证 · 济南',desc:'环境监测仪器专业制造商，在线水质监测仪、微型空气站、手持XRF土壤检测仪。CCEP+CPA双认证。',tags:['监测仪器','微型站','XRF','在线监测'],stats:{projects:500,rate:4.8,response:'2h'}},
+{name:'环保培训学院',cat:'training',verified:true,meta:'成立7年 · 培训资质 · 全省',desc:'环保执法人员培训、企业环保负责人培训、环保操作工培训。年培训量2000+人次，颁发行业认证证书。',tags:['培训','认证','企业培训','执法培训'],stats:{projects:80,rate:4.6,response:'24h'}}
+];
+
+var currentCat='all';
+function filterCat(cat,el){
+currentCat=cat;
+document.querySelectorAll('.cat-chip').forEach(function(c){c.classList.remove('active')});
+el.classList.add('active');
+renderList();
+}
+
+function renderList(){
+var list=PROVIDERS;
+if(currentCat!=='all'){list=PROVIDERS.filter(function(p){return p.cat===currentCat})}
+var html='';
+list.forEach(function(p){
+var catName={monitoring:'监测检测',treatment:'污染治理',consulting:'环评咨询',operation:'运维服务',training:'培训服务'}[p.cat];
+html+='<div class="provider-card">'+
+'<div class="provider-header"><span class="provider-name">'+p.name+'</span><span class="provider-badge '+(p.verified?'verified':'new')+'">'+(p.verified?'已认证':'待认证')+'</span></div>'+
+'<div class="provider-meta">'+p.meta+' · '+catName+'</div>'+
+'<div class="provider-desc">'+p.desc+'</div>'+
+'<div class="provider-tags">'+p.tags.map(function(t){return '<span class="provider-tag">'+t+'</span>'}).join('')+'</div>'+
+'<div class="provider-stats"><div class="provider-stat"><div class="v" style="color:var(--primary2)">'+p.stats.projects+'</div><div class="l">项目数</div></div><div class="provider-stat"><div class="v" style="color:var(--accent)">'+p.stats.rate+'</div><div class="l">评分</div></div><div class="provider-stat"><div class="v" style="color:var(--warn)">'+p.stats.response+'</div><div class="l">响应时间</div></div></div>'+
+'<div class="provider-actions"><a class="provider-btn primary" href="#" onclick="epbToast(\'已发送对接请求给'+p.name+'\');return false">对接服务商</a><a class="provider-btn" href="#" onclick="epbToast(\'查看'+p.name+'详情\');return false">查看详情</a></div>'+
+'</div>';
+});
+document.getElementById('provider-list').innerHTML=html||'<div style="text-align:center;padding:20px;color:var(--muted)">暂无该类型服务商</div>';
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderList();
+</script>
+</body>
+</html>

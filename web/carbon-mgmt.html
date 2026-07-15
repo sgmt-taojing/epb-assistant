@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>碳排放管理 · 双碳目标</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 排放趋势图 */
+.chart-row{display:flex;align-items:flex-end;gap:8px;height:140px;padding:0 4px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.chart-bar{flex:1;border-radius:2px 2px 0 0;min-height:4px;position:relative}
+.chart-bar.co2{background:linear-gradient(to top,#6b7280,#9ca3af)}
+.chart-bar.target{background:linear-gradient(to top,var(--accent),#34d399);opacity:.5}
+.chart-bar-val{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:600;white-space:nowrap}
+.chart-bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+/* 企业排放排行 */
+.ent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ent-row:last-child{border-bottom:none}
+.ent-name{flex:1;font-weight:500}
+.ent-data{text-align:right}
+.ent-data .val{font-weight:700;font-size:14px;color:var(--warn)}
+.ent-data .unit{font-size:10px;color:var(--muted)}
+.ent-bar{height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.ent-bar-fill{height:100%;border-radius:2px;background:var(--warn)}
+/* 碳交易 */
+.trade-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px}
+.trade-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.trade-name{font-size:13px;font-weight:600}
+.trade-price{font-size:16px;font-weight:700;color:var(--accent)}
+.trade-meta{font-size:11px;color:var(--muted)}
+/* 减碳建议 */
+.advice-box{background:var(--card2);border-radius:10px;padding:14px;border-left:3px solid var(--accent);margin-bottom:8px}
+.advice-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:6px}
+.advice-item{font-size:12px;padding:3px 0;padding-left:14px;position:relative;color:var(--text)}
+.advice-item::before{content:'→';position:absolute;left:0;color:var(--accent)}
+/* 进度条 */
+.progress-item{margin-bottom:10px}
+.progress-header{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.progress-bar{height:6px;background:var(--card2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>碳排放<span>管理</span></h1>
+<p>双碳目标 · 排放核算 · 碳交易 · 减碳路径</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card amber"><div class="num">12.5万</div><div class="label">辖区年排放(tCO₂)</div></div>
+<div class="stat-card green"><div class="num">-8.2%</div><div class="label">同比下降</div></div>
+<div class="stat-card blue"><div class="num">8家</div><div class="label">纳入碳交易企业</div></div>
+<div class="stat-card green"><div class="num">68.5</div><div class="label">碳价(元/t)</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">年度碳排放趋势</div>
+<div class="chart-row">
+<div class="chart-bar co2" style="height:85%"><div class="chart-bar-val">15.2</div><div class="chart-bar-label">2021</div></div>
+<div class="chart-bar co2" style="height:78%"><div class="chart-bar-val">14.1</div><div class="chart-bar-label">2022</div></div>
+<div class="chart-bar co2" style="height:70%"><div class="chart-bar-val">13.0</div><div class="chart-bar-label">2023</div></div>
+<div class="chart-bar co2" style="height:63%"><div class="chart-bar-val">12.8</div><div class="chart-bar-label">2024</div></div>
+<div class="chart-bar co2" style="height:58%"><div class="chart-bar-val">12.5</div><div class="chart-bar-label">2025</div></div>
+<div class="chart-bar co2" style="height:52%"><div class="chart-bar-val">11.5</div><div class="chart-bar-label">2026</div></div>
+<div class="chart-bar target" style="height:35%"><div class="chart-bar-val" style="color:var(--accent)">8.0</div><div class="chart-bar-label" style="color:var(--accent)">2030目标</div></div>
+</div>
+<div style="margin-top:20px;font-size:10px;color:var(--muted)">单位：万吨CO₂ · 绿色为目标线 · 年均需下降5.5%达成2030碳达峰目标</div>
+</div>
+
+<div class="section">
+<div class="section-title">企业碳排放排行（TOP8）</div>
+<div class="ent-row"><span class="ent-name">华源化工</span><span class="ent-data"><span class="val">3.2万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:100%"></div></div>
+<div class="ent-row"><span class="ent-name">建材集团</span><span class="ent-data"><span class="val">2.8万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:88%"></div></div>
+<div class="ent-row"><span class="ent-name">泰山玻璃</span><span class="ent-data"><span class="val">2.1万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:66%"></div></div>
+<div class="ent-row"><span class="ent-name">新华制药</span><span class="ent-data"><span class="val">1.5万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:47%"></div></div>
+<div class="ent-row"><span class="ent-name">渤海印染</span><span class="ent-data"><span class="val">1.2万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:38%"></div></div>
+<div class="ent-row"><span class="ent-name">绿洲纸业</span><span class="ent-data"><span class="val">0.9万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:28%"></div></div>
+<div class="ent-row"><span class="ent-name">海润电镀</span><span class="ent-data"><span class="val">0.5万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:16%"></div></div>
+<div class="ent-row"><span class="ent-name">运达金属</span><span class="ent-data"><span class="val">0.3万</span><span class="unit"> tCO₂</span></span></div>
+<div class="ent-bar"><div class="ent-bar-fill" style="width:9%"></div></div>
+</div>
+
+<div class="section">
+<div class="section-title">碳交易行情</div>
+<div class="trade-card">
+<div class="trade-header"><span class="trade-name">全国碳排放配额（CEA）</span><span class="trade-price">68.50 元/t</span></div>
+<div class="trade-meta">涨跌：+1.20 (+1.78%) · 成交量：52.3万吨 · 更新：2026-07-15</div>
+</div>
+<div class="trade-card">
+<div class="trade-header"><span class="trade-name">国家核证自愿减排量（CCER）</span><span class="trade-price" style="color:var(--primary2)">42.30 元/t</span></div>
+<div class="trade-meta">涨跌：-0.50 (-1.17%) · 成交量：18.6万吨 · 更新：2026-07-15</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">企业碳配额使用情况</div>
+<div class="progress-item"><div class="progress-header"><span>华源化工</span><span style="color:var(--danger)">已用92% (超额预警)</span></div><div class="progress-bar"><div class="progress-fill" style="width:92%;background:var(--danger)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>建材集团</span><span style="color:var(--warn)">已用78%</span></div><div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--warn)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>泰山玻璃</span><span style="color:var(--accent)">已用55%</span></div><div class="progress-bar"><div class="progress-fill" style="width:55%;background:var(--accent)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>新华制药</span><span style="color:var(--accent)">已用42%</span></div><div class="progress-bar"><div class="progress-fill" style="width:42%;background:var(--accent)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>渤海印染</span><span style="color:var(--accent)">已用38%</span></div><div class="progress-bar"><div class="progress-fill" style="width:38%;background:var(--accent)"></div></div></div>
+</div>
+
+<div class="section">
+<div class="section-title">减碳路径建议</div>
+<div class="advice-box">
+<div class="advice-title">华源化工（排放大户 · 配额超额预警）</div>
+<div class="advice-item">MBR膜更换为低能耗型号，预计年减碳800t</div>
+<div class="advice-item">安装太阳能屋顶光伏（2000㎡），年减碳1200t</div>
+<div class="advice-item">余热回收系统改造，年减碳500t</div>
+<div class="advice-item">建议购买CCER抵消超额排放量</div>
+</div>
+<div class="advice-box" style="border-left-color:var(--warn)">
+<div class="advice-title" style="color:var(--warn)">建材集团（排放较高 · 配额偏紧）</div>
+<div class="advice-item">窑炉煤改气，预计年减碳2000t</div>
+<div class="advice-item">电机变频改造，年减碳300t</div>
+<div class="advice-item">原料替代（使用低碳原料）</div>
+</div>
+<div class="advice-box" style="border-left-color:var(--primary)">
+<div class="advice-title" style="color:var(--primary2)">辖区整体减碳策略</div>
+<div class="advice-item">推进清洁能源替代，提高天然气/电力消费占比</div>
+<div class="advice-item">推动重点行业节能改造，年目标减碳5000t</div>
+<div class="advice-item">建设碳汇林，增加林业碳汇</div>
+<div class="advice-item">推广CCER项目开发（沼气、光伏等）</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/data-cockpit.html"><span class="icon">📊</span>驾驶舱</a>
+<a class="nav-item active" href="/carbon-mgmt.html"><span class="icon">🌱</span>碳管理</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+</body>
+</html>
