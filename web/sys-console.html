@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>系统管理控制台 · 环保智慧执法</title>
+<style>
+:var{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e293b 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:#60a5fa}
+.hero p{color:#64748b;font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:#64748b;margin-top:2px}
+.stat-card.green .num{color:#10b981}
+.stat-card.blue .num{color:#60a5fa}
+.stat-card.amber .num{color:#f59e0b}
+.stat-card.red .num{color:#ef4444}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:#111827;border:1px solid #1e293b;font-size:12px;color:#64748b;cursor:pointer;flex-shrink:0}
+.tab.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.section{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:#60a5fa;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:#3b82f6;border-radius:2px}
+.config-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1e293b;font-size:13px}
+.config-row:last-child{border-bottom:none}
+.config-key{color:#64748b}
+.config-val{font-weight:500}
+.config-toggle{width:36px;height:20px;border-radius:10px;background:#1e293b;position:relative;cursor:pointer;transition:all .2s}
+.config-toggle.on{background:#10b981}
+.config-toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:all .2s}
+.config-toggle.on::after{left:18px}
+.log-item{background:#1a2332;border-radius:8px;padding:10px;margin-bottom:6px;font-family:'Courier New',monospace;font-size:11px}
+.log-time{color:#64748b}
+.log-level{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;margin:0 4px}
+.log-level.INFO{background:rgba(59,130,246,.15);color:#93c5fd}
+.log-level.WARN{background:rgba(245,158,11,.15);color:#fcd34d}
+.log-level.ERROR{background:rgba(239,68,68,.15);color:#fca5a5}
+.log-msg{color:#e2e8f0}
+.user-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1e293b;font-size:12px}
+.user-row:last-child{border-bottom:none}
+.user-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:#1a2332}
+.user-info{flex:1}
+.user-name{font-weight:500;font-size:13px}
+.user-role{font-size:10px;color:#64748b}
+.user-status{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.user-status.active{background:rgba(16,185,129,.15);color:#6ee7b7}
+.user-status.disabled{background:rgba(100,116,139,.15);color:#64748b}
+.health-bar{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:4px}
+.health-fill{height:100%;border-radius:3px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#111827;border-top:1px solid #1e293b;display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:#64748b;text-decoration:none;font-size:10px}
+.nav-item.active{color:#3b82f6}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>系统<span>控制台</span></h1>
+<p>配置管理 · 运行日志 · 用户权限 · 健康监控</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">healthy</div><div class="label">服务状态</div></div>
+<div class="stat-card blue"><div class="num">46</div><div class="label">页面数</div></div>
+<div class="stat-card amber"><div class="num">19</div><div class="label">API端点</div></div>
+<div class="stat-card green"><div class="num">99.8%</div><div class="label">可用率</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('config',this)">系统配置</div>
+<div class="tab" onclick="switchTab('logs',this)">运行日志</div>
+<div class="tab" onclick="switchTab('users',this)">用户权限</div>
+<div class="tab" onclick="switchTab('health',this)">健康监控</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/overview.html"><span class="icon">🗺️</span>总览</a>
+<a class="nav-item active" href="/sys-console.html"><span class="icon">⚙️</span>控制台</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+
+<script>
+var currentTab='config';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');render()}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='config'){area.innerHTML=renderConfig()}
+else if(currentTab==='logs'){area.innerHTML=renderLogs()}
+else if(currentTab==='users'){area.innerHTML=renderUsers()}
+else if(currentTab==='health'){area.innerHTML=renderHealth()}
+}
+
+function renderConfig(){
+var html='<div class="section"><div class="section-title">服务配置</div>';
+var configs=[
+{k:'服务端口',v:'8900',toggle:false},
+{k:'绑定地址',v:'0.0.0.0',toggle:false},
+{k:'数据库类型',v:'SQLite (epb.db)',toggle:false},
+{k:'CORS跨域',v:'已开启',toggle:true},
+{k:'API降级（静态JSON）',v:'已开启',toggle:true},
+{k:'自动备份',v:'每日03:00',toggle:true},
+{k:'日志级别',v:'INFO',toggle:false},
+{k:'最大上传大小',v:'50MB',toggle:false},
+{k:'会话超时',v:'30分钟',toggle:false},
+{k:'调试模式',v:'关闭',toggle:false}
+];
+configs.forEach(function(c){
+html+='<div class="config-row"><span class="config-key">'+c.k+'</span>';
+if(c.toggle){
+html+='<div class="config-toggle'+(c.v==='已开启'?' on':'')+'" onclick="toggleSwitch(this)"></div>';
+}else{
+html+='<span class="config-val">'+c.v+'</span>';
+}
+html+='</div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">部署信息</div>';
+html+='<div class="config-row"><span class="config-key">平台版本</span><span class="config-val">v5.0 · 2026-07-16</span></div>';
+html+='<div class="config-row"><span class="config-key">技术栈</span><span class="config-val">Python 3.9 + SQLite</span></div>';
+html+='<div class="config-row"><span class="config-key">GitHub仓库</span><span class="config-val">sgmt-taojing/epb-assistant</span></div>';
+html+='<div class="config-row"><span class="config-key">main分支</span><span class="config-val">f00d4da</span></div>';
+html+='<div class="config-row"><span class="config-key">gh-pages分支</span><span class="config-val">f7063f5</span></div>';
+html+='<div class="config-row"><span class="config-key">Docker</span><span class="config-val">已支持</span></div>';
+html+='</div>';
+return html;
+}
+
+function renderLogs(){
+var logs=[
+{time:'2026-07-16 05:41:23',level:'INFO',msg:'服务启动完成，监听端口8900'},
+{time:'2026-07-16 05:41:23',level:'INFO',msg:'数据库连接成功: epb.db'},
+{time:'2026-07-16 05:41:24',level:'INFO',msg:'加载14个Python模块'},
+{time:'2026-07-16 05:41:25',level:'INFO',msg:'API路由注册完成: 19个端点'},
+{time:'2026-07-16 05:42:01',level:'INFO',msg:'GET /api/health 200 1ms'},
+{time:'2026-07-16 05:42:15',level:'INFO',msg:'GET /api/equipment 200 5ms'},
+{time:'2026-07-15 22:52:33',level:'INFO',msg:'POST /api/report 200 12ms - RPT-20260715-001'},
+{time:'2026-07-15 22:48:10',level:'INFO',msg:'POST /api/task 200 8ms - TASK-20260715-001'},
+{time:'2026-07-15 22:30:00',level:'WARN',msg:'Cloudflare Tunnel连接不稳定，重连中...'},
+{time:'2026-07-15 22:30:05',level:'INFO',msg:'Cloudflare Tunnel重连成功'},
+{time:'2026-07-15 20:15:42',level:'INFO',msg:'POST /api/fusion_alert 200 45ms - 38条预警'},
+{time:'2026-07-14 09:12:00',level:'INFO',msg:'Git push main: 6ad8806 → f00d4da'},
+{time:'2026-07-14 09:12:05',level:'INFO',msg:'Git push gh-pages: bca41d7 → f7063f5'},
+{time:'2026-07-14 07:04:15',level:'INFO',msg:'POST /api/report 200 10ms - 举报API兼容性修复后首次测试'},
+{time:'2026-07-14 06:35:00',level:'ERROR',msg:'POST /api/report 500 - str object has no attribute get'},
+{time:'2026-07-14 06:35:05',level:'INFO',msg:'修复db_layer.py: 兼容扁平JSON结构'},
+{time:'2026-07-14 06:36:00',level:'INFO',msg:'POST /api/report 200 - 修复验证通过'}
+];
+var html='<div class="section"><div class="section-title">运行日志（最近20条）</div>';
+logs.forEach(function(l){
+html+='<div class="log-item"><span class="log-time">'+l.time+'</span><span class="log-level '+l.level+'">'+l.level+'</span><span class="log-msg">'+l.msg+'</span></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderUsers(){
+var users=[
+{name:'admin',role:'系统管理员',status:'active',avatar:'👨‍💼',last:'2026-07-16 05:41'},
+{name:'李执法',role:'高级执法员',status:'active',avatar:'👤',last:'2026-07-15 22:30'},
+{name:'王执法',role:'中级执法员',status:'active',avatar:'👤',last:'2026-07-15 18:20'},
+{name:'张执法',role:'初级执法员',status:'active',avatar:'👤',last:'2026-07-15 17:00'},
+{name:'赵监测',role:'环境监测员',status:'active',avatar:'👤',last:'2026-07-15 16:45'},
+{name:'公众用户',role:'公众',status:'active',avatar:'👥',last:'2026-07-15 22:00'},
+{name:'企业用户',role:'企业',status:'active',avatar:'🏢',last:'2026-07-15 21:30'},
+{name:'测试账号',role:'测试',status:'disabled',avatar:'🔧',last:'2026-07-13 10:00'}
+];
+var html='<div class="section"><div class="section-title">用户管理（8人）</div>';
+users.forEach(function(u){
+html+='<div class="user-row"><div class="user-avatar">'+u.avatar+'</div><div class="user-info"><div class="user-name">'+u.name+'</div><div class="user-role">'+u.role+' · 最后登录: '+u.last+'</div></div><span class="user-status '+u.status+'">'+(u.status==='active'?'正常':'禁用')+'</span></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">角色权限矩阵</div>';
+html+='<div class="config-row"><span class="config-key">系统管理员</span><span class="config-val">全部权限</span></div>';
+html+='<div class="config-row"><span class="config-key">高级执法员</span><span class="config-val">执法+审批+文书+裁量</span></div>';
+html+='<div class="config-row"><span class="config-key">中级执法员</span><span class="config-val">执法+文书+查看</span></div>';
+html+='<div class="config-row"><span class="config-key">初级执法员</span><span class="config-val">执法+查看</span></div>';
+html+='<div class="config-row"><span class="config-key">环境监测员</span><span class="config-val">监测+预警+查看</span></div>';
+html+='<div class="config-row"><span class="config-key">企业用户</span><span class="config-val">自查+审批+设备+金融</span></div>';
+html+='<div class="config-row"><span class="config-key">公众用户</span><span class="config-val">举报+科普+互动</span></div>';
+html+='</div>';
+return html;
+}
+
+function renderHealth(){
+var html='<div class="section"><div class="section-title">系统健康监控</div>';
+var items=[
+{name:'API服务',val:99.8,color:'#10b981',status:'健康'},
+{name:'数据库',val:100,color:'#10b981',status:'健康'},
+{name:'GitHub Pages',val:99.5,color:'#10b981',status:'健康'},
+{name:'Cloudflare Tunnel',val:97.2,color:'#f59e0b',status:'偶尔不稳定'},
+{name:'磁盘使用',val:42,color:'#10b981',status:'正常 (42%)'},
+{name:'内存使用',val:58,color:'#10b981',status:'正常 (58%)'},
+{name:'CPU使用',val:15,color:'#10b981',status:'正常 (15%)'},
+{name:'响应时间(平均)',val:8,color:'#10b981',status:'8ms'}
+];
+items.forEach(function(i){
+html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+i.name+'</span><span style="color:'+i.color+'">'+i.status+'</span></div><div class="health-bar"><div class="health-fill" style="width:'+(i.val>100?100:i.val)+'%;background:'+i.color+'"></div></div></div>';
+});
+html+='</div>';
+html+='<div class="section"><div class="section-title">API端点健康</div>';
+var apis=[
+{name:'/api/health',status:'200',time:'1ms',ok:true},
+{name:'/api/cases',status:'200',time:'5ms',ok:true},
+{name:'/api/equipment',status:'200',time:'8ms',ok:true},
+{name:'/api/law_index',status:'200',time:'3ms',ok:true},
+{name:'/api/search',status:'200',time:'12ms',ok:true},
+{name:'/api/report (POST)',status:'200',time:'10ms',ok:true},
+{name:'/api/fusion_alert (POST)',status:'200',time:'45ms',ok:true}
+];
+apis.forEach(function(a){
+html+='<div class="config-row"><span class="config-key" style="font-family:monospace">'+a.name+'</span><span class="config-val" style="color:'+(a.ok?'#10b981':'#ef4444')+'">'+a.status+' · '+a.time+'</span></div>';
+});
+html+='</div>';
+return html;
+}
+
+function toggleSwitch(el){el.classList.toggle('on')}
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>

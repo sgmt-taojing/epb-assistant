@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保数据开放 · 开放API门户</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.api-card{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--accent)}
+.api-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.api-name{font-size:13px;font-weight:600}
+.api-method{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.api-method.GET{background:rgba(16,185,129,.15);color:#6ee7b7}
+.api-method.POST{background:rgba(59,130,246,.15);color:#93c5fd}
+.api-method.PUT{background:rgba(245,158,11,.15);color:#fcd34d}
+.api-path{font-family:'Courier New',monospace;font-size:12px;color:var(--primary2);background:var(--card);padding:4px 8px;border-radius:4px;margin-bottom:6px}
+.api-desc{font-size:12px;color:var(--text)}
+.api-params{font-size:11px;color:var(--muted);margin-top:4px}
+.api-example{background:var(--card);border-radius:6px;padding:8px;margin-top:6px;font-family:'Courier New',monospace;font-size:10px;color:var(--accent);overflow-x:auto}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保数据 <span>开放</span>门户</h1>
+<p>开放API · 数据下载 · 第三方接入 · 数据共享</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">19</div><div class="label">API端点</div></div>
+<div class="stat-card green"><div class="num">13</div><div class="label">数据集</div></div>
+<div class="stat-card amber"><div class="num">5</div><div class="label">接入方</div></div>
+<div class="stat-card green"><div class="num">MIT</div><div class="label">开源协议</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">开放API列表</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">环境案例库</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/cases?limit=200&type=水污染</div>
+<div class="api-desc">获取环保执法案例库，支持按类型、关键词筛选</div>
+<div class="api-params">参数：limit(数量) · type(类型) · q(关键词)</div>
+<div class="api-example">curl https://sgmt-taojing.github.io/epb-assistant/api-data/cases.json</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">法规索引</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/law_index</div>
+<div class="api-desc">获取28部环保法规索引，含名称、颁布日期、适用范围</div>
+<div class="api-example">curl https://sgmt-taojing.github.io/epb-assistant/api-data/law_index.json</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">设备产品库</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/equipment?category=水污染治理</div>
+<div class="api-desc">获取14款环保设备产品信息，含案例和降本分析</div>
+<div class="api-params">参数：category(分类) · q(关键词)</div>
+<div class="api-example">curl https://sgmt-taojing.github.io/epb-assistant/api-data/equipment.json</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">知识图谱</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/knowledge_graph</div>
+<div class="api-desc">获取环保知识图谱节点和关系数据</div>
+<div class="api-example">curl https://sgmt-taojing.github.io/epb-assistant/api-data/knowledge_graph.json</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">企业名录</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/enterprises</div>
+<div class="api-desc">获取监管企业名录</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">监测设备</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/devices</div>
+<div class="api-desc">获取环境监测设备台账</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">群众举报</span><span class="api-method POST">POST</span></div>
+<div class="api-path">/api/report</div>
+<div class="api-desc">提交环境违法举报信息</div>
+<div class="api-params">参数：type · location · description · phone</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">全文搜索</span><span class="api-method GET">GET</span></div>
+<div class="api-path">/api/search?q=水污染</div>
+<div class="api-desc">跨库全文搜索（案例+法规+知识）</div>
+</div>
+
+<div class="api-card">
+<div class="api-header"><span class="api-name">多源融合预警</span><span class="api-method POST">POST</span></div>
+<div class="api-path">/api/fusion_alert</div>
+<div class="api-desc">获取多源数据融合预警结果</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">数据集下载</div>
+<div class="api-card" style="border-left-color:var(--primary)">
+<div class="api-header"><span class="api-name">案例库（JSON）</span><span class="api-method GET">101条</span></div>
+<div class="api-desc">101条环保执法案例，含违法类型、处罚结果、适用法条</div>
+<div class="api-example">https://sgmt-taojing.github.io/epb-assistant/api-data/cases.json</div>
+</div>
+<div class="api-card" style="border-left-color:var(--primary)">
+<div class="api-header"><span class="api-name">法规库（JSON）</span><span class="api-method GET">28部</span></div>
+<div class="api-desc">28部环保法律法规索引</div>
+<div class="api-example">https://sgmt-taojing.github.io/epb-assistant/api-data/law_index.json</div>
+</div>
+<div class="api-card" style="border-left-color:var(--primary)">
+<div class="api-header"><span class="api-name">设备产品库（JSON）</span><span class="api-method GET">14款</span></div>
+<div class="api-desc">14款环保设备产品+降本增效案例</div>
+<div class="api-example">https://sgmt-taojing.github.io/epb-assistant/api-data/equipment.json</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">接入指南</div>
+<div class="api-card" style="border-left-color:var(--warn)">
+<div class="api-header"><span class="api-name">快速接入</span></div>
+<div class="api-desc" style="line-height:1.8">
+1. 所有API均为RESTful风格，支持JSON格式<br>
+2. GitHub Pages静态数据可直接访问（无需认证）<br>
+3. 本地/Tunnel服务支持完整读写API<br>
+4. CORS已开启，支持跨域调用<br>
+5. 无需API Key，开源协议MIT
+</div>
+</div>
+<div class="api-card" style="border-left-color:var(--accent)">
+<div class="api-header"><span class="api-name">JavaScript示例</span></div>
+<div class="api-example">fetch('https://sgmt-taojing.github.io/epb-assistant/api-data/cases.json')
+  .then(r => r.json())
+  .then(data => console.log(data.cases.length))</div>
+</div>
+<div class="api-card" style="border-left-color:var(--accent)">
+<div class="api-header"><span class="api-name">Python示例</span></div>
+<div class="api-example">import requests
+r = requests.get('https://sgmt-taojing.github.io/epb-assistant/api-data/equipment.json')
+products = r.json()['products']
+for p in products:
+    print(p['name'], p['case']['saving'])</div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/overview.html"><span class="icon">🗺️</span>总览</a>
+<a class="nav-item active" href="/open-data.html"><span class="icon">🔓</span>数据开放</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+</body>
+</html>
