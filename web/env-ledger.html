@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>企业环保台账 · 电子化管理</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#064e3b 0%,#1e3a5f 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.ledger-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.ledger-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ledger-name{font-size:13px;font-weight:600}
+.ledger-status{padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.ledger-status.ok{background:rgba(16,185,129,.15);color:#6ee7b7}
+.ledger-status.warn{background:rgba(245,158,11,.15);color:#fcd34d}
+.ledger-status.expire{background:rgba(239,68,68,.15);color:#fca5a5}
+.ledger-meta{font-size:11px;color:var(--muted)}
+.ledger-detail{font-size:12px;margin-top:6px;line-height:1.6}
+/* 运行记录表 */
+.record-table{width:100%;border-collapse:collapse;font-size:11px}
+.record-table th{background:var(--card2);padding:8px;text-align:left;font-weight:600;color:var(--primary2);border-bottom:1px solid var(--border)}
+.record-table td{padding:8px;border-bottom:1px solid var(--border)}
+.record-table tr:hover{background:var(--card2)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.status-dot.green{background:var(--accent)}
+.status-dot.amber{background:var(--warn)}
+.status-dot.red{background:var(--danger)}
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.form-input,.form-select{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>企业环保<span>台账</span></h1>
+<p>治污设施运行 · 危废管理 · 监测数据 · 许可证 · 电子化一站式管理</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">8</div><div class="label">台账类型</div></div>
+<div class="stat-card blue"><div class="num">95%</div><div class="label">完整率</div></div>
+<div class="stat-card amber"><div class="num">2</div><div class="label">即将到期</div></div>
+<div class="stat-card red"><div class="num">1</div><div class="label">缺失项</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('overview',this)">总览</div>
+<div class="tab" onclick="switchTab('facility',this)">治污设施</div>
+<div class="tab" onclick="switchTab('waste',this)">危废管理</div>
+<div class="tab" onclick="switchTab('monitoring',this)">监测数据</div>
+<div class="tab" onclick="switchTab('permit',this)">许可证</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/ehs.html"><span class="icon">🏭</span>EHS</a>
+<a class="nav-item active" href="/env-ledger.html"><span class="icon">📚</span>台账</a>
+<a class="nav-item" href="/approval-service.html"><span class="icon">📋</span>审批</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+
+<script>
+var currentTab='overview';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');render()}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='overview'){area.innerHTML=renderOverview()}
+else if(currentTab==='facility'){area.innerHTML=renderFacility()}
+else if(currentTab==='waste'){area.innerHTML=renderWaste()}
+else if(currentTab==='monitoring'){area.innerHTML=renderMonitoring()}
+else if(currentTab==='permit'){area.innerHTML=renderPermit()}
+}
+
+function renderOverview(){
+var ledgers=[
+{name:'排污许可证',status:'ok',statusText:'有效',meta:'编号：PW-2023-001 · 有效期至2028-03-01',detail:'重点管理 · 许可排放COD 3000kg/年、氨氮300kg/年'},
+{name:'环境影响评价报告',status:'ok',statusText:'已批复',meta:'批复文号：环审[2020]15号 · 2020年批复',detail:'项目年产合成氨5万吨 · 环评要求MBR+消毒工艺'},
+{name:'突发环境事件应急预案',status:'warn',statusText:'即将到期',meta:'备案号：HA-2023-008 · 有效期至2026-09-01',detail:'剩余47天 · 需尽快修订并重新备案'},
+{name:'危险废物管理计划',status:'ok',statusText:'已备案',meta:'备案时间：2026-01-15 · 年度更新',detail:'危废种类：废矿物油(HW08) 5t/年、废酸(HW34) 12t/年'},
+{name:'自行监测方案',status:'ok',statusText:'已编制',meta:'年度方案 · 2026年1月编制',detail:'手动监测：季度1次 · 自动监测：COD/氨氮/pH 24h在线'},
+{name:'治污设施运行台账',status:'ok',statusText:'正常记录',meta:'记录频率：每日 · 最近记录：2026-07-16',detail:'MBR膜组件运行正常(待更换) · 加药系统运行(pH调节剂暂停)'},
+{name:'危废转移联单',status:'warn',statusText:'部分缺失',meta:'最近转移：2026-05-20 · 联单：3/5完整',detail:'2026年已转移废油3吨、废酸8吨 · 2次转移联单未归档'},
+{name:'环境管理制度',status:'expire',statusText:'需更新',meta:'最近修订：2022年 · 建议修订',detail:'环保管理制度文件已超2年未修订，需根据新法规更新'}
+];
+var html='<div class="section"><div class="section-title">台账总览（8类）</div>';
+ledgers.forEach(function(l){
+html+='<div class="ledger-item" style="border-left-color:'+(l.status==='ok'?'var(--accent)':l.status==='warn'?'var(--warn)':'var(--danger)')+'">'+
+'<div class="ledger-header"><span class="ledger-name">'+l.name+'</span><span class="ledger-status '+l.status+'">'+l.statusText+'</span></div>'+
+'<div class="ledger-meta">'+l.meta+'</div>'+
+'<div class="ledger-detail">'+l.detail+'</div>'+
+'</div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderFacility(){
+var html='<div class="section"><div class="section-title">治污设施运行记录（近7天）</div>';
+html+='<table class="record-table"><tr><th>日期</th><th>MBR膜</th><th>加药系统</th><th>曝气</th><th>COD(mg/L)</th><th>氨氮(mg/L)</th><th>状态</th></tr>';
+var records=[
+{date:'07-16',mbr:'运行',chem:'停运',air:'运行',cod:185,nh3n:2.8,s:'red'},
+{date:'07-15',mbr:'运行',chem:'停运',air:'运行',cod:172,nh3n:2.5,s:'red'},
+{date:'07-14',mbr:'运行',chem:'停运',air:'运行',cod:160,nh3n:2.2,s:'amber'},
+{date:'07-13',mbr:'运行',chem:'运行',air:'运行',cod:85,nh3n:1.5,s:'green'},
+{date:'07-12',mbr:'运行',chem:'运行',air:'运行',cod:78,nh3n:1.2,s:'green'},
+{date:'07-11',mbr:'运行',chem:'运行',air:'运行',cod:82,nh3n:1.4,s:'green'},
+{date:'07-10',mbr:'运行',chem:'运行',air:'运行',cod:75,nh3n:1.1,s:'green'}
+];
+records.forEach(function(r){
+var statusText={green:'达标',amber:'接近限值',red:'超标'}[r.s];
+html+='<tr><td>'+r.date+'</td><td>'+r.mbr+'</td><td style="color:'+(r.chem==='停运'?'var(--danger)':'var(--text)')+'">'+r.chem+'</td><td>'+r.air+'</td><td style="color:'+(r.cod>100?'var(--danger)':r.cod>80?'var(--warn)':'var(--accent)')+'">'+r.cod+'</td><td>'+r.nh3n+'</td><td><span class="status-dot '+r.s+'"></span>'+statusText+'</td></tr>';
+});
+html+='</table>';
+html+='<div style="margin-top:8px;padding:10px;background:rgba(239,68,68,.08);border-radius:8px;border:1px solid rgba(239,68,68,.2);font-size:11px;color:#fca5a5">⚠️ 异常：7月14日起pH调节剂投加装置停运，导致COD连续超标。需立即恢复运行。</div></div>';
+
+html+='<div class="section"><div class="section-title">添加运行记录</div>';
+html+='<div class="form-row"><div class="form-group"><label class="form-label">日期</label><input class="form-input" type="date" value="2026-07-16"></div><div class="form-group"><label class="form-label">MBR膜状态</label><select class="form-select"><option>运行</option><option>停运</option><option>维修</option></select></div></div>';
+html+='<div class="form-row"><div class="form-group"><label class="form-label">COD(mg/L)</label><input class="form-input" type="number" value="185"></div><div class="form-group"><label class="form-label">氨氮(mg/L)</label><input class="form-input" type="number" value="2.8" step="0.1"></div></div>';
+html+='<button class="btn" onclick="epbToast(\'运行记录已保存\')">保存记录</button></div>';
+return html;
+}
+
+function renderWaste(){
+var html='<div class="section"><div class="section-title">危废产生与贮存台账</div>';
+html+='<table class="record-table"><tr><th>危废种类</th><th>代码</th><th>年产生量</th><th>已转移</th><th>贮存量</th><th>贮存上限</th><th>状态</th></tr>';
+var wastes=[
+{name:'废矿物油',code:'HW08-001',produced:3.5,transferred:3.0,stored:0.5,limit:2,s:'green'},
+{name:'废酸',code:'HW34-002',produced:8.5,transferred:8.0,stored:0.5,limit:3,s:'green'},
+{name:'电镀污泥',code:'HW17-003',produced:2.2,transferred:1.5,stored:0.7,limit:1,s:'amber'},
+{name:'废活性炭',code:'HW49-004',produced:1.8,transferred:1.0,stored:0.8,limit:2,s:'green'}
+];
+wastes.forEach(function(w){
+var pct=w.stored/w.limit*100;
+var s=pct>=80?'red':pct>=60?'amber':'green';
+var sText={green:'正常',amber:'接近上限',red:'超限'}[s];
+html+='<tr><td>'+w.name+'</td><td>'+w.code+'</td><td>'+w.produced+'t</td><td>'+w.transferred+'t</td><td style="font-weight:600">'+w.stored+'t</td><td>'+w.limit+'t</td><td><span class="status-dot '+s+'"></span>'+sText+'</td></tr>';
+});
+html+='</table></div>';
+
+html+='<div class="section"><div class="section-title">危废转移记录</div>';
+var transfers=[
+{date:'2026-05-20',type:'废矿物油',qty:'3.0t',dest:'山东危废处置中心',manifest:'MF-2026-0520-001',status:'ok'},
+{date:'2026-04-15',type:'废酸',qty:'5.0t',dest:'山东危废处置中心',manifest:'MF-2026-0415-003',status:'ok'},
+{date:'2026-03-10',type:'废酸',qty:'3.0t',dest:'山东危废处置中心',manifest:'缺失',status:'expire'},
+{date:'2026-02-05',type:'废矿物油',qty:'0.5t',dest:'济南危废处置公司',manifest:'MF-2026-0205-002',status:'ok'}
+];
+transfers.forEach(function(t){
+html+='<div class="ledger-item" style="border-left-color:'+(t.status==='ok'?'var(--accent)':'var(--danger)')+'">'+
+'<div class="ledger-header"><span class="ledger-name">'+t.type+' '+t.qty+'</span><span class="ledger-status '+t.status+'">'+(t.status==='ok'?'联单完整':'联单缺失')+'</span></div>'+
+'<div class="ledger-meta">'+t.date+' → '+t.dest+' · 联单号：'+t.manifest+'</div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderMonitoring(){
+var html='<div class="section"><div class="section-title">自行监测数据台账</div>';
+html+='<table class="record-table"><tr><th>监测日期</th><th>类型</th><th>COD</th><th>氨氮</th><th>pH</th><th>是否达标</th></tr>';
+var monitors=[
+{date:'2026-07-10',type:'自动',cod:75,nh3n:1.1,ph:7.2,ok:true},
+{date:'2026-06-15',type:'手动',cod:82,nh3n:1.4,ph:7.0,ok:true},
+{date:'2026-05-15',type:'手动',cod:88,nh3n:1.6,ph:6.9,ok:true},
+{date:'2026-04-15',type:'手动',cod:92,nh3n:1.8,ph:6.8,ok:true},
+{date:'2026-03-15',type:'手动',cod:78,nh3n:1.3,ph:7.1,ok:true},
+{date:'2026-02-15',type:'手动',cod:85,nh3n:1.5,ph:7.0,ok:true},
+{date:'2026-01-15',type:'手动',cod:90,nh3n:1.7,ph:6.9,ok:true}
+];
+monitors.forEach(function(m){
+html+='<tr><td>'+m.date+'</td><td>'+m.type+'</td><td style="color:'+(m.cod>80?'var(--warn)':'var(--accent)')+'">'+m.cod+'</td><td>'+m.nh3n+'</td><td>'+m.ph+'</td><td>'+(m.ok?'<span class="status-dot green"></span>达标':'<span class="status-dot red"></span>超标')+'</td></tr>';
+});
+html+='</table>';
+html+='<div style="margin-top:8px;font-size:10px;color:var(--muted)">限值：COD≤100mg/L · 氨氮≤15mg/L · pH 6-9</div></div>';
+
+html+='<div class="section"><div class="section-title">监测设备校准记录</div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">COD在线监测仪</span><span class="ledger-status ok">正常</span></div><div class="ledger-meta">型号：COD-2030 · 最近校准：2026-07-01 · 下次校准：2026-10-01</div></div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">氨氮在线监测仪</span><span class="ledger-status ok">正常</span></div><div class="ledger-meta">型号：NH3N-2050 · 最近校准：2026-07-01 · 下次校准：2026-10-01</div></div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">pH在线监测仪</span><span class="ledger-status warn">需校准</span></div><div class="ledger-meta">型号：PH-2000 · 最近校准：2026-04-01 · 已超期 · 建议立即校准</div></div>';
+html+='</div>';
+return html;
+}
+
+function renderPermit(){
+var html='<div class="section"><div class="section-title">排污许可证信息</div>';
+html+='<div class="ledger-item" style="border-left-color:var(--accent)"><div class="ledger-header"><span class="ledger-name">排污许可证（重点管理）</span><span class="ledger-status ok">有效</span></div><div class="ledger-meta">编号：PW-2023-001 · 有效期：2023-03-01至2028-03-01</div>';
+html+='<div class="ledger-detail" style="margin-top:8px">';
+html+='<div>许可排放量（年度）：</div>';
+html+='<div style="margin-top:4px">· COD：3,000 kg/年（已用2,580 kg · 86%）</div>';
+html+='<div>· 氨氮：300 kg/年（已用82 kg · 27%）</div>';
+html+='<div>· 废气SO₂：15,000 kg/年（已用8,200 kg · 55%）</div>';
+html+='<div>· 废气NOx：8,000 kg/年（已用3,100 kg · 39%）</div>';
+html+='</div></div></div>';
+
+html+='<div class="section"><div class="section-title">许可排放量使用进度</div>';
+html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>COD（86%）</span><span style="color:var(--warn)">2,580 / 3,000 kg</span></div><div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden"><div style="height:100%;width:86%;background:var(--warn);border-radius:3px"></div></div></div>';
+html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>氨氮（27%）</span><span style="color:var(--accent)">82 / 300 kg</span></div><div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden"><div style="height:100%;width:27%;background:var(--accent);border-radius:3px"></div></div></div>';
+html+='<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>SO₂（55%）</span><span style="color:var(--accent)">8,200 / 15,000 kg</span></div><div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden"><div style="height:100%;width:55%;background:var(--accent);border-radius:3px"></div></div></div>';
+html+='<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>NOx（39%）</span><span style="color:var(--accent)">3,100 / 8,000 kg</span></div><div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden"><div style="height:100%;width:39%;background:var(--accent);border-radius:3px"></div></div></div>';
+html+='<div style="margin-top:12px;padding:10px;background:rgba(245,158,11,.08);border-radius:8px;border:1px solid rgba(245,158,11,.2);font-size:11px;color:#fcd34d">⚠️ COD许可排放量已使用86%，需控制排放浓度避免超额</div></div>';
+
+html+='<div class="section"><div class="section-title">执行报告提交记录</div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">2026年Q2执行报告</span><span class="ledger-status ok">已提交</span></div><div class="ledger-meta">提交时间：2026-07-10 · 平台审核通过</div></div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">2026年Q1执行报告</span><span class="ledger-status ok">已提交</span></div><div class="ledger-meta">提交时间：2026-04-12 · 平台审核通过</div></div>';
+html+='<div class="ledger-item"><div class="ledger-header"><span class="ledger-name">2025年度执行报告</span><span class="ledger-status ok">已提交</span></div><div class="ledger-meta">提交时间：2026-01-20 · 平台审核通过</div></div>';
+html+='</div>';
+return html;
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>

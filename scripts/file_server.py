@@ -165,6 +165,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'inspection.html'))
         elif path == '/eco-statistics.html':
             self._serve_static(os.path.join(WEB_DIR, 'eco-statistics.html'))
+        elif path == '/evidence-toolkit.html':
+            self._serve_static(os.path.join(WEB_DIR, 'evidence-toolkit.html'))
+        elif path == '/env-ledger.html':
+            self._serve_static(os.path.join(WEB_DIR, 'env-ledger.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
