@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>生态环境统计 · 产排污核算</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#064e3b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;white-space:nowrap}
+.tab{padding:8px 14px;border-radius:16px;background:var(--card);border:1px solid var(--border);font-size:12px;color:var(--muted);cursor:pointer;flex-shrink:0}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 排污系数表 */
+.coef-table{width:100%;border-collapse:collapse;font-size:11px}
+.coef-table th{background:var(--card2);padding:8px;text-align:left;font-weight:600;color:var(--primary2);border-bottom:1px solid var(--border)}
+.coef-table td{padding:8px;border-bottom:1px solid var(--border)}
+.coef-table tr:hover{background:var(--card2)}
+.coef-badge{padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600}
+.coef-badge.high{background:rgba(239,68,68,.15);color:#fca5a5}
+.coef-badge.mid{background:rgba(245,158,11,.15);color:#fcd34d}
+.coef-badge.low{background:rgba(16,185,129,.15);color:#6ee7b7}
+/* 计算器 */
+.calc-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:12px}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.calc-row:last-child{border-bottom:none}
+.calc-key{color:var(--muted)}
+.calc-val{font-weight:600}
+.calc-result{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(59,130,246,.08));border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:16px;text-align:center;margin-top:12px}
+.calc-result .num{font-size:28px;font-weight:700;color:var(--accent)}
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.form-select,.form-input{width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
+.form-select:focus,.form-input:focus{border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff}
+/* 图表 */
+.chart-row{display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.chart-bar{flex:1;border-radius:2px 2px 0 0;min-height:4px;position:relative}
+.chart-bar.b1{background:linear-gradient(to top,var(--primary),var(--primary2))}
+.chart-bar.b2{background:linear-gradient(to top,var(--warn),#fcd34d)}
+.chart-bar.b3{background:linear-gradient(to top,var(--danger),#fca5a5)}
+.chart-bar-val{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:600}
+.chart-bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>生态环境<span>统计</span></h1>
+<p>产排污系数 · 排放量核算 · 统计年报 · 趋势分析</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card amber"><div class="num">12.5万t</div><div class="label">辖区COD年排放</div></div>
+<div class="stat-card blue"><div class="num">8.3万t</div><div class="label">SO₂年排放</div></div>
+<div class="stat-card green"><div class="num">6.2万t</div><div class="label">NOx年排放</div></div>
+<div class="stat-card red"><div class="num">3.8万t</div><div class="label">VOCs年排放</div></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="switchTab('coef',this)">排污系数</div>
+<div class="tab" onclick="switchTab('calc',this)">排放量核算</div>
+<div class="tab" onclick="switchTab('trend',this)">趋势分析</div>
+<div class="tab" onclick="switchTab('annual',this)">统计年报</div>
+</div>
+
+<div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/data-cockpit.html"><span class="icon">📊</span>驾驶舱</a>
+<a class="nav-item active" href="/eco-statistics.html"><span class="icon">📈</span>统计</a>
+<a class="nav-item" href="/carbon-mgmt.html"><span class="icon">🌱</span>碳管理</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+
+<script>
+var currentTab='coef';
+function switchTab(tab,el){currentTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});el.classList.add('active');render()}
+
+function render(){
+var area=document.getElementById('content');
+if(currentTab==='coef'){area.innerHTML=renderCoef()}
+else if(currentTab==='calc'){area.innerHTML=renderCalc()}
+else if(currentTab==='trend'){area.innerHTML=renderTrend()}
+else if(currentTab==='annual'){area.innerHTML=renderAnnual()}
+}
+
+function renderCoef(){
+var coefs=[
+{industry:'化工制造业',product:'合成氨',pollutant:'COD',coef:'2.85',unit:'kg/t产品',level:'high'},
+{industry:'化工制造业',product:'尿素',pollutant:'COD',coef:'1.25',unit:'kg/t产品',level:'mid'},
+{industry:'造纸业',product:'机制纸',pollutant:'COD',coef:'15.5',unit:'kg/t产品',level:'high'},
+{industry:'造纸业',product:'纸板',pollutant:'COD',coef:'8.2',unit:'kg/t产品',level:'high'},
+{industry:'印染业',product:'棉布印染',pollutant:'COD',coef:'4.5',unit:'kg/百米',level:'high'},
+{industry:'电镀业',product:'镀件',pollutant:'Cr⁶⁺',coef:'0.85',unit:'g/m²',level:'mid'},
+{industry:'制药业',product:'化学原料药',pollutant:'COD',coef:'12.3',unit:'kg/t产品',level:'high'},
+{industry:'建材业',product:'水泥',pollutant:'粉尘',coef:'0.35',unit:'kg/t产品',level:'low'},
+{industry:'建材业',product:'平板玻璃',pollutant:'SO₂',coef:'1.8',unit:'kg/重量箱',level:'mid'},
+{industry:'钢铁业',product:'烧结矿',pollutant:'SO₂',coef:'2.5',unit:'kg/t产品',level:'high'},
+{industry:'食品业',product:'啤酒',pollutant:'COD',coef:'9.8',unit:'kg/kL',level:'high'},
+{industry:'化工业',product:'涂料',pollutant:'VOCs',coef:'3.2',unit:'kg/t产品',level:'mid'}
+];
+var levelText={high:'高',mid:'中',low:'低'};
+var html='<div class="section"><div class="section-title">行业产排污系数表（部分）</div>';
+html+='<table class="coef-table"><tr><th>行业</th><th>产品</th><th>污染物</th><th>系数</th><th>单位</th><th>等级</th></tr>';
+coefs.forEach(function(c){
+html+='<tr><td>'+c.industry+'</td><td>'+c.product+'</td><td>'+c.pollutant+'</td><td style="font-weight:600">'+c.coef+'</td><td style="color:var(--muted)">'+c.unit+'</td><td><span class="coef-badge '+c.level+'">'+levelText[c.level]+'</span></td></tr>';
+});
+html+='</table>';
+html+='<div style="margin-top:8px;font-size:10px;color:var(--muted)">数据来源：《第二次全国污染源普查产排污系数手册》</div></div>';
+return html;
+}
+
+function renderCalc(){
+return '<div class="section"><div class="section-title">排放量核算计算器</div>'+
+'<div class="form-group"><label class="form-label">行业类型</label><select class="form-select"><option>化工制造业</option><option>造纸业</option><option>印染业</option><option>电镀业</option><option>制药业</option><option>建材业</option><option>钢铁业</option><option>食品业</option></select></div>'+
+'<div class="form-row"><div class="form-group"><label class="form-label">产品产量（吨/年）</label><input class="form-input" type="number" value="5000" id="output"></div>'+
+'<div class="form-group"><label class="form-label">排污系数（kg/t）</label><input class="form-input" type="number" value="2.85" id="coef-input" step="0.01"></div></div>'+
+'<div class="form-row"><div class="form-group"><label class="form-label">治污设施去除率（%）</label><input class="form-input" type="number" value="85" id="removal"></div>'+
+'<div class="form-group"><label class="form-label">运行天数</label><input class="form-input" type="number" value="330" id="days"></div></div>'+
+'<button class="btn" onclick="calcEmission()">计算排放量</button>'+
+'<div class="calc-result"><div class="num" id="result-val">2,138</div><div style="font-size:12px;color:var(--muted)">kg/年（COD排放量）</div></div>'+
+'<div style="margin-top:12px;font-size:11px;color:var(--muted)">计算公式：排放量 = 产量 × 排污系数 × (1-去除率) × 运行天数/365</div>'+
+'</div>'+
+'<div class="section"><div class="section-title">核算结果对比</div>'+
+'<div class="calc-card"><div class="calc-row"><span class="calc-key">产生量</span><span class="calc-val">14,250 kg/年</span></div>'+
+'<div class="calc-row"><span class="calc-key">削减量</span><span class="calc-val" style="color:var(--accent)">-12,112 kg/年</span></div>'+
+'<div class="calc-row"><span class="calc-key">排放量</span><span class="calc-val" style="color:var(--warn)">2,138 kg/年</span></div>'+
+'<div class="calc-row"><span class="calc-key">达标判断</span><span class="calc-val" style="color:var(--accent)">✓ 达标（<限值3000kg）</span></div></div></div>';
+}
+
+function renderTrend(){
+var html='<div class="section"><div class="section-title">主要污染物年排放趋势</div>';
+html+='<div class="chart-row">';
+var data=[{y:'2021',v:18.5},{y:'2022',v:16.8},{y:'2023',v:14.5},{y:'2024',v:13.6},{y:'2025',v:12.8},{y:'2026',v:12.5}];
+data.forEach(function(d){
+var h=(d.v/20*100);
+html+='<div class="chart-bar b1" style="height:'+h+'%"><div class="chart-bar-val">'+d.v+'</div><div class="chart-bar-label">'+d.y+'</div></div>';
+});
+html+='</div><div style="margin-top:20px;font-size:10px;color:var(--muted)">COD排放量（万吨/年）· 5年下降32.4%</div></div>';
+
+html+='<div class="section"><div class="section-title">行业排放占比</div>';
+var sectors=[{name:'化工',pct:35,color:'var(--danger)'},{name:'造纸',pct:22,color:'var(--warn)'},{name:'印染',pct:15,color:'var(--primary)'},{name:'制药',pct:12,color:'var(--accent)'},{name:'食品',pct:8,color:'var(--primary2)'},{name:'其他',pct:8,color:'var(--muted)'}];
+sectors.forEach(function(s){
+html+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>'+s.name+'业</span><span style="color:'+s.color+'">'+s.pct+'%</span></div><div style="height:6px;background:var(--card2);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+s.pct+'%;background:'+s.color+';border-radius:3px"></div></div></div>';
+});
+html+='</div>';
+return html;
+}
+
+function renderAnnual(){
+var html='<div class="section"><div class="section-title">2026年度统计数据</div>';
+var stats=[
+{name:'废水排放总量',val:'2850',unit:'万吨',yoy:'-5.2%',up:false},
+{name:'COD排放量',val:'12.5',unit:'万吨',yoy:'-2.4%',up:false},
+{name:'氨氮排放量',val:'1.8',unit:'万吨',yoy:'-3.1%',up:false},
+{name:'废气排放总量',val:'1850',unit:'亿m³',yoy:'+1.5%',up:true},
+{name:'SO₂排放量',val:'8.3',unit:'万吨',yoy:'-6.8%',up:false},
+{name:'NOx排放量',val:'6.2',unit:'万吨',yoy:'-4.5%',up:false},
+{name:'VOCs排放量',val:'3.8',unit:'万吨',yoy:'-8.2%',up:false},
+{name:'一般工业固废',val:'45.2',unit:'万吨',yoy:'+2.1%',up:true},
+{name:'危险废物',val:'2.8',unit:'万吨',yoy:'-1.5%',up:false}
+];
+html+='<div class="calc-card">';
+stats.forEach(function(s){
+html+='<div class="calc-row"><span class="calc-key">'+s.name+'</span><span class="calc-val">'+s.val+' '+s.unit+' <span style="font-size:10px;color:'+(s.up?'var(--danger)':'var(--accent)')+'">'+s.yoy+'</span></span></div>';
+});
+html+='</div>';
+html+='<div style="margin-top:8px;font-size:10px;color:var(--muted)">同比涨跌：红色=同比上升，绿色=同比下降</div></div>';
+
+html+='<div class="section"><div class="section-title">数据来源说明</div>';
+html+='<div style="font-size:12px;line-height:1.8;color:var(--text)">'+
+'<div>1. 排放数据来源：环境统计年报 + 排污许可执行报告 + 在线监测数据</div>'+
+'<div>2. 核算方法：产排污系数法（第二次污普系数手册）</div>'+
+'<div>3. 统计范围：辖区重点排污企业（85家）+ 非重点估算</div>'+
+'<div>4. 数据审核：企业自报→县级初审→市级复核→省级审定</div>'+
+'<div>5. 发布频率：年度发布（次年6月前发布上年度数据）</div>'+
+'</div></div>';
+return html;
+}
+
+function calcEmission(){
+var output=parseFloat(document.getElementById('output').value)||0;
+var coef=parseFloat(document.getElementById('coef-input').value)||0;
+var removal=parseFloat(document.getElementById('removal').value)||0;
+var days=parseFloat(document.getElementById('days').value)||365;
+var result=Math.round(output*coef*(1-removal/100)*(days/365));
+document.getElementById('result-val').textContent=result.toLocaleString();
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+render();
+</script>
+</body>
+</html>
