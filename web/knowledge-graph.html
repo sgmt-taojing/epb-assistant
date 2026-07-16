@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保知识图谱 · 智能关联可视化</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:16px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.red .num{color:var(--danger)}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+/* 图谱可视化 */
+.graph-canvas{background:#0d1117;border:1px solid var(--border);border-radius:12px;height:320px;position:relative;overflow:hidden}
+.graph-grid{position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(circle,rgba(59,130,246,.05) 1px,transparent 1px);background-size:20px 20px}
+.graph-node{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:pointer;transition:all .3s;z-index:2}
+.graph-node.center{width:80px;height:80px;background:rgba(59,130,246,.2);border:2px solid var(--primary);color:var(--primary2)}
+.graph-node.l1{width:56px;height:56px;background:rgba(16,185,129,.15);border:2px solid var(--accent);color:#6ee7b7}
+.graph-node.l2{width:48px;height:48px;background:rgba(245,158,11,.12);border:2px solid var(--warn);color:#fcd34d}
+.graph-node.l3{width:40px;height:40px;background:rgba(239,68,68,.1);border:2px solid var(--danger);color:#fca5a5}
+.graph-node:hover{transform:scale(1.2);z-index:3}
+.graph-line{position:absolute;height:1px;background:rgba(59,130,246,.2);transform-origin:left center;z-index:1}
+/* 关联列表 */
+.relation-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.relation-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.relation-name{font-size:13px;font-weight:600}
+.relation-type{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;background:rgba(59,130,246,.15);color:#93c5fd}
+.relation-desc{font-size:12px;color:var(--text);line-height:1.6}
+.relation-chain{font-size:11px;color:var(--muted);margin-top:6px;font-family:monospace}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保<span>知识图谱</span></h1>
+<p>违法行为→法条→证据→案例→检查要点 · 智能关联可视化</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">8</div><div class="label">知识领域</div></div>
+<div class="stat-card green"><div class="num">15</div><div class="label">违法类型</div></div>
+<div class="stat-card amber"><div class="num">28</div><div class="label">关联法条</div></div>
+<div class="stat-card red"><div class="num">101</div><div class="label">关联案例</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">知识图谱可视化（以"水污染超标排放"为中心）</div>
+<div class="graph-canvas">
+<div class="graph-grid"></div>
+<!-- 连线（CSS模拟） -->
+<div class="graph-line" style="top:160px;left:50%;width:80px;transform:rotate(0deg)"></div>
+<div class="graph-line" style="top:140px;left:45%;width:90px;transform:rotate(-30deg)"></div>
+<div class="graph-line" style="top:180px;left:45%;width:90px;transform:rotate(30deg)"></div>
+<div class="graph-line" style="top:120px;left:35%;width:70px;transform:rotate(-60deg)"></div>
+<div class="graph-line" style="top:200px;left:35%;width:70px;transform:rotate(60deg)"></div>
+<div class="graph-line" style="top:160px;left:35%;width:80px;transform:rotate(180deg)"></div>
+<!-- 中心节点 -->
+<div class="graph-node center" style="top:120px;left:calc(50% - 40px)">水污染<br>超标</div>
+<!-- 一级关联 -->
+<div class="graph-node l1" style="top:60px;left:55%">适用<br>法条</div>
+<div class="graph-node l1" style="top:220px;left:55%">相似<br>案例</div>
+<div class="graph-node l1" style="top:130px;left:75%">证据<br>清单</div>
+<div class="graph-node l1" style="top:40px;left:25%">检查<br>要点</div>
+<div class="graph-node l1" style="top:240px;left:25%">处罚<br>标准</div>
+<div class="graph-node l1" style="top:130px;left:5%">行业<br>特征</div>
+<!-- 二级关联 -->
+<div class="graph-node l2" style="top:20px;left:70%;width:36px;height:36px;font-size:8px">COD</div>
+<div class="graph-node l2" style="top:270px;left:70%;width:36px;height:36px;font-size:8px">氨氮</div>
+<div class="graph-node l2" style="top:0px;left:40%;width:36px;height:36px;font-size:8px">pH</div>
+<div class="graph-node l3" style="top:280px;left:40%;width:32px;height:32px;font-size:7px">污泥</div>
+</div>
+<div style="margin-top:8px;display:flex;gap:16px;font-size:10px;color:var(--muted)">
+<span>🔵 中心节点</span>
+<span>🟢 一级关联</span>
+<span>🟡 二级关联</span>
+<span>🔴 三级关联</span>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">知识关联链（点击查看详情）</div>
+
+<div class="relation-item" style="border-left-color:var(--danger)">
+<div class="relation-header"><span class="relation-name">违法行为 → 适用法条</span><span class="relation-type">法律适用</span></div>
+<div class="relation-desc">水污染物超标排放 → 《水污染防治法》第八十三条</div>
+<div class="relation-chain">超标排放 → 第83条 → 罚款10-100万 → 责令改正/停产整治</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--accent)">
+<div class="relation-header"><span class="relation-name">违法行为 → 证据清单</span><span class="relation-type">证据链</span></div>
+<div class="relation-desc">水污染超标 → 必须采集的证据：</div>
+<div class="relation-chain">①现场照片 → ②在线监测数据 → ③水质采样报告 → ④排污许可证 → ⑤治污设施运行记录 → ⑥用电记录 → ⑦询问笔录</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--warn)">
+<div class="relation-header"><span class="relation-name">违法行为 → 相似案例</span><span class="relation-type">案例推荐</span></div>
+<div class="relation-desc">水污染超标 → 101条案例库中匹配15条相似案例</div>
+<div class="relation-chain">华源化工COD超标 → 渤海印染氨氮超标 → 绿洲纸业COD偏高 → 某造纸厂暗管偷排 → 某电镀厂含铬废水</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--primary)">
+<div class="relation-header"><span class="relation-name">违法行为 → 检查要点</span><span class="relation-type">执法指引</span></div>
+<div class="relation-desc">水污染超标 → 现场检查重点：</div>
+<div class="relation-chain">①治污设施运行状态 → ②药剂投加记录 → ③在线监测设备校验 → ④排放口规范化 → ⑤雨污分流 → ⑥污泥去向</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--danger)">
+<div class="relation-header"><span class="relation-name">违法行为 → 涉刑判断</span><span class="relation-type">刑事移送</span></div>
+<div class="relation-desc">水污染超标 → 是否涉嫌污染环境罪？</div>
+<div class="relation-chain">超标3倍以上(COD>300mg/L) → 涉嫌严重污染环境 → 移送公安 → 《刑法》第338条</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--accent)">
+<div class="relation-header"><span class="relation-name">行业类型 → 产排污环节</span><span class="relation-type">行业知识</span></div>
+<div class="relation-desc">化工行业 → 主要产排污环节：</div>
+<div class="relation-chain">原料储存 → 生产反应 → 产品分离 → 废水生成 → 废气排放 → 固废产生 → 噪声源</div>
+</div>
+
+<div class="relation-item" style="border-left-color:var(--warn)">
+<div class="relation-header"><span class="relation-name">处罚标准 → 自由裁量</span><span class="relation-type">裁量辅助</span></div>
+<div class="relation-desc">水污染防治法第83条 → 裁量因子：</div>
+<div class="relation-chain">超标倍数 × 持续时长 × 损害后果 × 社会影响 × 主观过错 × 整改 × 初犯 × 配合 → 处罚金额</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">8大知识领域</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--danger)"><div style="font-size:13px;font-weight:600;color:#fca5a5">💧 水污染</div><div style="font-size:11px;color:var(--muted);margin-top:4px">COD/氨氮/总磷/重金属 · 35%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--warn)"><div style="font-size:13px;font-weight:600;color:#fcd34d">💨 大气污染</div><div style="font-size:11px;color:var(--muted);margin-top:4px">VOCs/粉尘/SO₂/NOx · 28%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--danger)"><div style="font-size:13px;font-weight:600;color:#fca5a5">⚠️ 固废危废</div><div style="font-size:11px;color:var(--muted);margin-top:4px">危废贮存/转移/倾倒 · 18%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--warn)"><div style="font-size:13px;font-weight:600;color:#fcd34d">📊 自动监控</div><div style="font-size:11px;color:var(--muted);margin-top:4px">数据篡改/设备破坏 · 10%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--accent)"><div style="font-size:13px;font-weight:600;color:#6ee7b7">🔊 噪声污染</div><div style="font-size:11px;color:var(--muted);margin-top:4px">工业/施工/交通噪声 · 6%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--accent)"><div style="font-size:13px;font-weight:600;color:#6ee7b7">🌱 土壤污染</div><div style="font-size:11px;color:var(--muted);margin-top:4px">场地调查/修复验收 · 2%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--primary)"><div style="font-size:13px;font-weight:600;color:#93c5fd">📋 排污许可</div><div style="font-size:11px;color:var(--muted);margin-top:4px">无证排污/超许可 · 1%案例</div></div>
+<div style="background:var(--card2);border-radius:10px;padding:12px;border-left:3px solid var(--primary)"><div style="font-size:13px;font-weight:600;color:#93c5fd">🆘 应急管理</div><div style="font-size:11px;color:var(--muted);margin-top:4px">突发事件/预案/响应</div></div>
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/law-library.html"><span class="icon">📖</span>法规</a>
+<a class="nav-item active" href="/knowledge-graph.html"><span class="icon">🧠</span>图谱</a>
+<a class="nav-item" href="/equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+</body>
+</html>
