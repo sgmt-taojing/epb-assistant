@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>现场取证工具箱 · 移动执法</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#0c4a6e 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text);display:block}
+.tool-card:active{transform:scale(.97)}
+.tool-icon{font-size:32px;margin-bottom:6px}
+.tool-name{font-size:13px;font-weight:600}
+.tool-desc{font-size:10px;color:var(--muted);margin-top:2px}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+.evidence-item{background:var(--card2);border-radius:10px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.evidence-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.evidence-info{flex:1}
+.evidence-name{font-size:13px;font-weight:600}
+.evidence-meta{font-size:11px;color:var(--muted)}
+.evidence-status{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.evidence-status.collected{background:rgba(16,185,129,.15);color:#6ee7b7}
+.evidence-status.pending{background:rgba(245,158,11,.15);color:#fcd34d}
+.checklist-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.checklist-item:last-child{border-bottom:none}
+.checklist-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer}
+.checklist-check.done{background:var(--accent);border-color:var(--accent);color:#fff}
+.checklist-item.done .checklist-text{text-decoration:line-through;color:var(--muted)}
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--primary)}
+.form-textarea{min-height:60px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:block;width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;text-align:center}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.blue .num{color:var(--primary2)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>现场取证<span>工具箱</span></h1>
+<p>拍照取证 · 录音记录 · 采样登记 · GPS定位 · 执法清单</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card green"><div class="num">7</div><div class="label">已采集证据</div></div>
+<div class="stat-card amber"><div class="num">3</div><div class="label">待采集</div></div>
+<div class="stat-card blue"><div class="num">2</div><div class="label">已生成文书</div></div>
+</div>
+
+<div class="tool-grid">
+<a href="#" class="tool-card" onclick="epbToast('拍照取证功能演示');return false"><div class="tool-icon">📷</div><div class="tool-name">拍照取证</div><div class="tool-desc">现场照片+GPS标注</div></a>
+<a href="#" class="tool-card" onclick="epbToast('录音记录功能演示');return false"><div class="tool-icon">🎤</div><div class="tool-name">录音记录</div><div class="tool-desc">现场询问录音</div></a>
+<a href="#" class="tool-card" onclick="epbToast('采样登记功能演示');return false"><div class="tool-icon">🧪</div><div class="tool-name">采样登记</div><div class="tool-desc">水样/气样/土样</div></a>
+<a href="#" class="tool-card" onclick="epbToast('GPS定位功能演示');return false"><div class="tool-icon">📍</div><div class="tool-name">GPS定位</div><div class="tool-desc">精准坐标记录</div></a>
+<a href="#" class="tool-card" onclick="epbToast('测距测面积功能演示');return false"><div class="tool-icon">📏</div><div class="tool-name">测距测面积</div><div class="tool-desc">现场尺寸测量</div></a>
+<a href="#" class="tool-card" onclick="epbToast('便携检测功能演示');return false"><div class="tool-icon">🔬</div><div class="tool-name">便携检测</div><div class="tool-desc">快检仪器数据</div></a>
+<a href="/doc-generator.html" class="tool-card"><div class="tool-icon">📄</div><div class="tool-name">文书生成</div><div class="tool-desc">现场笔录AI生成</div></a>
+<a href="/penalty-calculator.html" class="tool-card"><div class="tool-icon">⚖️</div><div class="tool-name">裁量计算</div><div class="tool-desc">处罚金额计算</div></a>
+</div>
+
+<div class="section">
+<div class="section-title">已采集证据列表</div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(59,130,246,.1)">📷</div><div class="evidence-info"><div class="evidence-name">厂区排放口照片</div><div class="evidence-meta">2026-07-16 10:32 · GPS: 36.6512°N, 117.1201°E · 3张</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(16,185,129,.1)">🧪</div><div class="evidence-info"><div class="evidence-name">排放口水样</div><div class="evidence-meta">2026-07-16 10:35 · 样品编号：WS-2026-0716-001 · 已封存</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(59,130,246,.1)">📄</div><div class="evidence-info"><div class="evidence-name">在线监测数据导出</div><div class="evidence-meta">2026-07-16 10:40 · COD 7天趋势 · 185mg/L</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">🎤</div><div class="evidence-info"><div class="evidence-name">现场询问录音</div><div class="evidence-meta">2026-07-16 10:45 · 时长12分钟 · 被询问人：张厂长</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">📋</div><div class="evidence-info"><div class="evidence-name">治污设施运行台账</div><div class="evidence-meta">2026-07-16 10:50 · 近3个月记录 · 已拍照</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">📄</div><div class="evidence-info"><div class="evidence-name">排污许可证复印件</div><div class="evidence-meta">2026-07-16 10:52 · PW-2023-001 · 已拍照</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(239,68,68,.1)">🔬</div><div class="evidence-info"><div class="evidence-name">便携pH检测结果</div><div class="evidence-meta">2026-07-16 10:38 · pH=5.8（偏酸性）· 已记录</div></div><span class="evidence-status collected">已采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">⚡</div><div class="evidence-info"><div class="evidence-name">用电记录</div><div class="evidence-meta">待调取 · 需联系供电公司</div></div><span class="evidence-status pending">待采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">📄</div><div class="evidence-info"><div class="evidence-name">环评报告及批复</div><div class="evidence-meta">待调取 · 需企业提供</div></div><span class="evidence-status pending">待采集</span></div>
+<div class="evidence-item"><div class="evidence-icon" style="background:rgba(245,158,11,.1)">📄</div><div class="evidence-info"><div class="evidence-name">污泥处置合同</div><div class="evidence-meta">待调取 · 需企业提供</div></div><span class="evidence-status pending">待采集</span></div>
+</div>
+
+<div class="section">
+<div class="section-title">采样登记表</div>
+<div class="form-group"><label class="form-label">采样地点</label><input class="form-input" value="华源化工废水排放口" id="sample-location"></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">样品类型</label><select class="form-select"><option>废水</option><option>废气</option><option>土壤</option><option>固废</option><option>噪声</option></select></div>
+<div class="form-group"><label class="form-label">采样数量</label><input class="form-input" type="number" value="3" id="sample-count"></div>
+</div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">检测项目</label><input class="form-input" value="COD、氨氮、pH、重金属" id="sample-items"></div>
+<div class="form-group"><label class="form-label">采样时间</label><input class="form-input" type="datetime-local" value="2026-07-16T10:35" id="sample-time"></div>
+</div>
+<div class="form-group"><label class="form-label">备注</label><textarea class="form-textarea" placeholder="采样条件、天气、保存方式等">水样呈浅黄色，有轻微异味。4℃冷藏保存。24小时内送检。</textarea></div>
+<button class="btn" onclick="epbToast('采样登记单已生成并保存');return false">生成采样登记单</button>
+</div>
+
+<div class="section">
+<div class="section-title">执法检查清单</div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">核对排污许可证信息</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">检查治污设施运行状态</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">查看在线监测数据</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">检查排放口规范化</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">采集水样并封存</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">拍摄现场照片</div></div>
+<div class="checklist-item done"><div class="checklist-check done">✓</div><div class="checklist-text">制作现场询问录音</div></div>
+<div class="checklist-item"><div class="checklist-check" onclick="toggleCheck(this)"></div><div class="checklist-text">调取用电记录</div></div>
+<div class="checklist-item"><div class="checklist-check" onclick="toggleCheck(this)"></div><div class="checklist-text">调取环评报告</div></div>
+<div class="checklist-item"><div class="checklist-check" onclick="toggleCheck(this)"></div><div class="checklist-text">检查危废贮存间</div></div>
+<div class="checklist-item"><div class="checklist-check" onclick="toggleCheck(this)"></div><div class="checklist-text">制作现场检查笔录</div></div>
+<div class="checklist-item"><div class="checklist-check" onclick="toggleCheck(this)"></div><div class="checklist-text">制作询问笔录</div></div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/m-portal.html"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/m-workspace.html"><span class="icon">📋</span>工作台</a>
+<a class="nav-item active" href="/evidence-toolkit.html"><span class="icon">🧰</span>取证</a>
+<a class="nav-item" href="/doc-generator.html"><span class="icon">📄</span>文书</a>
+<a class="nav-item" href="/m-cases.html"><span class="icon">📖</span>案例</a>
+</div>
+
+<script>
+function toggleCheck(el){
+var item=el.parentElement;
+if(el.classList.contains('done')){
+el.classList.remove('done');el.innerHTML='';item.classList.remove('done')
+}else{
+el.classList.add('done');el.innerHTML='✓';item.classList.add('done')
+}
+}
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+</body>
+</html>
