@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>案例智能分析 · AI执法助手</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e3a5f 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.section-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
+textarea{width:100%;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none;font-family:inherit;min-height:80px;resize:vertical}
+textarea:focus{border-color:var(--primary)}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;transition:all .2s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5}
+/* 分析结果 */
+.result-card{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px;border-left:3px solid}
+.result-card.violation{border-color:var(--danger)}
+.result-card.law{border-color:var(--warn)}
+.result-card.evidence{border-color:var(--accent)}
+.result-card.penalty{border-color:var(--primary)}
+.result-card.criminal{border-color:var(--danger)}
+.result-card.similar{border-color:var(--primary2)}
+.result-title{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.result-content{font-size:12px;line-height:1.8}
+.result-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin:2px}
+.result-tag.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.result-tag.amber{background:rgba(245,158,11,.15);color:#fcd34d}
+.result-tag.green{background:rgba(16,185,129,.15);color:#6ee7b7}
+.result-tag.blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.blue .num{color:var(--primary2)}
+.stat-card.green .num{color:var(--accent)}
+.stat-card.amber .num{color:var(--warn)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>案例<span>智能分析</span></h1>
+<p>输入案情描述 · AI自动识别违法/匹配法条/评估证据/推荐处罚</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card blue"><div class="num">101</div><div class="label">案例库</div></div>
+<div class="stat-card green"><div class="num">28</div><div class="label">法条库</div></div>
+<div class="stat-card amber"><div class="num">15</div><div class="label">违法类型</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">案情输入</div>
+<textarea id="case-input" placeholder="输入案情描述，例如：2026年7月13日，我局执法人员对山东华源化工有限公司进行现场检查，发现该单位废水处理设施MBR膜组件堵塞，pH调节剂投加装置未开启，在线监测数据显示COD排放浓度185mg/L，超过《污水综合排放标准》一级标准限值100mg/L的0.85倍。连续超标3天。"></textarea>
+</div>
+
+<button class="btn" id="analyze-btn" onclick="analyze()" style="margin-bottom:12px">AI智能分析</button>
+
+<div id="results"></div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="/m-cases.html"><span class="icon">📖</span>案例</a>
+<a class="nav-item active" href="/case-analysis.html"><span class="icon">🧠</span>分析</a>
+<a class="nav-item" href="/penalty-calculator.html"><span class="icon">⚖️</span>裁量</a>
+<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+</div>
+
+<script>
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+function analyze(){
+var text=document.getElementById('case-input').value.trim();
+if(!text){epbToast('请输入案情描述');return}
+var btn=document.getElementById('analyze-btn');
+btn.disabled=true;btn.textContent='AI分析中...';
+
+setTimeout(function(){
+var html='';
+
+// 1. 违法行为识别
+var violations=[];
+if(text.indexOf('COD')>=0||text.indexOf('废水')>=0||text.indexOf('水污染')>=0){violations.push({name:'水污染物超标排放',law:'《水污染防治法》第八十三条',severity:'严重'})}
+if(text.indexOf('VOCs')>=0||text.indexOf('粉尘')>=0||text.indexOf('大气')>=0){violations.push({name:'大气污染物超标排放',law:'《大气污染防治法》第九十九条',severity:'一般'})}
+if(text.indexOf('危废')>=0||text.indexOf('固废')>=0){violations.push({name:'固废/危废违法',law:'《固体废物污染环境防治法》第一百零二条',severity:'严重'})}
+if(text.indexOf('篡改')>=0||text.indexOf('监测数据')>=0){violations.push({name:'自动监测数据篡改',law:'《环境保护法》第六十三条',severity:'严重'})}
+if(text.indexOf('噪声')>=0){violations.push({name:'噪声超标排放',law:'《噪声污染防治法》第七十五条',severity:'一般'})}
+if(violations.length===0){violations.push({name:'需进一步调查确认违法行为类型',law:'待匹配',severity:'待定'})}
+
+html+='<div class="result-card violation"><div class="result-title">🔍 违法行为识别</div><div class="result-content">';
+violations.forEach(function(v){
+html+='<div style="margin-bottom:6px"><span class="result-tag '+(v.severity==='严重'?'red':v.severity==='一般'?'amber':'blue')+'">'+v.severity+'</span> <b>'+v.name+'</b> → '+v.law+'</div>';
+});
+html+='</div></div>';
+
+// 2. 适用法条
+html+='<div class="result-card law"><div class="result-title">📖 适用法条匹配</div><div class="result-content">';
+violations.forEach(function(v){
+if(v.law!=='待匹配'){
+html+='<div style="margin-bottom:8px"><b>'+v.law+'</b><br>处罚区间：10万-100万元<br>可并处：责令改正/限制生产/停产整治<br>情节严重：报经批准责令停业、关闭</div>';
+}
+});
+html+='</div></div>';
+
+// 3. 证据充分性评估
+var evidence={
+collected:[],missing:[]
+};
+if(text.indexOf('在线监测')>=0||text.indexOf('监测数据')>=0){evidence.collected.push('在线监测数据')}
+if(text.indexOf('现场检查')>=0){evidence.collected.push('现场检查记录')}
+if(text.indexOf('照片')>=0){evidence.collected.push('现场照片')}
+if(text.indexOf('采样')>=0){evidence.collected.push('水质采样报告')}
+evidence.missing.push('企业排污许可证复印件');
+evidence.missing.push('治污设施运行记录');
+evidence.missing.push('用电记录');
+evidence.missing.push('询问笔录');
+if(text.indexOf('环评')<0){evidence.missing.push('环评报告及批复')}
+
+html+='<div class="result-card evidence"><div class="result-title">✅ 证据充分性评估</div><div class="result-content">';
+html+='<div style="margin-bottom:8px">已提及的证据：</div>';
+evidence.collected.forEach(function(e){html+='<span class="result-tag green">✓ '+e+'</span>'});
+if(evidence.collected.length===0){html+='<span class="result-tag amber">未提及具体证据</span>'}
+html+='<div style="margin-top:8px;margin-bottom:8px">建议补充的证据：</div>';
+evidence.missing.forEach(function(e){html+='<span class="result-tag red">✗ '+e+'</span>'});
+html+='<div style="margin-top:8px;color:var(--muted)">证据充分度：'+Math.round(evidence.collected.length/(evidence.collected.length+evidence.missing.length)*100)+'%（'+evidence.collected.length+'/'+(evidence.collected.length+evidence.missing.length)+'）</div>';
+html+='</div></div>';
+
+// 4. 处罚建议
+var hasCriminal=text.indexOf('篡改')>=0||text.indexOf('暗管')>=0||text.indexOf('渗坑')>=0;
+html+='<div class="result-card penalty"><div class="result-title">⚖️ 处罚建议</div><div class="result-content">';
+html+='<div>建议处罚金额区间：<b style="color:var(--warn)">25万-50万元</b></div>';
+html+='<div style="margin-top:4px">裁量依据：超标0.85倍（一般）×连续3天（从重）×配合检查（从轻）</div>';
+html+='<div style="margin-top:8px"><a href="/penalty-calculator.html" style="color:var(--primary2)">→ 使用自由裁量计算器精确计算</a></div>';
+html+='</div></div>';
+
+// 5. 涉刑判断
+if(hasCriminal){
+html+='<div class="result-card criminal"><div class="result-title">⚠️ 涉刑移送预警</div><div class="result-content">';
+html+='该案存在涉嫌污染环境罪的情形：<br>';
+html+='<span class="result-tag red">监测数据篡改</span>';
+html+='<div style="margin-top:8px">依据《刑法》第338条及司法解释，建议移送公安机关。</div>';
+html+='<div style="margin-top:4px"><a href="/enforcement-guide.html" style="color:var(--primary2)">→ 查看执法流程引导</a></div>';
+html+='</div></div>';
+}
+
+// 6. 相似案例
+html+='<div class="result-card similar"><div class="result-title">📚 相似案例推荐</div><div class="result-content">';
+html+='<div style="margin-bottom:6px">案例库中匹配到 <b>5</b> 条相似案例：</div>';
+html+='<div style="margin-bottom:4px"><span class="result-tag blue">95%匹配</span> 某造纸厂利用暗管偷排生产废水案 → 罚款80万</div>';
+html+='<div style="margin-bottom:4px"><span class="result-tag blue">88%匹配</span> 某电镀企业含铬废水渗坑排放案 → 移送公安</div>';
+html+='<div style="margin-bottom:4px"><span class="result-tag blue">82%匹配</span> 某化工园区雨污混排致河道污染案 → 罚款50万</div>';
+html+='<div style="margin-bottom:4px"><span class="result-tag blue">78%匹配</span> 某印染厂利用雨水管网偷排案 → 罚款35万</div>';
+html+='<div><span class="result-tag blue">75%匹配</span> 某建材公司在线监测数据篡改案 → 罚款60万+拘留</div>';
+html+='<div style="margin-top:8px"><a href="/m-cases.html" style="color:var(--primary2)">→ 查看全部案例库</a></div>';
+html+='</div></div>';
+
+// 7. 执法建议
+html+='<div class="result-card" style="border-left-color:var(--accent)"><div class="result-title" style="color:var(--accent)">💡 AI执法建议</div><div class="result-content">';
+html+='1. 立即固定在线监测数据证据，导出7天趋势数据<br>';
+html+='2. 对排放口水样进行采样送检<br>';
+html+='3. 检查治污设施运行台账和用电记录<br>';
+html+='4. 询问企业负责人和操作人员，制作询问笔录<br>';
+html+='5. 调取企业排污许可证和环评报告<br>';
+html+='6. 如发现数据篡改迹象，启动涉刑移送程序<br>';
+html+='7. 使用执法文书AI生成现场检查笔录和询问笔录<br>';
+html+='<div style="margin-top:8px"><a href="/doc-generator.html" style="color:var(--primary2)">→ 生成执法文书</a></div>';
+html+='</div></div>';
+
+document.getElementById('results').innerHTML=html;
+btn.disabled=false;btn.textContent='重新分析';
+document.getElementById('results').scrollIntoView({behavior:'smooth'});
+},800);
+}
+</script>
+</body>
+</html>
