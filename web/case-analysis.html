@@ -74,11 +74,11 @@ textarea:focus{border-color:var(--primary)}
 </div>
 
 <div class="bottom-nav">
-<a class="nav-item" href="/"><span class="icon">🏠</span>首页</a>
-<a class="nav-item" href="/m-cases.html"><span class="icon">📖</span>案例</a>
-<a class="nav-item active" href="/case-analysis.html"><span class="icon">🧠</span>分析</a>
-<a class="nav-item" href="/penalty-calculator.html"><span class="icon">⚖️</span>裁量</a>
-<a class="nav-item" href="/m-portal.html"><span class="icon">📱</span>移动端</a>
+<a class="nav-item" href="index.html"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="m-cases.html"><span class="icon">📖</span>案例</a>
+<a class="nav-item active" href="case-analysis.html"><span class="icon">🧠</span>分析</a>
+<a class="nav-item" href="penalty-calculator.html"><span class="icon">⚖️</span>裁量</a>
+<a class="nav-item" href="m-portal.html"><span class="icon">📱</span>移动端</a>
 </div>
 
 <script>
@@ -145,7 +145,7 @@ var hasCriminal=text.indexOf('篡改')>=0||text.indexOf('暗管')>=0||text.index
 html+='<div class="result-card penalty"><div class="result-title">⚖️ 处罚建议</div><div class="result-content">';
 html+='<div>建议处罚金额区间：<b style="color:var(--warn)">25万-50万元</b></div>';
 html+='<div style="margin-top:4px">裁量依据：超标0.85倍（一般）×连续3天（从重）×配合检查（从轻）</div>';
-html+='<div style="margin-top:8px"><a href="/penalty-calculator.html" style="color:var(--primary2)">→ 使用自由裁量计算器精确计算</a></div>';
+html+='<div style="margin-top:8px"><a href="penalty-calculator.html" style="color:var(--primary2)">→ 使用自由裁量计算器精确计算</a></div>';
 html+='</div></div>';
 
 // 5. 涉刑判断
@@ -154,7 +154,7 @@ html+='<div class="result-card criminal"><div class="result-title">⚠️ 涉刑
 html+='该案存在涉嫌污染环境罪的情形：<br>';
 html+='<span class="result-tag red">监测数据篡改</span>';
 html+='<div style="margin-top:8px">依据《刑法》第338条及司法解释，建议移送公安机关。</div>';
-html+='<div style="margin-top:4px"><a href="/enforcement-guide.html" style="color:var(--primary2)">→ 查看执法流程引导</a></div>';
+html+='<div style="margin-top:4px"><a href="enforcement-guide.html" style="color:var(--primary2)">→ 查看执法流程引导</a></div>';
 html+='</div></div>';
 }
 
@@ -166,7 +166,7 @@ html+='<div style="margin-bottom:4px"><span class="result-tag blue">88%匹配</s
 html+='<div style="margin-bottom:4px"><span class="result-tag blue">82%匹配</span> 某化工园区雨污混排致河道污染案 → 罚款50万</div>';
 html+='<div style="margin-bottom:4px"><span class="result-tag blue">78%匹配</span> 某印染厂利用雨水管网偷排案 → 罚款35万</div>';
 html+='<div><span class="result-tag blue">75%匹配</span> 某建材公司在线监测数据篡改案 → 罚款60万+拘留</div>';
-html+='<div style="margin-top:8px"><a href="/m-cases.html" style="color:var(--primary2)">→ 查看全部案例库</a></div>';
+html+='<div style="margin-top:8px"><a href="m-cases.html" style="color:var(--primary2)">→ 查看全部案例库</a></div>';
 html+='</div></div>';
 
 // 7. 执法建议
@@ -178,7 +178,7 @@ html+='4. 询问企业负责人和操作人员，制作询问笔录<br>';
 html+='5. 调取企业排污许可证和环评报告<br>';
 html+='6. 如发现数据篡改迹象，启动涉刑移送程序<br>';
 html+='7. 使用执法文书AI生成现场检查笔录和询问笔录<br>';
-html+='<div style="margin-top:8px"><a href="/doc-generator.html" style="color:var(--primary2)">→ 生成执法文书</a></div>';
+html+='<div style="margin-top:8px"><a href="doc-generator.html" style="color:var(--primary2)">→ 生成执法文书</a></div>';
 html+='</div></div>';
 
 document.getElementById('results').innerHTML=html;

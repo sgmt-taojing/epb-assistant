@@ -454,7 +454,7 @@ window.fetch = function(url, opts) {
   <button class="qb-btn" onclick="ftScrollTo('collectCard',this)"><span>📷</span>证据采集</button>
   <button class="qb-btn" onclick="ftScrollTo('sceneAnalysisCard',this)"><span>🤖</span>场景识别</button>
   <button class="qb-btn" onclick="ftScrollTo('submitCard',this)"><span>📤</span>提交记录</button>
-  <a href="/" class="qb-btn"><span>🏠</span>返回首页</a>
+  <a href="index.html" class="qb-btn"><span>🏠</span>返回首页</a>
 </div>
 
 <!-- 全局搜索浮层 -->
@@ -667,7 +667,7 @@ window.fetch = function(url, opts) {
     <div class="submit-hint" id="submitHint">已采集 0 项证据</div>
   </div>
 
-  <a href="/" class="back-link">← 返回主系统</a>
+  <a href="index.html" class="back-link">← 返回主系统</a>
 </div>
 
 <!-- 隐藏的文件输入 -->
@@ -1642,7 +1642,7 @@ function buildLocalAnalysisFromText(text) {
     <a href="#" class="ft-float-item" onclick="toggleVoiceRecord();ftToggleFloat()"><span>🎙</span>语音笔录</a>
     <a href="#" class="ft-float-item" onclick="ftOpenSearch();ftToggleFloat()"><span>🔍</span>知识查询</a>
     <a href="#" class="ft-float-item" onclick="startAnalysis();ftToggleFloat()"><span>🧠</span>AI分析</a>
-    <a href="/" class="ft-float-item"><span>🏠</span>返回首页</a>
+    <a href="index.html" class="ft-float-item"><span>🏠</span>返回首页</a>
   </div>
   <button class="ft-float-toggle" id="ft-float-toggle" onclick="ftToggleFloat()">+</button>
 </div>
@@ -2007,7 +2007,7 @@ function createDeviceConfigModal() {
   html += '<div class="dc-item"><span class="dc-label">水质检测仪</span><label class="dc-switch"><input type="checkbox" id="dc-water-enabled" onchange="toggleDevice(\'waterSampler\')"><span class="dc-slider"></span></label></div>';
   html += '</div>';
   html += '<div style="margin-top:16px"><button class="btn btn-primary" onclick="saveDeviceConfig()">保存配置</button>';
-  html += '<a href="/device-mgmt.html" style="margin-left:8px;font-size:12px;color:var(--blue)">设备管理平台 →</a></div>';
+  html += '<a href="device-mgmt.html" style="margin-left:8px;font-size:12px;color:var(--blue)">设备管理平台 →</a></div>';
   html += '</div></div></div>';
   
   var div = document.createElement('div');
