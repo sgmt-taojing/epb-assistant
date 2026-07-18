@@ -183,6 +183,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'eco-frontier-data.json'))
         elif path == '/eco-frontier.html':
             self._serve_static(os.path.join(WEB_DIR, 'eco-frontier.html'))
+        elif path == '/ops-monitor.html':
+            self._serve_static(os.path.join(WEB_DIR, 'ops-monitor.html'))
+        elif path == '/ops-monitor-data.js':
+            self._serve_static(os.path.join(WEB_DIR, 'ops-monitor-data.js'))
         elif path == '/mobile-nav.js':
             self._serve_static(os.path.join(WEB_DIR, 'mobile-nav.js'))
         # 健康检查

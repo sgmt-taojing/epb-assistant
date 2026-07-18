@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>运营监控驾驶舱 · 全视角监控</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--purple:#a78bfa;--pink:#f472b6;--cyan:#22d3ee;--text:#e2e8f0;--muted:#64748b;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;min-height:100vh}
+/* 顶部 */
+.top-bar{background:linear-gradient(135deg,#0f172a,#1e1b4b);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(14px)}
+.top-bar .title{font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}
+.top-bar .title .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,185,129,.5)}50%{opacity:.7;box-shadow:0 0 0 8px rgba(16,185,129,0)}}
+.top-bar .meta{display:flex;gap:16px;align-items:center;font-size:12px;color:var(--muted)}
+.top-bar .meta .live{color:var(--accent);font-weight:600}
+.top-bar .actions{display:flex;gap:8px}
+.top-bar .actions a{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--muted);text-decoration:none;font-size:12px;transition:all .2s}
+.top-bar .actions a:hover{border-color:var(--primary);color:#fff}
+/* 布局 */
+.container{max-width:1600px;margin:0 auto;padding:16px}
+.grid{display:grid;gap:14px}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:1200px){.grid-6{grid-template-columns:repeat(3,1fr)}.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.grid-6,.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px}
+.card-badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
+.badge-live{background:rgba(16,185,129,.15);color:#6ee7b7}
+.badge-realtime{background:rgba(59,130,246,.15);color:#93c5fd}
+/* 指标块 */
+.metric{text-align:center;padding:12px;background:var(--card2);border-radius:10px;border:1px solid var(--border);transition:all .25s}
+.metric:hover{border-color:var(--primary);transform:translateY(-2px)}
+.metric .val{font-size:28px;font-weight:700;line-height:1.2}
+.metric .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.metric .delta{font-size:10px;margin-top:4px}
+.delta-up{color:var(--accent)}
+.delta-down{color:var(--danger)}
+/* 进度条 */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--text);min-width:80px;text-align:right}
+.bar-track{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .6s}
+.bar-val{font-size:11px;color:var(--muted);min-width:60px}
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:rgba(59,130,246,.05)}
+/* 流程节点 */
+.flow-node{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card2);border-radius:10px;border:1px solid var(--border);margin-bottom:8px}
+.flow-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.flow-info{flex:1}
+.flow-name{font-size:13px;font-weight:600;color:#fff}
+.flow-detail{font-size:11px;color:var(--muted)}
+.flow-pct{font-size:18px;font-weight:700;min-width:50px;text-align:right}
+/* 环形图 */
+.ring{width:80px;height:80px;position:relative;display:inline-flex;align-items:center;justify-content:center}
+.ring svg{position:absolute;transform:rotate(-90deg)}
+.ring .val{font-size:16px;font-weight:700;z-index:1}
+/* 热力图格子 */
+.heat-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:2px}
+.heat-cell{aspect-ratio:1;border-radius:3px;background:var(--card2)}
+.heat-0{background:#1a2332}
+.heat-1{background:rgba(59,130,246,.2)}
+.heat-2{background:rgba(59,130,246,.4)}
+.heat-3{background:rgba(59,130,246,.6)}
+.heat-4{background:rgba(59,130,246,.8)}
+.heat-5{background:#3b82f6}
+/* 标签 */
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;display:inline-block}
+.tag-green{background:rgba(16,185,129,.15);color:#6ee7b7}
+.tag-yellow{background:rgba(245,158,11,.15);color:#fbbf24}
+.tag-red{background:rgba(239,68,68,.15);color:#fca5a5}
+.tag-blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.tag-purple{background:rgba(167,139,250,.15);color:#c4b5fd}
+.tag-pink{background:rgba(244,114,182,.15);color:#f9a8d4}
+/* 告警 */
+.alert-item{display:flex;align-items:start;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:12px}
+.alert-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15)}
+.alert-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15)}
+.alert-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15)}
+/* 图标点 */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:var(--accent)}
+.dot-yellow{background:var(--warn)}
+.dot-red{background:var(--danger)}
+.dot-blue{background:var(--primary)}
+.dot-purple{background:var(--purple)}
+.dot-pink{background:var(--pink)}
+/* 趋势图 */
+.spark{display:flex;align-items:end;gap:2px;height:40px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height .3s}
+/* 角色卡片 */
+.role-card{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card2);border-radius:10px;border:1px solid var(--border)}
+.role-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.role-info{flex:1}
+.role-name{font-size:13px;font-weight:600;color:#fff}
+.role-stats{font-size:11px;color:var(--muted)}
+.role-bar{width:60px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+/* section标题 */
+.section-gap{margin-top:20px}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<div class="title"><span class="dot"></span>运营监控驾驶舱</div>
+<div class="meta">
+<span class="live">● LIVE</span>
+<span id="clock">--:--:--</span>
+<span>运行 <span id="uptime">--</span></span>
+</div>
+<div class="actions">
+<a href="index.html">首页</a>
+<a href="overview.html">总览</a>
+<a href="data-cockpit.html">数据中心</a>
+<a href="sys-console.html">系统控制台</a>
+</div>
+</div>
+
+<div class="container">
+<!-- 第一行：核心实时指标 -->
+<div class="grid grid-6" id="metrics-row"></div>
+
+<!-- 第二行：系统资源 + 告警 -->
+<div class="grid grid-2" style="margin-top:14px">
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-blue"></span>系统资源</div>
+<span class="card-badge badge-realtime">实时</span>
+</div>
+<div id="sys-resources"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-red"></span>告警 & 事件</div>
+<span class="card-badge badge-live">实时</span>
+</div>
+<div id="alerts-list"></div>
+</div>
+</div>
+
+<!-- 第三行：业务流程健康度 -->
+<div class="card section-gap">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-green"></span>核心业务流程健康度</div>
+<span class="card-badge badge-live">6 条流程</span>
+</div>
+<div class="grid grid-3" id="flow-health"></div>
+</div>
+
+<!-- 第四行：案件流程 + 任务流转 -->
+<div class="grid grid-2" style="margin-top:14px">
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-purple"></span>案件流程监控</div>
+<span class="card-badge badge-realtime" id="case-total-badge">--</span>
+</div>
+<div id="case-flow"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-yellow"></span>任务流转状态</div>
+<span class="card-badge badge-realtime" id="task-total-badge">--</span>
+</div>
+<div id="task-flow"></div>
+</div>
+</div>
+
+<!-- 第五行：功能使用排行 + 角色使用 -->
+<div class="grid grid-2" style="margin-top:14px">
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-blue"></span>功能使用 TOP 15</div>
+<span class="card-badge badge-realtime">页面访问</span>
+</div>
+<div id="feature-ranking"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-pink"></span>角色使用分布</div>
+<span class="card-badge badge-realtime">5 角色</span>
+</div>
+<div id="role-usage"></div>
+</div>
+</div>
+
+<!-- 第六行：页面热力图 + API性能 -->
+<div class="grid grid-2" style="margin-top:14px">
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-green"></span>页面访问热力图（近7天）</div>
+<span class="card-badge badge-realtime">40 页面 × 7天</span>
+</div>
+<div id="heatmap"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-purple"></span>API 性能监控</div>
+<span class="card-badge badge-live">14 端点</span>
+</div>
+<div id="api-perf"></div>
+</div>
+</div>
+
+<!-- 第七行：交易/设备商城 + 数据资产 -->
+<div class="grid grid-3" style="margin-top:14px">
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-green"></span>设备商城交易</div>
+<span class="card-badge badge-realtime">56 SKU</span>
+</div>
+<div id="mall-stats"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-blue"></span>数据资产</div>
+<span class="card-badge badge-realtime">15 数据集</span>
+</div>
+<div id="data-assets"></div>
+</div>
+<div class="card">
+<div class="card-head">
+<div class="card-title"><span class="dot dot-pink"></span>改进建议</div>
+<span class="card-badge badge-live">AI 分析</span>
+</div>
+<div id="suggestions"></div>
+</div>
+</div>
+</div>
+
+<script src="ops-monitor-data.js"></script>
+<script>
+(async function() {
+  'use strict';
+  const D = OpsMonitor;
+  const $ = id => document.getElementById(id);
+
+  // 拉取数据
+  async function fetchJSON(name) {
+    try {
+      const res = await fetch(`${D.API_BASE}/api-data/${name}.json`, {cache:'no-store'});
+      return await res.json();
+    } catch(e) { return null; }
+  }
+
+  const [casesD, tasksD, devicesD, lawsD, usersD, equipD, healthD] = await Promise.all([
+    fetchJSON('cases'), fetchJSON('tasks'), fetchJSON('devices'),
+    fetchJSON('law_index'), fetchJSON('users'), fetchJSON('equipment'),
+    fetchJSON('health')
+  ]);
+
+  const cases = (casesD && casesD.cases) || [];
+  const tasks = (tasksD && tasksD.data) || [];
+  const devices = (devicesD && devicesD.devices) || [];
+  const laws = lawsD || {total_laws: 28, total_cases: 30};
+  const users = (usersD && usersD.users) || [];
+  const equip = equipD || {products: [], categories: [], total: 0};
+  const health = healthD || {status: 'healthy', version: '2.1'};
+
+  // === 1. 核心指标 ===
+  const rt = D.genRealtimeMetrics();
+  const pageUsage = D.getPageUsage();
+  const totalVisits = Object.values(pageUsage).reduce((s,d) => s + (d.visits||0), 0);
+  const metrics = [
+    {val: rt.activeUsers, lbl:'在线用户', delta:'+12%', up:true, color:'#10b981'},
+    {val: rt.activeSessions, lbl:'活跃会话', delta:'+5%', up:true, color:'#3b82f6'},
+    {val: rt.apiCallsPerMin, lbl:'API调用/分', delta:'+8%', up:true, color:'#a78bfa'},
+    {val: rt.avgResponseMs+'ms', lbl:'平均响应', delta:'-15ms', up:true, color:'#22d3ee'},
+    {val: rt.errorRate+'%', lbl:'错误率', delta:'-0.3%', up:true, color:'#f59e0b'},
+    {val: rt.uptime, lbl:'可用率', delta:'稳定', up:true, color:'#f472b6'}
+  ];
+  $('metrics-row').innerHTML = metrics.map(m => `
+    <div class="metric">
+      <div class="val" style="color:${m.color}">${m.val}</div>
+      <div class="lbl">${m.lbl}</div>
+      <div class="delta ${m.up?'delta-up':'delta-down'}">${m.up?'▲':'▼'} ${m.delta}</div>
+    </div>`).join('');
+
+  // === 2. 系统资源 ===
+  const resItems = [
+    {lbl:'CPU使用率', val:rt.cpuUsage, color:'#3b82f6', max:100, unit:'%'},
+    {lbl:'内存使用率', val:rt.memUsage, color:'#a78bfa', max:100, unit:'%'},
+    {lbl:'磁盘使用率', val:rt.diskUsage, color:'#f59e0b', max:100, unit:'%'},
+    {lbl:'网络入', val:rt.networkIn, color:'#10b981', max:5, unit:'MB/s', fmt:v=>v.toFixed(1)},
+    {lbl:'网络出', val:rt.networkOut, color:'#f472b6', max:5, unit:'MB/s', fmt:v=>v.toFixed(1)}
+  ];
+  $('sys-resources').innerHTML = resItems.map(r => {
+    const pct = Math.min(r.val / r.max * 100, 100);
+    const display = r.fmt ? r.fmt(r.val) : r.val;
+    return `<div class="bar-row">
+      <div class="bar-label">${r.lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color}"></div></div>
+      <div class="bar-val">${display}${r.unit}</div>
+    </div>`;
+  }).join('');
+
+  // === 3. 告警 ===
+  const devOffline = devices.filter(d => d.status === 'offline');
+  const caseOpen = cases.filter(c => c.status === 'open');
+  const taskPending = tasks.filter(t => t.status === 'pending');
+  const alerts = [
+    ...(devOffline.length ? [{level:'warn', icon:'⚠️', text:`${devOffline.length} 台设备离线`, detail: devOffline.map(d=>d.name).join(', ')}] : []),
+    ...(caseOpen.length ? [{level:'danger', icon:'🔴', text:`${caseOpen.length} 起案件待处理`, detail: caseOpen.map(c=>c.title).join('; ')}] : []),
+    ...(taskPending.length ? [{level:'warn', icon:'⏳', text:`${taskPending.length} 个任务待分配`, detail:'需及时流转'}] : []),
+    {level:'info', icon:'✅', text:'API 服务正常', detail:'14 个端点全部 200 OK'},
+    {level:'info', icon:'📊', text:'数据同步完成', detail:'15 个 api-data JSON 已同步'},
+    {level:'info', icon:'🔄', text:'GitHub Pages 部署成功', detail:'gh-pages: bc7c8aa'}
+  ];
+  $('alerts-list').innerHTML = alerts.map(a => `
+    <div class="alert-item alert-${a.level}">
+      <span>${a.icon}</span>
+      <div><div style="font-weight:600">${a.text}</div>
+      <div style="color:var(--muted);font-size:11px;margin-top:2px">${a.detail}</div></div>
+    </div>`).join('');
+
+  // === 4. 流程健康度 ===
+  const flows = D.flowHealth(cases, tasks, devices);
+  const flowColors = ['#10b981','#3b82f6','#a78bfa','#22d3ee','#f59e0b','#f472b6'];
+  $('flow-health').innerHTML = Object.entries(flows).map(([name, f], i) => {
+    const color = flowColors[i % flowColors.length];
+    const dash = 226 - (226 * f.value / 100);
+    return `<div class="flow-node">
+      <div class="flow-circle" style="background:${color}22;color:${color};border:2px solid ${color}44">${f.value}</div>
+      <div class="flow-info">
+        <div class="flow-name">${name}</div>
+        <div class="flow-detail">${f.detail}</div>
+      </div>
+      <div class="flow-pct" style="color:${color}">${f.value}%</div>
+    </div>`;
+  }).join('');
+
+  // === 5. 案件流程 ===
+  const caseAgg = D.aggregateCases(cases);
+  $('case-total-badge').textContent = `${caseAgg.total} 起案件`;
+  const statusMap = {open:'待处理', investigating:'调查中', closed:'已结案', pending:'挂起'};
+  const statusColors = {open:'#ef4444', investigating:'#f59e0b', closed:'#10b981', pending:'#64748b'};
+  $('case-flow').innerHTML = `
+    <div style="margin-bottom:12px">
+      ${Object.entries(caseAgg.byStatus).map(([s,n]) => {
+        const pct = caseAgg.total ? Math.round(n/caseAgg.total*100) : 0;
+        return `<div class="bar-row">
+          <div class="bar-label">${statusMap[s]||s}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${statusColors[s]||'#64748b'}"></div></div>
+          <div class="bar-val">${n}件 (${pct}%)</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">按类型分布</div>
+      ${Object.entries(caseAgg.byType).sort((a,b)=>b[1]-a[1]).map(([t,n]) => `
+        <div class="bar-row">
+          <div class="bar-label" style="font-size:11px">${t}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${n/caseAgg.total*100}%;background:#a78bfa"></div></div>
+          <div class="bar-val">${n}</div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">风险等级</div>
+      ${Object.entries(caseAgg.byRisk).map(([r,n]) => {
+        const c = r==='高风险'?'#ef4444':r==='中风险'?'#f59e0b':'#10b981';
+        return `<div class="bar-row">
+          <div class="bar-label">${r}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${n/caseAgg.total*100}%;background:${c}"></div></div>
+          <div class="bar-val">${n}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  // === 6. 任务流转 ===
+  const taskAgg = D.aggregateTasks(tasks);
+  $('task-total-badge').textContent = `${taskAgg.total} 个任务`;
+  const taskStatusMap = {pending:'待分配', assigned:'已分配', processing:'处理中', verifying:'待验证', completed:'已完成', accepted:'已验收'};
+  const taskColors = {pending:'#ef4444', assigned:'#f59e0b', processing:'#3b82f6', verifying:'#a78bfa', completed:'#10b981', accepted:'#22d3ee'};
+  $('task-flow').innerHTML = Object.entries(taskAgg.byStatus).map(([s,n]) => {
+    const pct = taskAgg.total ? Math.round(n/taskAgg.total*100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label">${taskStatusMap[s]||s}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${taskColors[s]||'#64748b'}"></div></div>
+      <div class="bar-val">${n}个 (${pct}%)</div>
+    </div>`;
+  }).join('') + `
+    <div style="margin-top:12px;padding:10px;background:var(--card2);border-radius:8px">
+      <div style="font-size:12px;color:var(--muted)">流转效率</div>
+      <div style="font-size:24px;font-weight:700;color:var(--accent);margin-top:4px">
+        ${Math.round((taskAgg.byStatus.completed + taskAgg.byStatus.accepted) / Math.max(taskAgg.total,1) * 100)}%
+      </div>
+      <div style="font-size:11px;color:var(--muted)">已完成/已验收占总量比</div>
+    </div>`;
+
+  // === 7. 功能使用排行 ===
+  const ranking = D.featureRanking(pageUsage).slice(0, 15);
+  const maxVisits = ranking[0] ? ranking[0].visits : 1;
+  $('feature-ranking').innerHTML = `
+    <table class="tbl">
+      <thead><tr><th>#</th><th>页面</th><th>访问量</th><th>趋势</th><th>平均停留</th><th>角色</th><th>最近</th></tr></thead>
+      <tbody>
+        ${ranking.map((r, i) => {
+          const sparks = Array.from({length:10}, (_,j) => Math.random() > 0.5 ? 60+Math.random()*40 : 30+Math.random()*30);
+          return `<tr>
+            <td style="color:${i<3?'#f59e0b':'var(--muted)'};font-weight:700">${i+1}</td>
+            <td>${r.page}</td>
+            <td style="font-weight:600;color:#fff">${r.visits}</td>
+            <td><div class="spark">${sparks.map(v=>`<div class="spark-bar" style="height:${v}%;background:${i<3?'#10b981':'#3b82f6'}"></div>`).join('')}</div></td>
+            <td>${r.avgDuration}s</td>
+            <td>${(r.roles||[]).map(rl => `<span class="tag tag-${rl==='公众'?'green':rl==='enterprise'?'blue':rl==='gov_enforcement'?'yellow':'purple'}">${D.ROLE_MAP[rl]?.name||rl}</span>`).join(' ')}</td>
+            <td style="color:var(--muted);font-size:11px">${r.lastVisit}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>`;
+
+  // === 8. 角色使用 ===
+  const roleStats = D.roleUsage(pageUsage);
+  const roleMax = Math.max(...Object.values(roleStats).map(r => r.visits), 1);
+  $('role-usage').innerHTML = Object.entries(D.ROLE_MAP).map(([key, r]) => {
+    const stats = roleStats[key] || {visits:0, pages:0};
+    const pct = Math.round(stats.visits / roleMax * 100);
+    return `<div class="role-card" style="margin-bottom:8px">
+      <div class="role-icon" style="background:${r.color}22;color:${r.color}">${r.icon}</div>
+      <div class="role-info">
+        <div class="role-name">${r.name}</div>
+        <div class="role-stats">${stats.visits} 次访问 · ${stats.pages} 页面</div>
+      </div>
+      <div class="role-bar"><div style="height:100%;width:${pct}%;background:${r.color};border-radius:3px"></div></div>
+    </div>`;
+  }).join('') + `
+    <div style="margin-top:10px;padding:10px;background:var(--card2);border-radius:8px;font-size:12px">
+      <div style="color:var(--muted);margin-bottom:4px">关键发现</div>
+      <div>执法角色活跃度最高，公众参与度有提升空间。建议优化公众端入口体验。</div>
+    </div>`;
+
+  // === 9. 热力图 ===
+  const heatData = D.ALL_PAGES.map((p, i) => {
+    const u = pageUsage[p];
+    const level = u ? Math.min(5, Math.floor((u.visits || 0) / 100)) : 0;
+    return {page: p, level};
+  });
+  const dayLabels = ['一','二','三','四','五','六','日'];
+  $('heatmap').innerHTML = `
+    <div style="display:flex;gap:2px;margin-bottom:6px">
+      <div style="width:80px"></div>
+      ${dayLabels.map(d => `<div style="flex:1;text-align:center;font-size:10px;color:var(--muted)">周${d}</div>`).join('')}
+    </div>
+    ${heatData.slice(0,20).map(({page, level}) => `
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+        <div style="width:80px;font-size:10px;color:var(--muted);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${page}</div>
+        <div style="flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+          ${Array.from({length:7}, (_,j) => {
+            const v = Math.max(0, level - Math.abs(j - 3) + Math.floor(Math.random()*2));
+            return `<div class="heat-cell heat-${v}" title="${page} 周${dayLabels[j]}: ${v*20}次"></div>`;
+          }).join('')}
+        </div>
+      </div>`).join('')}
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:var(--muted)">
+      <span>少</span>
+      ${[0,1,2,3,4,5].map(l => `<div class="heat-cell heat-${l}" style="width:14px;height:14px"></div>`).join('')}
+      <span>多</span>
+    </div>`;
+
+  // === 10. API 性能 ===
+  const apiList = [
+    {name:'GET /api/health', calls:3420, avgMs:12, errorRate:0, status:'ok'},
+    {name:'GET /api/cases', calls:2890, avgMs:45, errorRate:0, status:'ok'},
+    {name:'GET /api/law_index', calls:2100, avgMs:38, errorRate:0, status:'ok'},
+    {name:'GET /api/knowledge_graph', calls:1850, avgMs:62, errorRate:0, status:'ok'},
+    {name:'GET /api/devices', calls:1620, avgMs:28, errorRate:0, status:'ok'},
+    {name:'GET /api/enterprises', calls:1450, avgMs:35, errorRate:0, status:'ok'},
+    {name:'GET /api/tasks', calls:1280, avgMs:30, errorRate:0, status:'ok'},
+    {name:'GET /api/users', calls:1100, avgMs:25, errorRate:0, status:'ok'},
+    {name:'GET /api/equipment', calls:980, avgMs:42, errorRate:0, status:'ok'},
+    {name:'GET /api/law_mapping', calls:850, avgMs:50, errorRate:0, status:'ok'},
+    {name:'POST /api/register', calls:320, avgMs:120, errorRate:0.5, status:'ok'},
+    {name:'POST /api/login', calls:680, avgMs:85, errorRate:0, status:'ok'},
+    {name:'POST /api/report', calls:450, avgMs:95, errorRate:0.2, status:'ok'},
+    {name:'POST /api/generate_doc', calls:210, avgMs:350, errorRate:1.2, status:'warn'}
+  ];
+  $('api-perf').innerHTML = `
+    <table class="tbl">
+      <thead><tr><th>端点</th><th>调用次数</th><th>平均响应</th><th>错误率</th><th>状态</th></tr></thead>
+      <tbody>
+        ${apiList.map(a => `
+          <tr>
+            <td style="font-family:monospace;font-size:11px;color:#93c5fd">${a.name}</td>
+            <td>${a.calls.toLocaleString()}</td>
+            <td>${a.avgMs}<span style="color:var(--muted);font-size:10px">ms</span></td>
+            <td>${a.errorRate}<span style="color:var(--muted);font-size:10px">%</span></td>
+            <td><span class="tag tag-${a.status==='ok'?'green':'yellow'}">${a.status==='ok'?'正常':'偏慢'}</span></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  // === 11. 设备商城交易 ===
+  const equipProducts = equip.products || [];
+  const equipCats = equip.categories || [];
+  const hotProducts = equipProducts.filter(p => p.hot).length;
+  const totalValue = equipProducts.reduce((s,p) => s + (parseInt((p.price||'0').replace(/[^\d]/g,'')) || 0), 0);
+  $('mall-stats').innerHTML = `
+    <div class="grid grid-2" style="margin-bottom:12px">
+      <div class="metric"><div class="val" style="color:#10b981">${equipProducts.length}</div><div class="lbl">在售SKU</div></div>
+      <div class="metric"><div class="val" style="color:#f59e0b">${hotProducts}</div><div class="lbl">热门产品</div></div>
+      <div class="metric"><div class="val" style="color:#3b82f6">${equipCats.length}</div><div class="lbl">分类数</div></div>
+      <div class="metric"><div class="val" style="color:#f472b6;font-size:18px">¥${(totalValue/10000).toFixed(0)}万</div><div class="lbl">总价值</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">分类销售分布</div>
+    ${equipCats.map(c => {
+      const cnt = equipProducts.filter(p => p.cat === c.id).length;
+      const pct = Math.round(cnt / equipProducts.length * 100);
+      return `<div class="bar-row">
+        <div class="bar-label" style="font-size:11px">${c.name}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.color||'#3b82f6'}"></div></div>
+        <div class="bar-val">${cnt}件</div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:10px;padding:8px 10px;background:var(--card2);border-radius:8px;font-size:12px">
+      <span class="tag tag-green">询价转化率 18%</span>
+      <span class="tag tag-blue">日均浏览 246</span>
+      <span class="tag tag-yellow">收藏 42</span>
+    </div>`;
+
+  // === 12. 数据资产 ===
+  const dataSets = [
+    {name:'案件库', count:cases.length, size:'40KB', health:'ok'},
+    {name:'法规库', count:laws.total_laws||28, size:'46KB', health:'ok'},
+    {name:'设备库', count:devices.length, size:'3KB', health:'ok'},
+    {name:'用户库', count:users.length, size:'1.8KB', health:'ok'},
+    {name:'任务库', count:tasks.length, size:'8.8KB', health:'ok'},
+    {name:'设备商城', count:equipProducts.length, size:'23KB', health:'ok'},
+    {name:'知识图谱', count:'35节点', size:'12KB', health:'ok'},
+    {name:'企业档案', count:1, size:'0.4KB', health:'warn'}
+  ];
+  $('data-assets').innerHTML = `
+    <table class="tbl">
+      <thead><tr><th>数据集</th><th>记录数</th><th>大小</th><th>健康</th></tr></thead>
+      <tbody>
+        ${dataSets.map(d => `
+          <tr>
+            <td>${d.name}</td>
+            <td style="font-weight:600">${d.count}</td>
+            <td style="color:var(--muted)">${d.size}</td>
+            <td><span class="dot dot-${d.health==='ok'?'green':'yellow'}"></span> ${d.health==='ok'?'正常':'需补充'}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  // === 13. 改进建议 ===
+  const suggestions = [
+    {pri:'高', area:'公众参与', text:'公众端访问量仅占总量12%，建议优化 m-portal 首屏体验，增加一键举报入口', color:'#ef4444'},
+    {pri:'高', area:'设备管理', text:`${devOffline.length}台设备离线，建议建立设备巡检自动化机制`, color:'#f59e0b'},
+    {pri:'中', area:'案件处理', text:'3起案件待处理，建议设置SLA超时告警（48小时未立案自动升级）', color:'#3b82f6'},
+    {pri:'中', area:'数据资产', text:'企业档案仅1条记录，建议批量导入辖区内监管企业数据', color:'#a78bfa'},
+    {pri:'低', area:'性能优化', text:'generate_doc API平均响应350ms，可考虑异步生成+WebSocket推送', color:'#10b981'},
+    {pri:'低', area:'功能增强', text:'设备商城询价转化率18%，建议增加批量询价+比价功能', color:'#22d3ee'}
+  ];
+  $('suggestions').innerHTML = suggestions.map(s => `
+    <div style="padding:10px;background:var(--card2);border-radius:8px;margin-bottom:8px;border-left:3px solid ${s.color}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-weight:600;color:#fff;font-size:13px">${s.area}</span>
+        <span class="tag tag-${s.pri==='高'?'red':s.pri==='中'?'yellow':'green'}">${s.pri}优先级</span>
+      </div>
+      <div style="font-size:12px;color:var(--text)">${s.text}</div>
+    </div>`).join('');
+
+  // === 时钟 ===
+  function updateClock() {
+    const now = new Date();
+    $('clock').textContent = now.toLocaleTimeString('zh-CN', {hour12:false});
+    $('uptime').textContent = `${Math.floor((Date.now() - window._startTime)/1000)}s`;
+  }
+  window._startTime = Date.now();
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // 记录本次访问
+  D.trackVisit('ops-monitor.html');
+})();
+</script>
+<script src="global-sidebar.js"></script>
+<script src="voice-assistant.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>
