@@ -68,6 +68,7 @@ var MENU = [
   {title:'📜 法规数据', items:[
     {name:'法规库',icon:'📜',url:'law-library.html'},
     {name:'知识图谱',icon:'🕸️',url:'knowledge-graph.html'},
+    {name:'环保前沿·商机',icon:'🚀',url:'eco-frontier.html',badge:'NEW'},
     {name:'数据开放',icon:'📂',url:'open-data.html'},
     {name:'生态统计',icon:'📊',url:'eco-statistics.html'},
     {name:'信用评级',icon:'⭐',url:'credit-rating.html'},

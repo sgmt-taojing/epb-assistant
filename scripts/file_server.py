@@ -179,6 +179,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'global-sidebar.js'))
         elif path == '/equipment-catalog.json':
             self._serve_static(os.path.join(WEB_DIR, 'equipment-catalog.json'))
+        elif path == '/eco-frontier-data.json':
+            self._serve_static(os.path.join(WEB_DIR, 'eco-frontier-data.json'))
+        elif path == '/eco-frontier.html':
+            self._serve_static(os.path.join(WEB_DIR, 'eco-frontier.html'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
