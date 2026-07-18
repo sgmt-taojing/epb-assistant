@@ -184,7 +184,7 @@ function inquire(id, name){
   const text = `已记录询价：${name}（${id}）。客服将在24小时内联系您。`;
   if (typeof epbToast === 'function') epbToast(text, 'success');
   else if (window.AIAssistant) window.AIAssistant.open();
-  else alert(text);
+  else if (typeof epbToast === "function") epbToast(text, "info"); else console.log(text);
 }
 
 // 静态fallback（fetch失败时）

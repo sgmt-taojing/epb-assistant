@@ -238,10 +238,29 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_equipment_categories()
         elif path.startswith('/api/equipment/'):
             self._handle_equipment_detail(path.split('/')[-1])
+        # /api-data/ 静态JSON（GitHub Pages fallback）
+        elif path.startswith('/api-data/'):
+            fname = path[len('/api-data/'):]
+            fpath = os.path.join(BASE_DIR, 'api-data', fname)
+            self._serve_static(fpath)
+        # /api/ 未匹配的路径 → 尝试 api-data/{name}.json 回退
+        elif path.startswith('/api/'):
+            api_name = path[len('/api/'):].strip('/')
+            # 尝试 api-data/{api_name}.json
+            fallback = os.path.join(BASE_DIR, 'api-data', api_name + '.json')
+            if os.path.isfile(fallback):
+                self._serve_static(fallback)
+            else:
+                self._send_json({'ok': False, 'error': 'API not found: ' + api_name}, 404)
         else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b'Not Found')
+            # 尝试 web/ 目录下的其他 html 文件
+            guessed = os.path.join(WEB_DIR, path.lstrip('/'))
+            if path != '/' and os.path.isfile(guessed):
+                self._serve_static(guessed)
+            else:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Not Found')
 
     def _serve_static(self, fpath):
         if not os.path.isfile(fpath):
