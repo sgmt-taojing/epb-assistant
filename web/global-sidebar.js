@@ -88,7 +88,7 @@ var MENU = [
     {name:'移动案例',icon:'📂',url:'m-cases.html'},
     {name:'移动自查',icon:'✅',url:'m-self-check.html'},
     {name:'企业H5',icon:'🏢',url:'ehs.html'},
-    {name:'移动商城',icon:'🛒',url:'mall.html'},
+    {name:'移动商城',icon:'🛒',url:'equipment-mall.html'},
     {name:'视频工作室',icon:'🎬',url:'video-studio.html'},
     {name:'微信H5',icon:'💬',url:'wechat-h5.html'},
   ]},
@@ -96,7 +96,7 @@ var MENU = [
     {name:'培训学习',icon:'🎓',url:'training.html'},
     {name:'登录',icon:'🔐',url:'login.html'},
     {name:'监管模块',icon:'👮',url:'supervision.html'},
-    {name:'企业平台',icon:'🏢',url:'enterprise.html'},
+    {name:'企业平台',icon:'🏢',url:'public-interact.html'},
   ]},
 ];
 
