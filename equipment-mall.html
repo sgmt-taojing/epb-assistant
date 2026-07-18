@@ -2,418 +2,198 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>环保设备商城 · 降本增效 · 案例驱动</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>设备商城 · 环保监管传感器全量名录</title>
 <style>
 :root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6}
-/* 顶部Banner */
-.hero{background:linear-gradient(135deg,#0c4a6e 0%,#064e3b 50%,#1e293b 100%);padding:32px 20px;text-align:center;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 50%,rgba(59,130,246,.15),transparent 50%),radial-gradient(circle at 70% 50%,rgba(16,185,129,.1),transparent 50%)}
-.hero h1{font-size:22px;font-weight:700;margin-bottom:8px;position:relative}
-.hero h1 span{color:var(--accent)}
-.hero p{color:var(--muted);font-size:13px;position:relative}
-.hero-stats{display:flex;justify-content:center;gap:24px;margin-top:16px;position:relative}
-.hero-stat{text-align:center}
-.hero-stat .num{font-size:20px;font-weight:700;color:var(--primary2)}
-.hero-stat .label{font-size:10px;color:var(--muted);margin-top:2px}
-/* 搜索栏 */
-.search-bar{padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
-.search-input{width:100%;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:20px;color:var(--text);font-size:14px;outline:none}
-.search-input:focus{border-color:var(--primary)}
-/* 分类标签 */
-.cat-bar{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;white-space:nowrap;background:var(--card)}
-.cat-bar::-webkit-scrollbar{display:none}
-.cat-chip{padding:6px 14px;border-radius:16px;background:var(--card2);border:1px solid var(--border);color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s;flex-shrink:0}
-.cat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
-/* 产品卡片 */
-.product-list{padding:12px 16px 80px}
-.product-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.product-card:active{transform:scale(.98)}
-.product-card .badge-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
-.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
-.tag-cat{background:rgba(59,130,246,.15);color:var(--primary2)}
-.tag-save{background:rgba(16,185,129,.15);color:var(--accent)}
-.tag-roi{background:rgba(245,158,11,.15);color:var(--warn)}
-.product-card h3{font-size:15px;font-weight:600;margin-bottom:6px}
-.product-card .desc{font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.product-card .specs{display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--muted)}
-.product-card .specs span{display:flex;align-items:center;gap:4px}
-.product-card .price{color:var(--accent);font-weight:600;font-size:14px;margin-top:8px}
-.product-card .case-preview{background:var(--card2);border-radius:8px;padding:10px;margin-top:10px;border-left:3px solid var(--accent)}
-.product-card .case-preview .case-title{font-size:12px;font-weight:600;color:var(--primary2);margin-bottom:4px}
-.product-card .case-preview .case-metrics{display:flex;gap:12px;font-size:11px}
-.product-card .case-preview .case-metrics .metric{display:flex;flex-direction:column}
-.product-card .case-preview .case-metrics .metric .v{font-weight:600;color:var(--accent)}
-.product-card .case-preview .case-metrics .metric .l{color:var(--muted);font-size:10px}
-/* 详情弹窗 */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;display:none;backdrop-filter:blur(4px)}
-.modal-overlay.show{display:flex;align-items:flex-end;justify-content:center}
-.modal{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-header{padding:20px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1}
-.modal-header h2{font-size:18px;font-weight:700}
-.modal-header .close{position:absolute;right:20px;top:20px;width:32px;height:32px;border-radius:50%;background:var(--card2);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.modal-body{padding:20px}
-.modal-section{margin-bottom:20px}
-.modal-section h4{font-size:13px;color:var(--primary2);margin-bottom:8px;font-weight:600;display:flex;align-items:center;gap:6px}
-.modal-section h4::before{content:'';width:3px;height:14px;background:var(--primary);border-radius:2px}
-.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.spec-item{background:var(--card);padding:8px 12px;border-radius:8px;border:1px solid var(--border)}
-.spec-item .label{font-size:10px;color:var(--muted)}
-.spec-item .value{font-size:13px;font-weight:500;margin-top:2px}
-.case-detail{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}
-.case-detail .case-title{font-size:14px;font-weight:600;color:var(--primary2);margin-bottom:12px}
-.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
-.compare-col{padding:10px;border-radius:8px}
-.compare-col.before{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
-.compare-col.after{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)}
-.compare-col .label{font-size:10px;color:var(--muted);margin-bottom:4px}
-.compare-col .text{font-size:12px;line-height:1.5}
-.compare-col.before .text{color:#fca5a5}
-.compare-col.after .text{color:#6ee7b7}
-.saving-banner{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(59,130,246,.1));border-radius:10px;padding:14px;text-align:center;margin:12px 0}
-.saving-banner .amount{font-size:24px;font-weight:700;color:var(--accent)}
-.saving-banner .label{font-size:11px;color:var(--muted)}
-.metric-row{display:flex;justify-content:space-around;margin-top:10px}
-.metric-row .m{text-align:center}
-.metric-row .m .v{font-size:16px;font-weight:700;color:var(--primary2)}
-.metric-row .m .l{font-size:10px;color:var(--muted)}
-.highlight-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.highlight-list .hl{padding:4px 10px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:6px;font-size:11px;color:var(--accent)}
-.scene-list{display:flex;flex-wrap:wrap;gap:6px}
-.scene-list .sc{padding:4px 10px;background:var(--card2);border:1px solid var(--border);border-radius:6px;font-size:11px;color:var(--muted)}
-.cert-list{display:flex;flex-wrap:wrap;gap:6px}
-.cert-list .ce{padding:4px 8px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:4px;font-size:11px;color:var(--primary2)}
-/* 底部导航 */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
-.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
-.nav-item.active{color:var(--primary)}
-.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
-/* 空状态 */
-.empty{text-align:center;padding:40px 20px;color:var(--muted)}
-.empty .icon{font-size:40px;margin-bottom:8px}
-/* 案例视图切换 */
-.view-tabs{display:flex;gap:8px;padding:0 16px 8px}
-.view-tab{padding:6px 12px;border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;border:1px solid var(--border)}
-.view-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-/* 案例卡片 */
-.case-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;cursor:pointer;transition:all .2s}
-.case-card:active{transform:scale(.98)}
-.case-card .case-cat{font-size:10px;color:var(--muted);margin-bottom:4px}
-.case-card h3{font-size:14px;margin-bottom:8px}
-.case-card .case-loc{font-size:11px;color:var(--muted);margin-bottom:8px}
-.case-card .case-savings{display:flex;gap:12px}
-.case-card .case-savings .s{display:flex;flex-direction:column}
-.case-card .case-savings .s .v{font-weight:700;color:var(--accent);font-size:14px}
-.case-card .case-savings .s .l{font-size:10px;color:var(--muted)}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e293b 100%);padding:32px 20px;text-align:center}
+.hero h1{font-size:24px;font-weight:700;margin-bottom:6px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:13px;margin-bottom:8px}
+.hero .stats{display:flex;justify-content:center;gap:24px;margin-top:12px}
+.hero .stat{text-align:center}
+.hero .stat .num{font-size:22px;font-weight:700;color:var(--primary2)}
+.hero .stat .label{font-size:11px;color:var(--muted)}
+.container{max-width:1280px;margin:0 auto;padding:16px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;background:var(--card);padding:12px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border);align-items:center}
+.search{flex:1;min-width:200px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;outline:none}
+.search:focus{border-color:var(--primary)}
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.cat-tab{padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:16px;color:var(--muted);font-size:12px;cursor:pointer;transition:all .2s}
+.cat-tab:hover{border-color:var(--primary);color:var(--primary2)}
+.cat-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.cat-tab .count{opacity:.7;margin-left:3px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.product-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .2s;position:relative;display:flex;flex-direction:column}
+.product-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,.15)}
+.cat-badge{position:absolute;top:12px;right:12px;padding:2px 8px;background:rgba(59,130,246,.15);color:#93c5fd;border-radius:4px;font-size:10px;font-weight:600}
+.hot-badge{position:absolute;top:12px;left:12px;padding:2px 8px;background:rgba(245,158,11,.2);color:#fbbf24;border-radius:4px;font-size:10px;font-weight:600}
+.product-head{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.product-icon{width:40px;height:40px;background:var(--card2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.product-meta{flex:1;min-width:0}
+.product-id{font-size:10px;color:var(--muted);font-family:'Courier New',monospace}
+.product-brand{font-size:11px;color:var(--primary2)}
+.product-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.3}
+.product-model{font-size:11px;color:var(--muted);margin-bottom:8px}
+.product-spec{font-size:12px;color:var(--text);background:var(--card2);padding:8px 10px;border-radius:6px;margin-bottom:8px;line-height:1.5}
+.product-section{margin-top:8px}
+.product-section .sec-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
+.product-section .sec-content{font-size:12px;color:var(--text);line-height:1.5}
+.features{display:flex;flex-wrap:wrap;gap:4px}
+.feature-tag{padding:2px 6px;background:var(--card2);border:1px solid var(--border);border-radius:3px;font-size:10px;color:#94a3b8}
+.product-foot{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.product-price{font-size:16px;font-weight:700;color:var(--accent)}
+.product-unit{font-size:11px;color:var(--muted);margin-left:2px}
+.btn-cta{padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-cta:hover{background:#2563eb}
+.scenarios{display:flex;flex-wrap:wrap;gap:4px}
+.scenario-tag{padding:2px 6px;background:rgba(16,185,129,.1);color:#6ee7b7;border-radius:3px;font-size:10px}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .icon{font-size:48px;opacity:.3;margin-bottom:10px}
 </style>
 </head>
 <body>
-
 <div class="hero">
-<h1>环保设备<span>·降本增效</span>商城</h1>
-<p>每款设备都有真实案例 · 每笔投入都算清回报</p>
-<div class="hero-stats">
-<div class="hero-stat"><div class="num" id="stat-products">-</div><div class="label">设备产品</div></div>
-<div class="hero-stat"><div class="num" id="stat-cases">-</div><div class="label">实战案例</div></div>
-<div class="hero-stat"><div class="num" id="stat-saving">-</div><div class="label">年均降本万</div></div>
-<div class="hero-stat"><div class="num">7</div><div class="label">领域覆盖</div></div>
+<h1>环保监管传感器<span>·设备商城</span></h1>
+<p>10大类 · 56件专业仪器 · 覆盖水/气/声/土/固/废/辐射/生态/执法全场景</p>
+<div class="stats">
+<div class="stat"><div class="num" id="stat-total">0</div><div class="label">产品总数</div></div>
+<div class="stat"><div class="num" id="stat-cat">0</div><div class="label">分类数</div></div>
+<div class="stat"><div class="num" id="stat-brand">0</div><div class="label">品牌数</div></div>
+<div class="stat"><div class="num" id="stat-hot">0</div><div class="label">热门款</div></div>
 </div>
 </div>
 
-<div class="search-bar">
-<input class="search-input" id="search" placeholder="搜索设备 / 行业 / 污染物..." oninput="doSearch()">
+<div class="container">
+<div class="toolbar">
+<input type="text" class="search" id="searchBox" placeholder="搜索产品名/型号/品牌/应用场景...">
+<div class="cat-tabs" id="catTabs"></div>
 </div>
 
-<div class="cat-bar" id="cat-bar"></div>
-
-<div class="view-tabs">
-<div class="view-tab active" onclick="switchView('products')">设备列表</div>
-<div class="view-tab" onclick="switchView('cases')">案例视图</div>
-</div>
-
-<div class="product-list" id="product-list"></div>
-
-<div class="bottom-nav">
-<a class="nav-item" href="index.html"><span class="icon">🏠</span>首页</a>
-<a class="nav-item" href="knowledge.html"><span class="icon">📚</span>知识库</a>
-<a class="nav-item active" href="equipment-mall.html"><span class="icon">🛒</span>设备商城</a>
-<a class="nav-item" href="m-report.html"><span class="icon">📢</span>举报</a>
-<a class="nav-item" href="m-workspace.html"><span class="icon">📋</span>工作台</a>
-</div>
-
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-<div class="modal" id="modal"></div>
+<div class="products" id="productsGrid"></div>
 </div>
 
 <script>
-var API_BASE='';
-var allProducts=[];
-var currentCat='all';
-var currentView='products';
-var searchKeyword='';
-
-// API 降级
-var _apiFallbackMap={'/api/equipment':'/api-data/equipment.json','/api/equipment/categories':'/api-data/equipment.json'};
-var _origFetch=window.fetch;
-window.fetch=function(url,opts){
-return _origFetch(url,opts).catch(function(){
-var fb=_apiFallbackMap[url]||_apiFallbackMap[url.split('?')[0]];
-if(fb)return _origFetch(fb);
-throw new Error('API unavailable: '+url);
-});
+const DATA = {
+  cats: [
+    {id:'all',name:'全部',icon:'🌐'},
+    {id:'water',name:'水质监测',icon:'💧'},
+    {id:'air',name:'大气监测',icon:'🌫️'},
+    {id:'noise',name:'噪声监测',icon:'🔊'},
+    {id:'soil',name:'土壤监测',icon:'🌱'},
+    {id:'waste',name:'固废危废',icon:'☣️'},
+    {id:'voc',name:'VOCs监测',icon:'💨'},
+    {id:'radiation',name:'辐射监测',icon:'☢️'},
+    {id:'ecological',name:'生态监测',icon:'🦅'},
+    {id:'portable',name:'便携执法',icon:'📱'},
+    {id:'platform',name:'监测平台',icon:'🖥️'}
+  ]
 };
 
-function loadData(){
-fetch('/api/equipment').then(function(r){return r.json()}).then(function(data){
-allProducts=data.products||data||[];
-renderCats();
-renderStats();
-render();
-}).catch(function(){
-// 使用内嵌数据
-allProducts=EMBEDDED_PRODUCTS;
-renderCats();
-renderStats();
-render();
-});
+let PRODUCTS = [];
+let currentCat = 'all';
+
+(async function(){
+  try {
+    const res = await fetch('equipment-catalog.json', {cache:'no-store'});
+    const data = await res.json();
+    PRODUCTS = data.products;
+    const brandSet = new Set(PRODUCTS.map(p => p.brand));
+    const hotCount = PRODUCTS.filter(p => p.hot).length;
+    document.getElementById('stat-total').textContent = PRODUCTS.length;
+    document.getElementById('stat-cat').textContent = data.categories.length;
+    document.getElementById('stat-brand').textContent = brandSet.size;
+    document.getElementById('stat-hot').textContent = hotCount;
+  } catch(e) {
+    PRODUCTS = FALLBACK;
+    document.getElementById('stat-total').textContent = PRODUCTS.length;
+  }
+  renderTabs();
+  renderProducts();
+  document.getElementById('searchBox').addEventListener('input', renderProducts);
+})();
+
+function renderTabs(){
+  const el = document.getElementById('catTabs');
+  const counts = {};
+  PRODUCTS.forEach(p => counts[p.cat] = (counts[p.cat] || 0) + 1);
+  el.innerHTML = DATA.cats.map(c => {
+    const n = c.id === 'all' ? PRODUCTS.length : (counts[c.id] || 0);
+    return `<div class="cat-tab ${c.id===currentCat?'active':''}" data-id="${c.id}">${c.icon} ${c.name}<span class="count">${n}</span></div>`;
+  }).join('');
+  el.querySelectorAll('.cat-tab').forEach(t => t.addEventListener('click', () => {
+    currentCat = t.dataset.id;
+    renderTabs();
+    renderProducts();
+  }));
 }
 
-function renderStats(){
-document.getElementById('stat-products').textContent=allProducts.length;
-document.getElementById('stat-cases').textContent=allProducts.length;
-var totalSaving=0;
-allProducts.forEach(function(p){
-var m=p.case.saving.match(/(\d+\.?\d*)/);
-if(m)totalSaving+=parseFloat(m[1]);
-});
-document.getElementById('stat-saving').textContent=Math.round(totalSaving);
+function renderProducts(){
+  const q = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+  const list = PRODUCTS.filter(p => {
+    if (currentCat !== 'all' && p.cat !== currentCat) return false;
+    if (!q) return true;
+    const hay = [p.name, p.model, p.brand, p.spec, p.applications, ...(p.scenarios||[]), ...(p.features||[])].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  const grid = document.getElementById('productsGrid');
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><div>没有找到匹配的产品</div></div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const catName = (DATA.cats.find(c => c.id === p.cat)||{}).name || p.cat;
+    const icon = (DATA.cats.find(c => c.id === p.cat)||{}).icon || '📦';
+    return `
+<article class="product-card">
+  ${p.hot ? '<span class="hot-badge">🔥 热门</span>' : ''}
+  <span class="cat-badge">${catName}</span>
+  <div class="product-head">
+    <div class="product-icon">${icon}</div>
+    <div class="product-meta">
+      <div class="product-id">${p.id}</div>
+      <div class="product-brand">${p.brand}</div>
+    </div>
+  </div>
+  <div class="product-title">${p.name}</div>
+  <div class="product-model">型号: ${p.model}</div>
+  <div class="product-spec">📊 ${p.spec}</div>
+  <div class="product-section">
+    <div class="sec-title">🎯 应用场景</div>
+    <div class="scenarios">${(p.scenarios||[]).map(s => `<span class="scenario-tag">${s}</span>`).join('')}</div>
+  </div>
+  <div class="product-section">
+    <div class="sec-title">⚙️ 核心特性</div>
+    <div class="features">${(p.features||[]).map(f => `<span class="feature-tag">${f}</span>`).join('')}</div>
+  </div>
+  <div class="product-section">
+    <div class="sec-title">💡 监管说明</div>
+    <div class="sec-content">${p.applications}</div>
+  </div>
+  <div class="product-foot">
+    <div><span class="product-price">${p.price}</span><span class="product-unit">/${p.unit}</span></div>
+    <button class="btn-cta" onclick="inquire('${p.id}','${p.name.replace(/'/g, '\\&#39;')}')">询价</button>
+  </div>
+</article>`;
+  }).join('');
 }
 
-function renderCats(){
-var cats=[{key:'all',name:'全部'}];
-var seen={};
-allProducts.forEach(function(p){
-if(!seen[p.category]){
-cats.push({key:p.category,name:p.category});
-seen[p.category]=1;
-}
-});
-var html=cats.map(function(c){
-return '<div class="cat-chip'+(c.key===currentCat?' active':'')+'" onclick="selectCat(\''+c.key+'\')">'+c.name+'</div>';
-}).join('');
-document.getElementById('cat-bar').innerHTML=html;
+function inquire(id, name){
+  const text = `已记录询价：${name}（${id}）。客服将在24小时内联系您。`;
+  if (typeof epbToast === 'function') epbToast(text, 'success');
+  else if (window.AIAssistant) window.AIAssistant.open();
+  else alert(text);
 }
 
-function selectCat(cat){
-currentCat=cat;
-renderCats();
-render();
-}
-
-function switchView(view){
-currentView=view;
-document.querySelectorAll('.view-tab').forEach(function(t){t.classList.remove('active')});
-event.target.classList.add('active');
-render();
-}
-
-function doSearch(){
-searchKeyword=document.getElementById('search').value.toLowerCase().trim();
-render();
-}
-
-function getFiltered(){
-var list=allProducts;
-if(currentCat!=='all'){
-list=list.filter(function(p){return p.category===currentCat});
-}
-if(searchKeyword){
-list=list.filter(function(p){
-return p.name.toLowerCase().indexOf(searchKeyword)>=0||
-p.description.toLowerCase().indexOf(searchKeyword)>=0||
-p.category.toLowerCase().indexOf(searchKeyword)>=0||
-p.tags.some(function(t){return t.toLowerCase().indexOf(searchKeyword)>=0})||
-p.applicable_scenarios.some(function(s){return s.toLowerCase().indexOf(searchKeyword)>=0});
-});
-}
-return list;
-}
-
-function render(){
-var list=getFiltered();
-var container=document.getElementById('product-list');
-if(list.length===0){
-container.innerHTML='<div class="empty"><div class="icon">🔍</div>未找到匹配的设备</div>';
-return;
-}
-if(currentView==='cases'){
-container.innerHTML=list.map(renderCaseCard).join('');
-}else{
-container.innerHTML=list.map(renderProductCard).join('');
-}
-}
-
-function renderProductCard(p){
-var c=p.case;
-var savingNum=c.saving.match(/[\d.]+/);
-var savingText=savingNum?savingNum[0]+'万':'-';
-return '<div class="product-card" onclick="showDetail(\''+p.id+'\')">'+
-'<div class="badge-row">'+
-'<span class="tag tag-cat">'+p.category+'</span>'+
-'<span class="tag tag-save">年省'+savingText+'</span>'+
-'<span class="tag tag-roi">ROI '+c.roi+'</span>'+
-'</div>'+
-'<h3>'+p.name+'</h3>'+
-'<div class="desc">'+p.description+'</div>'+
-'<div class="specs">'+
-'<span>💰 '+p.price_range+'</span>'+
-'<span>⚙️ '+p.capacity+'</span>'+
-'<span>🏢 '+p.brand+'</span>'+
-'</div>'+
-'<div class="price">'+p.price_range+'</div>'+
-'<div class="case-preview">'+
-'<div class="case-title">📦 '+c.title+'</div>'+
-'<div class="case-metrics">'+
-'<div class="metric"><span class="v">'+savingText+'</span><span class="l">年节省</span></div>'+
-'<div class="metric"><span class="v">'+c.payback.replace(/年.*/,'年')+'</span><span class="l">回收期</span></div>'+
-'<div class="metric"><span class="v">'+c.roi+'</span><span class="l">投资回报</span></div>'+
-'</div>'+
-'</div>'+
-'</div>';
-}
-
-function renderCaseCard(p){
-var c=p.case;
-return '<div class="case-card" onclick="showDetail(\''+p.id+'\')">'+
-'<div class="case-cat">'+p.category+' · '+c.industry+' · '+c.location+'</div>'+
-'<h3>'+c.title+'</h3>'+
-'<div class="case-loc">设备：'+p.name+'</div>'+
-'<div class="case-savings">'+
-'<div class="s"><span class="v">'+c.saving+'</span><span class="l">年节省</span></div>'+
-'<div class="s"><span class="v">'+c.payback+'</span><span class="l">回收期</span></div>'+
-'<div class="s"><span class="v">'+c.roi+'</span><span class="l">回报率</span></div>'+
-'</div>'+
-'</div>';
-}
-
-function showDetail(pid){
-var p=allProducts.filter(function(x){return x.id===pid})[0];
-if(!p)return;
-var c=p.case;
-var html='<div class="modal-header">'+
-'<h2>'+p.name+'</h2>'+
-'<button class="close" onclick="closeModal()">✕</button>'+
-'</div><div class="modal-body">';
-
-// 标签
-html+='<div class="badge-row" style="margin-bottom:16px">'+
-p.tags.map(function(t){return '<span class="tag tag-cat">'+t+'</span>'}).join('')+
-'</div>';
-
-// 描述
-html+='<div class="modal-section">'+
-'<h4>产品概述</h4>'+
-'<p style="font-size:13px;line-height:1.7;color:var(--text)">'+p.description+'</p>'+
-'</div>';
-
-// 规格参数
-html+='<div class="modal-section">'+
-'<h4>规格参数</h4>'+
-'<div class="spec-grid">'+
-'<div class="spec-item"><div class="label">品牌型号</div><div class="value">'+p.brand+' '+p.model+'</div></div>'+
-'<div class="spec-item"><div class="label">处理能力</div><div class="value">'+p.capacity+'</div></div>'+
-'<div class="spec-item"><div class="label">功率</div><div class="value">'+p.power+'</div></div>'+
-'<div class="spec-item"><div class="label">占地面积</div><div class="value">'+p.footprint+'</div></div>'+
-'<div class="spec-item"><div class="label">价格区间</div><div class="value" style="color:var(--accent)">'+p.price_range+'</div></div>'+
-'<div class="spec-item"><div class="label">安装周期</div><div class="value">'+p.installation_period+'</div></div>'+
-'<div class="spec-item"><div class="label">质保</div><div class="value">'+p.warranty+'</div></div>'+
-'<div class="spec-item"><div class="label">认证</div><div class="value" style="font-size:11px">'+p.certifications.join('、')+'</div></div>'+
-'</div>'+
-'</div>';
-
-// 案例详情
-html+='<div class="modal-section">'+
-'<h4>实战案例 · 降本增效分析</h4>'+
-'<div class="case-detail">'+
-'<div class="case-title">📦 '+c.title+'</div>'+
-'<div style="font-size:11px;color:var(--muted);margin-bottom:12px">'+c.industry+' · '+c.location+'</div>'+
-
-'<div class="compare-row">'+
-'<div class="compare-col before">'+
-'<div class="label">改造前</div>'+
-'<div class="text">'+c.before+'</div>'+
-'</div>'+
-'<div class="compare-col after">'+
-'<div class="label">改造后</div>'+
-'<div class="text">'+c.after+'</div>'+
-'</div>'+
-'</div>'+
-
-'<div class="compare-row">'+
-'<div class="compare-col before">'+
-'<div class="label">改造前成本</div>'+
-'<div class="text">'+c.cost_before+'</div>'+
-'</div>'+
-'<div class="compare-col after">'+
-'<div class="label">改造后成本</div>'+
-'<div class="text">'+c.cost_after+'</div>'+
-'</div>'+
-'</div>'+
-
-'<div class="saving-banner">'+
-'<div class="amount">'+c.saving+'</div>'+
-'<div class="label">年均节省</div>'+
-'</div>'+
-
-'<div class="metric-row">'+
-'<div class="m"><div class="v">'+c.payback+'</div><div class="l">投资回收期</div></div>'+
-'<div class="m"><div class="v">'+c.roi+'</div><div class="l">投资回报率</div></div>'+
-'<div class="m"><div class="v">'+c.compliance+'</div><div class="l">达标标准</div></div>'+
-'</div>'+
-
-'<div style="margin-top:12px">'+
-'<div style="font-size:12px;color:var(--muted);margin-bottom:6px">核心亮点</div>'+
-'<div class="highlight-list">'+
-c.highlights.map(function(h){return '<span class="hl">'+h+'</span>'}).join('')+
-'</div>'+
-'</div>'+
-'</div>'+
-'</div>';
-
-// 适用场景
-html+='<div class="modal-section">'+
-'<h4>适用场景</h4>'+
-'<div class="scene-list">'+
-p.applicable_scenarios.map(function(s){return '<span class="sc">'+s+'</span>'}).join('')+
-'</div>'+
-'</div>';
-
-// 认证
-html+='<div class="modal-section">'+
-'<h4>资质认证</h4>'+
-'<div class="cert-list">'+
-p.certifications.map(function(ce){return '<span class="ce">'+ce+'</span>'}).join('')+
-'</div>'+
-'</div>';
-
-html+='</div>';
-
-document.getElementById('modal').innerHTML=html;
-document.getElementById('modal-overlay').classList.add('show');
-}
-
-function closeModal(e){
-if(e&&e.target!==document.getElementById('modal-overlay'))return;
-document.getElementById('modal-overlay').classList.remove('show');
-}
-
-// 初始化
-loadData();
+// 静态fallback（fetch失败时）
+const FALLBACK = [
+  {id:'W-001',cat:'water',name:'COD在线监测仪',brand:'聚光科技',model:'COD-2000',spec:'量程0-5000mg/L',price:'¥58,000',unit:'台',scenarios:['化工'],features:['HJ 377'],applications:'COD监测',hot:true},
+  {id:'A-001',cat:'air',name:'PM2.5监测仪',brand:'赛默飞',model:'TEOM 1405',spec:'量程0-10mg/m³',price:'¥128,000',unit:'台',scenarios:['国控站'],features:['β射线法'],applications:'颗粒物监测',hot:true}
+];
 </script>
+<script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
 </body>

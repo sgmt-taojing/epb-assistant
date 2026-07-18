@@ -1,0 +1,447 @@
+{
+  "version": "v1.0",
+  "lastUpdate": "2026-07-18",
+  "totalSensors": 56,
+  "categories": [
+    {"id":"water","name":"水质监测","icon":"💧","count":12},
+    {"id":"air","name":"大气监测","icon":"🌫️","count":10},
+    {"id":"noise","name":"噪声监测","icon":"🔊","count":6},
+    {"id":"soil","name":"土壤监测","icon":"🌱","count":6},
+    {"id":"waste","name":"固废危废","icon":"☣️","count":5},
+    {"id":"voc","name":"VOCs监测","icon":"💨","count":5},
+    {"id":"radiation","name":"辐射监测","icon":"☢️","count":3},
+    {"id":"ecological","name":"生态监测","icon":"🦅","count":4},
+    {"id":"portable","name":"便携执法","icon":"📱","count":3},
+    {"id":"platform","name":"监测平台","icon":"🖥️","count":2}
+  ],
+  "products": [
+    {
+      "id":"W-001","cat":"water","name":"COD在线监测仪","brand":"聚光科技","model":"COD-2000",
+      "spec":"量程0-5000mg/L，检出限5mg/L，重复性±3%","price":"¥58,000","unit":"台",
+      "scenarios":["化工园区废水排口","生活污水处理厂","工业园区集中处理设施"],
+      "features":["国标HJ 377-2008","壁挂式安装","4-20mA/RS485输出","IP65防护"],
+      "applications":"实时监测化学需氧量，超标自动报警并上传环保平台",
+      "tag":"在线监测","hot":true
+    },
+    {
+      "id":"W-002","cat":"water","name":"氨氮在线分析仪","brand":"哈希","model":"Amtax NA8000",
+      "spec":"量程0-1000mg/L，检出限0.05mg/L","price":"¥72,000","unit":"台",
+      "scenarios":["市政污水厂","印染废水","制药废水"],
+      "features":["气液分离电极法","自动清洗","远程校准","符合HJ 536"],
+      "applications":"监测水中氨氮浓度，识别氨氮污染源",
+      "tag":"在线监测"
+    },
+    {
+      "id":"W-003","cat":"water","name":"总磷总氮分析仪","brand":"岛津","model":"TNP-4110",
+      "spec":"TP 0-20mg/L，TN 0-200mg/L","price":"¥98,000","unit":"台",
+      "scenarios":["污水处理厂出水","地表水监测站"],
+      "features":["双参数同时测量","紫外消解","自动稀释","符合HJ 670"],
+      "applications":"总磷总氮双参数同时监测，水体富营养化预警",
+      "tag":"在线监测","hot":true
+    },
+    {
+      "id":"W-004","cat":"water","name":"重金属多参数水质仪","brand":"聚光科技","model":"ICP-MS-5000",
+      "spec":"可测铅镉铬砷汞等23种元素","price":"¥268,000","unit":"台",
+      "scenarios":["电镀行业废水","重金属污染场地","饮用水源地"],
+      "features":["电感耦合等离子体质谱","检出限ppb级","自动进样","符合HJ 700"],
+      "applications":"同时监测多种重金属，电镀/冶炼行业监管利器",
+      "tag":"重金属","hot":true
+    },
+    {
+      "id":"W-005","cat":"water","name":"pH/电导率/溶解氧三合一","brand":"哈希","model":"HQd Portable",
+      "spec":"pH 0-14，电导率0-200mS/cm，DO 0-20mg/L","price":"¥28,500","unit":"台",
+      "scenarios":["现场执法快速检测","污染事故应急监测"],
+      "features":["便携式","防水IP67","可充电","数据无线上传"],
+      "applications":"执法现场水质快速检测，必备便携设备",
+      "tag":"便携执法","hot":true
+    },
+    {
+      "id":"W-006","cat":"water","name":"高锰酸盐指数分析仪","brand":"连华科技","model":"LH-COD-3M",
+      "spec":"量程0-10mg/L","price":"¥42,000","unit":"台",
+      "scenarios":["饮用水源地","地表水断面"],
+      "features":["符合GB 11892","滴定法原理","自动加液","免维护设计"],
+      "applications":"饮用水源地水质监测，识别有机污染"
+    },
+    {
+      "id":"W-007","cat":"water","name":"水质生物毒性在线监测仪","brand":"以色列BBE","model":"toxControl",
+      "spec":"发光细菌法，15分钟出结果","price":"¥380,000","unit":"台",
+      "scenarios":["化工园区排口","制药废水","事故应急"],
+      "features":["生物毒性快速预警","无人值守","超标自动留样","实时上传"],
+      "applications":"应急监测预警，识别有毒有害污染物排放",
+      "tag":"生物毒性","hot":true
+    },
+    {
+      "id":"W-008","cat":"water","name":"总有机碳TOC分析仪","brand":"岛津","model":"TOC-L CPH",
+      "spec":"量程0-30000mg/L","price":"¥158,000","unit":"台",
+      "scenarios":["制药/半导体纯水","污水厂"],
+      "features":["催化燃烧氧化法","NDIR检测","检出限4μg/L"],
+      "applications":"高浓度有机污染物总量监测"
+    },
+    {
+      "id":"W-009","cat":"water","name":"蓝绿藻在线监测仪","brand":"海鸟","model":"BGA-600",
+      "spec":"量程0-200万cells/mL","price":"¥85,000","unit":"台",
+      "scenarios":["湖泊水库","饮用水源地"],
+      "features":["荧光法原理","无试剂","实时报警","太阳能供电"],
+      "applications":"湖泊水库蓝藻爆发预警，饮用水安全",
+      "tag":"富营养化"
+    },
+    {
+      "id":"W-010","cat":"water","name":"紫外(UV)吸收水质仪","brand":"哈希","model":"UVAS sc",
+      "spec":"254nm等效COD/SAC","price":"¥68,000","unit":"台",
+      "scenarios":["工业废水","市政污水"],
+      "features":["无试剂","响应快","免维护","符合ISO 11206"],
+      "applications":"COD等效监测，可作为排放预警"
+    },
+    {
+      "id":"W-011","cat":"water","name":"阴离子表面活性剂分析仪","brand":"聚光","model":"AN-1000",
+      "spec":"量程0-5mg/L","price":"¥52,000","unit":"台",
+      "scenarios":["日化洗涤废水","印染废水"],
+      "features":["亚甲基蓝分光光度法","符合GB 7494"],
+      "applications":"洗涤剂污染监管"
+    },
+    {
+      "id":"W-012","cat":"water","name":"五参数水质自动监测浮标","brand":"海兰信","model":"AquaBuoy-5",
+      "spec":"pH+DO+电导率+浊度+温度","price":"¥168,000","unit":"台",
+      "scenarios":["江河湖库地表水","近岸海域"],
+      "features":["浮标式部署","4G/北斗通信","太阳能供电","IP68防水"],
+      "applications":"地表水断面水质监测，自动巡查报警",
+      "tag":"地表水","hot":true
+    },
+    {
+      "id":"A-001","cat":"air","name":"PM2.5/PM10颗粒物监测仪","brand":"赛默飞","model":"TEOM 1405",
+      "spec":"量程0-10mg/m³，检出限0.1μg/m³","price":"¥128,000","unit":"台",
+      "scenarios":["国控城市站","工业园区空气站","建筑工地"],
+      "features":["β射线法+微量振荡天平","符合HJ 653","实时上传"],
+      "applications":"环境空气颗粒物监测，雾霾预警",
+      "tag":"在线监测","hot":true
+    },
+    {
+      "id":"A-002","cat":"air","name":"SO2/NOx/O3三参数分析仪","brand":"赛默飞","model":"i-series",
+      "spec":"SO2 0-500ppb，NOx 0-500ppb，O3 0-500ppb","price":"¥258,000","unit":"台",
+      "scenarios":["国控/省控空气站","工业园区"],
+      "features":["紫外吸收+化学发光","符合HJ 482","自动校零"],
+      "applications":"环境空气常规污染物监测",
+      "tag":"在线监测"
+    },
+    {
+      "id":"A-003","cat":"air","name":"CO分析仪","brand":"霍尼韦尔","model":"MLT 4",
+      "spec":"量程0-50ppm","price":"¥48,000","unit":"台",
+      "scenarios":["环境空气","工业源周边"],
+      "features":["红外吸收法","符合HJ 695","快速响应"],
+      "applications":"CO污染监测"
+    },
+    {
+      "id":"A-004","cat":"air","name":"大气环境监测微型站","brand":"聚光","model":"AQMS-100",
+      "spec":"6参数(SO2/NO2/CO/O3/PM2.5/PM10)","price":"¥98,000","unit":"套",
+      "scenarios":["街道社区网格化","污染溯源","工地扬尘"],
+      "features":["一体化设计","太阳能供电","4G上传","网格化部署"],
+      "applications":"大气网格化监测，精准溯源污染源",
+      "tag":"网格化","hot":true
+    },
+    {
+      "id":"A-005","cat":"air","name":"激光雷达(垂直/水平)","brand":"无锡中科光电","model":"Lidar-1000",
+      "spec":"垂直探测5km，水平扫描10km","price":"¥580,000","unit":"台",
+      "scenarios":["工业园区","港口","大型企业厂界"],
+      "features":["三维扫描","走航车搭载","污染团追踪"],
+      "applications":"污染溯源、走航监测",
+      "tag":"溯源","hot":true
+    },
+    {
+      "id":"A-006","cat":"air","name":"氨气(NH3)在线监测仪","brand":"英国Protea","model":"Atmos",
+      "spec":"量程0-100ppm","price":"¥86,000","unit":"台",
+      "scenarios":["化工园区","养殖业周边"],
+      "features":["红外可调谐激光","无干扰","快速响应"],
+      "applications":"恶臭/养殖污染监管"
+    },
+    {
+      "id":"A-007","cat":"air","name":"恶臭电子鼻监测系统","brand":"德国Airsense","model":"PEN3",
+      "spec":"10种金属氧化物传感器","price":"¥186,000","unit":"台",
+      "scenarios":["垃圾处理厂","污水处理厂","化工厂"],
+      "features":["模式识别","实时报警","数据云端"],
+      "applications":"恶臭污染投诉监测",
+      "tag":"恶臭"
+    },
+    {
+      "id":"A-008","cat":"air","name":"烟气在线监测系统(CEMS)","brand":"聚光","model":"CEMS-2000",
+      "spec":"SO2/NOx/颗粒物/含氧量","price":"¥298,000","unit":"套",
+      "scenarios":["燃煤锅炉","垃圾焚烧电厂","钢铁焦化"],
+      "features":["符合HJ 75-2017","直接抽取法","远程质控"],
+      "applications":"固定污染源烟气排放在线监测",
+      "tag":"污染源","hot":true
+    },
+    {
+      "id":"A-009","cat":"air","name":"扬尘在线监测仪","brand":"蓝盾","model":"LD-108",
+      "spec":"PM2.5+PM10+噪声+气象","price":"¥18,800","unit":"台",
+      "scenarios":["建筑工地","道路施工","堆场码头"],
+      "features":["太阳能供电","视频监控","超标喷淋联动"],
+      "applications":"工地扬尘污染监管",
+      "tag":"工地"
+    },
+    {
+      "id":"A-010","cat":"air","name":"温室气体(CO2/CH4)监测站","brand":"Picarro","model":"G2301",
+      "spec":"CO2 0-1000ppm，CH4 0-30ppm","price":"¥450,000","unit":"台",
+      "scenarios":["城市温室气体监测","工业园区碳监测试点"],
+      "features":["光腔衰荡光谱","±0.05ppm精度","无人值守"],
+      "applications":"碳达峰碳中和监测",
+      "tag":"碳监测","hot":true
+    },
+    {
+      "id":"N-001","cat":"noise","name":"多功能噪声在线监测仪","brand":"杭州爱华","model":"AWA6228+",
+      "spec":"20-140dB，0.1dB分辨率","price":"¥22,500","unit":"台",
+      "scenarios":["城市功能区","工业园区厂界","交通干线"],
+      "features":["24小时连续监测","4G上传","超标报警","符合GB 3096"],
+      "applications":"噪声投诉监测、工业厂界噪声监管",
+      "tag":"噪声","hot":true
+    },
+    {
+      "id":"N-002","cat":"noise","name":"噪声振动一体化监测站","brand":"杭州爱华","model":"AWA5936",
+      "spec":"噪声+振动+气象五参数","price":"¥48,000","unit":"台",
+      "scenarios":["城市轨道交通沿线","建筑施工场地"],
+      "features":["多功能集成","远程访问","数据存储90天"],
+      "applications":"振动污染监测"
+    },
+    {
+      "id":"N-003","cat":"noise","name":"便携式噪声分析仪","brand":"B&K","model":"2240",
+      "spec":"20-140dB，符合IEC 61672 Class 1","price":"¥58,000","unit":"台",
+      "scenarios":["现场执法","建筑工地检查","投诉处理"],
+      "features":["手持便携","GPS定位","录音回放"],
+      "applications":"噪声执法现场取证",
+      "tag":"便携执法"
+    },
+    {
+      "id":"N-004","cat":"noise","name":"机场噪声在线监测系统","brand":"德国Norsonic","model":"Nor140",
+      "spec":"全天候高采样率","price":"¥88,000","unit":"台",
+      "scenarios":["机场周边","航空噪声投诉"],
+      "features":["飞行情报数据接入","事件触发","航迹叠加"],
+      "applications":"机场噪声精细化监管"
+    },
+    {
+      "id":"N-005","cat":"noise","name":"工业企业厂界噪声智能监测","brand":"聚光","model":"EPB-N100",
+      "spec":"+视频联动+超标自动取证","price":"¥38,000","unit":"台",
+      "scenarios":["重点监管企业厂界"],
+      "features":["AI识别噪声源","视频联动","证据链"],
+      "applications":"厂界噪声非现场执法",
+      "tag":"非现场执法","hot":true
+    },
+    {
+      "id":"N-006","cat":"noise","name":"中高考噪声保障监测站","brand":"蓝盾","model":"LD-N01",
+      "spec":"临时快速部署","price":"¥12,800","unit":"台",
+      "scenarios":["考点周边临时部署"],
+      "features":["即装即用","电池续航72h","云端管理"],
+      "applications":"特殊时段噪声保障"
+    },
+    {
+      "id":"S-001","cat":"soil","name":"土壤重金属快速检测仪","brand":"聚光科技","model":"XRF-2000",
+      "spec":"可测铅镉铬砷汞等14元素","price":"¥268,000","unit":"台",
+      "scenarios":["污染地块","农田土壤","矿山周边"],
+      "features":["X射线荧光","现场快速","检出限ppm级","符合HJ 680"],
+      "applications":"污染场地调查、土壤修复监测",
+      "tag":"土壤","hot":true
+    },
+    {
+      "id":"S-002","cat":"soil","name":"土壤多参数监测站","brand":"海兰信","model":"SoilSense-5",
+      "spec":"水分/温度/EC/pH/盐分","price":"¥28,800","unit":"台",
+      "scenarios":["农田","污染修复场地"],
+      "features":["多深度分层","太阳能供电","4G/北斗"],
+      "applications":"土壤环境质量长期监测"
+    },
+    {
+      "id":"S-003","cat":"soil","name":"地下水监测井系统","brand":"美国Solinst","model":"Levelogger 5",
+      "spec":"水位+温度+电导率","price":"¥18,500","unit":"套",
+      "scenarios":["污染地块地下水"],
+      "features":["无人值守","自动记录","5年续航"],
+      "applications":"地下水污染扩散监测"
+    },
+    {
+      "id":"S-004","cat":"soil","name":"土壤VOC快速检测箱","brand":"美国PI","model":"Inficon Hapsite",
+      "spec":"便携GC-MS","price":"¥580,000","unit":"台",
+      "scenarios":["污染场地调查","应急监测"],
+      "features":["现场30分钟出结果","识别100+ VOC","便携"],
+      "applications":"污染地块挥发性有机物快速筛查",
+      "tag":"应急"
+    },
+    {
+      "id":"S-005","cat":"soil","name":"土壤取样机器人","brand":"德国Geoprobe","model":"7822DT",
+      "spec":"直接推进式钻探","price":"¥680,000","unit":"台",
+      "scenarios":["深层污染场地"],
+      "features":["无扰动取样","最深30m","现场快速"],
+      "applications":"深层土壤及地下水取样"
+    },
+    {
+      "id":"S-006","cat":"soil","name":"农田土壤环境监测一体站","brand":"聚光","model":"SoilGuard-300",
+      "spec":"重金属+有机物+养分","price":"¥98,000","unit":"台",
+      "scenarios":["基本农田","蔬菜基地"],
+      "features":["连续监测","超标预警","可追溯"],
+      "applications":"农田环境监管"
+    },
+    {
+      "id":"WA-001","cat":"waste","name":"危废智能称重系统","brand":"聚光","model":"HWaste-W200",
+      "spec":"+RFID识别+视频联动","price":"¥68,000","unit":"台",
+      "scenarios":["产废企业","危废经营单位"],
+      "features":["自动称重","刷卡绑定","视频证据","数据直传"],
+      "applications":"危废转移全过程监管",
+      "tag":"危废","hot":true
+    },
+    {
+      "id":"WA-002","cat":"waste","name":"危废贮存间智能监控","brand":"海康","model":"iWaste-Cam",
+      "spec":"门禁+视频+温湿度+气体","price":"¥38,000","unit":"台",
+      "scenarios":["危废暂存间","贮存库"],
+      "features":["人脸识别","超标报警","日志追溯"],
+      "applications":"危废暂存间全方位监管"
+    },
+    {
+      "id":"WA-003","cat":"waste","name":"医疗废物智能收集车","brand":"聚光","model":"MW-V200",
+      "spec":"自动称重+扫码+GPS","price":"¥28,800","unit":"台",
+      "scenarios":["医院","医废集中处置中心"],
+      "features":["无接触收集","全程GPS","数据上链"],
+      "applications":"医疗废物分类收集监管"
+    },
+    {
+      "id":"WA-004","cat":"waste","name":"废气焚烧炉在线监测","brand":"西门子","model":"FTIR Gasmet",
+      "spec":"多组分同时测","price":"¥320,000","unit":"台",
+      "scenarios":["危废焚烧","医疗废物处置"],
+      "features":["FTIR红外","30+种污染物","秒级响应"],
+      "applications":"焚烧炉烟气精细化监管",
+      "tag":"焚烧"
+    },
+    {
+      "id":"WA-005","cat":"waste","name":"工业固废在线溯源系统","brand":"航天信息","model":"iTrack-W",
+      "spec":"二维码+GPS+区块链","price":"¥48,000","unit":"套",
+      "scenarios":["一般工业固废","再生资源"],
+      "features":["一码通溯源","区块链存证","运输轨迹"],
+      "applications":"一般工业固废全过程追溯",
+      "tag":"溯源"
+    },
+    {
+      "id":"V-001","cat":"voc","name":"FID便携VOCs检测仪","brand":"美国Baseline","model":"pi201",
+      "spec":"0-10000ppm","price":"¥48,000","unit":"台",
+      "scenarios":["石化企业","加油站","印刷厂"],
+      "features":["氢火焰离子化","便携式","GPS定位"],
+      "applications":"VOCs执法快速检测",
+      "tag":"便携执法","hot":true
+    },
+    {
+      "id":"V-002","cat":"voc","name":"PID光离子化VOCs检测仪","brand":"美国华瑞","model":"MiniRAE 3000",
+      "spec":"0-15000ppm","price":"¥32,000","unit":"台",
+      "scenarios":["化工泄漏","应急监测"],
+      "features":["10.6eV紫外灯","便携","声光报警"],
+      "applications":"VOCs泄漏应急监测",
+      "tag":"应急"
+    },
+    {
+      "id":"V-003","cat":"voc","name":"VOCs在线监测系统","brand":"雪迪龙","model":"Model 9060",
+      "spec":"+气象五参数","price":"¥168,000","unit":"台",
+      "scenarios":["石化企业厂界","化工园区"],
+      "features":["PID+FID双原理","自动校准","符合HJ 1011"],
+      "applications":"厂界VOCs无组织排放监管",
+      "tag":"在线监测"
+    },
+    {
+      "id":"V-004","cat":"voc","name":"红外热成像VOCs泄漏检测","brand":"FLIR","model":"FLIR GF320",
+      "spec":"1280×720分辨率","price":"¥580,000","unit":"台",
+      "scenarios":["石化装置","天然气管道"],
+      "features":["可视化泄漏","远距离","动态拍摄"],
+      "applications":"化工装置LDAR检测利器",
+      "tag":"LDAR","hot":true
+    },
+    {
+      "id":"V-005","cat":"voc","name":"走航车VOCs监测系统","brand":"雪迪龙","model":"MobileVOCs-3000",
+      "spec":"秒级响应+GIS地图","price":"¥860,000","unit":"套",
+      "scenarios":["化工园区走航"],
+      "features":["车载搭载","实时走航","污染团识别"],
+      "applications":"VOCs污染溯源、走航巡查"
+    },
+    {
+      "id":"R-001","cat":"radiation","name":"γ辐射剂量率监测仪","brand":"中辐核仪","model":"FD-125",
+      "spec":"0.01-1000μSv/h","price":"¥38,000","unit":"台",
+      "scenarios":["核设施周边","辐照企业厂界"],
+      "features":["自动监测","连续工作","符合HJ 1006"],
+      "applications":"电离辐射环境质量监测",
+      "tag":"辐射","hot":true
+    },
+    {
+      "id":"R-002","cat":"radiation","name":"氡气监测仪","brand":"美国Sun Nuclear","model":"1028",
+      "spec":"连续氡浓度监测","price":"¥28,500","unit":"台",
+      "scenarios":["地下空间","铀矿"],
+      "features":["静电收集法","无人值守","长期数据"],
+      "applications":"室内氡浓度、地下工程监测"
+    },
+    {
+      "id":"R-003","cat":"radiation","name":"αβ表面污染监测仪","brand":"中广核","model":"αβ-2020",
+      "spec":"α 0.01-10000cps，β 0.01-10000cps","price":"¥58,000","unit":"台",
+      "scenarios":["核电站","核素生产"],
+      "features":["大面积探头","表面污染快速识别"],
+      "applications":"核设施周边表面污染监管"
+    },
+    {
+      "id":"E-001","cat":"ecological","name":"生物多样性红外相机","brand":"北京环宇蓝","model":"Eco-Cam 4G",
+      "spec":"+4G回传","price":"¥8,800","unit":"台",
+      "scenarios":["自然保护区","生物多样性调查"],
+      "features":["红外触发","太阳能供电","4G回传","30天待机"],
+      "applications":"陆生野生动物多样性监测",
+      "tag":"生态","hot":true
+    },
+    {
+      "id":"E-002","cat":"ecological","name":"水质生物毒性发光菌监测","brand":"北京滨松","model":"Biolux-T",
+      "spec":"15分钟出结果","price":"¥48,000","unit":"台",
+      "scenarios":["饮用水源地","重点湖泊"],
+      "features":["发光细菌法","符合ISO 11348"],
+      "applications":"水体生物毒性应急预警"
+    },
+    {
+      "id":"E-003","cat":"ecological","name":"湿地生态水文多参数监测站","brand":"海兰信","model":"Wetland-3",
+      "spec":"水位+流量+水质+气象","price":"¥98,000","unit":"台",
+      "scenarios":["湿地公园","自然保护区"],
+      "features":["多参数集成","长期监测","自动报警"],
+      "applications":"湿地生态保护"
+    },
+    {
+      "id":"E-004","cat":"ecological","name":"海洋水质浮标监测系统","brand":"海兰信","model":"MarineBuoy-5",
+      "spec":"pH+DO+盐度+叶绿素+浊度","price":"¥186,000","unit":"台",
+      "scenarios":["近岸海域","入海河口"],
+      "features":["抗腐蚀","抗风浪","4G/北斗","3年续航"],
+      "applications":"海洋生态环境监测",
+      "tag":"海洋"
+    },
+    {
+      "id":"P-001","cat":"portable","name":"执法一体化便携箱","brand":"华唯","model":"Env-LawCase",
+      "spec":"pH+电导率+浊度+COD+余氯+温度","price":"¥38,800","unit":"套",
+      "scenarios":["环境执法现场","应急监测"],
+      "features":["一箱式配置","GPS定位","拍照取证","4G上传"],
+      "applications":"环境执法人员标配设备",
+      "tag":"便携执法","hot":true
+    },
+    {
+      "id":"P-002","cat":"portable","name":"无人机环境应急监测","brand":"大疆","model":"Mavic 3E+模块",
+      "spec":"+气体+水质+辐射模块","price":"¥186,000","unit":"套",
+      "scenarios":["应急监测","污染溯源"],
+      "features":["空中快速到达","多载荷集成","视频回传"],
+      "applications":"环境应急快速响应",
+      "tag":"应急"
+    },
+    {
+      "id":"P-003","cat":"portable","name":"执法记录仪+环境检测模块","brand":"海康","model":"DSJ-iLaw-Env",
+      "spec":"+5气体传感器","price":"¥18,500","unit":"台",
+      "scenarios":["现场执法取证"],
+      "features":["4K摄录","实时4G","气体超标联动拍照"],
+      "applications":"现场执法全过程记录",
+      "tag":"执法"
+    },
+    {
+      "id":"PT-001","cat":"platform","name":"环境监测数据云平台","brand":"聚光","model":"EPBCloud",
+      "spec":"支持万级点位接入","price":"¥500,000起","unit":"套",
+      "scenarios":["省/市/园区监管"],
+      "features":["实时数据","超标报警","GIS可视化","移动执法APP对接"],
+      "applications":"环境监管核心平台",
+      "tag":"平台","hot":true
+    },
+    {
+      "id":"PT-002","cat":"platform","name":"污染源在线监控平台","brand":"航天信息","model":"PolluteWatch",
+      "spec":"+移动执法+信用评价","price":"¥680,000起","unit":"套",
+      "scenarios":["重点污染源监管"],
+      "features":["全过程留痕","数据铁笼","AI智能预警"],
+      "applications":"污染源精细化监管",
+      "tag":"平台"
+    }
+  ]
+}

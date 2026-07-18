@@ -177,6 +177,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'ai-assistant.js'))
         elif path == '/global-sidebar.js':
             self._serve_static(os.path.join(WEB_DIR, 'global-sidebar.js'))
+        elif path == '/equipment-catalog.json':
+            self._serve_static(os.path.join(WEB_DIR, 'equipment-catalog.json'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
