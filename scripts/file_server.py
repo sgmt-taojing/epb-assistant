@@ -169,6 +169,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'evidence-toolkit.html'))
         elif path == '/env-ledger.html':
             self._serve_static(os.path.join(WEB_DIR, 'env-ledger.html'))
+        elif path == '/voice-assistant.js':
+            self._serve_static(os.path.join(WEB_DIR, 'voice-assistant.js'))
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
