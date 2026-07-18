@@ -169,6 +169,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'evidence-toolkit.html'))
         elif path == '/env-ledger.html':
             self._serve_static(os.path.join(WEB_DIR, 'env-ledger.html'))
+        elif path == '/eco-calendar.html':
+            self._serve_static(os.path.join(WEB_DIR, 'eco-calendar.html'))
         elif path == '/voice-assistant.js':
             self._serve_static(os.path.join(WEB_DIR, 'voice-assistant.js'))
         elif path == '/ai-assistant.js':

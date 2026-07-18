@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>环保政策日历 · 重要日期提醒</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--text:#e2e8f0;--muted:#64748b;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#0c4a6e 0%,#1e293b 100%);padding:24px 20px;text-align:center}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:4px}
+.hero h1 span{color:var(--warn)}
+.hero p{color:var(--muted);font-size:12px}
+.container{padding:16px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.stat-card .num{font-size:18px;font-weight:700}
+.stat-card .label{font-size:10px;color:var(--muted);margin-top:2px}
+.stat-card.red .num{color:var(--danger)}
+.stat-card.amber .num{color:var(--warn)}
+.stat-card.green .num{color:var(--accent)}
+.month-header{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.month-name{font-size:16px;font-weight:700;color:var(--primary2)}
+.month-count{font-size:11px;color:var(--muted)}
+.event-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;border-left:3px solid var(--primary)}
+.event-card.urgent{border-left-color:var(--danger)}
+.event-card.important{border-left-color:var(--warn)}
+.event-card.normal{border-left-color:var(--accent)}
+.event-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.event-title{font-size:14px;font-weight:600;flex:1}
+.event-date{text-align:right;flex-shrink:0;margin-left:8px}
+.event-day{font-size:20px;font-weight:700;line-height:1}
+.event-month{font-size:10px;color:var(--muted)}
+.event-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;margin-top:4px}
+.event-badge.urgent{background:rgba(239,68,68,.15);color:#fca5a5}
+.event-badge.important{background:rgba(245,158,11,.15);color:#fcd34d}
+.event-badge.normal{background:rgba(16,185,129,.15);color:#6ee7b7}
+.event-desc{font-size:12px;color:var(--text);line-height:1.6}
+.event-action{display:inline-block;margin-top:6px;font-size:11px;color:var(--primary2);text-decoration:none}
+.event-countdown{font-size:11px;margin-top:4px;color:var(--warn)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:8px 0;z-index:100}
+.nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>环保政策<span>日历</span></h1>
+<p>重要日期 · 截止提醒 · 政策节点 · 不漏不错</p>
+</div>
+
+<div class="container">
+<div class="stat-row">
+<div class="stat-card red"><div class="num">2</div><div class="label">紧急(7天内)</div></div>
+<div class="stat-card amber"><div class="num">5</div><div class="label">本月到期</div></div>
+<div class="stat-card green"><div class="num">18</div><div class="label">全年节点</div></div>
+</div>
+
+<div class="month-header">
+<span class="month-name">📅 2026年7月</span>
+<span class="month-count">5个节点</span>
+</div>
+
+<div class="event-card urgent">
+<div class="event-header">
+<span class="event-title">华源化工应急整改截止</span>
+<span class="event-date"><div class="event-day" style="color:var(--danger)">20</div><div class="event-month">7月</div></span>
+</div>
+<span class="event-badge urgent">紧急 · 倒计时2天</span>
+<div class="event-desc">中央环保督察反馈问题#03整改截止。MBR膜更换+pH调节剂恢复运行。未按期完成将升级处罚。</div>
+<div class="event-countdown">⏰ 剩余2天</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="event-card urgent">
+<div class="event-header">
+<span class="event-title">运达金属危废整改截止</span>
+<span class="event-date"><div class="event-day" style="color:var(--danger)">18</div><div class="event-month">7月</div></span>
+</div>
+<span class="event-badge urgent">紧急 · 倒计时0天</span>
+<div class="event-desc">危废贮存间标准化改造完成截止。需完成防渗、标识、台账全部整改。</div>
+<div class="event-countdown">⏰ 今日截止！</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="event-card important">
+<div class="event-header">
+<span class="event-title">Q2排污许可执行报告提交</span>
+<span class="event-date"><div class="event-day" style="color:var(--warn)">15</div><div class="event-month">7月</div></span>
+</div>
+<span class="event-badge important">已完成</span>
+<div class="event-desc">2026年第二季度排污许可证执行报告已提交，平台审核通过。</div>
+<a class="event-action" href="env-ledger.html">→ 查看台账</a>
+</div>
+
+<div class="event-card important">
+<div class="event-header">
+<span class="event-title">海润电镀案件移送公安截止</span>
+<span class="event-date"><div class="event-day" style="color:var(--warn)">30</div><div class="event-month">7月</div></span>
+</div>
+<span class="event-badge important">重要 · 倒计时12天</span>
+<div class="event-desc">监测数据篡改案移送公安机关。需完成移送材料准备和证据移交。</div>
+<div class="event-countdown">⏰ 剩余12天</div>
+<a class="event-action" href="enforcement-guide.html">→ 查看执法流程</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">绿洲纸业在线监测设备恢复</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">25</div><div class="event-month">7月</div></span>
+</div>
+<span class="event-badge normal">整改中</span>
+<div class="event-desc">在线监测设备已离线5小时，要求24小时内恢复数据上传。</div>
+<div class="event-countdown">⏰ 剩余7天</div>
+<a class="event-action" href="remote-enforcement.html">→ 查看非现场执法</a>
+</div>
+
+<div class="month-header" style="margin-top:16px">
+<span class="month-name">📅 2026年8月</span>
+<span class="month-count">4个节点</span>
+</div>
+
+<div class="event-card important">
+<div class="event-header">
+<span class="event-title">华源化工应急整改最终截止</span>
+<span class="event-date"><div class="event-day" style="color:var(--warn)">14</div><div class="event-month">8月</div></span>
+</div>
+<span class="event-badge important">30天整改期</span>
+<div class="event-desc">MBR膜全面更换完成，出水COD稳定达标，提交整改完成报告。</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">渤海印染雨污分流改造完成</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">30</div><div class="event-month">8月</div></span>
+</div>
+<span class="event-badge normal">改造中</span>
+<div class="event-desc">雨污分流改造工程完成截止。已封堵偷排口，管网改造中。</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">化工园区VOCs治理完成</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">30</div><div class="event-month">9月</div></span>
+</div>
+<span class="event-badge normal">推进中</span>
+<div class="event-desc">化工园区VOCs无组织排放全面治理，LDAR检测规范化。</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">运达金属场地修复完成</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">30</div><div class="event-month">10月</div></span>
+</div>
+<span class="event-badge normal">修复中</span>
+<div class="event-desc">危废倾倒场地土壤修复工程完成。需通过修复效果评估。</div>
+<a class="event-action" href="inspection.html">→ 查看督察整改</a>
+</div>
+
+<div class="month-header" style="margin-top:16px">
+<span class="month-name">📅 年度固定节点</span>
+<span class="month-count">6个</span>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">年度排污许可执行报告</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">31</div><div class="event-month">1月</div></span>
+</div>
+<span class="event-badge normal">每年</span>
+<div class="event-desc">每年1月31日前提交上年度排污许可证执行报告。</div>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">环境统计年报</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">31</div><div class="event-month">3月</div></span>
+</div>
+<span class="event-badge normal">每年</span>
+<div class="event-desc">每年3月31日前完成上年度环境统计数据上报。</div>
+<a class="event-action" href="eco-statistics.html">→ 查看统计</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">危废管理计划备案</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">31</div><div class="event-month">1月</div></span>
+</div>
+<span class="event-badge normal">每年</span>
+<div class="event-desc">每年1月31日前完成危废管理计划年度备案。</div>
+<a class="event-action" href="env-ledger.html">→ 查看台账</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">应急预案修订备案</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">1</div><div class="event-month">9月</div></span>
+</div>
+<span class="event-badge normal">每3年</span>
+<div class="event-desc">应急预案有效期3年，到期需修订重新备案。华源化工2026年9月到期。</div>
+<a class="event-action" href="approval-service.html">→ 查看审批服务</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">六五环境日</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">5</div><div class="event-month">6月</div></span>
+</div>
+<span class="event-badge normal">宣传日</span>
+<div class="event-desc">每年6月5日世界环境日，组织开展环保宣传活动。</div>
+<a class="event-action" href="eco-science.html">→ 查看科普</a>
+</div>
+
+<div class="event-card normal">
+<div class="event-header">
+<span class="event-title">全国生态日</span>
+<span class="event-date"><div class="event-day" style="color:var(--accent)">15</div><div class="event-month">8月</div></span>
+</div>
+<span class="event-badge normal">宣传日</span>
+<div class="event-desc">每年8月15日全国生态日，开展生态文明宣传教育。</div>
+<a class="event-action" href="public-interact.html">→ 查看互动中心</a>
+</div>
+</div>
+
+<div class="bottom-nav">
+<a class="nav-item" href="m-portal.html"><span class="icon">🏠</span>首页</a>
+<a class="nav-item" href="ai-report.html"><span class="icon">📊</span>报告</a>
+<a class="nav-item active" href="eco-calendar.html"><span class="icon">📅</span>日历</a>
+<a class="nav-item" href="equipment-mall.html"><span class="icon">🛒</span>商城</a>
+<a class="nav-item" href="m-workspace.html"><span class="icon">📋</span>工作台</a>
+</div>
+<script src="voice-assistant.js"></script><script src="ai-assistant.js"></script>
+</body>
+</html>
