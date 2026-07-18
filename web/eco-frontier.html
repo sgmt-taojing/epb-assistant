@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>环保前沿 · 全球新技术×政策×商机</title>
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--card2:#1a2332;--border:#1e293b;--primary:#3b82f6;--primary2:#60a5fa;--accent:#10b981;--warn:#f59e0b;--danger:#ef4444;--purple:#a78bfa;--pink:#f472b6;--text:#e2e8f0;--muted:#64748b;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;padding-bottom:80px}
+.hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e293b 100%);padding:48px 20px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,rgba(59,130,246,.2) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(167,139,250,.2) 0%,transparent 50%)}
+.hero>*{position:relative}
+.hero .label{display:inline-block;padding:3px 12px;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.3);color:#c4b5fd;border-radius:20px;font-size:11px;letter-spacing:1px;margin-bottom:14px}
+.hero h1{font-size:32px;font-weight:700;margin-bottom:10px;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--muted);font-size:14px;max-width:640px;margin:0 auto 18px}
+.hero .stats{display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.hero .stat{text-align:center;padding:8px 14px;background:rgba(15,23,42,.5);border:1px solid var(--border);border-radius:10px;min-width:90px}
+.hero .stat .num{font-size:24px;font-weight:700;color:#f472b6}
+.hero .stat .label{font-size:11px;color:var(--muted)}
+.container{max-width:1280px;margin:0 auto;padding:18px}
+.section{margin-bottom:36px}
+.section-header{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.section-title{font-size:20px;font-weight:700;color:#fff}
+.section-title .icon{font-size:24px;margin-right:6px}
+.section-desc{font-size:12px;color:var(--muted)}
+.section-count{font-size:11px;background:rgba(59,130,246,.15);color:#93c5fd;padding:2px 8px;border-radius:8px;font-weight:600}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
+.item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;transition:all .25s;position:relative;overflow:hidden}
+.item::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,#3b82f6,#8b5cf6)}
+.item[data-stage="快速增长"]::before{background:linear-gradient(180deg,#3b82f6,#10b981)}
+.item[data-stage="政策落地"]::before{background:linear-gradient(180deg,#f59e0b,#3b82f6)}
+.item[data-stage="强制执行"]::before{background:linear-gradient(180deg,#ef4444,#f59e0b)}
+.item:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:0 10px 28px rgba(59,130,246,.18)}
+.item-head{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:8px}
+.item-title{font-size:16px;font-weight:700;color:#fff;line-height:1.4;flex:1}
+.item-region{font-size:11px;color:var(--primary2);background:rgba(59,130,246,.1);padding:2px 8px;border-radius:4px;white-space:nowrap}
+.item-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.tag{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600}
+.tag-tech{background:rgba(167,139,250,.15);color:#c4b5fd}
+.tag-policy{background:rgba(245,158,11,.15);color:#fbbf24}
+.tag-money{background:rgba(16,185,129,.15);color:#6ee7b7}
+.tag-default{background:rgba(148,163,184,.15);color:#cbd5e1}
+.item-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.item-section-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.item-section-content{font-size:12.5px;color:var(--text);line-height:1.6}
+.item-meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.meta-stage{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600}
+.stage-孵化期{background:rgba(99,102,241,.15);color:#a5b4fc}
+.stage-中试期, .stage-试点期, .stage-试点{background:rgba(245,158,11,.15);color:#fbbf24}
+.stage-快速增长, .stage-政策落地, .stage-模式创新, .stage-规模化, .stage-全面推广{background:rgba(16,185,129,.15);color:#6ee7b7}
+.stage-强制执行, .stage-资金到位, .stage-已落地{background:rgba(239,68,68,.15);color:#fca5a5}
+.stage-规模化前夕, .stage-快速扩张{background:rgba(167,139,250,.15);color:#c4b5fd}
+.meta-invest{display:flex;gap:2px}
+.invest-dot{width:8px;height:8px;border-radius:50%;background:#1e293b}
+.invest-dot.on-low{background:#10b981}
+.invest-dot.on-mid{background:#f59e0b}
+.invest-dot.on-high{background:#ef4444}
+.hot-flag{position:absolute;top:14px;right:14px;font-size:18px;filter:drop-shadow(0 0 4px rgba(245,158,11,.5))}
+.nav-quick{display:flex;gap:8px;flex-wrap:wrap;background:var(--card);padding:10px 12px;border-radius:12px;margin-bottom:18px;border:1px solid var(--border)}
+.nav-link{padding:5px 12px;background:var(--bg);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:12px;text-decoration:none;transition:all .2s}
+.nav-link:hover{border-color:var(--primary);color:#fff;background:var(--primary)}
+.footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:12px;border-top:1px solid var(--border);margin-top:30px}
+.footer .source{color:var(--muted);font-size:11px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="hero">
+<div class="label">🌐 GLOBAL · CHINA · 2025-2030</div>
+<h1>环保前沿 · 全球新技术×全国政策×创新商机</h1>
+<p>覆盖全球颠覆性技术、国内政策红利、创新商业模式和标杆案例。每条都附市场规模、切入点、投资强度判断。</p>
+<div class="stats">
+<div class="stat"><div class="num" id="stat-total">0</div><div class="label">商机条目</div></div>
+<div class="stat"><div class="num">4</div><div class="label">主题板块</div></div>
+<div class="stat"><div class="num">20</div><div class="label">细分领域</div></div>
+<div class="stat"><div class="num">¥1.5T</div><div class="label">覆盖市场</div></div>
+</div>
+</div>
+
+<div class="container">
+<div class="nav-quick">
+<a class="nav-link" href="#global-tech">🌍 全球前沿技术</a>
+<a class="nav-link" href="#china-policy">🇨🇳 全国政策商机</a>
+<a class="nav-link" href="#business-model">💰 创新商业模式</a>
+<a class="nav-link" href="#case-study">🏆 标杆案例</a>
+<a class="nav-link" href="overview.html">📊 看总览驾驶舱</a>
+<a class="nav-link" href="equipment-mall.html">🛒 设备商城</a>
+</div>
+<div id="content"></div>
+</div>
+
+<div class="footer">
+<div>环保智慧执法平台 · Eco Frontier | 数据更新至 2026-07-18</div>
+<div class="source">信息来源：生态环境部、国家发改委、IEA、Wood Mackenzie、各上市公司公开信息</div>
+<div class="source">⚠️ 商机数据基于公开信息整理，仅供战略参考，不构成投资建议</div>
+</div>
+
+<script>
+(async function(){
+  let data;
+  try {
+    const res = await fetch('eco-frontier-data.json', {cache:'no-store'});
+    data = await res.json();
+  } catch(e) {
+    data = {sections:[]};
+  }
+  const total = data.sections.reduce((s,sec) => s + sec.items.length, 0);
+  document.getElementById('stat-total').textContent = total;
+  const c = document.getElementById('content');
+  const tagClass = t => {
+    if (/技术|AI|数字|碳|氢能|传感器|新能|生物/.test(t)) return 'tag-tech';
+    if (/政策|EOD|碳市场|CCER|考核|资金|披露|监管/.test(t)) return 'tag-policy';
+    if (/模式|合同|平台|数据要素|电力|需求/.test(t)) return 'tag-money';
+    return 'tag-default';
+  };
+  const investMap = {低:1, 中:2, 高:3};
+  const stageClass = s => {
+    if (s.includes('孵化')) return 'stage-孵化期';
+    if (s.includes('中试') || s.includes('试点')) return 'stage-中试期';
+    if (s.includes('快速增长') || s.includes('政策落地')) return 'stage-快速增长';
+    if (s.includes('强制') || s.includes('资金到位') || s.includes('已落地')) return 'stage-已落地';
+    if (s.includes('规模化前夕') || s.includes('快速扩张')) return 'stage-规模化前夕';
+    return 'stage-快速增长';
+  };
+  c.innerHTML = data.sections.map(sec => `
+<section class="section" id="${sec.id}">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title"><span class="icon">${sec.title.split(' ')[0]}</span>${sec.title.split(' ').slice(1).join(' ')}</h2>
+      <div class="section-desc">${sec.desc}</div>
+    </div>
+    <span class="section-count">${sec.items.length} 条</span>
+  </div>
+  <div class="items">
+    ${sec.items.map(it => `
+<article class="item" data-stage="${it.stage}">
+  ${it.hot ? '<span class="hot-flag" title="重点关注">🔥</span>' : ''}
+  <div class="item-head">
+    <div class="item-title">${it.title}</div>
+    <div class="item-region">📍 ${it.region}</div>
+  </div>
+  <div class="item-tags">${(it.tags||[]).map(t => `<span class="tag ${tagClass(t)}">${t}</span>`).join('')}</div>
+  <div class="item-section">
+    <div class="item-section-title">📋 摘要</div>
+    <div class="item-section-content">${it.summary}</div>
+  </div>
+  <div class="item-section">
+    <div class="item-section-title">💎 商机</div>
+    <div class="item-section-content">${it.potential}</div>
+  </div>
+  <div class="item-meta">
+    <span class="meta-stage ${stageClass(it.stage)}">${it.stage}</span>
+    <div class="meta-invest" title="投资强度：${it.invest}">
+      ${[1,2,3].map(i => `<span class="invest-dot ${i<=investMap[it.invest]?'on-'+(it.invest==='高'?'high':it.invest==='中'?'mid':'low'):''}"></span>`).join('')}
+      <span style="margin-left:4px;font-size:10px;color:var(--muted)">${it.invest === '低' ? '轻量' : it.invest === '中' ? '中等' : '重资产'}</span>
+    </div>
+  </div>
+</article>`).join('')}
+  </div>
+</section>`).join('');
+})();
+</script>
+<script src="global-sidebar.js"></script>
+<script src="voice-assistant.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>
