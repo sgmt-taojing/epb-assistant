@@ -366,11 +366,38 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 <h1>🌿 环保智慧执法平台</h1>
 <p>知识驱动 · AI闭环 · 天地一体 · 开源开放 — 面向公众·企业·政府·监管·执法五位一体</p>
 <div class="hero-stats">
-<div class="hero-stat"><div class="num" id="hNum1">0</div><div class="label">今日检查(次)</div></div>
-<div class="hero-stat"><div class="num" id="hNum2">0</div><div class="label">在线企业(家)</div></div>
-<div class="hero-stat"><div class="num" id="hNum3">0</div><div class="label">AI预警(条)</div></div>
-<div class="hero-stat"><div class="num" id="hNum4">0</div><div class="label">知识条目</div></div>
+<div class="hero-stat"><div class="num" id="hNum1">0</div><div class="label">案件总数</div></div>
+<div class="hero-stat"><div class="num" id="hNum2">0</div><div class="label">监管企业</div></div>
+<div class="hero-stat"><div class="num" id="hNum3">0</div><div class="label">IoT数据(万)</div></div>
+<div class="hero-stat"><div class="num" id="hNum4">0</div><div class="label">在线设备</div></div>
 </div>
+</div>
+
+<!-- 实时数据面板 -->
+<div style="max-width:1200px;margin:0 auto;padding:12px 16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <!-- 实时案件流 -->
+    <div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:var(--g)">📋 实时案件流</span>
+        <span id="active-cases-badge" style="background:#e74c3c;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;display:none">0</span>
+      </div>
+      <div id="case-status-bar"></div>
+      <div id="recent-cases-list" style="margin-top:8px;max-height:200px;overflow-y:auto">
+        <div style="text-align:center;padding:20px;color:var(--gm);font-size:12px">加载中...</div>
+      </div>
+    </div>
+    <!-- 设备状态 -->
+    <div style="background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:var(--g)">📡 设备状态</span>
+        <span id="latest-data-ts" style="font-size:11px;color:var(--gm)">--:--:--</span>
+      </div>
+      <div id="device-status-list" style="max-height:220px;overflow-y:auto">
+        <div style="text-align:center;padding:20px;color:var(--gm);font-size:12px">加载中...</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="portal-bar">
@@ -1115,20 +1142,107 @@ try{
 }catch(e){}
 
 setTimeout(()=>{
-  // 动态加载统计数据
-  fetch('/api/health').then(r=>r.json()).then(d=>{
-    var s=d.data_stats||{};
-    animNum(document.getElementById('hNum1'),s.cases||101);
-    animNum(document.getElementById('hNum2'),s.law_index||28);
-    animNum(document.getElementById('hNum3'),s.knowledge_graph||8);
-    animNum(document.getElementById('hNum4'),s.law_mapping||15);
-  }).catch(()=>{
-    animNum(document.getElementById('hNum1'),101);
-    animNum(document.getElementById('hNum2'),28);
-    animNum(document.getElementById('hNum3'),8);
-    animNum(document.getElementById('hNum4'),15);
+  // 从多个API拉取活数据
+  Promise.all([
+    fetch('/api/health').then(r=>r.json()).catch(()=>null),
+    fetch('/api/cases').then(r=>r.json()).catch(()=>null),
+    fetch('/api/devices').then(r=>r.json()).catch(()=>null),
+    fetch('/api/enterprises').then(r=>r.json()).catch(()=>null)
+  ]).then(([health, cases, devices, enterprises])=>{
+    if(health && health.ok){
+      var s=health.data_stats||{};
+      animNum(document.getElementById('hNum1'),s.cases||0);
+      animNum(document.getElementById('hNum2'),s.enterprises||0);
+      animNum(document.getElementById('hNum3'),Math.floor((s.iot_records||0)/10000));
+      animNum(document.getElementById('hNum4'),s.devices||0);
+      
+      // 更新活跃案件徽章
+      var activeEl=document.getElementById('active-cases-badge');
+      if(activeEl && s.active_cases!==undefined){
+        activeEl.textContent=s.active_cases;
+        activeEl.style.display=s.active_cases>0?'inline-block':'none';
+      }
+      // 更新最新数据时间
+      var tsEl=document.getElementById('latest-data-ts');
+      if(tsEl && s.latest_iot){
+        tsEl.textContent='数据更新: '+s.latest_iot.substring(11,19);
+      }
+      // 案件状态分布条
+      var cs=health.case_status||{};
+      var distEl=document.getElementById('case-status-bar');
+      if(distEl){
+        var colors={'reported':'#e74c3c','accepted':'#f39c12','investigating':'#3498db','hearing':'#9b59b6','penalty':'#e67e22','executing':'#1abc9c','archived':'#95a5a6','closed':'#7f8c8d','rejected':'#bdc3c7','open':'#2ecc71'};
+        var total=Object.values(cs).reduce((a,b)=>a+b,0)||1;
+        var html='<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:8px">';
+        for(var st in cs){
+          var pct=(cs[st]/total*100).toFixed(1);
+          if(pct>0){
+            html+='<div style="width:'+pct+'%;background:'+(colors[st]||'#999')+'" title="'+st+': '+cs[st]+'"></div>';
+          }
+        }
+        html+='</div>';
+        distEl.innerHTML=html;
+      }
+    } else {
+      animNum(document.getElementById('hNum1'),0);
+      animNum(document.getElementById('hNum2'),0);
+      animNum(document.getElementById('hNum3'),0);
+      animNum(document.getElementById('hNum4'),0);
+    }
+    
+    // 更新最近案件列表
+    if(cases && cases.cases){
+      var listEl=document.getElementById('recent-cases-list');
+      if(listEl){
+        var recent=cases.cases.slice(-5).reverse();
+        listEl.innerHTML=recent.map(function(c){
+          var statusColors={'reported':'#e74c3c','accepted':'#f39c12','investigating':'#3498db','hearing':'#9b59b6','penalty':'#e67e22','executing':'#1abc9c','archived':'#95a5a6','closed':'#7f8c8d','open':'#2ecc71'};
+          var sc=statusColors[c.status]||'#999';
+          return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06)">'+
+            '<span style="width:8px;height:8px;border-radius:50%;background:'+sc+';flex-shrink:0"></span>'+
+            '<span style="flex:1;font-size:13px;color:var(--g)">'+(c.title||'匿名案件')+'</span>'+
+            '<span style="font-size:11px;color:'+sc+'">'+(c.status||'unknown')+'</span>'+
+            '<span style="font-size:11px;color:var(--gm)">'+(c.date||'')+'</span>'+
+            '</div>';
+        }).join('');
+      }
+    }
+    
+    // 更新设备状态
+    if(devices && devices.devices){
+      var devEl=document.getElementById('device-status-list');
+      if(devEl){
+        var byType={};
+        devices.devices.forEach(function(d){byType[d.type]=(byType[d.type]||0)+1;});
+        var typeNames={'water_quality':'水质','air_quality':'空气','noise':'噪声','emission_water':'废水','emission_gas':'废气','power':'用电','soil':'土壤'};
+        devEl.innerHTML=Object.entries(byType).map(function(t){
+          return '<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px">'+
+            '<span style="color:var(--g)">'+(typeNames[t[0]]||t[0])+'</span>'+
+            '<span style="color:var(--gl);font-weight:600">'+t[1]+'台</span></div>';
+        }).join('');
+      }
+    }
   });
 },800);
+
+// 每30秒刷新数据
+setInterval(()=>{
+  fetch('/api/health').then(r=>r.json()).then(d=>{
+    if(d && d.ok){
+      var s=d.data_stats||{};
+      var el1=document.getElementById('hNum1');
+      var el2=document.getElementById('hNum2');
+      var el3=document.getElementById('hNum3');
+      var el4=document.getElementById('hNum4');
+      if(el1)el1.textContent=s.cases||0;
+      if(el2)el2.textContent=s.enterprises||0;
+      if(el3)el3.textContent=Math.floor((s.iot_records||0)/10000);
+      if(el4)el4.textContent=s.devices||0;
+      var tsEl=document.getElementById('latest-data-ts');
+      if(tsEl && s.latest_iot)tsEl.textContent='数据更新: '+s.latest_iot.substring(11,19);
+    }
+  }).catch(()=>{});
+},30000);
 
 // Dept toggle
 function toggleDept(el){

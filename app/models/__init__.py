@@ -44,7 +44,8 @@ def init_db():
         '''CREATE TABLE IF NOT EXISTS iot_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             device_id TEXT, param TEXT, value REAL,
-            timestamp TEXT, quality TEXT)''',
+            timestamp TEXT, quality TEXT,
+            unit TEXT DEFAULT '-', standard TEXT DEFAULT '-')''',
         '''CREATE TABLE IF NOT EXISTS standards (
             id TEXT PRIMARY KEY, name TEXT, category TEXT,
             params TEXT)'''
