@@ -90,7 +90,8 @@ class TestAuth:
         assert r.status_code == 404
     
     def test_register(self, client):
-        r = client.post('/api/auth/register', json={'username': 'testuser', 'password': 'test123', 'role': 'public'})
+        import time as _t
+        r = client.post('/api/auth/register', json={'username': f'testuser_{int(_t.time())}', 'password': 'test123', 'role': 'public'})
         assert r.status_code == 200
         assert r.get_json()['ok'] == True
 
@@ -148,3 +149,36 @@ class TestDiagnostic:
         items = r.get_json()['items']
         for item in items:
             assert 'suggestion' in item
+
+class TestSecurity:
+    def test_security_headers(self, client):
+        r = client.get('/api/health')
+        assert r.headers.get('X-Content-Type-Options') == 'nosniff'
+        assert r.headers.get('X-Frame-Options') == 'DENY'
+        assert 'Content-Security-Policy' in r.headers
+    
+    def test_sql_injection_blocked(self, client):
+        r = client.post('/api/auth/login', json={
+            'username': "admin' OR '1'='1", 'password': 'x'
+        })
+        assert r.status_code == 400
+    
+    def test_xss_blocked(self, client):
+        r = client.post('/api/case/report', json={
+            'title': '<script>alert(1)</script>', 'type': 'test', 'fact': 'test'
+        })
+        assert r.status_code == 400
+    
+    def test_rate_limiting(self, client):
+        blocked = 0
+        for i in range(8):
+            r = client.post('/api/auth/login', json={'username': 'x', 'password': 'x'})
+            if r.status_code == 429:
+                blocked += 1
+        assert blocked > 0, 'Rate limiting should kick in'
+    
+    def test_normal_request_not_blocked(self, client):
+        r = client.get('/api/health')
+        assert r.status_code == 200
+        r = client.get('/api/enterprises')
+        assert r.status_code == 200

@@ -18,6 +18,10 @@ def create_app():
     app.register_blueprint(case_bp, url_prefix='/api/case')
     app.register_blueprint(diag_bp, url_prefix='/api/diag')
     
+    # 安全中间件
+    from app.security import init_security
+    init_security(app)
+    
     # 静态文件服务
     @app.route('/')
     def index():
