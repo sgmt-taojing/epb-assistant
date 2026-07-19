@@ -123,6 +123,33 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 .back-to-top { position: fixed; bottom: 100px; right: 30px; width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid var(--green-light); color: var(--green); font-size: 18px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: none; align-items: center; justify-content: center; z-index: 998; transition: all 0.3s; }
 .back-to-top.active { display: flex; }
 .back-to-top:hover { background: var(--green); color: white; }
+/* 响应式适配 */
+@media (max-width:768px){
+  *{font-size:90%}
+  .container{padding:8px;max-width:100%}
+  .stat-row,.module-grid,.channel-grid,.scenario-grid,.report-grid,.quick-grid,.stats-grid,.dim-grid,.sensor-grid,.form-row,.result-grid,.industry-grid,.cal-header,.cal-grid{grid-template-columns:1fr!important;gap:6px}
+  .section,.card{padding:10px;margin-bottom:8px}
+  .bottom-nav{padding:6px 0}
+  .nav-item{font-size:9px}
+  .nav-item .icon{font-size:16px}
+  .search-bar{position:relative;padding:8px}
+  .tab,.filter-chip{font-size:11px;padding:6px 10px}
+  table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .hero{padding:12px}
+  .form-row{grid-template-columns:1fr!important}
+  .ent-card,.task-item,.alert-item{flex-direction:column;align-items:flex-start;gap:6px}
+  .module-item{padding:10px 6px}
+  .api-example,.api-path{font-size:9px}
+}
+@media (min-width:1200px){
+  .container{max-width:1400px;margin:0 auto}
+  .stat-row{grid-template-columns:repeat(4,1fr)!important}
+  .module-grid{grid-template-columns:repeat(3,1fr)!important}
+  .channel-grid,.scenario-grid,.stats-grid,.dim-grid,.sensor-grid,.result-grid,.industry-grid{grid-template-columns:repeat(3,1fr)!important}
+  .section,.card{padding:20px}
+  .bottom-nav{max-width:1400px;left:50%;transform:translateX(-50%);width:100%;max-width:1400px}
+  .search-bar{max-width:1400px;left:50%;transform:translateX(-50%);width:100%}
+}
 </style>
 <script src="/auth-guard.js"></script>
 <script>

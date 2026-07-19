@@ -69,6 +69,118 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .nav-item{flex:1;text-align:center;padding:6px 0;color:var(--muted);text-decoration:none;font-size:10px}
 .nav-item.active{color:var(--primary)}
 .nav-item .icon{font-size:18px;display:block;margin-bottom:2px}
+/* 响应式适配 */
+@media (max-width: 768px){
+  body{font-size:90%}
+  .hero{padding:16px 12px}
+  .hero h1{font-size:16px}
+  .hero p{font-size:11px}
+  .container{padding:10px 8px}
+  .stat-row{grid-template-columns:1fr 1fr!important}
+  .form-row{grid-template-columns:1fr!important}
+  .tool-grid{grid-template-columns:1fr!important}
+  .team-grid{grid-template-columns:1fr!important}
+  .resource-grid{grid-template-columns:1fr!important}
+  .district-grid{grid-template-columns:1fr!important}
+  .product-terms{grid-template-columns:1fr!important}
+  .quick-grid{grid-template-columns:repeat(3,1fr)!important}
+  .type-grid{grid-template-columns:repeat(2,1fr)!important}
+  .preview-grid{grid-template-columns:repeat(2,1fr)!important}
+  .role-grid{grid-template-columns:1fr!important}
+  .mod-grid{grid-template-columns:repeat(3,1fr)!important}
+  .products{grid-template-columns:1fr!important}
+  .section{padding:12px;margin-bottom:10px}
+  .card{margin:8px;padding:12px}
+  .tabs{gap:4px}
+  .tab{padding:6px 10px;font-size:11px}
+  .filter-bar{gap:4px;padding:6px 8px}
+  .filter-chip{padding:5px 10px;font-size:11px}
+  .coef-table,.law-table,.data-table,table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  .coef-table th,.coef-table td,.law-table th,.law-table td,th,td{padding:6px;font-size:10px}
+  .bottom-nav{padding:6px 0}
+  .nav-item{font-size:9px}
+  .nav-item .icon{font-size:16px}
+  .top-bar{padding:10px 12px}
+  .top-bar h1{font-size:14px}
+  .calc-result .num{font-size:22px}
+  .hero .stats{gap:12px}
+  .hero .stat .num{font-size:18px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .search{min-width:0}
+  .cat-tabs{overflow-x:auto;flex-wrap:nowrap}
+  .product-card{padding:12px}
+  .product-title{font-size:13px}
+  .detail-panel{max-width:100%}
+  .step-dots{gap:6px}
+  .dot{width:22px}
+  .mode-tab{padding:10px;font-size:12px}
+  .body{padding:16px 16px 20px}
+  .header{padding:20px}
+  .logo{font-size:28px}
+  .wrap{max-width:100%;border-radius:16px}
+  .notice-title{font-size:12px}
+  .case-title{font-size:13px}
+  .case-fact{font-size:11px}
+  .btn-submit{font-size:13px;padding:12px}
+  .checkbox-row{padding:6px 0}
+  .upload-area{padding:14px}
+}
+@media (min-width: 1200px){
+  body{padding-bottom:0}
+  .container{max-width:1400px;margin:0 auto;padding:24px}
+  .hero{padding:40px 32px}
+  .hero h1{font-size:28px}
+  .hero p{font-size:14px}
+  .stat-row{grid-template-columns:repeat(4,1fr)!important;gap:16px}
+  .form-row{grid-template-columns:1fr 1fr!important;gap:16px}
+  .tool-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px}
+  .team-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px}
+  .resource-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px}
+  .district-grid{grid-template-columns:repeat(3,1fr)!important;gap:16px}
+  .product-terms{grid-template-columns:repeat(3,1fr)!important;gap:12px}
+  .quick-grid{grid-template-columns:repeat(8,1fr)!important;gap:16px}
+  .type-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px}
+  .preview-grid{grid-template-columns:repeat(6,1fr)!important;gap:10px}
+  .role-grid{grid-template-columns:repeat(4,1fr)!important;gap:12px}
+  .mod-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr))!important;gap:10px}
+  .products{grid-template-columns:repeat(3,1fr)!important;gap:20px}
+  .section{padding:24px;margin-bottom:20px}
+  .card{margin:16px;padding:24px}
+  .tabs{gap:10px}
+  .tab{padding:10px 20px;font-size:14px}
+  .coef-table,.law-table,table{font-size:13px}
+  .coef-table th,.coef-table td,th,td{padding:12px}
+  .bottom-nav{display:none}
+  .nav-item{font-size:13px}
+  .nav-item .icon{font-size:24px}
+  .top-bar{padding:18px 32px}
+  .top-bar h1{font-size:20px}
+  .hero .stats{gap:40px}
+  .hero .stat .num{font-size:32px}
+  .hero .stat .label{font-size:13px}
+  .toolbar{padding:16px;border-radius:16px}
+  .search{padding:12px 16px;font-size:15px}
+  .cat-tab{padding:8px 18px;font-size:14px}
+  .product-card{padding:24px}
+  .product-title{font-size:18px}
+  .section-title{font-size:18px}
+  .calc-result .num{font-size:36px}
+  .wrap{max-width:780px}
+  .header{padding:40px}
+  .logo{font-size:48px}
+  .title{font-size:24px}
+  .body{padding:36px 40px 40px}
+  .mode-tab{padding:18px;font-size:16px}
+  .form-input,.form-select,.form-textarea{padding:14px 18px;font-size:16px}
+  .btn{padding:16px;font-size:16px}
+  .btn-submit{font-size:17px;padding:18px}
+  .notice-title{font-size:15px}
+  .case-title{font-size:16px}
+  .case-fact{font-size:14px}
+  .quick-icon{width:64px;height:64px;font-size:28px}
+  .quick-label{font-size:12px}
+  .detail-panel{max-width:680px}
+}
 </style>
 <script src="api-fallback.js"></script>
 </head>
