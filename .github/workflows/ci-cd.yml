@@ -1,0 +1,98 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, gh-pages]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install flask pytest
+      
+      - name: Run tests
+        env:
+          PYTHONPATH: .
+        run: |
+          python -m pytest tests/test_api.py -v --tb=short
+      
+      - name: Lint check
+        run: |
+          python -c "
+          import os, re
+          errors = []
+          for f in os.listdir('web'):
+              if not f.endswith('.html'): continue
+              s = open(f'web/{f}').read()
+              o = s.count('<div')
+              c = s.count('</div>')
+              if o != c:
+                  errors.append(f'{f}: div mismatch {o}/{c}')
+              if 'alert(' in s and 'epbToast' not in s:
+                  errors.append(f'{f}: alert() found')
+              if 'Math.random' in s:
+                  errors.append(f'{f}: Math.random() found')
+          if errors:
+              for e in errors: print(f'  ❌ {e}')
+              exit(1)
+          else:
+              print(f'  ✅ All {len(os.listdir(\"web\"))} files passed')
+          "
+  
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install & Build
+        run: |
+          npm install
+          npm run build
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      
+      - name: Copy web files
+        run: |
+          git checkout main -- web/
+          git checkout main -- scripts/
+      
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "deploy: auto-sync from main"
+          git push origin gh-pages

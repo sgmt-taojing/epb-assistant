@@ -250,6 +250,15 @@ function getAnswer(question){
   if(roleMatch.length > 0) return roleMatch[0].a;
   if(otherMatch.length > 0) return otherMatch[0].a;
 
+  // 实时数据查询（异步）
+  if(q.indexOf('数据') >= 0 || q.indexOf('统计') >= 0 || q.indexOf('多少') >= 0 ||
+     q.indexOf('案件') >= 0 && (q.indexOf('多少') >= 0 || q.indexOf('状态') >= 0) ||
+     q.indexOf('企业') >= 0 && q.indexOf('多少') >= 0 ||
+     q.indexOf('设备') >= 0 && q.indexOf('多少') >= 0 ||
+     q.indexOf('在线') >= 0 || q.indexOf('iot') >= 0 || q.indexOf('监控') >= 0 && q.indexOf('数据') >= 0){
+    return fetchLiveStats(q);
+  }
+
   // 页面导航
   var navMap = {
     '商城':'equipment-mall.html','设备':'equipment-mall.html','法规':'law-library.html','法律':'law-library.html',
@@ -262,6 +271,9 @@ function getAnswer(question){
     '培训':'training.html','图谱':'knowledge-graph.html','统计':'eco-statistics.html',
     '督察':'inspection.html','总览':'overview.html','门户':'m-portal.html',
     '控制台':'sys-console.html','分析':'case-analysis.html','非现场':'remote-enforcement.html',
+    '诊断':'iot-diagnostic.html','能耗':'energy.html','运营':'ops-monitor.html',
+    '政策日历':'eco-calendar.html','商机':'eco-frontier.html','工程':'engineering-plan.html',
+    '工作空间':'workspace.html','登录':'login.html'
   };
   for(var key in navMap){
     if(q.indexOf(key) >= 0){
@@ -270,6 +282,47 @@ function getAnswer(question){
   }
 
   return DEFAULT_ANSWER;
+}
+
+// 从API拉取实时数据
+function fetchLiveStats(q){
+  // 直接返回提示，异步拉取数据后更新
+  setTimeout(function(){
+    fetch('/api/health').then(function(r){return r.json();}).then(function(d){
+      var s = d.data_stats || {};
+      var cs = d.case_status || {};
+      var dt = d.device_types || {};
+      var msg = '📊 <strong>平台实时数据</strong>\n';
+      msg += '━━━━━━━━━━━━━━━\n';
+      msg += '📋 案件总数: ' + (s.cases||0) + ' (活跃: ' + (s.active_cases||0) + ')\n';
+      msg += '🏭 监管企业: ' + (s.enterprises||0) + '家\n';
+      msg += '📡 在线设备: ' + (s.devices||0) + '台\n';
+      msg += '📈 IoT数据: ' + ((s.iot_records||0)/10000).toFixed(1) + '万条\n';
+      msg += '👤 注册用户: ' + (s.users||0) + '人\n';
+      if(s.latest_iot){
+        msg += '⏰ 数据更新: ' + s.latest_iot.substring(11,19) + '\n';
+      }
+      msg += '━━━━━━━━━━━━━━━\n';
+      msg += '<span style="color:#94a3b8;font-size:11px">案件状态分布：</span>\n';
+      var statusNames = {'reported':'已举报','accepted':'已受理','investigating':'调查中','hearing':'审理中','penalty':'处罚决定','executing':'执行中','archived':'已归档','closed':'已结案','rejected':'已驳回','open':'待处理'};
+      for(var st in cs){
+        if(cs[st] > 0){
+          msg += '  ' + (statusNames[st]||st) + ': ' + cs[st] + '件\n';
+        }
+      }
+      msg += '━━━━━━━━━━━━━━━\n';
+      msg += '<span style="color:#94a3b8;font-size:11px">设备类型分布：</span>\n';
+      var typeNames = {'water_quality':'水质监测','air_quality':'空气质量','noise':'噪声监测','emission_water':'废水排放','emission_gas':'废气排放','power':'用电监控','soil':'土壤监测'};
+      for(var tp in dt){
+        msg += '  ' + (typeNames[tp]||tp) + ': ' + dt[tp] + '台\n';
+      }
+      msg += '\n💡 数据由5角色机器人每60秒自动更新';
+      addMessage(msg, false);
+    }).catch(function(){
+      addMessage('⚠️ 暂时无法获取实时数据，请稍后再试', false);
+    });
+  }, 500);
+  return '🔍 正在从服务器拉取实时数据...';
 }
 
 function sendQuestion(q){
