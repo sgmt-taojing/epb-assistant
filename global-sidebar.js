@@ -65,7 +65,7 @@ var MENU = [
   ]},
   {title:'🛒 设备&能耗', items:[
     {name:'设备商城',icon:'🛒',url:'equipment-mall.html'},
-    {name:'能耗管理',icon:'⚡',url:'energy-mgmt.html',badge:'NEW'},
+    {name:'能耗管理',icon:'⚡',url:'energy.html',badge:'NEW'},
     {name:'数据驾驶舱',icon:'📊',url:'dashboard.html'},
     {name:'绿色金融',icon:'💰',url:'green-finance.html'},
     {name:'碳排放管理',icon:'🌿',url:'carbon-mgmt.html'},

@@ -1,0 +1,91 @@
+{
+  "version": "v1.0",
+  "updated": "2026-07-19",
+  "standards": [
+    {
+      "id": "GB3838-2002",
+      "name": "地表水环境质量标准",
+      "category": "水质",
+      "params": [
+        {"code":"pH","name":"pH值","unit":"-","limits":{"I":6.5,"II":6.5,"III":6.5,"IV":6.5,"V":6.0},"type":"range","std":"6-9"},
+        {"code":"COD","name":"化学需氧量","unit":"mg/L","limits":{"I":15,"II":15,"III":20,"IV":30,"V":40},"type":"max"},
+        {"code":"NH3N","name":"氨氮","unit":"mg/L","limits":{"I":0.15,"II":0.5,"III":1.0,"IV":1.5,"V":2.0},"type":"max"},
+        {"code":"TP","name":"总磷","unit":"mg/L","limits":{"I":0.02,"II":0.1,"III":0.2,"IV":0.3,"V":0.4},"type":"max"},
+        {"code":"TN","name":"总氮","unit":"mg/L","limits":{"I":0.2,"II":0.5,"III":1.0,"IV":1.5,"V":2.0},"type":"max"}
+      ]
+    },
+    {
+      "id": "GB3095-2012",
+      "name": "环境空气质量标准",
+      "category": "大气",
+      "params": [
+        {"code":"PM25","name":"PM2.5","unit":"μg/m³","limits":{"一级":35,"二级":75},"type":"max","avg":"24h"},
+        {"code":"PM10","name":"PM10","unit":"μg/m³","limits":{"一级":50,"二级":150},"type":"max","avg":"24h"},
+        {"code":"SO2","name":"二氧化硫","unit":"μg/m³","limits":{"一级":50,"二级":150},"type":"max","avg":"24h"},
+        {"code":"NO2","name":"二氧化氮","unit":"μg/m³","limits":{"一级":40,"二级":80},"type":"max","avg":"24h"},
+        {"code":"O3","name":"臭氧","unit":"μg/m³","limits":{"一级":160,"二级":200},"type":"max","avg":"8h"},
+        {"code":"CO","name":"一氧化碳","unit":"mg/m³","limits":{"一级":4,"二级":4},"type":"max","avg":"1h"}
+      ]
+    },
+    {
+      "id": "GB12348-2008",
+      "name": "工业企业厂界环境噪声排放标准",
+      "category": "噪声",
+      "params": [
+        {"code":"noise","name":"厂界噪声","unit":"dB(A)","limits":{"1类":55,"2类":60,"3类":65,"4类":70},"type":"max","avg":"昼间"},
+        {"code":"noise_night","name":"厂界噪声(夜间)","unit":"dB(A)","limits":{"1类":45,"2类":50,"3类":55,"4类":55},"type":"max","avg":"夜间"}
+      ]
+    },
+    {
+      "id": "GB8978-1996",
+      "name": "污水综合排放标准",
+      "category": "废水排放",
+      "params": [
+        {"code":"COD","name":"化学需氧量","unit":"mg/L","limits":{"一级":100,"二级":150,"三级":500},"type":"max"},
+        {"code":"BOD5","name":"五日生化需氧量","unit":"mg/L","limits":{"一级":30,"二级":60,"三级":300},"type":"max"},
+        {"code":"SS","name":"悬浮物","unit":"mg/L","limits":{"一级":70,"二级":200,"三级":400},"type":"max"},
+        {"code":"NH3N","name":"氨氮","unit":"mg/L","limits":{"一级":15,"二级":25,"三级":35},"type":"max"},
+        {"code":"oil","name":"石油类","unit":"mg/L","limits":{"一级":10,"二级":10,"三级":30},"type":"max"},
+        {"code":"Cr6","name":"总铬","unit":"mg/L","limits":{"一级":1.5,"二级":1.5,"三级":1.5},"type":"max"}
+      ]
+    },
+    {
+      "id": "GB16297-1996",
+      "name": "大气污染物综合排放标准",
+      "category": "废气排放",
+      "params": [
+        {"code":"SO2","name":"二氧化硫","unit":"mg/m³","limits":{"一级":550,"二级":550},"type":"max"},
+        {"code":"NOx","name":"氮氧化物","unit":"mg/m³","limits":{"一级":240,"二级":240},"type":"max"},
+        {"code":"dust","name":"颗粒物","unit":"mg/m³","limits":{"一级":120,"二级":120},"type":"max"},
+        {"code":"VOCs","name":"挥发性有机物","unit":"mg/m³","limits":{"一级":60,"二级":80},"type":"max"}
+      ]
+    },
+    {
+      "id": "GB36600-2018",
+      "name": "土壤环境质量建设用地土壤污染风险管控标准",
+      "category": "土壤",
+      "params": [
+        {"code":"Pb","name":"铅","unit":"mg/kg","limits":{"第一类":400,"第二类":800},"type":"max"},
+        {"code":"Cd","name":"镉","unit":"mg/kg","limits":{"第一类":20,"第二类":65},"type":"max"},
+        {"code":"Hg","name":"汞","unit":"mg/kg","limits":{"第一类":8,"第二类":38},"type":"max"},
+        {"code":"As","name":"砷","unit":"mg/kg","limits":{"第一类":20,"第二类":60},"type":"max"}
+      ]
+    }
+  ],
+  "device_protocols": [
+    {"id":"modbus","name":"Modbus TCP/RTU","port":502,"desc":"工业设备通用协议，支持水质/气体/噪声传感器"},
+    {"id":"mqtt","name":"MQTT","port":1883,"desc":"物联网消息队列，支持低功耗设备实时上报"},
+    {"id":"http","name":"HTTP POST","port":80,"desc":"RESTful API推送，支持智能仪表和网关"},
+    {"id":"hj212","name":"HJ212环保协议","port":9000,"desc":"污染源在线监控通信协议（生态环境部标准）"},
+    {"id":"opcua","name":"OPC UA","port":4840,"desc":"工业统一架构，支持PLC和DCS系统"}
+  ],
+  "device_templates": [
+    {"type":"water_quality","name":"水质在线监测仪","protocol":"hj212","params":["pH","COD","NH3N","TP","TN"],"standard":"GB3838-2002","interval":5},
+    {"type":"air_quality","name":"空气质量监测站","protocol":"hj212","params":["PM25","PM10","SO2","NO2","O3","CO"],"standard":"GB3095-2012","interval":5},
+    {"type":"noise","name":"噪声监测仪","protocol":"modbus","params":["noise","noise_night"],"standard":"GB12348-2008","interval":1},
+    {"type":"emission_water","name":"废水排放在线监测","protocol":"hj212","params":["COD","BOD5","SS","NH3N","oil"],"standard":"GB8978-1996","interval":15},
+    {"type":"emission_gas","name":"废气排放在线监测(CEMS)","protocol":"hj212","params":["SO2","NOx","dust","VOCs"],"standard":"GB16297-1996","interval":15},
+    {"type":"power","name":"用电监控终端","protocol":"mqtt","params":["power","voltage","current"],"standard":null,"interval":1},
+    {"type":"soil","name":"土壤监测仪","protocol":"modbus","params":["Pb","Cd","Hg","As"],"standard":"GB36600-2018","interval":60}
+  ]
+}
