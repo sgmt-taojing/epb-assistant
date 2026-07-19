@@ -38,11 +38,13 @@ var MENU = [
     {name:'首页',icon:'🏠',url:'index.html'},
   ]},
   {title:'🔍 监测感知', items:[
-    {name:'天地一体感知',icon:'🌐',url:'sensor-dashboard.html'},
     {name:'环境一张图',icon:'🗺️',url:'env-map.html'},
     {name:'非现场执法',icon:'👁️',url:'remote-enforcement.html'},
     {name:'智能预警系统',icon:'🔔',url:'smart-alert.html',badge:'45'},
     {name:'无人机巡查',icon:'🚁',url:'drone-patrol.html'},
+    {name:'物联网监测',icon:'📡',url:'iot.html'},
+    {name:'设备管理',icon:'⚙️',url:'device-mgmt.html'},
+    {name:'传感器可视化',icon:'🌐',url:'sensor-dashboard.html'},
   ]},
   {title:'📋 执法办案', items:[
     {name:'执法流程引导',icon:'📋',url:'enforcement-guide.html'},
@@ -59,9 +61,12 @@ var MENU = [
     {name:'企业环保台账',icon:'📚',url:'env-ledger.html'},
     {name:'环保管家',icon:'🔧',url:'eco-manager.html'},
     {name:'能力评估',icon:'📐',url:'capacity-assess.html'},
+    {name:'EHS安环管理',icon:'🏭',url:'ehs.html'},
   ]},
-  {title:'🛒 设备商城', items:[
+  {title:'🛒 设备&能耗', items:[
     {name:'设备商城',icon:'🛒',url:'equipment-mall.html'},
+    {name:'能耗管理',icon:'⚡',url:'energy-mgmt.html',badge:'NEW'},
+    {name:'数据驾驶舱',icon:'📊',url:'dashboard.html'},
     {name:'绿色金融',icon:'💰',url:'green-finance.html'},
     {name:'碳排放管理',icon:'🌿',url:'carbon-mgmt.html'},
   ]},
@@ -87,7 +92,7 @@ var MENU = [
     {name:'移动工作台',icon:'💼',url:'m-workspace.html'},
     {name:'移动案例',icon:'📂',url:'m-cases.html'},
     {name:'移动自查',icon:'✅',url:'m-self-check.html'},
-    {name:'企业H5',icon:'🏢',url:'ehs.html'},
+    {name:'EHS移动端',icon:'🏭',url:'ehs.html'},
     {name:'移动商城',icon:'🛒',url:'equipment-mall.html'},
     {name:'视频工作室',icon:'🎬',url:'video-studio.html'},
     {name:'微信H5',icon:'💬',url:'wechat-h5.html'},
