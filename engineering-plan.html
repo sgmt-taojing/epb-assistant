@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>EPB Assistant 软件工程规划 v1.0</title>
+<script src="api-fallback.js"></script>
+<style>
+:root{--g:#2E7D5B;--gm:#3B9B6E;--gl:#52B788;--gbg:#F5F9F6;--bg:#F5F9F6;--card:#FFF;--border:#D8E8DE;--text:#1A1A1A;--muted:#666;--shadow:0 2px 16px rgba(46,125,91,.08);--r:14px;--warn:#E67E22;--red:#C0392B;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--amber:#F39C12}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+.nav{background:linear-gradient(135deg,#2E7D5B,#3B9B6E);padding:0 20px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(46,125,91,.15)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.nav-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gl),var(--gm));display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-logo-text{font-size:15px;font-weight:700;color:#e8f5e9}
+.nav-back{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;text-decoration:none}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.hero{background:linear-gradient(135deg,#2E7D5B 0%,#3B9B6E 40%,#4CAF7C 100%);border-radius:var(--r);padding:30px;color:#fff;margin-bottom:20px}
+.hero h1{font-size:24px;font-weight:800;margin-bottom:8px}
+.hero p{font-size:14px;opacity:.8;max-width:700px}
+.hero .meta{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap}
+.hero .meta-item .num{font-size:22px;font-weight:800;color:#a5d6a7}
+.hero .meta-item .lbl{font-size:11px;opacity:.7}
+.phase{background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:16px}
+.phase-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--border)}
+.phase-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.phase-title{font-size:18px;font-weight:700;color:var(--g)}
+.phase-meta{font-size:12px;color:var(--muted);margin-left:auto}
+.task{padding:12px 14px;background:var(--gbg);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--gl)}
+.task-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.task-name{font-size:14px;font-weight:700;color:var(--text)}
+.task-pri{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
+.pri-p0{background:rgba(192,57,43,.12);color:var(--red)}
+.pri-p1{background:rgba(230,126,34,.12);color:var(--warn)}
+.pri-p2{background:rgba(41,128,185,.12);color:var(--blue)}
+.pri-p3{background:rgba(82,183,136,.12);color:var(--g)}
+.task-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.task-deliver{font-size:11px;color:var(--gl);margin-top:4px;font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:768px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{text-align:center;padding:12px;background:var(--gbg);border-radius:10px}
+.metric .val{font-size:20px;font-weight:800}
+.metric .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.section-title{font-size:16px;font-weight:700;color:var(--g);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+.tbl th{text-align:left;color:var(--muted);font-weight:600;padding:8px;border-bottom:2px solid var(--border);font-size:11px}
+.tbl td{padding:8px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:var(--gbg)}
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;display:inline-block}
+.tag-red{background:rgba(192,57,43,.12);color:var(--red)}
+.tag-yellow{background:rgba(230,126,34,.12);color:var(--warn)}
+.tag-green{background:rgba(82,183,136,.12);color:var(--g)}
+.tag-blue{background:rgba(41,128,185,.12);color:var(--blue)}
+.tag-purple{background:rgba(142,68,173,.12);color:var(--purple)}
+</style>
+</head>
+<body>
+<nav class="nav">
+<a class="nav-logo" href="index.html"><div class="nav-logo-icon">📋</div><div class="nav-logo-text">软件工程规划</div></a>
+<a class="nav-back" href="index.html">← 返回首页</a>
+</nav>
+
+<div class="container">
+<div class="hero">
+<h1>EPB Assistant 软件工程规划 v1.0</h1>
+<p>从当前Demo阶段（59页面/纯前端/静态JSON）演进到生产级环保智慧执法平台。按4阶段6个月路线图推进，每阶段有明确交付物和验收标准。</p>
+<div class="meta">
+<div class="meta-item"><div class="num">59→90+</div><div class="lbl">页面规模</div></div>
+<div class="meta-item"><div class="num">1.2MB→3MB</div><div class="lbl">代码量</div></div>
+<div class="meta-item"><div class="num">4阶段</div><div class="lbl">工程周期</div></div>
+<div class="meta-item"><div class="num">6个月</div><div class="lbl">完成时间</div></div>
+</div>
+</div>
+
+<div class="metrics">
+<div class="metric"><div class="val" style="color:var(--g)">59</div><div class="lbl">当前页面</div></div>
+<div class="metric"><div class="val" style="color:var(--blue)">7</div><div class="lbl">JS组件</div></div>
+<div class="metric"><div class="val" style="color:var(--warn)">14</div><div class="lbl">Python后端</div></div>
+<div class="metric"><div class="val" style="color:var(--purple)">0</div><div class="lbl">自动化测试</div></div>
+</div>
+
+<div class="section-title">📊 当前架构评估</div>
+<table class="tbl">
+<thead><tr><th>维度</th><th>当前状态</th><th>成熟度</th><th>主要短板</th></tr></thead>
+<tbody>
+<tr><td>前端架构</td><td>纯HTML+内联CSS/JS，无框架</td><td><span class="tag tag-yellow">Demo级</span></td><td>无组件复用、无构建工具、无状态管理</td></tr>
+<tr><td>后端架构</td><td>Python SimpleHTTPServer</td><td><span class="tag tag-yellow">Demo级</span></td><td>无数据库、无ORM、无异步、无中间件</td></tr>
+<tr><td>数据层</td><td>静态JSON文件（18个）</td><td><span class="tag tag-red">原型级</span></td><td>无持久化、无事务、无并发控制</td></tr>
+<tr><td>部署</td><td>GitHub Pages + 本地服务</td><td><span class="tag tag-green">可用</span></td><td>无CI/CD、无灰度发布、无回滚</td></tr>
+<tr><td>测试</td><td>手动curl + 人工验证</td><td><span class="tag tag-red">缺失</span></td><td>0自动化测试、0覆盖率</td></tr>
+<tr><td>安全</td><td>无认证、无鉴权、无加密</td><td><span class="tag tag-red">缺失</span></td><td>login.html是演示、API无鉴权</td></tr>
+<tr><td>文档</td><td>README + MEMORY.md</td><td><span class="tag tag-yellow">基础</span></td><td>无API文档、无架构图、无部署SOP</td></tr>
+<tr><td>组件化</td><td>7个全局注入JS组件</td><td><span class="tag tag-green">良好</span></td><td>组件间无依赖管理、无版本控制</td></tr>
+</tbody>
+</table>
+
+<!-- Phase 1 -->
+<div class="phase">
+<div class="phase-header">
+<div class="phase-num" style="background:var(--red)">1</div>
+<div class="phase-title">Phase 1 — 工程化基建（第1-4周）</div>
+<div class="phase-meta">P0 · 4周 · 前端+后端+测试</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">1.1 前端构建工具链搭建</div><span class="task-pri pri-p0">P0</span></div>
+<div class="task-desc">引入 Vite 构建工具，将59个HTML页面的内联CSS/JS提取为独立模块。建立 src/ → dist/ 构建流程。配置开发服务器热更新。不引入框架（保持原生JS），但实现模块化(import/export)和CSS变量统一管理。</div>
+<div class="task-deliver">交付: vite.config.js + src/目录结构 + dist/构建产物 + npm run dev / npm run build</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">1.2 后端架构升级：Flask + SQLite</div><span class="task-pri pri-p0">P0</span></div>
+<div class="task-desc">将 file_server.py 迁移为 Flask 应用。引入 SQLite 数据库替代静态JSON。创建数据模型（Enterprise/Device/Case/Law/Task/User）。将14个API端点迁移为 Flask Blueprint。保持向前兼容：GET /api/cases 返回相同JSON结构。</div>
+<div class="task-deliver">交付: app.py + models.py + routes/*.py + epb.db + 迁移脚本(import_json_to_db.py)</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">1.3 自动化测试框架搭建</div><span class="task-pri pri-p0">P0</span></div>
+<div class="task-desc">搭建 pytest 后端测试 + Playwright 前端E2E测试。后端覆盖14个API端点（状态码+响应结构+边界值）。前端覆盖核心流程：首页加载→侧栏菜单→页面跳转→设备商城→案件查询→诊断报告生成。目标覆盖率 ≥60%。</div>
+<div class="task-deliver">交付: tests/ 目录 + pytest.ini + playwright.config.js + 30+测试用例 + CI可运行</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">1.4 用户认证与鉴权系统</div><span class="task-pri pri-p0">P0</span></div>
+<div class="task-desc">基于 Flask-Login 实现 JWT 认证。5角色RBAC（公众/企业/执法/监管/政府）。login.html 对接真实登录API。API端点加鉴权中间件。前端 auth-guard.js 升级为真实token校验。密码 bcrypt 加密存储。</div>
+<div class="task-deliver">交付: auth.py + JWT中间件 + RBAC权限矩阵 + 登录/注册API + token刷新机制</div>
+</div>
+</div>
+
+<!-- Phase 2 -->
+<div class="phase">
+<div class="phase-header">
+<div class="phase-num" style="background:var(--warn)">2</div>
+<div class="phase-title">Phase 2 — 核心功能强化（第5-10周）</div>
+<div class="phase-meta">P1 · 6周 · 业务功能深化</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">2.1 IoT设备接入引擎</div><span class="task-pri pri-p1">P1</span></div>
+<div class="task-desc">实现真实设备数据接入：HJ212协议解析器、MQTT消息订阅、Modbus寄存器读取。设备注册→心跳保活→数据采集→异常告警→自动断线重连。数据写入SQLite，支持时序查询。iot-diagnostic.html 对接真实数据生成诊断报告。</div>
+<div class="task-deliver">交付: protocols/hj212.py + protocols/mqtt_client.py + protocols/modbus.py + DeviceManager + 数据采集服务</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">2.2 案件全流程闭环</div><span class="task-pri pri-p1">P1</span></div>
+<div class="task-desc">实现案件 举报→立案→调查→审理→处罚→执行→归档 全流程。POST /api/report 写入数据库。案件状态机驱动流转。SLA超时自动告警。执法文书AI生成对接模板引擎。自由裁量计算器对接真实案例库。</div>
+<div class="task-deliver">交付: case_workflow.py + 状态机 + SLA引擎 + 文书模板5种 + 裁量基准表</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">2.3 国标对标与诊断报告引擎</div><span class="task-pri pri-p1">P1</span></div>
+<div class="task-desc">将6部国标从JSON硬编码迁移为数据库管理。诊断报告引擎：采集数据→匹配标准→计算占标率→生成诊断项→给出建议→输出PDF。支持自定义标准扩展。报告模板可配置。</div>
+<div class="task-deliver">交付: standards_engine.py + report_generator.py + PDF导出 + 自定义标准API</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">2.4 实时监测大屏与WebSocket</div><span class="task-pri pri-p1">P1</span></div>
+<div class="task-desc">引入 Flask-SocketIO 实现实时推送。ops-monitor.html 从轮询改为WebSocket订阅。传感器数据秒级推送。告警实时弹窗。在线用户数实时统计。大屏支持全屏模式。</div>
+<div class="task-deliver">交付: websocket_events.py + 前端Socket.IO客户端 + 实时大屏</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">2.5 数据扩充与种子数据</div><span class="task-pri pri-p1">P1</span></div>
+<div class="task-desc">企业档案从1条扩充到50+条（山东省真实行业分布）。设备从4台扩充到30+台（覆盖7类设备）。案件50条保持（已有）。法规28部保持。生成确定性模拟时序数据（30天×30设备×5分钟间隔=86400条）。</div>
+<div class="task-deliver">交付: seed_data.py + 50企业 + 30设备 + 86400条时序数据 + 数据生成脚本</div>
+</div>
+</div>
+
+<!-- Phase 3 -->
+<div class="phase">
+<div class="phase-header">
+<div class="phase-num" style="background:var(--blue)">3</div>
+<div class="phase-title">Phase 3 — 优化与体验提升（第11-18周）</div>
+<div class="phase-meta">P2 · 8周 · 性能+体验+安全</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">3.1 响应式适配全覆盖</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">45个缺@media的页面全部补齐1200px/768px双断点。移动端体验优化：触控目标≥44px、字体≥14px、表格横向滚动。PWA支持：manifest.json + Service Worker + 离线访问。</div>
+<div class="task-deliver">交付: 59页面响应式 + PWA配置 + Lighthouse移动端评分≥80</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">3.2 性能优化</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">HTML/CSS/JS压缩（Vite构建）。图片WebP格式转换+懒加载。API响应Gzip。SQLite索引优化。前端路由按需加载（code splitting）。首屏加载 ≤2s（3G网络）。</div>
+<div class="task-deliver">交付: 构建产物 <500KB gzipped + Lighthouse性能评分≥90 + 性能基准测试报告</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">3.3 安全加固</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">HTTPS强制（Let's Encrypt + Nginx反代）。CSP内容安全策略。XSS防护（DOMPurify）。CSRF Token。SQL注入防护（SQLAlchemy ORM）。API限流（Flask-Limiter）。安全头（HSTS/X-Frame-Options等）。</div>
+<div class="task-deliver">交付: Nginx配置 + 安全中间件 + OWASP Top 10扫描通过 + 渗透测试报告</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">3.4 AI助手升级：对接大模型API</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">将前端规则引擎升级为后端大模型API（GLM/通义千问）。知识库RAG：法规向量检索+上下文注入。多轮对话记忆。5角色system prompt。流式响应（SSE）。意图识别+function calling。</div>
+<div class="task-deliver">交付: ai_engine.py + RAG管道 + 5角色prompt + SSE流式接口 + 对话历史</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">3.5 CI/CD流水线</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">GitHub Actions：push→lint→test→build→deploy。自动部署到GitHub Pages（前端）+ Docker镜像（后端）。PR自动审查。版本号管理（语义化版本）。回滚机制。</div>
+<div class="task-deliver">交付: .github/workflows/ci.yml + Docker镜像 + 自动部署脚本 + 版本tag</div>
+</div>
+</div>
+
+<!-- Phase 4 -->
+<div class="phase">
+<div class="phase-header">
+<div class="phase-num" style="background:var(--g)">4</div>
+<div class="phase-title">Phase 4 — 生产部署与运营（第19-24周）</div>
+<div class="phase-meta">P3 · 6周 · 部署+监控+运营</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">4.1 Docker容器化部署</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">完善Dockerfile + docker-compose.yml。Flask + Gunicorn + Nginx三层架构。SQLite→PostgreSQL迁移（可选）。数据卷持久化。健康检查。一键部署脚本 deploy.py 升级。</div>
+<div class="task-deliver">交付: docker-compose.prod.yml + Nginx.conf + Gunicorn配置 + 部署SOP文档</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">4.2 运营监控体系</div><span class="task-pri pri-p3">P3</span></div>
+<div class="task-desc">ops-monitor.html 对接真实指标：Prometheus采集 + Grafana仪表盘。业务指标（案件/设备/企业）+ 系统指标（CPU/内存/网络）+ API指标（QPS/延迟/错误率）。告警规则（钉钉/企业微信通知）。</div>
+<div class="task-deliver">交付: prometheus.yml + grafana/仪表盘JSON + 告警规则 + 通知渠道</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">4.3 文档体系</div><span class="task-pri pri-p3">P3</span></div>
+<div class="task-desc">API文档（OpenAPI/Swagger）。架构设计文档。部署SOP。用户手册（5角色）。开发规范。数据字典。运维手册。</div>
+<div class="task-deliver">交付: docs/ 目录 + Swagger UI + 7份文档 + 在线文档站</div>
+</div>
+
+<div class="task">
+<div class="task-head"><div class="task-name">4.4 灾备与数据迁移</div><span class="task-pri pri-p3">P3</span></div>
+<div class="task-desc">数据库自动备份（每日增量+每周全量）。数据导出/导入工具。灾难恢复SOP（RTO ≤4h, RPO ≤24h）。数据迁移脚本（版本升级时使用）。</div>
+<div class="task-deliver">交付: backup.py + restore.py + 恢复SOP + RTO/RPO验证报告</div>
+</div>
+</div>
+
+<div class="section-title">📅 里程碑与验收标准</div>
+<table class="tbl">
+<thead><tr><th>里程碑</th><th>时间</th><th>验收标准</th><th>交付物</th></tr></thead>
+<tbody>
+<tr><td><strong>M1: 工程化基建</strong></td><td>第4周末</td><td>Vite构建通过 + Flask API 14端点通过 + 测试覆盖率≥60% + JWT登录可用</td><td>构建链+数据库+测试套件+认证</td></tr>
+<tr><td><strong>M2: 核心功能</strong></td><td>第10周末</td><td>IoT设备真实接入 + 案件全流程跑通 + 诊断报告PDF导出 + WebSocket实时推送</td><td>接入引擎+状态机+报告引擎+WebSocket</td></tr>
+<tr><td><strong>M3: 优化完成</strong></td><td>第18周末</td><td>Lighthouse≥90 + 59页面响应式 + OWASP扫描通过 + AI大模型对话可用 + CI/CD自动部署</td><td>性能报告+安全报告+PWA+CI/CD</td></tr>
+<tr><td><strong>M4: 生产就绪</strong></td><td>第24周末</td><td>Docker部署通过 + 监控告警生效 + 文档完整 + 灾备验证通过</td><td>生产环境+监控+文档+灾备</td></tr>
+</tbody>
+</table>
+
+<div class="section-title">⚠️ 风险与对策</div>
+<table class="tbl">
+<thead><tr><th>风险</th><th>概率</th><th>影响</th><th>对策</th></tr></thead>
+<tbody>
+<tr><td>HJ212协议设备不兼容</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-red">高</span></td><td>先用模拟器验证，预留协议适配层</td></tr>
+<tr><td>大模型API成本超预算</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>分级策略：规则引擎优先，复杂问题才调用大模型</td></tr>
+<tr><td>SQLite并发瓶颈</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>Phase 4可迁移PostgreSQL，WAL模式缓解</td></tr>
+<tr><td>前端无框架导致维护成本高</td><td><span class="tag tag-red">高</span></td><td><span class="tag tag-yellow">中</span></td><td>Phase 1模块化拆分+组件注入机制已缓解，必要时引入Vue/Lit</td></tr>
+<tr><td>数据安全合规（环保执法数据）</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-red">高</span></td><td>Phase 3安全加固+数据脱敏+审计日志</td></tr>
+</tbody>
+</table>
+
+<div class="section-title">🔧 技术选型决策</div>
+<table class="tbl">
+<thead><tr><th>层级</th><th>当前</th><th>Phase 1-2</th><th>Phase 3-4</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>前端框架</td><td>无（原生JS）</td><td>Vite+原生ES模块</td><td>保持/Vue3（视维护成本）</td><td>59页面已稳定，不急于引入框架</td></tr>
+<tr><td>后端框架</td><td>SimpleHTTPServer</td><td>Flask</td><td>Flask+Gunicorn</td><td>轻量、生态丰富、团队熟悉</td></tr>
+<tr><td>数据库</td><td>静态JSON</td><td>SQLite</td><td>PostgreSQL（可选）</td><td>SQLite零配置，后期可迁移</td></tr>
+<tr><td>测试</td><td>手动</td><td>pytest+Playwright</td><td>+JMeter压测</td><td>Python生态最全</td></tr>
+<tr><td>部署</td><td>GitHub Pages</td><td>+Docker</td><td>+K8s（可选）</td><td>Docker够用，K8s视规模</td></tr>
+<tr><td>实时通信</td><td>轮询</td><td>Flask-SocketIO</td><td>保持</td><td>与Flask同生态</td></tr>
+<tr><td>AI</td><td>规则引擎</td><td>规则+GLM API</td><td>RAG+GLM API</td><td>分级调用控成本</td></tr>
+</tbody>
+</table>
+</div>
+
+<script src="global-sidebar.js"></script>
+<script src="voice-assistant.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>
