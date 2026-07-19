@@ -12,6 +12,7 @@ from app import create_app
 def client():
     app = create_app()
     app.config['TESTING'] = True
+    # 测试用真实数据库（已初始化种子数据）
     with app.test_client() as client:
         yield client
 
@@ -101,3 +102,49 @@ class TestStaticPages:
     def test_page_200(self, client, page):
         r = client.get('/' + page)
         assert r.status_code == 200
+
+class TestCaseWorkflow:
+    def test_states(self, client):
+        r = client.get('/api/case/states')
+        assert r.status_code == 200
+        states = r.get_json()['states']
+        assert 'reported' in states
+        assert 'archived' in states
+        assert len(states) == 9
+    
+    def test_create_report(self, client):
+        r = client.post('/api/case/report', json={
+            'title': '测试举报', 'type': '水污染类', 'fact': '测试内容'
+        })
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data['ok'] == True
+        assert 'case_id' in data
+        assert data['status'] == 'reported'
+
+class TestDiagnostic:
+    def test_standards(self, client):
+        r = client.get('/api/diag/standards')
+        assert r.status_code == 200
+        data = r.get_json()
+        assert len(data['standards']) == 5
+    
+    def test_generate_report(self, client):
+        r = client.post('/api/diag/report', json={
+            'enterprise': '测试企业', 'period_days': 30, 'standard': 'all'
+        })
+        assert r.status_code == 200
+        data = r.get_json()
+        assert data['ok'] == True
+        assert 'score' in data
+        assert 'grade' in data
+        assert 'items' in data
+        assert data['total_params'] > 0
+    
+    def test_report_has_suggestions(self, client):
+        r = client.post('/api/diag/report', json={
+            'enterprise': '测试企业', 'period_days': 7, 'standard': 'GB3838-2002'
+        })
+        items = r.get_json()['items']
+        for item in items:
+            assert 'suggestion' in item
