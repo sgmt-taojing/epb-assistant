@@ -106,6 +106,7 @@ var MENU = [
     {name:'管理后台',icon:'🖥️',url:'admin.html'},
     {name:'工作空间',icon:'🗂️',url:'workspace.html'},
     {name:'登录',icon:'🔐',url:'login.html'},
+    {name:'工程规划',icon:'🗺️',url:'engineering-plan.html'},
   ]},
 ];
 

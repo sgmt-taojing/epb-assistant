@@ -76,7 +76,9 @@ def api_call(method, path, data=None):
 
 def insert_iot_data():
     """插入新的IoT数据点（每轮5-10条）"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=5000')
     c = conn.cursor()
     
     # 获取所有设备
@@ -124,7 +126,9 @@ def insert_iot_data():
 
 def get_cases_by_status(status):
     """获取指定状态的案件"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=5000')
     rows = conn.execute('SELECT id, title, type FROM cases WHERE status = ? LIMIT 5', (status,)).fetchall()
     conn.close()
     return [{'id': r[0], 'title': r[1], 'type': r[2]} for r in rows]
