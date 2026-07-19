@@ -1,0 +1,17 @@
+{
+  "type": "enforcement",
+  "script": {
+    "opening": "近日，{org}执法人员在{location}开展现场检查，",
+    "body": "检查发现{findings}。执法人员立即{actions}，",
+    "evidence": "现场采集证据{evidence_count}项，包括{evidence_list}。",
+    "closing": "目前案件正在进一步调查处理中。{org}将持续严厉打击环境违法行为，守护碧水蓝天。"
+  },
+  "narration": "近日，{org}执法人员在{location}开展现场检查， 检查发现{findings}。执法人员立即{actions}， 现场采集证据{evidence_count}项，包括{evidence_list}。 目前案件正在进一步调查处理中。{org}将持续严厉打击环境违法行为，守护碧水蓝天。",
+  "status": "script_ready",
+  "created_at": "2026-06-26T17:26:01.927229",
+  "next_steps": [
+    "1. TTS生成旁白音频",
+    "2. 整理现场照片/视频素材",
+    "3. FFmpeg合成最终视频"
+  ]
+}

@@ -1,35 +1,7 @@
-# Python
 __pycache__/
 *.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
-
-# Database (keep epb.db in repo for demo data)
-# epb.db-journal
-# epb.db-wal
-
-# Uploads and outputs (runtime data)
-uploads/
-outputs/
-
-# Logs
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Environment
-.env
-.env.local
-
-# Node (if added later)
 node_modules/
+dist/
+epb.db
+*.log
+.openclaw/
