@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>⚡ 能耗管理 — 环保智慧执法平台</title>
+<script src="api-fallback.js"></script>
+<style>
+:root{--g:#2E7D5B;--gm:#3B9B6E;--gl:#52B788;--gbg:#F5F9F6;--bg:#F5F9F6;--card:#FFF;--border:#D8E8DE;--text:#1A1A1A;--muted:#666;--shadow:0 2px 16px rgba(46,125,91,.08);--r:14px;--warn:#E67E22;--red:#C0392B;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--amber:#F39C12}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+.nav{background:linear-gradient(135deg,#2E7D5B,#3B9B6E);padding:0 20px;height:56px;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(46,125,91,.15)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.nav-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gl),var(--gm));display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-logo-text{font-size:15px;font-weight:700;color:#e8f5e9}
+.nav-back{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 14px;font-size:13px;text-decoration:none;transition:all .2s}
+.nav-back:hover{background:rgba(255,255,255,.2)}
+.container{max-width:1400px;margin:0 auto;padding:16px}
+.hero{background:linear-gradient(135deg,#2E7D5B 0%,#3B9B6E 40%,#4CAF7C 100%);border-radius:var(--r);padding:24px;color:#fff;margin-bottom:16px}
+.hero h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.hero p{font-size:13px;opacity:.8}
+.hero-stats{display:flex;gap:24px;margin-top:14px;flex-wrap:wrap}
+.hero-stat .num{font-size:24px;font-weight:800;color:#a5d6a7}
+.hero-stat .label{font-size:11px;opacity:.7}
+.grid{display:grid;gap:14px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:768px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.card-title{font-size:14px;font-weight:700;color:var(--g);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.metric{text-align:center;padding:14px;background:var(--gbg);border-radius:10px}
+.metric .val{font-size:26px;font-weight:800}
+.metric .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.metric .delta{font-size:10px;margin-top:2px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;min-width:100px;text-align:right}
+.bar-track{flex:1;height:10px;background:var(--gbg);border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:5px;transition:width .6s}
+.bar-val{font-size:11px;color:var(--muted);min-width:70px}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;color:var(--muted);font-weight:600;padding:8px;border-bottom:2px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.tbl td{padding:8px;border-bottom:1px solid var(--border)}
+.tbl tr:hover{background:var(--gbg)}
+.tag{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;display:inline-block}
+.tag-green{background:rgba(82,183,136,.15);color:var(--g)}
+.tag-yellow{background:rgba(230,126,34,.15);color:var(--warn)}
+.tag-red{background:rgba(192,57,43,.15);color:var(--red)}
+.tag-blue{background:rgba(41,128,185,.15);color:var(--blue)}
+.section-gap{margin-top:16px}
+.alert-item{display:flex;align-items:start;gap:8px;padding:10px;border-radius:8px;margin-bottom:6px;font-size:12px}
+.alert-warn{background:rgba(230,126,34,.06);border:1px solid rgba(230,126,34,.12)}
+.alert-danger{background:rgba(192,57,43,.06);border:1px solid rgba(192,57,43,.12)}
+.alert-ok{background:rgba(82,183,136,.06);border:1px solid rgba(82,183,136,.12)}
+.spark{display:flex;align-items:end;gap:2px;height:30px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px}
+</style>
+</head>
+<body>
+<nav class="nav">
+<a class="nav-logo" href="index.html"><div class="nav-logo-icon">⚡</div><div class="nav-logo-text">能耗管理</div></a>
+<a class="nav-back" href="index.html">← 返回首页</a>
+</nav>
+
+<div class="container">
+<div class="hero">
+<h1>⚡ 企业能耗管理</h1>
+<p>治污设施用电监控 · 产排污环节能耗分析 · 异常停产自动发现 · 碳排放核算</p>
+<div class="hero-stats">
+<div class="hero-stat"><div class="num">1,247</div><div class="label">监控企业(家)</div></div>
+<div class="hero-stat"><div class="num">3,580</div><div class="label">监测点(个)</div></div>
+<div class="hero-stat"><div class="num">98.2%</div><div class="label">在线率</div></div>
+<div class="hero-stat"><div class="num">23</div><div class="label">异常告警</div></div>
+</div>
+</div>
+
+<div class="grid grid-4">
+<div class="metric"><div class="val" style="color:var(--blue)">8,452</div><div class="lbl">今日用电(万kWh)</div><div class="delta" style="color:var(--g)">▲ 2.3%</div></div>
+<div class="metric"><div class="val" style="color:var(--purple)">6,890</div><div class="lbl">治污设施用电</div><div class="delta" style="color:var(--muted)">占81.5%</div></div>
+<div class="metric"><div class="val" style="color:var(--amber)">1,562</div><div class="lbl">生产用电</div><div class="delta" style="color:var(--muted)">占18.5%</div></div>
+<div class="metric"><div class="val" style="color:var(--teal)">0.82</div><div class="lbl">治污/生产比</div><div class="delta" style="color:var(--g)">达标</div></div>
+</div>
+
+<div class="grid grid-2 section-gap">
+<div class="card">
+<div class="card-title">📊 各行业能耗对比</div>
+<div id="industry-bars"></div>
+</div>
+<div class="card">
+<div class="card-title">⚡ 实时功率TOP10企业</div>
+<table class="tbl">
+<thead><tr><th>企业</th><th>行业</th><th>功率(kW)</th><th>治污比</th><th>状态</th></tr></thead>
+<tbody id="top-power"></tbody>
+</table>
+</div>
+</div>
+
+<div class="grid grid-3 section-gap">
+<div class="card">
+<div class="card-title">🚨 异常告警</div>
+<div id="alerts"></div>
+</div>
+<div class="card">
+<div class="card-title">📈 24小时用电趋势</div>
+<div class="spark" id="spark-24h"></div>
+<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:6px">
+<span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+</div>
+<div style="margin-top:10px;font-size:12px;color:var(--muted)">
+峰时: <strong style="color:var(--red)">14:00 (412kW)</strong> · 
+谷时: <strong style="color:var(--blue)">04:00 (89kW)</strong> · 
+峰谷差: <strong>323kW</strong>
+</div>
+</div>
+<div class="card">
+<div class="card-title">🌿 碳排放估算</div>
+<div class="metric" style="margin-bottom:10px">
+<div class="val" style="color:var(--g);font-size:22px">3,285 tCO₂</div>
+<div class="lbl">本月碳排放（按用电量×0.5810 tCO₂/MWh）</div>
+</div>
+<div style="font-size:12px;color:var(--muted);margin-bottom:6px">行业碳排放占比</div>
+<div class="bar-row"><div class="bar-label" style="font-size:11px">化工</div><div class="bar-track"><div class="bar-fill" style="width:35%;background:var(--red)"></div></div><div class="bar-val">1,150t</div></div>
+<div class="bar-row"><div class="bar-label" style="font-size:11px">建材</div><div class="bar-track"><div class="bar-fill" style="width:25%;background:var(--warn)"></div></div><div class="bar-val">821t</div></div>
+<div class="bar-row"><div class="bar-label" style="font-size:11px">造纸</div><div class="bar-track"><div class="bar-fill" style="width:18%;background:var(--amber)"></div></div><div class="bar-val">591t</div></div>
+<div class="bar-row"><div class="bar-label" style="font-size:11px">纺织</div><div class="bar-track"><div class="bar-fill" style="width:12%;background:var(--blue)"></div></div><div class="bar-val">394t</div></div>
+<div class="bar-row"><div class="bar-label" style="font-size:11px">其他</div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--teal)"></div></div><div class="bar-val">329t</div></div>
+</div>
+</div>
+
+<div class="card section-gap">
+<div class="card-title">🏢 监控企业清单</div>
+<table class="tbl">
+<thead><tr><th>企业名称</th><th>行业</th><th>月用电(万kWh)</th><th>治污设施功率</th><th>治污/生产比</th><th>在线点</th><th>状态</th><th>最近告警</th></tr></thead>
+<tbody id="enterprise-list"></tbody>
+</table>
+</div>
+</div>
+
+<script>
+(function(){
+// 行业能耗
+var industries = [
+  {name:'化工',value:3250,color:'#C0392B'},
+  {name:'建材',value:2180,color:'#E67E22'},
+  {name:'造纸',value:1560,color:'#F39C12'},
+  {name:'纺织',value:890,color:'#2980B9'},
+  {name:'电镀',value:420,color:'#8E44AD'},
+  {name:'食品',value:320,color:'#009688'},
+  {name:'其他',value:150,color:'#64748b'}
+];
+var maxVal = 3250;
+document.getElementById('industry-bars').innerHTML = industries.map(function(i){
+  var pct = Math.round(i.value/maxVal*100);
+  return '<div class="bar-row"><div class="bar-label">'+i.name+'</div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+i.color+'"></div></div><div class="bar-val">'+i.value+'万kWh</div></div>';
+}).join('');
+
+// TOP10企业
+var companies = [
+  {name:'济南某化工有限公司',ind:'化工',power:485,ratio:0.85,status:'ok'},
+  {name:'山东某建材集团',ind:'建材',power:420,ratio:0.78,status:'ok'},
+  {name:'济南某造纸厂',ind:'造纸',power:365,ratio:0.91,status:'ok'},
+  {name:'某纺织印染公司',ind:'纺织',power:280,ratio:0.65,status:'warn'},
+  {name:'某电镀园区',ind:'电镀',power:195,ratio:0.88,status:'ok'},
+  {name:'某食品有限公司',ind:'食品',power:156,ratio:0.92,status:'ok'},
+  {name:'某热电厂',ind:'电力',power:520,ratio:0.45,status:'danger'},
+  {name:'某水泥制造',ind:'建材',power:385,ratio:0.72,status:'warn'},
+  {name:'某制药企业',ind:'化工',power:310,ratio:0.83,status:'ok'},
+  {name:'某钢铁加工',ind:'金属',power:445,ratio:0.68,status:'warn'}
+];
+document.getElementById('top-power').innerHTML = companies.map(function(c){
+  var tag = c.status==='ok'?'<span class="tag tag-green">正常</span>':c.status==='warn'?'<span class="tag tag-yellow">偏低</span>':'<span class="tag tag-red">异常</span>';
+  return '<tr><td>'+c.name+'</td><td>'+c.ind+'</td><td style="font-weight:600">'+c.power+'</td><td>'+(c.ratio*100).toFixed(0)+'%</td><td>'+tag+'</td></tr>';
+}).join('');
+
+// 告警
+var alerts = [
+  {level:'danger',icon:'🔴',text:'某热电厂治污/生产比仅45%',detail:'远低于标准80%，疑似治污设施停运'},
+  {level:'warn',icon:'⚠️',text:'某纺织印染公司治污比65%',detail:'治污设施功率偏低，可能降负荷运行'},
+  {level:'warn',icon:'⚠️',text:'某水泥制造夜间用电异常',detail:'凌晨2-5点功率突降60%，疑似停产未报备'},
+  {level:'ok',icon:'✅',text:'1,247家企业在线监测正常',detail:'数据采集率98.2%，21家企业离线'},
+  {level:'ok',icon:'✅',text:'碳排放核算完成',detail:'本月3,285 tCO₂，同比下降8.3%'}
+];
+document.getElementById('alerts').innerHTML = alerts.map(function(a){
+  return '<div class="alert-item alert-'+a.level+'"><span>'+a.icon+'</span><div><div style="font-weight:600">'+a.text+'</div><div style="color:var(--muted);font-size:11px;margin-top:2px">'+a.detail+'</div></div></div>';
+}).join('');
+
+// 24小时趋势
+var hours = [89,76,82,95,110,145,180,220,280,320,365,390,405,412,398,380,350,310,280,240,200,165,130,105];
+var maxH = 412;
+document.getElementById('spark-24h').innerHTML = hours.map(function(h,i){
+  var pct = h/maxH*100;
+  var color = h>350?'#C0392B':h>200?'#E67E22':'#3B9B6E';
+  return '<div class="spark-bar" style="height:'+pct+'%;background:'+color+'" title="'+i+':00 '+h+'kW"></div>';
+}).join('');
+
+// 企业清单
+var enterprises = [
+  {name:'济南某化工有限公司',ind:'化工',kwh:3250,power:485,ratio:0.85,points:12,status:'ok',alert:'无'},
+  {name:'山东某建材集团',ind:'建材',kwh:2180,power:420,ratio:0.78,points:8,status:'ok',alert:'无'},
+  {name:'济南某造纸厂',ind:'造纸',kwh:1560,power:365,ratio:0.91,points:6,status:'ok',alert:'无'},
+  {name:'某纺织印染公司',ind:'纺织',kwh:890,power:280,ratio:0.65,points:5,status:'warn',alert:'治污比偏低'},
+  {name:'某电镀园区',ind:'电镀',kwh:420,power:195,ratio:0.88,points:3,status:'ok',alert:'无'},
+  {name:'某热电厂',ind:'电力',kwh:5200,power:520,ratio:0.45,points:15,status:'danger',alert:'治污设施疑似停运'},
+  {name:'某水泥制造',ind:'建材',kwh:1850,power:385,ratio:0.72,points:7,status:'warn',alert:'夜间用电异常'},
+  {name:'某制药企业',ind:'化工',kwh:1120,power:310,ratio:0.83,points:6,status:'ok',alert:'无'},
+  {name:'某钢铁加工',ind:'金属',kwh:2240,power:445,ratio:0.68,points:9,status:'warn',alert:'治污比待提升'},
+  {name:'某食品有限公司',ind:'食品',kwh:320,power:156,ratio:0.92,points:2,status:'ok',alert:'无'}
+];
+document.getElementById('enterprise-list').innerHTML = enterprises.map(function(e){
+  var tag = e.status==='ok'?'<span class="tag tag-green">正常</span>':e.status==='warn'?'<span class="tag tag-yellow">关注</span>':'<span class="tag tag-red">异常</span>';
+  return '<tr><td style="font-weight:600">'+e.name+'</td><td>'+e.ind+'</td><td>'+e.kwh+'</td><td>'+e.power+'kW</td><td>'+(e.ratio*100).toFixed(0)+'%</td><td>'+e.points+'</td><td>'+tag+'</td><td style="color:var(--muted)">'+e.alert+'</td></tr>';
+}).join('');
+})();
+</script>
+<script src="global-sidebar.js"></script>
+<script src="voice-assistant.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>
