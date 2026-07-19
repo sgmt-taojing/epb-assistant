@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>📊 数据驾驶舱 — 环保智慧执法平台</title>
 <style>
-:root{--g:#1B4332;--gm:#2D6A4F;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--bg:#0a1929;--bg2:#102a43;--bg3:#1a3a5c;--card:#15273d;--border:#234166;--text:#e0e8f0;--muted:#8aa5be;--glow:#52B788;--r:10px}
+:root{--g:#2E7D5B;--gm:#3B9B6E;--gl:#52B788;--gp:#D8E8DC;--gbg:#F2F8F4;--red:#E74C3C;--amber:#E67E22;--blue:#2980B9;--purple:#8E44AD;--teal:#009688;--bg:#0a1929;--bg2:#102a43;--bg3:#1a3a5c;--card:#15273d;--border:#234166;--text:#e0e8f0;--muted:#8aa5be;--glow:#52B788;--r:10px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'PingFang SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 .top-bar{background:linear-gradient(135deg,#0a1929,#1a3a5c);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
@@ -371,6 +371,7 @@ fetch('/api/report').then(r=>r.json()).then(data=>{
 // Auto refresh every 5 minutes
 setInterval(function(){location.reload();},300000);
 </script>
+<script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
 </body>

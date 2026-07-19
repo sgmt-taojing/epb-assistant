@@ -6,15 +6,15 @@
 <title>🚔 现场执法终端</title>
 <style>
 :root {
-  --green: #1B4332; --green-mid: #2D6A4F; --green-light: #52B788;
+  --green: #2E7D5B; --green-mid: #3B9B6E; --green-light: #52B788;
   --green-pale: #D8E8DC; --green-bg: #F2F8F4;
   --red: #C0392B; --red-pale: #FDEDEC;
   --amber: #E67E22; --amber-pale: #FEF5E7;
   --blue: #2471A3; --blue-pale: #EBF5FB;
   --purple: #7D3C98; --purple-pale: #F4ECF7;
-  --bg: #F0F2F0; --card: #FFFFFF; --border: #D0E0D4;
+  --bg: #F5F9F6; --card: #FFFFFF; --border: #D8E8DE;
   --text: #1A1A1A; --text-muted: #777;
-  --shadow: 0 2px 12px rgba(27,67,50,0.1);
+  --shadow: 0 2px 12px rgba(46,125,91,0.08);
   --radius: 14px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,7 +26,7 @@ body {
 
 /* === 顶栏 === */
 .top-bar {
-  background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%);
+  background: linear-gradient(135deg, #2E7D5B 0%, #3B9B6E 100%);
   color: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
   position: sticky; top: 0; z-index: 100;
 }
@@ -1636,12 +1636,12 @@ function buildLocalAnalysisFromText(text) {
 <!-- 浮动快捷面板 -->
 <div id="ft-float-panel">
   <div class="ft-float-menu" id="ft-float-menu">
-    <a href="#" class="ft-float-item" onclick="ftNewCase();ftToggleFloat()"><span>📋</span>新建案件</a>
-    <a href="#" class="ft-float-item" onclick="takePhoto();ftToggleFloat()"><span>📷</span>快速拍照</a>
-    <a href="#" class="ft-float-item" onclick="recordVideo();ftToggleFloat()"><span>🎬</span>录制视频</a>
-    <a href="#" class="ft-float-item" onclick="toggleVoiceRecord();ftToggleFloat()"><span>🎙</span>语音笔录</a>
-    <a href="#" class="ft-float-item" onclick="ftOpenSearch();ftToggleFloat()"><span>🔍</span>知识查询</a>
-    <a href="#" class="ft-float-item" onclick="startAnalysis();ftToggleFloat()"><span>🧠</span>AI分析</a>
+    <button type="button" class="ft-float-item" onclick="ftNewCase();ftToggleFloat()"><span>📋</span>新建案件</button>
+    <button type="button" class="ft-float-item" onclick="takePhoto();ftToggleFloat()"><span>📷</span>快速拍照</button>
+    <button type="button" class="ft-float-item" onclick="recordVideo();ftToggleFloat()"><span>🎬</span>录制视频</button>
+    <button type="button" class="ft-float-item" onclick="toggleVoiceRecord();ftToggleFloat()"><span>🎙</span>语音笔录</button>
+    <button type="button" class="ft-float-item" onclick="ftOpenSearch();ftToggleFloat()"><span>🔍</span>知识查询</button>
+    <button type="button" class="ft-float-item" onclick="startAnalysis();ftToggleFloat()"><span>🧠</span>AI分析</button>
     <a href="index.html" class="ft-float-item"><span>🏠</span>返回首页</a>
   </div>
   <button class="ft-float-toggle" id="ft-float-toggle" onclick="ftToggleFloat()">+</button>
@@ -2016,7 +2016,7 @@ function createDeviceConfigModal() {
   
   // Add styles
   var style = document.createElement('style');
-  style.textContent = '.device-config-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}.device-config-overlay.show{display:flex}.device-config-panel{background:#fff;border-radius:16px;width:90%;max-width:480px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}.dc-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.dc-header h2{font-size:16px;color:#1B4332}.dc-close{width:30px;height:30px;border:none;background:#f5f5f5;border-radius:50%;font-size:18px;cursor:pointer}.dc-body{padding:16px 20px}.dc-section{border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:10px}.dc-section-title{font-size:14px;font-weight:700;color:#1B4332;margin-bottom:10px}.dc-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}.dc-item:last-child{border-bottom:none}.dc-label{font-size:13px;color:#333}.dc-switch{position:relative;display:inline-block;width:44px;height:24px}.dc-switch input{opacity:0;width:0;height:0}.dc-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:24px;transition:.3s}.dc-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}input:checked+.dc-slider{background:#2D6A4F}input:checked+.dc-slider:before{transform:translateX(20px)}.form-input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box}';
+  style.textContent = '.device-config-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}.device-config-overlay.show{display:flex}.device-config-panel{background:#fff;border-radius:16px;width:90%;max-width:480px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}.dc-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}.dc-header h2{font-size:16px;color:#2E7D5B}.dc-close{width:30px;height:30px;border:none;background:#f5f5f5;border-radius:50%;font-size:18px;cursor:pointer}.dc-body{padding:16px 20px}.dc-section{border:1px solid #e0e0e0;border-radius:10px;padding:14px;margin-bottom:10px}.dc-section-title{font-size:14px;font-weight:700;color:#2E7D5B;margin-bottom:10px}.dc-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}.dc-item:last-child{border-bottom:none}.dc-label{font-size:13px;color:#333}.dc-switch{position:relative;display:inline-block;width:44px;height:24px}.dc-switch input{opacity:0;width:0;height:0}.dc-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#ccc;border-radius:24px;transition:.3s}.dc-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}input:checked+.dc-slider{background:#3B9B6E}input:checked+.dc-slider:before{transform:translateX(20px)}.form-input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box}';
   document.head.appendChild(style);
   
   updateDeviceConfigUI();
@@ -2117,6 +2117,7 @@ function saveDeviceConfig() {
 // Init
 updateConnectedCount();
 </script>
+<script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
 </body>
