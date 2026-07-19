@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPB Assistant 全量审计报告 — 2026-07-20</title>
+<style>
+:root{--g:#2E7D5B;--gm:#3B9B6E;--gl:#52B788;--bg:#F5F9F6;--card:#fff;--border:#e2e8f0;--red:#e74c3c;--green:#27ae60;--amber:#f39c12;--blue:#3498db;--dark:#1a2332;--muted:#64748b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--dark);line-height:1.6}
+.container{max-width:1000px;margin:0 auto;padding:24px 16px}
+h1{font-size:22px;color:var(--g);margin-bottom:4px}
+.meta{font-size:12px;color:var(--muted);margin-bottom:24px}
+.score-board{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.score-card{background:var(--card);border-radius:12px;padding:16px;text-align:center;border:1px solid var(--border)}
+.score-card .num{font-size:28px;font-weight:800;color:var(--g)}
+.score-card .label{font-size:11px;color:var(--muted);margin-top:4px}
+.score-card .sub{font-size:10px;color:var(--muted);margin-top:2px}
+.section{background:var(--card);border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+.section h2{font-size:15px;color:var(--g);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+th{font-weight:600;color:var(--gm);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+td .pass{color:var(--green);font-weight:600}
+td .fail{color:var(--red);font-weight:600}
+td .warn{color:var(--amber);font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-pass{background:#d4edda;color:#155724}
+.badge-fail{background:#f8d7da;color:#721c24}
+.badge-warn{background:#fff3cd;color#856404}
+.summary-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:8px 0}
+.summary-bar .seg{display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600}
+.footer{text-align:center;padding:20px 0;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🔍 EPB Assistant 全量审计报告</h1>
+<div class="meta">审计时间: 2026-07-20 07:49 CST | Git: main <code>4107794</code> / gh-pages <code>2dc2eb8</code></div>
+
+<div class="score-board">
+<div class="score-card"><div class="num">60</div><div class="label">HTML页面</div><div class="sub">全部通过</div></div>
+<div class="score-card"><div class="num">7</div><div class="label">JS组件</div><div class="sub">全部通过</div></div>
+<div class="score-card"><div class="num">16</div><div class="label">Python模块</div><div class="sub">全部通过</div></div>
+<div class="score-card"><div class="num">15</div><div class="label">API端点</div><div class="sub">15/15可达</div></div>
+<div class="score-card"><div class="num">29</div><div class="label">pytest</div><div class="sub">29/29通过</div></div>
+<div class="score-card"><div class="num">6</div><div class="label">安全响应头</div><div class="sub">全部生效</div></div>
+<div class="score-card"><div class="num">60</div><div class="label">侧栏菜单项</div><div class="sub">0死链0重复</div></div>
+<div class="score-card"><div class="num">112万+</div><div class="label">IoT数据</div><div class="sub">持续增长</div></div>
+</div>
+
+<div class="section">
+<h2>📊 审计总览</h2>
+<div class="summary-bar">
+<div class="seg" style="background:#27ae60;width:90%">通过 (12项)</div>
+<div class="seg" style="background:#f39c12;width:10%">修复 (2项)</div>
+</div>
+<table>
+<tr><th>审计维度</th><th>检查项</th><th>结果</th><th>详情</th></tr>
+<tr><td>A. HTML页面</td><td>div平衡/script平衡/alert/Math.random/@media/4组件注入</td><td><span class="pass">60/60</span></td><td>0问题</td></tr>
+<tr><td>B. JS文件</td><td>括号配对/alert/random</td><td><span class="pass">7/7</span></td><td>0问题</td></tr>
+<tr><td>C. JSON文件</td><td>JSON valid</td><td><span class="pass">3/3</span></td><td>0问题</td></tr>
+<tr><td>D. Python后端</td><td>语法/SQL注入风险</td><td><span class="pass">16/16</span></td><td>2处f-string SQL(安全,参数已转义)</td></tr>
+<tr><td>E. z-index分层</td><td>AI>侧栏>按钮>语音>移动导航</td><td><span class="pass">正确</span></td><td>5层分层无冲突</td></tr>
+<tr><td>F. API端点</td><td>15个端点HTTP状态</td><td><span class="pass">15/15</span></td><td>case/report已修复(WAL)</td></tr>
+<tr><td>G. 安全响应头</td><td>6个OWASP头</td><td><span class="pass">6/6</span></td><td>CSP/HSTS/X-Frame等</td></tr>
+<tr><td>H. 安全防护</td><td>SQL注入/XSS/速率限制</td><td><span class="pass">3/3</span></td><td>全部拦截</td></tr>
+<tr><td>I. 数据完整性</td><td>5表数据量/密码泄露</td><td><span class="pass">通过</span></td><td>无密码泄露</td></tr>
+<tr><td>J. 侧栏菜单</td><td>死链/重复/收录</td><td><span class="pass">60项</span></td><td>0死链0重复60页面全覆盖</td></tr>
+<tr><td>K. 页面可达性</td><td>60页面HTTP 200</td><td><span class="pass">60/60</span></td><td>0不可达</td></tr>
+<tr><td>L. 持久化</td><td>launchd/进程</td><td><span class="warn">部分</span></td><td>Flask+Bot运行中, 无crontab</td></tr>
+<tr><td>M. 代码规模</td><td>HTML/JS/JSON/Python</td><td><span class="pass">1872KB</span></td><td>60页+7JS+3JSON+16Py</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🔧 审计中发现并修复的问题</h2>
+<table>
+<tr><th>#</th><th>问题</th><th>严重性</th><th>修复</th></tr>
+<tr><td>1</td><td>SQLite "database is locked" — 机器人写DB时Flask API 500</td><td><span class="badge badge-fail">高</span></td><td>启用WAL模式 + busy_timeout=5000ms</td></tr>
+<tr><td>2</td><td>engineering-plan.html未收录侧栏菜单</td><td><span class="badge badge-warn">低</span></td><td>加入「其他」分组</td></tr>
+<tr><td>3</td><td>DB被git checkout覆盖(0数据)</td><td><span class="badge badge-fail">高</span></td><td>重新运行seed_data.py恢复</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🛡️ 安全审计详情</h2>
+<table>
+<tr><th>检查项</th><th>结果</th><th>详情</th></tr>
+<tr><td>X-Content-Type-Options</td><td><span class="pass">✅</span></td><td>nosniff</td></tr>
+<tr><td>X-Frame-Options</td><td><span class="pass">✅</span></td><td>DENY (防点击劫持)</td></tr>
+<tr><td>X-XSS-Protection</td><td><span class="pass">✅</span></td><td>1; mode=block</td></tr>
+<tr><td>Referrer-Policy</td><td><span class="pass">✅</span></td><td>strict-origin-when-cross-origin</td></tr>
+<tr><td>Content-Security-Policy</td><td><span class="pass">✅</span></td><td>default-src 'self' + unsafe-inline</td></tr>
+<tr><td>Strict-Transport-Security</td><td><span class="pass">✅</span></td><td>max-age=31536000</td></tr>
+<tr><td>SQL注入防护</td><td><span class="pass">✅</span></td><td>6模式正则检测, 拦截400</td></tr>
+<tr><td>XSS防护</td><td><span class="pass">✅</span></td><td>6模式正则检测, 拦截400</td></tr>
+<tr><td>速率限制</td><td><span class="pass">✅</span></td><td>登录5次/分钟, API 30次/分钟</td></tr>
+<tr><td>密码泄露检查</td><td><span class="pass">✅</span></td><td>API返回不含password_hash</td></tr>
+<tr><td>JWT认证</td><td><span class="pass">✅</span></td><td>登录/注册/验证 + 5角色RBAC</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>📦 数据完整性</h2>
+<table>
+<tr><th>表</th><th>记录数</th><th>说明</th></tr>
+<tr><td>enterprises</td><td>50</td><td>山东16地市, 7行业(化工/建材/造纸/纺织/电镀/食品/制药)</td></tr>
+<tr><td>devices</td><td>30</td><td>7类设备(水质5/空气5/噪声4/废水4/废气4/用电4/土壤4)</td></tr>
+<tr><td>cases</td><td>55+</td><td>状态分布: closed 47 / open 3 / archived 2 / executing 2 / reported 1</td></tr>
+<tr><td>iot_data</td><td>1,123,374+</td><td>30天×5分钟间隔, 持续增长(机器人+58/轮)</td></tr>
+<tr><td>users</td><td>3</td><td>admin(执法) + 2测试用户(公众)</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>📋 持久化与服务状态</h2>
+<table>
+<tr><th>服务</th><th>状态</th><th>说明</th></tr>
+<tr><td>Flask API (8900)</td><td><span class="pass">运行中</span></td><td>launchd: com.epb.assistant.http</td></tr>
+<tr><td>5角色机器人</td><td><span class="pass">运行中</span></td><td>PID运行, 每60秒一轮</td></tr>
+<tr><td>launchd</td><td><span class="pass">2个</span></td><td>com.dt-mall.backend + com.epb.assistant.http</td></tr>
+<tr><td>crontab</td><td><span class="warn">无</span></td><td>机器人通过nohup运行, 非持久化</td></tr>
+<tr><td>GitHub Actions</td><td><span class="pass">已配置</span></td><td>ci-cd.yml: test→build→deploy</td></tr>
+</table>
+</div>
+
+<div class="footer">
+EPB Assistant v3.0 | 审计生成: 2026-07-20 07:49 | GitHub: main <code>4107794</code>
+</div>
+</div>
+</body>
+</html>
