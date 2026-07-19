@@ -402,7 +402,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
       <thead><tr><th>#</th><th>页面</th><th>访问量</th><th>趋势</th><th>平均停留</th><th>角色</th><th>最近</th></tr></thead>
       <tbody>
         ${ranking.map((r, i) => {
-          const sparks = Array.from({length:10}, (_,j) => Math.random() > 0.5 ? 60+Math.random()*40 : 30+Math.random()*30);
+          const sparks = Array.from({length:10}, (_,j) => { const s = (i*31+j*17)%100; return s > 50 ? 60+(s%40) : 30+(s%30); });
           return `<tr>
             <td style="color:${i<3?'#f59e0b':'var(--muted)'};font-weight:700">${i+1}</td>
             <td>${r.page}</td>
@@ -453,7 +453,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
         <div style="width:80px;font-size:10px;color:var(--muted);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${page}</div>
         <div style="flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
           ${Array.from({length:7}, (_,j) => {
-            const v = Math.max(0, level - Math.abs(j - 3) + Math.floor(Math.random()*2));
+            const v = Math.max(0, level - Math.abs(j - 3) + ((i*7+j*13)%2));
             return `<div class="heat-cell heat-${v}" title="${page} 周${dayLabels[j]}: ${v*20}次"></div>`;
           }).join('')}
         </div>

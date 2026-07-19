@@ -90,7 +90,7 @@ fab.style.cssText = [
   'position:fixed','bottom:70px','right:72px','width:52px','height:52px',
   'border-radius:50%','background:linear-gradient(135deg,#10b981,#34d399)',
   'color:#fff','font-size:22px','display:flex','align-items:center','justify-content:center',
-  'cursor:pointer','z-index:99998','box-shadow:0 4px 12px rgba(16,185,129,.4)',
+  'cursor:pointer','z-index:99999','box-shadow:0 4px 12px rgba(16,185,129,.4)',
   'transition:all .3s','user-select:none','-webkit-tap-highlight-color:transparent'
 ].join(';');
 
@@ -100,7 +100,7 @@ chat.style.cssText = [
   'position:fixed','bottom:130px','right:16px','width:340px','max-width:calc(100vw - 32px)',
   'height:500px','max-height:calc(100vh - 160px)',
   'background:#0a0e1a','border:1px solid #1e293b','border-radius:16px',
-  'z-index:99998','display:none','flex-direction:column',
+  'z-index:99999','display:none','flex-direction:column',
   'box-shadow:0 8px 32px rgba(0,0,0,.4)','overflow:hidden',
   'font-family:-apple-system,BlinkMacSystemFont,sans-serif'
 ].join(';');

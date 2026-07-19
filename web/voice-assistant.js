@@ -17,7 +17,7 @@ fab.style.cssText = [
   'position:fixed','bottom:70px','right:16px','width:52px','height:52px',
   'border-radius:50%','background:linear-gradient(135deg,#3b82f6,#60a5fa)',
   'color:#fff','font-size:22px','display:flex','align-items:center','justify-content:center',
-  'cursor:pointer','z-index:99999','box-shadow:0 4px 12px rgba(59,130,246,.4)',
+  'cursor:pointer','z-index:99996','box-shadow:0 4px 12px rgba(59,130,246,.4)',
   'transition:all .3s','user-select:none','-webkit-tap-highlight-color:transparent'
 ].join(';');
 
@@ -27,7 +27,7 @@ panel.id = 'va-panel';
 panel.style.cssText = [
   'position:fixed','bottom:130px','right:16px','width:300px','max-width:calc(100vw - 32px)',
   'background:#111827','border:1px solid #1e293b','border-radius:12px',
-  'padding:16px','z-index:99999','display:none','box-shadow:0 8px 24px rgba(0,0,0,.3)',
+  'padding:16px','z-index:99996','display:none','box-shadow:0 8px 24px rgba(0,0,0,.3)',
   'font-family:-apple-system,BlinkMacSystemFont,sans-serif','color:#e2e8f0'
 ].join(';');
 
