@@ -4,7 +4,7 @@
   'use strict';
 
   const API_BASE = (location.hostname === '127.0.0.1' || location.hostname === 'localhost')
-    ? 'http://127.0.0.1:8900' : '';
+    ? 'http://127.0.0.1:8899' : '';
 
   // 平台页面清单（用于功能使用统计）
   const ALL_PAGES = [

@@ -5,7 +5,7 @@
 运行端口：8899
 """
 
-import os, json, uuid, base64, cgi
+import os, json, uuid, base64, cgi, re
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, unquote, parse_qs
 from datetime import datetime
@@ -26,6 +26,50 @@ WEB_DIR = os.path.join(BASE_DIR, dir_cfg.get('web', 'web'))
 DB_DIR = os.path.join(BASE_DIR, dir_cfg.get('db', 'db'))
 UPLOAD_DIR = os.path.join(BASE_DIR, dir_cfg.get('uploads', 'uploads'))
 OUTPUTS_DIR = os.path.join(BASE_DIR, dir_cfg.get('outputs', 'outputs'))
+
+# Flask 路由表（启动时从 app 蓝图构建）
+_FLASK_ROUTES = set()
+flask_app = None  # Flask app 实例，由 _build_flask_routes() 赋值
+
+def _match_flask_template(path):
+    """检查 path 是否匹配某个 Flask 参数化路由模板（如 /api/case/sla/<case_id>）"""
+    path_parts = path.strip('/').split('/')
+    for route in _FLASK_ROUTES:
+        route_parts = route.strip('/').split('/')
+        if len(path_parts) != len(route_parts):
+            continue
+        matched = True
+        for pp, rp in zip(path_parts, route_parts):
+            if rp.startswith('<') and rp.endswith('>'):
+                continue  # 参数段
+            if pp != rp:
+                matched = False
+                break
+        if matched:
+            return route
+    return None
+
+def _build_flask_routes():
+    """从 Flask app 蓝图构建路由表"""
+    global _FLASK_ROUTES
+    try:
+        import importlib.util
+        import sys
+        app_init = os.path.join(BASE_DIR, 'app', '__init__.py')
+        if not os.path.exists(app_init):
+            return
+        # 把项目根加进 sys.path，让 app.routes.* 能 import
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+        spec = importlib.util.spec_from_file_location('app', app_init)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        global flask_app
+        flask_app = mod.create_app()
+        for rule in flask_app.url_map.iter_rules():
+            _FLASK_ROUTES.add(str(rule))  # e.g. /api/auth/login
+    except Exception as e:
+        print(f'[Flask routes] 路由表构建失败(非致命): {e}')
 
 # 导入数据库层
 import sys as _sys
@@ -251,8 +295,18 @@ class EPBHandler(SimpleHTTPRequestHandler):
             fname = path[len('/api-data/'):]
             fpath = os.path.join(BASE_DIR, 'api-data', fname)
             self._serve_static(fpath)
-        # /api/ 未匹配的路径 → 尝试 api-data/{name}.json 回退
+        # /api/ 未匹配的路径 → 先尝试 Flask 路由，再尝试 api-data/{name}.json 回退
         elif path.startswith('/api/'):
+            # Flask 路由优先：精确匹配 + 参数化匹配（/api/case/sla/<id>）
+            if _FLASK_ROUTES:
+                if path in _FLASK_ROUTES:
+                    _forward_to_flask(self)
+                    return
+                # 参数化匹配：路径段换 <...> 与模板比对
+                path_template = _match_flask_template(path)
+                if path_template:
+                    _forward_to_flask(self)
+                    return
             api_name = path[len('/api/'):].strip('/')
             # 尝试 api-data/{api_name}.json
             fallback = os.path.join(BASE_DIR, 'api-data', api_name + '.json')
@@ -359,12 +413,25 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_device_register()
         elif parsed.path == '/api/device_data':
             self._handle_device_data()
+        elif parsed.path.startswith('/api/') and _FLASK_ROUTES:
+            # 动态路由 fallback: 转给 Flask 处理（路由表从 app.routes.* 自动构建）
+            if parsed.path in _FLASK_ROUTES or _match_flask_template(parsed.path):
+                _forward_to_flask(self)
+            else:
+                self.send_error(404, 'Not Found')
         else:
             self.send_error(404, 'Not Found')
 
     def _cors_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        # OWASP 推荐安全响应头
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('X-XSS-Protection', '1; mode=block')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+        self.send_header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: https:; connect-src 'self' https:")
 
     def _send_json(self, data, code=200):
         """发送 JSON 响应"""
@@ -607,6 +674,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
     def _handle_enterprises(self):
         """GET /api/enterprises — 辖区企业名录"""
         try:
+            if _USE_DB:
+                enterprises = db.db_list_enterprises()
+                self._send_json({'ok': True, 'enterprises': enterprises, 'total': len(enterprises)})
+                return
             ent_file = os.path.join(DB_DIR, 'enterprises.json')
             if os.path.exists(ent_file):
                 with open(ent_file, 'r', encoding='utf-8') as f:
@@ -778,18 +849,45 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 with open(path, 'wb') as f:
                     f.write(file_data)
             else:
-                form = cgi.FieldStorage(
-                    fp=self.rfile, headers=self.headers,
-                    environ={'REQUEST_METHOD': 'POST'})
-                field = form.getfirst('file')
-                if not field:
-                    self.send_error(400, 'No file field')
+                # 自己解析 multipart/form-data，避免 cgi.FieldStorage 在大文件/某些边界下 ValueError
+                boundary_match = re.search(r'boundary=(?:(?:"([^"]+)")|([^;\s]+))', content_type)
+                boundary = (boundary_match.group(1) or boundary_match.group(2)) if boundary_match else None
+                if not boundary:
+                    self._send_json({'ok': False, 'error': 'missing boundary'}, code=400)
                     return
-                safe_name = (f'{datetime.now().strftime("%Y%m%d%H%M%S")}_'
-                             f'{uuid.uuid4().hex[:6]}_{field.filename}')
-                path = os.path.join(UPLOAD_DIR, safe_name)
-                with open(path, 'wb') as f:
-                    f.write(field.file.read())
+                length = int(self.headers.get('Content-Length', 0))
+                if length <= 0:
+                    self._send_json({'ok': False, 'error': 'empty body'}, code=400)
+                    return
+                body = self.rfile.read(length)
+                delim = b'--' + boundary.encode('ascii')
+                parts = body.split(delim)
+                saved_path = None
+                for part in parts:
+                    if not part or part in (b'', b'--\r\n', b'--', b'--\r\n'):
+                        continue
+                    header_end = part.find(b'\r\n\r\n')
+                    if header_end < 0:
+                        continue
+                    header = part[:header_end].decode('ascii', errors='ignore')
+                    file_content = part[header_end + 4:]
+                    if file_content.endswith(b'\r\n'):
+                        file_content = file_content[:-2]
+                    fn_match = re.search(r'filename="?([^";\r\n]+)"?', header)
+                    if not fn_match:
+                        continue
+                    orig_filename = fn_match.group(1)
+                    safe_name = (f'{datetime.now().strftime("%Y%m%d%H%M%S")}_'
+                                 f'{uuid.uuid4().hex[:6]}_{orig_filename}')
+                    path = os.path.join(UPLOAD_DIR, safe_name)
+                    with open(path, 'wb') as f:
+                        f.write(file_content)
+                    saved_path = path
+                    break
+                if not saved_path:
+                    self._send_json({'ok': False, 'error': 'no file in multipart'}, code=400)
+                    return
+                path = saved_path
 
             file_url = f'/uploads/{os.path.basename(path)}'
             preview = self._extract_preview(path)
@@ -2044,20 +2142,23 @@ class EPBHandler(SimpleHTTPRequestHandler):
             results = []
             q_lower = q.lower()
             
-            # 1. 从 law_index.json 搜索（key=法规名，value=dict含provisions/cases）
+            # 1. 从 law_index.json 搜索（list of {law_name, article, full_text, case_count}）
             law_path = os.path.join(DB_DIR, 'law_index.json')
             if os.path.isfile(law_path):
                 with open(law_path, 'r', encoding='utf-8') as f:
                     law_data = json.load(f)
-                for law_name, law_info in list(law_data.get('laws', {}).items())[:30]:
-                    if q_lower in law_name.lower():
-                        first_case = ''
-                        for prov in law_info.get('provisions', [])[:1]:
-                            for c in prov.get('cases', [])[:1]:
-                                first_case = f"{c.get('title','')} — {c.get('fact','')[:60]}"
+                # 容错：laws 可能是 list 或 dict
+                laws_raw = law_data.get('laws', {})
+                if isinstance(laws_raw, dict):
+                    items = list(laws_raw.items())[:30]
+                else:
+                    items = [(l.get('law_name', ''), l) for l in laws_raw[:30]]
+                for law_name, law_info in items:
+                    if isinstance(law_info, dict) and (q_lower in law_name.lower() or q_lower in str(law_info.get('full_text',''))[:200].lower()):
                         results.append({
                             'type': '法规', 'icon': '⚖️', 'title': law_name,
-                            'desc': first_case or f"共{law_info.get('total_cases',0)}个案例", 'score': 1.0
+                            'desc': str(law_info.get('full_text',''))[:80] or f"共{law_info.get('case_count',0)}个案例",
+                            'score': 1.0
                         })
             
             # 2. 从 knowledge_graph.json 搜索（law_categories/industry_profiles/evidence_standards）
@@ -2122,11 +2223,59 @@ def _count_api_endpoints():
             count += 1
     return count
 
+def _forward_to_flask(self):
+    """直接调用同进程内 Flask app（用 test_client，零网络依赖）"""
+    try:
+        # Flask test_client 返回 Response 对象
+        with flask_app.test_client() as tc:
+            headers = {k: v for k, v in self.headers.items() if k.lower() != 'host'}
+            # Werkzeug 1.x 测试客户端需要完整 path with query string from parsed
+            from urllib.parse import urlparse
+            parsed = urlparse(self.path)
+            path = parsed.path
+            query = parsed.query
+            if self.command == 'POST':
+                length = int(self.headers.get('Content-Length', 0) or 0)
+                body = self.rfile.read(length) if length > 0 else b''
+                ct = self.headers.get('Content-Type', 'application/json')
+                resp = tc.post(path + (('?' + query) if query else ''), data=body, headers={**headers, 'Content-Type': ct})
+            elif self.command == 'GET':
+                resp = tc.get(path + (('?' + query) if query else ''), headers=headers)
+            elif self.command == 'PUT':
+                length = int(self.headers.get('Content-Length', 0) or 0)
+                body = self.rfile.read(length) if length > 0 else b''
+                ct = self.headers.get('Content-Type', 'application/json')
+                resp = tc.put(path + (('?' + query) if query else ''), data=body, headers={**headers, 'Content-Type': ct})
+            else:
+                resp = tc.open(self.path, method=self.command, headers=headers)
+
+        payload = resp.get_data()
+        self.send_response(resp.status_code)
+        ct = resp.headers.get('Content-Type', 'application/json')
+        self.send_header('Content-Type', ct)
+        self.send_header('Content-Length', str(len(payload)))
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.end_headers()
+        self.wfile.write(payload)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        self._send_json({'ok': False, 'error': f'flask_forward_failed: {e}'}, code=502)
+
+
 def run(port=None):
     if port is None:
         port = _config.get('server', {}).get('port', 8899)
-    server = HTTPServer(('0.0.0.0', port), EPBHandler)
-    print(f'🌿 环保执法助手服务已启动: http://0.0.0.0:{port}')
+    # 启动时构建路由表
+    _build_flask_routes()
+    if _FLASK_ROUTES:
+        print(f'   [Flask fallback] 从 app 蓝图挂载 {_FLASK_ROUTES & {"/api/auth/login", "/api/case/report", "/api/diag/report"}} 等路由')
+    HTTPServer.allow_reuse_address = True
+    server = HTTPServer(('127.0.0.1', port), EPBHandler)  # 安全加固:仅本机访问
+    print(f'🌿 环保执法助手服务已启动: http://127.0.0.1:{port}')
     print(f'   POST /api/upload        — 文件上传')
     print(f'   POST /api/generate_doc  — 文书生成（docx/pdf/ppt）')
     print(f'   POST /api/search_cases  — 案例查询')

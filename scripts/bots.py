@@ -8,7 +8,7 @@ import json, time, hashlib, urllib.request, sqlite3, os
 from datetime import datetime, timedelta
 import random as _r  # 仅用于机器人行为模拟，非业务数据
 
-BASE = 'http://127.0.0.1:8900'
+BASE = 'http://127.0.0.1:8899'
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'epb.db')
 
 # 5角色
