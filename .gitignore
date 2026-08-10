@@ -5,3 +5,14 @@ dist/
 epb.db
 *.log
 .openclaw/
+venv/
+
+# Security
+.env
+.env.*
+*.key
+*.pem
+db/config.json
+*.db-shm
+*.db-wm
+*.db.bak
