@@ -19,3 +19,6 @@ db/config.json
 *.db
 *.db-wal
 *.db-shm
+
+# 环境配置示例允许入库（实际 .env 仍忽略）
+!.env.example
