@@ -1,7 +1,7 @@
 """数据模型 — SQLite + sqlite3 原生（无需ORM）"""
 import sqlite3, json, os
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'epb.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'db', 'epb.db')
 
 def get_db():
     conn = sqlite3.connect(DB_PATH, timeout=10)

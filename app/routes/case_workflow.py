@@ -25,7 +25,7 @@ def create_report():
     case_id = 'CASE-' + str(int(time.time()))[-8:]
     conn = get_db()
     conn.execute(
-        'INSERT INTO cases (id, date, title, party, type, source, fact, status, risk_level, criminal, fetchedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO cases (id, date, title, party, type, source, fact, status, risk_level, criminal, fetched_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
         (case_id, time.strftime('%Y-%m-%d'), data.get('title','匿名举报'), data.get('party','匿名'),
          data.get('type','其他'), '公众举报', data.get('fact',''), 'reported', '中风险', 0, time.strftime('%Y-%m-%dT%H:%M:%S'))
     )

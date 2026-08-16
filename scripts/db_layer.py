@@ -332,6 +332,41 @@ def db_task_count():
     return n
 
 # ============ 设备 ============
+def db_list_enterprises(limit=500):
+    """列出辖区所有企业"""
+    conn = get_conn()
+    rows = conn.execute('SELECT * FROM enterprises ORDER BY id LIMIT ?', (limit,)).fetchall()
+    conn.close()
+    result = []
+    for r in rows:
+        result.append({
+            'id': r['id'],
+            'name': r['name'],
+            'industry': r['type'] or '',
+            'address': r['address'] or '',
+            'lng': r['lng'] or 0,
+            'lat': r['lat'] or 0,
+            'permit_no': r['permit_no'] or '',
+            'pollutants': from_json(r['pollutants'] or '[]'),
+            'monitoring_points': from_json(r['monitoring_points'] or '[]'),
+            'contact_person': r['contact_person'] or '',
+            'contact_phone': r['contact_phone'] or '',
+            'credit_level': r['credit_level'] or 'B',
+            'risk_level': r['risk_level'] or 'medium',
+            'last_check_date': r['last_check_date'] or '',
+            'status': r['status'] or 'active'
+        })
+    return result
+
+
+def db_enterprise_count():
+    """企业总数"""
+    conn = get_conn()
+    n = conn.execute('SELECT COUNT(*) as n FROM enterprises').fetchone()['n']
+    conn.close()
+    return n
+
+
 def db_list_devices():
     conn = get_conn()
     c = conn.cursor()

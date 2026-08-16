@@ -504,7 +504,7 @@ window.fetch = function(url, opts) {
     </div>
 
     <button class="submit-btn" style="margin-top:10px" onclick="startAnalysis()">
-      🔍 智能分析 · 获取执法指引
+      🔍 自动分析 · 获取执法指引
     </button>
   </div>
 
@@ -611,7 +611,7 @@ window.fetch = function(url, opts) {
     <!-- 分析结果展示 -->
     <div id="sceneAnalysisResult" style="display:none">
       <div class="guide-panel" style="margin-top:10px">
-        <div class="guide-title">🤖 智能分析结果</div>
+        <div class="guide-title">🤖 自动分析结果</div>
         <div class="guide-text" id="sceneAnalysisText"></div>
       </div>
 
@@ -737,7 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ============= 智能分析 =============
+// ============= 自动分析 =============
 async function startAnalysis() {
   state.caseText = document.getElementById('caseText').value.trim();
   if (!state.caseText && !state.violationType) {
@@ -749,7 +749,7 @@ async function startAnalysis() {
   document.getElementById('statusDot').classList.remove('off');
 
   try {
-    // 调用智能分析API
+    // 调用自动分析API
     const resp = await fetch('/api/smart_analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

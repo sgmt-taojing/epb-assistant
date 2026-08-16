@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 # ── 路径 ──────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_FILE  = os.path.join(BASE_DIR, 'epb.db')
+DB_FILE  = os.path.join(BASE_DIR, 'db', 'epb.db')
 
 # ── 确定性伪随机 ──────────────────────────────────
 def det(seed, factor=2654435761, offset=12345, rng=10000):
@@ -285,7 +285,7 @@ def write_to_db(enterprises, devices, iot_rows):
              d['registered_at'], d['last_active']))
     
     # 写IoT数据 — 批量插入
-    c.executemany('''INSERT INTO iot_data (device_id, param, value, timestamp, quality)
+    c.executemany('''INSERT INTO iot_data (device_id, parameter, value, timestamp, quality)
         VALUES (?,?,?,?,?)''', iot_rows)
     
     conn.commit()

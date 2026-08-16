@@ -16,3 +16,6 @@ db/config.json
 *.db-shm
 *.db-wm
 *.db.bak
+*.db
+*.db-wal
+*.db-shm

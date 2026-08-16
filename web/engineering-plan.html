@@ -193,8 +193,8 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 
 <div class="task">
-<div class="task-head"><div class="task-name">3.4 AI助手升级：对接大模型API</div><span class="task-pri pri-p2">P2</span></div>
-<div class="task-desc">将前端规则引擎升级为后端大模型API（GLM/通义千问）。知识库RAG：法规向量检索+上下文注入。多轮对话记忆。5角色system prompt。流式响应（SSE）。意图识别+function calling。</div>
+<div class="task-head"><div class="task-name">3.4 知识助手升级：对接知识库API</div><span class="task-pri pri-p2">P2</span></div>
+<div class="task-desc">将前端规则引擎升级为后端知识库API（GLM/通义千问）。知识库RAG：法规向量检索+上下文注入。多轮对话记忆。5角色system prompt。流式响应（SSE）。意图识别+function calling。</div>
 <div class="task-deliver">交付: ai_engine.py + RAG管道 + 5角色prompt + SSE流式接口 + 对话历史</div>
 </div>
 
@@ -244,7 +244,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 <tbody>
 <tr><td><strong>M1: 工程化基建</strong></td><td>第4周末</td><td>Vite构建通过 + Flask API 14端点通过 + 测试覆盖率≥60% + JWT登录可用</td><td>构建链+数据库+测试套件+认证</td></tr>
 <tr><td><strong>M2: 核心功能</strong></td><td>第10周末</td><td>IoT设备真实接入 + 案件全流程跑通 + 诊断报告PDF导出 + WebSocket实时推送</td><td>接入引擎+状态机+报告引擎+WebSocket</td></tr>
-<tr><td><strong>M3: 优化完成</strong></td><td>第18周末</td><td>Lighthouse≥90 + 59页面响应式 + OWASP扫描通过 + AI大模型对话可用 + CI/CD自动部署</td><td>性能报告+安全报告+PWA+CI/CD</td></tr>
+<tr><td><strong>M3: 优化完成</strong></td><td>第18周末</td><td>Lighthouse≥90 + 59页面响应式 + OWASP扫描通过 + AI知识库对话可用 + CI/CD自动部署</td><td>性能报告+安全报告+PWA+CI/CD</td></tr>
 <tr><td><strong>M4: 生产就绪</strong></td><td>第24周末</td><td>Docker部署通过 + 监控告警生效 + 文档完整 + 灾备验证通过</td><td>生产环境+监控+文档+灾备</td></tr>
 </tbody>
 </table>
@@ -254,7 +254,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 <thead><tr><th>风险</th><th>概率</th><th>影响</th><th>对策</th></tr></thead>
 <tbody>
 <tr><td>HJ212协议设备不兼容</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-red">高</span></td><td>先用模拟器验证，预留协议适配层</td></tr>
-<tr><td>大模型API成本超预算</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>分级策略：规则引擎优先，复杂问题才调用大模型</td></tr>
+<tr><td>知识库API成本超预算</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>分级策略：规则引擎优先，复杂问题才调用知识库</td></tr>
 <tr><td>SQLite并发瓶颈</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-yellow">中</span></td><td>Phase 4可迁移PostgreSQL，WAL模式缓解</td></tr>
 <tr><td>前端无框架导致维护成本高</td><td><span class="tag tag-red">高</span></td><td><span class="tag tag-yellow">中</span></td><td>Phase 1模块化拆分+组件注入机制已缓解，必要时引入Vue/Lit</td></tr>
 <tr><td>数据安全合规（环保执法数据）</td><td><span class="tag tag-yellow">中</span></td><td><span class="tag tag-red">高</span></td><td>Phase 3安全加固+数据脱敏+审计日志</td></tr>

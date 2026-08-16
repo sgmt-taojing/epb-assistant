@@ -513,9 +513,14 @@ def generate_ajdcbg(party, case_type, fact, evidence, law, suggestion, case_id=N
     add_para(doc, '3. 2026年  月  日，委托检测机构出具检测报告（报告编号：      ）。')
 
     add_heading(doc, '三、证据材料', level=2)
-    add_para(doc, f'（一）主体证据：{evidence[0]}')
-    add_para(doc, f'（二）事实证据：{evidence[1]}')
-    add_para(doc, f'（三）鉴定意见：{evidence[2]}')
+    ev = evidence if isinstance(evidence, list) and len(evidence) >= 3 else [
+        '当事人营业执照复印件（证明主体资格）',
+        '现场检查笔录、调查询问笔录及影像资料',
+        '鉴定检测报告（证明违法事实）',
+    ]
+    add_para(doc, f'（一）主体证据：{ev[0]}')
+    add_para(doc, f'（二）事实证据：{ev[1]}')
+    add_para(doc, f'（三）鉴定意见：{ev[2]}')
 
     add_heading(doc, '四、法律适用', level=2)
     add_para(doc, f'当事人行为违反{law}之规定，应依据{law}予以处罚。')
@@ -554,7 +559,31 @@ def generate_doc(doc_type, case_data, output_path):
     if doc_type not in generators:
         raise ValueError(f'未知文书类型：{doc_type}')
 
-    doc, cid = generators[doc_type](case_data)
+    # 默认值兜底，避免缺字段 KeyError
+    defaults = {
+        'party': case_data.get('party') or case_data.get('enterprise') or case_data.get('reporter') or '当事人',
+        'fact': case_data.get('fact') or case_data.get('description') or '（当事人存在环境违法行为）',
+        'law': case_data.get('law') or '《中华人民共和国环境保护法》第二十五条',
+        'result': case_data.get('result', ''),
+        'fine': case_data.get('fine', '10'),
+        'requirement': case_data.get('requirement', '立即停止违法行为'),
+        'deadline': case_data.get('deadline', '15日内'),
+        'location': case_data.get('location', ''),
+        'inspector': case_data.get('inspector', '执法人员'),
+        'date': case_data.get('date', datetime.now().strftime('%Y-%m-%d')),
+        'facts': case_data.get('facts', ''),
+        'person': case_data.get('person', ''),
+        'role': case_data.get('role', ''),
+        'qa': case_data.get('qa', []),
+        'legal_basis': case_data.get('legal_basis', ''),
+        'items': case_data.get('items', []),
+        'case_type': case_data.get('case_type', ''),
+        'evidence': case_data.get('evidence', []),
+        'suggestion': case_data.get('suggestion', ''),
+    }
+    safe_data = {**defaults, **case_data}
+
+    doc, cid = generators[doc_type](safe_data)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     doc.save(output_path)
     return output_path, cid

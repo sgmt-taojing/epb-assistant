@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧠 AI智能分析</title>
+<title>🧠 AI自动分析</title>
 <style>
 :root { --green: #2E7D5B; --green-mid: #3B9B6E; --green-light: #52B788; --green-pale: #D8E8DC; --green-bg: #F2F8F4; --red: #C0392B; --amber: #E67E22; --blue: #2980B9; --purple: #8E44AD; --bg: #F8FAF8; --card: #FFFFFF; --border: #D8E8DE; --text: #1A1A1A; --text-muted: #666; --shadow: 0 2px 12px rgba(27,67,50,0.08); --radius: 12px; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -148,12 +148,12 @@ window.fetch = function(url, opts) {
 <script src="api-fallback.js"></script>
 </head>
 <body>
-<div class="top-bar"><span style="font-size:22px">🧠</span><h1>AI智能分析</h1><a href="index.html" class="back">← 返回平台</a></div>
+<div class="top-bar"><span style="font-size:22px">🧠</span><h1>AI自动分析</h1><a href="index.html" class="back">← 返回平台</a></div>
 <div class="container">
   <div class="card">
-    <div class="card-title">🔍 案件智能分析</div>
+    <div class="card-title">🔍 案件自动分析</div>
     <textarea id="caseInput" placeholder="输入案件描述，AI自动识别违法类型、匹配法条、评估风险、推荐证据...&#10;&#10;示例：某化工厂私设暗管排放含重金属废水，经检测铅超标5倍，现场发现暗管连接至厂区围墙外河道"></textarea>
-    <button class="analyze-btn" onclick="smartAnalyze()">🧠 开始智能分析</button>
+    <button class="analyze-btn" onclick="smartAnalyze()">🧠 开始自动分析</button>
     <div class="result-panel" id="resultPanel"></div>
   </div>
 
@@ -193,7 +193,7 @@ async function smartAnalyze() {
 }
 function quickAnalyze(type) {
   const names = {risk:'风险评估',law:'法条匹配',evidence:'证据检查',penalty:'裁量计算',criminal:'涉刑判断',similar:'相似案例'};
-  epbToast(`🔍 ${names[type]}功能\n\n请先在上方输入案件描述，然后点击"开始智能分析"。\n\n该快捷功能将作为分析流程的独立步骤，后续版本将支持单独调用。`);
+  epbToast(`🔍 ${names[type]}功能\n\n请先在上方输入案件描述，然后点击"开始自动分析"。\n\n该快捷功能将作为分析流程的独立步骤，后续版本将支持单独调用。`);
 }
 </script>
 <script src="global-sidebar.js"></script>
