@@ -83,6 +83,11 @@ def _build_flask_routes():
 import sys as _sys
 _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:
+    import kb_qa  # 统一知识问答引擎（KB-first 三级分级）
+except Exception as _e:
+    kb_qa = None
+    print(f'[WARN] 知识问答引擎加载失败: {_e}')
+try:
     import db_layer as db
     _USE_DB = True
 except Exception as e:
@@ -155,6 +160,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'm-workspace.html'))
         elif path == '/auth-guard.js':
             self._serve_static(os.path.join(WEB_DIR, 'auth-guard.js'))
+        elif path == '/ask.html' or path == '/ask':
+            self._serve_static(os.path.join(WEB_DIR, 'ask.html'))
+        elif path == '/research-data.html':
+            self._serve_static(os.path.join(WEB_DIR, 'research-data.html'))
+        elif path == '/epb-roles.js':
+            self._serve_static(os.path.join(WEB_DIR, 'epb-roles.js'))
         elif path == '/device-mgmt.html':
             self._serve_static(os.path.join(WEB_DIR, 'device-mgmt.html'))
         elif path == '/equipment-mall.html':
@@ -397,6 +408,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_collection_progress()
         elif parsed.path == '/api/knowledge_items':
             self._handle_knowledge_items()
+        elif parsed.path == '/api/ask':
+            self._handle_ask()
         elif parsed.path == '/api/contribute':
             self._handle_contribute()
         elif parsed.path == '/api/report':
@@ -1633,6 +1646,25 @@ class EPBHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({'ok': True, **progress}, ensure_ascii=False).encode('utf-8'))
 
+
+    def _handle_ask(self):
+        """POST /api/ask — 统一知识问答（KB-first 三级分级，本地毫秒级）"""
+        try:
+            if kb_qa is None:
+                self._send_json({'ok': False, 'error': '知识问答引擎未加载，请联系管理员'}, code=503)
+                return
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            body = self.rfile.read(length) if length > 0 else b''
+            try:
+                data = json.loads(body or b'{}')
+            except Exception:
+                data = {}
+            q = data.get('q', '') or data.get('question', '')
+            result = kb_qa.answer(q)
+            self._send_json(result)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'问答处理失败: {e}'}, code=500)
 
     def _handle_knowledge_items(self):
         """"知识条目列表 API"""

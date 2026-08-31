@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究数据服务 · 脱敏数据集申请</title>
+<link rel="canonical" href="https://sgmt-taojing.github.io/epb-assistant/research-data.html">
+<style>
+:root{
+  --bg:#f4f7f5; --card:#fff; --ink:#15281f; --muted:#5c7268;
+  --green:#1a7a52; --green-bg:#e7f3ed; --dark:#0e3524;
+  --blue:#2b5fad; --blue-bg:#edf3fb; --amber:#8a6116; --amber-bg:#faf3e3;
+  --line:#dbe6e0; --red:#b03636; --red-bg:#fbeeee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+header{background:linear-gradient(135deg,#0b2e1e,#1a7a52);color:#fff;padding:22px 24px}
+.hwrap{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:20px;letter-spacing:.5px}
+header .sub{font-size:12.5px;opacity:.85}
+header .nav{margin-left:auto;display:flex;gap:10px;font-size:13px}
+header .nav a{color:#fff;opacity:.85;text-decoration:none;padding:5px 12px;border:1px solid rgba(255,255,255,.3);border-radius:99px}
+header .nav a:hover{opacity:1;background:rgba(255,255,255,.12)}
+main{max-width:960px;margin:0 auto;padding:24px 16px}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px 24px;margin-bottom:18px}
+.intro h2{font-size:16px;color:var(--dark);margin-bottom:8px}
+.intro p{font-size:13.8px;color:var(--ink)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px}
+.step{background:var(--green-bg);border:1px solid #cde8db;border-radius:10px;padding:12px 14px}
+.step .n{font-size:11px;color:var(--green);font-weight:700}
+.step .t{font-size:13.5px;font-weight:650;margin-top:2px}
+.step .d{font-size:12px;color:var(--muted);margin-top:2px}
+h2.sec{font-size:16.5px;color:var(--dark);margin:26px 0 12px;border-left:4px solid var(--green);padding-left:10px}
+.datasets{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.ds{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column}
+.ds .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ds .ic{font-size:22px}
+.ds h3{font-size:15px;color:var(--dark)}
+.ds .desc{font-size:12.8px;color:var(--muted);flex:1}
+.ds .meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.tag{font-size:11.5px;padding:2px 10px;border-radius:99px;background:#eef4f0;border:1px solid var(--line);color:var(--muted)}
+.tag.ok{background:var(--green-bg);color:var(--green);border-color:#cde8db}
+.tag.warn{background:var(--amber-bg);color:var(--amber);border-color:#ecd9a8}
+.ds .btn{margin-top:8px;background:var(--green);color:#fff;border:none;border-radius:9px;padding:10px;font-size:13.5px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none}
+.ds .btn:hover{background:#156845}
+.ds .btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+.apply{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:22px 24px}
+.apply h3{font-size:15.5px;margin-bottom:12px;color:var(--dark)}
+.frow{margin-bottom:14px}
+.frow label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.frow label .req{color:var(--red)}
+.frow input,.frow select,.frow textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.frow textarea{min-height:80px;resize:vertical}
+.frow input:focus,.frow select:focus,.frow textarea:focus{border-color:var(--green)}
+.frow .hint{font-size:11.8px;color:var(--muted);margin-top:3px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btnrow{display:flex;gap:10px;margin-top:6px}
+.btn-primary{background:var(--green);color:#fff;border:none;border-radius:9px;padding:12px 26px;font-size:14.5px;font-weight:650;cursor:pointer}
+.btn-primary:hover{background:#156845}
+.btn-primary:disabled{opacity:.55;cursor:wait}
+.note{background:var(--amber-bg);border:1px solid #ecd9a8;border-radius:10px;padding:12px 16px;font-size:12.8px;margin-top:14px;line-height:1.7}
+.okmsg{display:none;background:var(--green-bg);border:1px solid #cde8db;border-radius:10px;padding:14px 18px;font-size:13.5px;margin-top:14px}
+.okmsg.show{display:block}
+.api{background:#0e3524;color:#d7efe3;border-radius:10px;padding:16px 18px;font:12.5px/1.8 "SF Mono",Menlo,Consolas,monospace;overflow-x:auto;margin-top:10px}
+footer{background:#0e3524;color:rgba(255,255,255,.75);text-align:center;padding:14px;font-size:12px;margin-top:30px}
+footer a{color:inherit}
+@media(max-width:640px){ .f2{grid-template-columns:1fr} header .nav{display:none} }
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <span style="font-size:24px">🔬</span>
+    <div>
+      <h1>研究数据服务</h1>
+      <div class="sub">面向科研人员与高校师生 · 脱敏数据集申请 · 合规开放</div>
+    </div>
+    <nav class="nav">
+      <a href="/ask.html">💬 智能问答</a>
+      <a href="/open-data.html">🔓 开放数据</a>
+      <a href="/index.html">🏠 首页</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>数据怎么拿（端到端流程）</h2>
+    <p>所有研究数据均经过<b>分类分级 + 自动脱敏 + 溯源水印</b>后开放。申请需说明研究目的与数据范围，审批通过后获取下载链接或 API 密钥。全程留痕，符合《数据安全法》《个人信息保护法》要求。</p>
+    <div class="steps">
+      <div class="step"><div class="n">STEP 1</div><div class="t">提交申请</div><div class="d">单位、研究目的、数据范围</div></div>
+      <div class="step"><div class="n">STEP 2</div><div class="t">资质核验</div><div class="d">科研机构/高校身份确认</div></div>
+      <div class="step"><div class="n">STEP 3</div><div class="t">数据脱敏</div><div class="d">k-匿名+代称化+坐标模糊</div></div>
+      <div class="step"><div class="n">STEP 4</div><div class="t">获取数据</div><div class="d">下载链接 / API 密钥</div></div>
+    </div>
+  </div>
+
+  <h2 class="sec">可申请数据集</h2>
+  <div class="datasets">
+    <div class="ds">
+      <div class="top"><span class="ic">📋</span><h3>执法案例研究集</h3></div>
+      <div class="desc">106 个已办结执法案例（水/气/固废/在线监测等），含案情、适用法条、处罚结果、风险等级。</div>
+      <div class="meta"><span class="tag ok">已脱敏</span><span class="tag">JSON/CSV</span><span class="tag">106 条</span></div>
+      <a class="btn" href="#apply" onclick="prePick('执法案例研究集')">申请此数据集</a>
+    </div>
+    <div class="ds">
+      <div class="top"><span class="ic">📡</span><h3>环境监测统计集</h3></div>
+      <div class="desc">物联监测点位统计聚合数据（日粒度），企业标识已分组代号化，数值保留研究有效性。</div>
+      <div class="meta"><span class="tag ok">已脱敏</span><span class="tag">聚合API</span><span class="tag">k-匿名 k≥5</span></div>
+      <a class="btn" href="#apply" onclick="prePick('环境监测统计集')">申请此数据集</a>
+    </div>
+    <div class="ds">
+      <div class="top"><span class="ic">🏭</span><h3>企业环境行为研究集</h3></div>
+      <div class="desc">企业环境信用、风险画像、整改记录（区域/行业维度），准标识组 k≥5 匿名化处理。</div>
+      <div class="meta"><span class="tag ok">已脱敏</span><span class="tag">批量包</span><span class="tag">带水印</span></div>
+      <a class="btn" href="#apply" onclick="prePick('企业环境行为研究集')">申请此数据集</a>
+    </div>
+    <div class="ds">
+      <div class="top"><span class="ic">🎓</span><h3>教学案例包（高校）</h3></div>
+      <div class="desc">面向环境法/环境管理课程的精选案例集，附教学指引与讨论题，支持课堂与实习沙箱。</div>
+      <div class="meta"><span class="tag ok">教学授权</span><span class="tag">案例包</span><span class="tag">可课堂使用</span></div>
+      <a class="btn ghost" href="#apply" onclick="prePick('教学案例包')">教师申请</a>
+    </div>
+  </div>
+
+  <h2 class="sec">数据使用申请</h2>
+  <div class="apply" id="apply">
+    <h3>申请表（1 分钟填写）</h3>
+    <div class="f2">
+      <div class="frow">
+        <label>申请人姓名 <span class="req">*</span></label>
+        <input id="a-name" maxlength="30" placeholder="真实姓名">
+      </div>
+      <div class="frow">
+        <label>所属单位 <span class="req">*</span></label>
+        <input id="a-org" maxlength="60" placeholder="高校 / 科研院所 / 企业研究部门">
+      </div>
+    </div>
+    <div class="f2">
+      <div class="frow">
+        <label>联系方式（邮箱/手机） <span class="req">*</span></label>
+        <input id="a-contact" maxlength="40" placeholder="用于接收审批结果">
+      </div>
+      <div class="frow">
+        <label>申请数据集 <span class="req">*</span></label>
+        <select id="a-ds">
+          <option value="">请选择</option>
+          <option>执法案例研究集</option>
+          <option>环境监测统计集</option>
+          <option>企业环境行为研究集</option>
+          <option>教学案例包</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <label>研究目的与数据用途 <span class="req">*</span></label>
+      <textarea id="a-purpose" maxlength="500" placeholder="例如：博士课题《环境执法裁量均衡性研究》，需要案例的违法类型、处罚金额、地区分布字段……"></textarea>
+      <div class="hint">请具体说明研究课题与所需字段范围，越具体审批越快</div>
+    </div>
+    <div class="frow">
+      <label>数据使用承诺</label>
+      <div style="font-size:13px;background:#f6faf8;border:1px solid var(--line);border-radius:9px;padding:12px 14px;line-height:1.8">
+        <label style="display:flex;gap:8px;font-weight:400;cursor:pointer"><input type="checkbox" id="a-agree" style="width:auto">我承诺：仅将数据用于上述研究目的；不重新识别个人或企业身份；不向第三方转售/转发数据；发表论文时按引用格式注明来源；研究结束后按要求数据。</label>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn-primary" id="btn-submit" onclick="submitApply()">提交申请</button>
+    </div>
+    <div class="okmsg" id="okmsg"></div>
+    <div class="note">⏱ 审批时效：高校/科研院所一般 <b>3 个工作日</b>内回复；涉企业明细字段的可能需要补充研究方案。申请记录全程留痕，可凭联系方式查询进度。调用统计类数据 API 的密钥在审批通过后发放，限速 60 次/分钟。</div>
+  </div>
+
+  <h2 class="sec">统计类数据 API（示例）</h2>
+  <div class="apply">
+    <p style="font-size:13.5px;color:var(--muted)">审批通过后发放密钥，即可调用脱敏聚合接口：</p>
+    <div class="api">POST /api/research/stats
+Authorization: Bearer &lt;your-api-key&gt;
+
+{
+  "dataset": "monitoring_daily",
+  "region": "山东省",
+  "metric": "aqi_avg",
+  "from": "2026-01-01",
+  "to": "2026-06-30",
+  "granularity": "city"      // 仅支持 city 级以上（合规）
+}</div>
+  </div>
+</main>
+
+<footer>环保智慧执法平台 · 研究数据服务 v1.0 · 数据合规开放，引用请注明出处 · <a href="/ask.html">遇到问题？问智能问答</a></footer>
+
+<script>
+'use strict';
+function $(id){ return document.getElementById(id); }
+function prePick(name){
+  var sel = $('a-ds');
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].text === name){ sel.selectedIndex = i; break; }
+  }
+}
+function submitApply(){
+  var name = $('a-name').value.trim();
+  var org = $('a-org').value.trim();
+  var contact = $('a-contact').value.trim();
+  var ds = $('a-ds').value;
+  var purpose = $('a-purpose').value.trim();
+  var ok = $('okmsg');
+  ok.className = 'okmsg';
+  if(!name || !org || !contact || !ds || !purpose){
+    ok.textContent = '⚠️ 请完整填写必填项（姓名、单位、联系方式、数据集、研究目的）';
+    ok.style.cssText = 'background:var(--red-bg);border-color:#eccaca;color:var(--red)';
+    ok.className = 'okmsg show';
+    return;
+  }
+  if(!$('a-agree').checked){
+    ok.textContent = '⚠️ 请先勾选数据使用承诺';
+    ok.style.cssText = 'background:var(--red-bg);border-color:#eccaca;color:var(--red)';
+    ok.className = 'okmsg show';
+    return;
+  }
+  var btn = $('btn-submit');
+  btn.disabled = true; btn.textContent = '提交中…';
+  // 申请落库（走举报通道复用持久化，类型=research_data）
+  var payload = {
+    type: '研究数据申请',
+    title: ds + ' — ' + name + '（' + org + '）',
+    fact: purpose,
+    contact: contact,
+    source: 'research-data.html'
+  };
+  fetch('/api/report', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); }).then(function(d){
+    btn.disabled = false; btn.textContent = '提交申请';
+    ok.style.cssText = '';
+    ok.innerHTML = '✅ 申请已提交（受理号：' + (d.id || d.report_id || 'RD-' + Date.now().toString(36).toUpperCase()) + '）。审批结果将发送至您的联系方式，通常 3 个工作日内。提交期间可先用 <a href="/ask.html">智能问答</a> 查询公开知识。';
+    ok.className = 'okmsg show';
+  }).catch(function(){
+    // 服务不可用也给出明确指引，禁止静默失败
+    btn.disabled = false; btn.textContent = '提交申请';
+    ok.style.cssText = 'background:var(--amber-bg);border-color:#ecd9a8;color:var(--amber)';
+    ok.textContent = '⚠️ 服务暂不可用，申请未送达。本地部署请确认服务已启动，或稍后重试。';
+    ok.className = 'okmsg show';
+  });
+}
+</script>
+</body>
+</html>

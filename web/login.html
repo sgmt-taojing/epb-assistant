@@ -216,6 +216,7 @@ window.fetch = function(url, opts) {
 };
 </script>
 <script src="api-fallback.js"></script>
+<script src="/epb-roles.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -421,7 +422,12 @@ function showResult(r,org){
 
 function enterSystem(){
   var r=rolesData[selectedRole];
-  var p1=(r.modules||[]).find(m=>m.priority===1);
+  // v3 角色路由：优先用 EPB_ROLES 专属工作台，其次模块 priority1，兑底首页
+  if(window.EPB_ROLES){
+    var home = EPB_ROLES.home(selectedRole);
+    if(home && home !== '/index.html'){ location.href=home; return; }
+  }
+  var p1=(r&&r.modules||[]).find(m=>m.priority===1);
   location.href=p1?p1.url:'/index.html';
 }
 
