@@ -203,6 +203,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'ask.html'))
         elif path == '/research-data.html':
             self._serve_static(os.path.join(WEB_DIR, 'research-data.html'))
+        elif path == '/my-certificates.html':
+            self._serve_static(os.path.join(WEB_DIR, 'my-certificates.html'))
         elif path == '/epb-roles.js':
             self._serve_static(os.path.join(WEB_DIR, 'epb-roles.js'))
         elif path == '/device-mgmt.html':

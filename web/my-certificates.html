@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的证书 · 超级环保智能体</title>
+<style>
+:root{--bg:#f4f7f5;--card:#fff;--ink:#15281f;--muted:#5c7268;--green:#1a7a52;--green-bg:#e7f3ed;--dark:#0e3524;--red:#b03636;--red-bg:#fbeeee;--blue:#2b5fad;--blue-bg:#edf3fb;--amber:#8a6116;--amber-bg:#faf3e3;--line:#dbe6e0;--gold:#b8860b;--gold-bg:#fdf6e3}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding:0}
+.hd{background:linear-gradient(135deg,#0b2e1e,#1a7a52 70%,#2fa06c);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.hd h1{font-size:21px;letter-spacing:.5px}
+.hd .sub{opacity:.85;font-size:13px;margin-top:4px}
+.hd a{color:#fff;text-decoration:none;background:rgba(255,255,255,.15);padding:6px 14px;border-radius:8px;font-size:13px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 24px 60px}
+.tabs{display:flex;gap:6px;border-bottom:2px solid var(--line);margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:10px 18px;cursor:pointer;color:var(--muted);font-size:14.5px;font-weight:600;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px 22px;margin-bottom:16px}
+.card h3{font-size:16px;color:var(--dark);margin-bottom:12px}
+.muted{color:var(--muted);font-size:13px}
+.btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13.5px;font-weight:600;transition:all .15s}
+.btn-pri{background:var(--green);color:#fff}
+.btn-pri:hover{background:#15693f}
+.btn-ghost{background:transparent;color:var(--green);border:1px solid var(--green)}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:13px;color:var(--dark);margin-bottom:5px;font-weight:600}
+.form-row input{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;font-family:inherit;background:#fff}
+.form-row input:focus{outline:none;border-color:var(--green)}
+.alert{padding:11px 16px;border-radius:8px;font-size:13.5px;margin-bottom:14px}
+.alert-ok{background:var(--green-bg);color:var(--green);border:1px solid #c8e5d6}
+.alert-err{background:var(--red-bg);color:var(--red);border:1px solid #f0cfcf}
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.cert{background:linear-gradient(135deg,#fdf9ee 0%,#fff 45%,#f2f8f0 100%);border:2px solid var(--gold);border-radius:13px;padding:22px;position:relative;overflow:hidden}
+.cert::before{content:'🎓';position:absolute;top:-10px;right:-6px;font-size:70px;opacity:.12}
+.cert .no{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.cert .title{font-size:17px;font-weight:750;color:var(--dark);margin:8px 0 4px;line-height:1.4}
+.cert .name{font-size:14px;color:var(--ink);margin-bottom:8px}
+.cert .name b{color:var(--green);font-size:15px}
+.cert .score-row{display:flex;gap:10px;margin:10px 0;padding:10px 0;border-top:1px dashed #e2d9be;border-bottom:1px dashed #e2d9be}
+.cert .score-row div{flex:1;text-align:center}
+.cert .score-row b{display:block;font-size:19px;font-weight:750;color:var(--gold)}
+.cert .score-row span{font-size:11.5px;color:var(--muted)}
+.cert .honor{display:inline-block;font-size:11.5px;padding:3px 12px;border-radius:99px;background:var(--gold-bg);color:var(--gold);font-weight:650;margin-right:6px}
+.cert .issued{font-size:12px;color:var(--muted);margin-top:10px}
+.cert .actions{margin-top:12px;display:flex;gap:8px}
+.cert .actions button{flex:1;padding:7px 12px;font-size:12.5px}
+.honor-excellent{background:linear-gradient(90deg,#b8860b,#daa520);color:#fff !important}
+.honor-pass{background:var(--green-bg);color:var(--green) !important}
+.tbl{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;font-size:13.2px}
+.tbl th{background:#eaf3ee;text-align:left;padding:9px 11px;color:var(--dark);font-weight:650;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:9px 11px;border-bottom:1px solid #eef3f0;vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.empty{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty .icon{font-size:44px;margin-bottom:10px}
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center}
+.stat .n{font-size:23px;font-weight:750;color:var(--green)}
+.stat .l{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="hd">
+  <div>
+    <h1>🎓 我的证书</h1>
+    <div class="sub">学练考评闭环最后一环 — 查询、验真、展示你的环保从业能力凭证</div>
+  </div>
+  <a href="/training.html">← 返回培训中心</a>
+</div>
+<div class="wrap">
+
+<div class="tabs">
+  <div class="tab active" data-tab="mine">📜 我的证书</div>
+  <div class="tab" data-tab="verify">🔍 证书验真</div>
+</div>
+
+<!-- 我的证书 -->
+<div class="panel active" id="p-mine">
+  <div class="card">
+    <h3>📜 输入姓名查证书</h3>
+    <p class="muted" style="margin-bottom:14px">输入参加考试时使用的姓名，查询名下全部证书及分数。</p>
+    <div style="display:flex;gap:8px;max-width:520px">
+      <div class="form-row" style="flex:1;margin-bottom:0">
+        <input id="mine-name" placeholder="如：张三" maxlength="40">
+      </div>
+      <button class="btn btn-pri" id="btn-mine">查询</button>
+    </div>
+  </div>
+  <div id="mine-stats"></div>
+  <div id="mine-result"></div>
+</div>
+
+<!-- 验真 -->
+<div class="panel" id="p-verify">
+  <div class="card">
+    <h3>🔍 证书验真（防伪）</h3>
+    <p class="muted" style="margin-bottom:14px">输入证书编号验证真伪。 employers / 监管方可核验员工持证情况。编号格式：EPB-CERT-YYYYMMDD-XXXX。</p>
+    <div style="display:flex;gap:8px;max-width:560px">
+      <div class="form-row" style="flex:1;margin-bottom:0">
+        <input id="verify-no" placeholder="如：EPB-CERT-20260831-34E55C6B" maxlength="40">
+      </div>
+      <button class="btn btn-pri" id="btn-verify">验真</button>
+    </div>
+  </div>
+  <div id="verify-result"></div>
+</div>
+
+</div>
+
+<script>
+// Tab
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active')});
+    t.classList.add('active');
+    document.getElementById('p-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+var HONOR_CLASS = {'优秀':'honor-excellent','合格':'honor-pass'};
+
+// ============ 我的证书 ============
+document.getElementById('btn-mine').addEventListener('click', loadMine);
+document.getElementById('mine-name').addEventListener('keydown', function(e){if(e.key==='Enter') loadMine()});
+function loadMine(){
+  var name = document.getElementById('mine-name').value.trim();
+  var box = document.getElementById('mine-result');
+  var statBox = document.getElementById('mine-stats');
+  if(!name){box.innerHTML='<div class="alert alert-err">请输入姓名</div>';statBox.innerHTML='';return}
+  fetch('/api/training/certificates?user=' + encodeURIComponent(name))
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.ok){box.innerHTML='<div class="alert alert-err">'+(d.error||'查询失败')+'</div>';statBox.innerHTML='';return}
+      var cs = d.certificates || [];
+      if(!cs.length){
+        statBox.innerHTML='';
+        box.innerHTML='<div class="card"><div class="empty"><div class="icon">📭</div>该姓名下暂无证书<br><span class="muted">去 <a href="/training.html">培训中心</a> 完成课程考试即可自动发证</span></div></div>';
+        return;
+      }
+      // 统计
+      var total = cs.length;
+      var excellent = cs.filter(function(c){return c.honor==='优秀'}).length;
+      var best = Math.max.apply(null, cs.map(function(c){return c.score||0}));
+      var courses = {};
+      cs.forEach(function(c){courses[c.course_title]=1});
+      statBox.innerHTML = '<div class="stat-row">'
+        + '<div class="stat"><div class="n">'+total+'</div><div class="l">证书总数</div></div>'
+        + '<div class="stat"><div class="n" style="color:var(--gold)">'+excellent+'</div><div class="l">优秀证书</div></div>'
+        + '<div class="stat"><div class="n" style="color:var(--blue)">'+best+'</div><div class="l">最高分</div></div>'
+        + '<div class="stat"><div class="n">'+Object.keys(courses).length+'</div><div class="l">覆盖课程</div></div>'
+        + '</div>';
+      // 证书卡
+      var h = '<div class="cert-grid">';
+      cs.forEach(function(c){
+        var honorClass = HONOR_CLASS[c.honor] || 'honor-pass';
+        h += '<div class="cert">';
+        h += '<div class="no">证书编号 <code>'+c.cert_no+'</code></div>';
+        h += '<div class="title">'+c.course_title+'</div>';
+        h += '<div class="name">持证人 <b>'+c.user_name+'</b>'+(c.user_role?' · '+c.user_role:'')+'</div>';
+        h += '<div class="score-row"><div><b>'+c.score+'</b><span>考试分数</span></div><div><b>'+c.course_title.length+'</b><span>课程章节</span></div><div><b>100</b><span>满分</span></div></div>';
+        h += '<span class="honor '+honorClass+'">'+(c.honor||'合格')+'</span>';
+        h += '<div class="issued">发证日期：'+(c.issued_at||'').substring(0,10)+'</div>';
+        h += '<div class="actions"><button class="btn btn-ghost" onclick="printCert(\''+c.cert_no+'\')">🖨️ 打印</button><button class="btn btn-ghost" onclick="verifyCert(\''+c.cert_no+'\')">🔍 验真</button></div>';
+        h += '</div>';
+      });
+      h += '</div>';
+      box.innerHTML = h;
+    }).catch(function(e){box.innerHTML='<div class="alert alert-err">网络异常：'+e.message+'</div>'});
+}
+
+function printCert(no){
+  fetch('/api/training/certificates?cert_no=' + encodeURIComponent(no))
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.ok || !d.certificates.length){alert('证书不存在');return}
+      var c = d.certificates[0];
+      var w = window.open('', '_blank');
+      w.document.write('<html><head><title>证书 '+c.cert_no+'</title>'
+        +'<style>body{font-family:-apple-system,"PingFang SC",sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4f7f5;margin:0}'
+        +'.cert{max-width:680px;width:90%;background:linear-gradient(135deg,#fdf9ee,#fff 50%,#f2f8f0);border:3px double #b8860b;border-radius:16px;padding:48px;text-align:center}'
+        +'.t1{font-size:13px;color:#8a6116;letter-spacing:4px}.t2{font-size:30px;font-weight:800;color:#0e3524;margin:14px 0}'
+        +'.t3{font-size:15px;color:#15281f;line-height:2}.name{font-size:24px;font-weight:750;color:#1a7a52;margin:12px 0}'
+        +'.score{font-size:44px;font-weight:800;color:#b8860b;margin:10px}.honor{display:inline-block;font-size:14px;padding:5px 20px;border-radius:99px;background:#fdf6e3;color:#b8860b;font-weight:650;margin:10px 0}'
+        +'.meta{font-size:12px;color:#5c7268;margin-top:24px;line-height:1.8}@media print{body{background:#fff}.cert{border-color:#b8860b}}</style>'
+        +'</head><body><div class="cert">'
+        +'<div class="t1">EPB ENVIRONMENTAL PROTECTION ASSISTANT</div>'
+        +'<div class="t2">环 保 从 业 能 力 证 书</div>'
+        +'<div class="t3">兹证明</div>'
+        +'<div class="name">'+c.user_name+'</div>'
+        +'<div class="t3">在《'+c.course_title+'》课程学习中成绩'+(c.score>=60?'合格':'不合格')+'，特发此证。</div>'
+        +'<div class="score">'+c.score+'<span style="font-size:18px;color:#8a6116"> 分</span></div>'
+        +'<div class="honor">'+(c.honor||'合格')+'</div>'
+        +'<div class="meta">证书编号：'+c.cert_no+'<br>发证日期：'+(c.issued_at||'').substring(0,10)+'<br>本证书可通过超级环保智能体平台验真</div>'
+        +'</div><script>setTimeout(function(){window.print()},400)<\/script></body></html>');
+      w.document.close();
+    });
+}
+
+function verifyCert(no){
+  document.querySelector('[data-tab=verify]').click();
+  document.getElementById('verify-no').value = no;
+  setTimeout(doVerify, 100);
+}
+
+// ============ 证书验真 ============
+document.getElementById('btn-verify').addEventListener('click', doVerify);
+document.getElementById('verify-no').addEventListener('keydown', function(e){if(e.key==='Enter') doVerify()});
+function doVerify(){
+  var no = document.getElementById('verify-no').value.trim();
+  var box = document.getElementById('verify-result');
+  if(!no){box.innerHTML='<div class="alert alert-err">请输入证书编号</div>';return}
+  fetch('/api/training/certificates?cert_no=' + encodeURIComponent(no))
+    .then(function(r){return r.json()})
+    .then(function(d){
+      if(!d.ok){box.innerHTML='<div class="alert alert-err">'+(d.error||'验真失败')+'</div>';return}
+      var cs = d.certificates || [];
+      if(!cs.length){
+        box.innerHTML = '<div class="card" style="border-color:var(--red);background:var(--red-bg)"><h3 style="color:var(--red)">❌ 未查到该证书</h3><p class="muted">证书编号 <code>'+no+'</code> 在平台无记录，请核对编号或警惕伪造证书。</p></div>';
+        return;
+      }
+      var c = cs[0];
+      box.innerHTML = '<div class="card" style="border-color:var(--green);background:var(--green-bg)"><h3 style="color:var(--green)">✅ 证书真实有效</h3>'
+        + '<table class="tbl"><tr><th>项目</th><th>内容</th></tr>'
+        + '<tr><td>证书编号</td><td><code>'+c.cert_no+'</code></td></tr>'
+        + '<tr><td>课程名称</td><td>'+c.course_title+'</td></tr>'
+        + '<tr><td>持证人</td><td>'+c.user_name+'</td></tr>'
+        + '<tr><td>考试分数</td><td><b style="color:var(--gold)">'+c.score+'</b> 分</td></tr>'
+        + '<tr><td>评定</td><td>'+(c.honor||'合格')+'</td></tr>'
+        + '<tr><td>发证日期</td><td>'+(c.issued_at||'').substring(0,10)+'</td></tr>'
+        + '</table></div>';
+    }).catch(function(e){box.innerHTML='<div class="alert alert-err">网络异常：'+e.message+'</div>'});
+}
+</script>
+</body>
+</html>
