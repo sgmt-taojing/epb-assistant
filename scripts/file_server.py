@@ -88,6 +88,11 @@ except Exception as _e:
     kb_qa = None
     print(f'[WARN] 知识问答引擎加载失败: {_e}')
 try:
+    import inspection_flow  # 二期·执法检查端到端流水线
+except Exception as _e:
+    inspection_flow = None
+    print(f'[WARN] 执法检查流水线加载失败: {_e}')
+try:
     import db_layer as db
     _USE_DB = True
 except Exception as e:
@@ -99,6 +104,40 @@ os.makedirs(OUTPUTS_DIR, exist_ok=True)
 
 
 class EPBHandler(SimpleHTTPRequestHandler):
+
+    # ---- 修真：原始 UTF-8 中文请求行还原（2026-08-31）----
+    # http.server 用 latin-1 解析请求行，URL 直接带原始 UTF-8 字节时（如中文姓名
+    # 「张」含 0xA0 字节→解析成 NBSP/空白→请求行被切碎→400）。浏览器会自动
+    # 百分号编码不触发，但 curl/socket/脚本直连必炸。这里在基类 parse_request
+    # 校验前把非 ASCII 字节按 UTF-8 解并重编码为 %XX，让基类只处理纯 ASCII。
+    def parse_request(self):
+        try:
+            # raw_requestline 是 bytes，去掉 \r\n 后尝试标准 UTF-8 解码
+            line = self.raw_requestline
+            if line:
+                try:
+                    text = line.rstrip(b'\r\n').decode('utf-8')
+                    # 仅当请求行里存在非 ASCII（原始中文）时才重建
+                    if any(ord(c) > 127 for c in text):
+                        self.raw_requestline = self._reencode_request_line(text)
+                except (UnicodeDecodeError, AttributeError):
+                    pass  # 已是合法编码 → 交给基类正常处理
+        except Exception:
+            pass
+        return super().parse_request()
+
+    @staticmethod
+    def _reencode_request_line(text):
+        """把含中文的请求行重编码为纯 ASCII：方法+空格+路径(中文→%XX)+协议"""
+        # 拆出协议尾（HTTP/1.1）与方法
+        import re as _re
+        m = _re.match(r'^(GET|POST|PUT|DELETE|OPTIONS|HEAD)\s+(\S+)(\s+HTTP/[\d.]+)?$', text, _re.I)
+        if not m:
+            return ('GET ' + _re.sub(r'[^\x20-\x7E]', lambda c: c.group(0).encode('utf-8').hex(), text)).encode('ascii', 'replace')
+        method, target, proto = m.group(1), m.group(2), m.group(3) or 'HTTP/1.1'
+        # 仅对路径与查询部分做 UTF-8 → %XX（保留已有的 %XX、保留合法 ASCII）
+        safe = _re.sub(r'[^\x00-\x7F]', lambda c: ''.join('%%%02X' % b for b in c.group(0).encode('utf-8')), target)
+        return (f'{method} {safe} {proto}').encode('ascii')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=BASE_DIR, **kwargs)
@@ -287,6 +326,18 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_cases_list()
         elif path == '/api/roles':
             self._handle_roles()
+        elif path == '/api/training/courses':
+            self._handle_training_courses()
+        elif path == '/api/training/course':
+            self._handle_training_course()
+        elif path == '/api/training/certificates':
+            self._handle_training_certificates()
+        elif path == '/api/research/apply':
+            self._handle_research_apply()
+        elif path == '/api/research/list':
+            self._handle_research_list()
+        elif path == '/api/research/review':
+            self._handle_research_review()
         elif path == '/api/users':
             self._handle_users()
         elif path == '/api/tenant':
@@ -410,6 +461,24 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_knowledge_items()
         elif parsed.path == '/api/ask':
             self._handle_ask()
+        elif parsed.path == '/api/training/courses':
+            self._handle_training_courses()
+        elif parsed.path == '/api/training/course':
+            self._handle_training_course()
+        elif parsed.path == '/api/training/quiz/submit':
+            self._handle_training_quiz_submit()
+        elif parsed.path == '/api/training/certificates':
+            self._handle_training_certificates()
+        elif parsed.path == '/api/research/apply':
+            self._handle_research_apply()
+        elif parsed.path == '/api/research/review':
+            self._handle_research_review()
+        elif parsed.path == '/api/research/list':
+            self._handle_research_list()
+        elif parsed.path == '/api/inspection/checklist':
+            self._handle_inspection_checklist()
+        elif parsed.path == '/api/inspection/submit':
+            self._handle_inspection_submit()
         elif parsed.path == '/api/contribute':
             self._handle_contribute()
         elif parsed.path == '/api/report':
@@ -1666,6 +1735,314 @@ class EPBHandler(SimpleHTTPRequestHandler):
             import traceback; traceback.print_exc()
             self._send_json({'ok': False, 'error': f'问答处理失败: {e}'}, code=500)
 
+    def _training_db(self):
+        """培训/证书数据库连接"""
+        import sqlite3
+        os.makedirs(os.path.join(DB_DIR), exist_ok=True)
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'training.db'))
+        conn.row_factory = sqlite3.Row
+        conn.execute('''CREATE TABLE IF NOT EXISTS certificates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cert_no TEXT UNIQUE NOT NULL,
+            user_name TEXT NOT NULL,
+            user_phone TEXT DEFAULT '',
+            user_role TEXT DEFAULT '',
+            course_id TEXT NOT NULL,
+            course_title TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            honor TEXT NOT NULL,
+            issued_at TEXT NOT NULL
+        )''')
+        conn.execute('''CREATE TABLE IF NOT EXISTS progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_name TEXT NOT NULL,
+            user_phone TEXT DEFAULT '',
+            course_id TEXT NOT NULL,
+            sections_read INTEGER DEFAULT 0,
+            sections_total INTEGER DEFAULT 0,
+            best_score INTEGER DEFAULT 0,
+            attempts INTEGER DEFAULT 0,
+            updated_at TEXT NOT NULL,
+            UNIQUE(user_name, course_id)
+        )''')
+        conn.execute('''CREATE TABLE IF NOT EXISTS research_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            apply_id TEXT UNIQUE NOT NULL,
+            dataset TEXT NOT NULL,
+            org TEXT NOT NULL,
+            applicant_name TEXT NOT NULL,
+            applicant_phone TEXT DEFAULT '',
+            applicant_role TEXT DEFAULT '',
+            purpose TEXT DEFAULT '',
+            usage_commit INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            reject_reason TEXT DEFAULT '',
+            approved_at TEXT DEFAULT '',
+            fulfilled_at TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )''')
+        return conn
+
+    def _handle_training_courses(self):
+        """GET /api/training/courses — 课程目录"""
+        try:
+            from training_hub import get_all_courses
+            courses = get_all_courses()
+            # 附带个人进度（可选 user 参数）
+            parsed = urlparse(self.path)
+            params = {self._qval(k): self._qval(v) for k, v in (q.split('=', 1) for q in parsed.query.split('&') if '=' in q)}
+            user = params.get('user', '')
+            progress = {}
+            if user:
+                try:
+                    conn = self._training_db()
+                    rows = conn.execute('SELECT course_id, best_score, attempts, sections_read, sections_total FROM progress WHERE user_name=?', (user,)).fetchall()
+                    for r in rows:
+                        progress[r['course_id']] = {'best_score': r['best_score'], 'attempts': r['attempts'], 'sections_read': r['sections_read'], 'sections_total': r['sections_total']}
+                    conn.close()
+                except Exception:
+                    pass
+            for c in courses:
+                c['progress'] = progress.get(c['course_id'])
+            self._send_json({'ok': True, 'courses': courses})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'课程目录加载失败: {e}'}, code=500)
+
+    def _handle_training_course(self):
+        """GET /api/training/course?id=xxx — 课程详情（sections + quiz，quiz 不带答案）"""
+        try:
+            from training_hub import get_course_detail
+            parsed = urlparse(self.path)
+            params = {self._qval(k): self._qval(v) for k, v in (q.split('=', 1) for q in parsed.query.split('&') if '=' in q)}
+            cid = params.get('id', '')
+            detail = get_course_detail(cid)
+            if not detail:
+                self._send_json({'ok': False, 'error': '课程不存在'}, code=404)
+                return
+            # 安全：quiz 不下发 answer/explanation（防作弊，判分时才回传）
+            quiz_public = [{'q': q['q'], 'options': q['options']} for q in detail.get('quiz', [])]
+            detail['quiz'] = quiz_public
+            self._send_json({'ok': True, 'course': detail})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'课程加载失败: {e}'}, code=500)
+
+    def _handle_training_quiz_submit(self):
+        """POST /api/training/quiz/submit — 提交答案，判分 + 合格发证书 + 进度回写"""
+        try:
+            from training_hub import grade_quiz
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            body = self.rfile.read(length) if length > 0 else b''
+            try:
+                data = json.loads(body or b'{}')
+            except Exception:
+                data = {}
+            cid = str(data.get('course_id', '')).strip()
+            answers = data.get('answers', [])
+            user = str(data.get('user', '') or '匿名学员').strip()[:30]
+            phone = str(data.get('phone', '')).strip()[:20]
+            role = str(data.get('role', '')).strip()[:30]
+            if not isinstance(answers, list) or len(answers) > 50:
+                self._send_json({'ok': False, 'error': '答案格式不正确'}, code=400)
+                return
+            answers = [int(a) if isinstance(a, (int, str)) and str(a).lstrip('-').isdigit() else -1 for a in answers]
+            result = grade_quiz(cid, answers)
+            if not result.get('ok'):
+                self._send_json(result, code=404)
+                return
+            # 落库：合格发证 + 进度更新
+            try:
+                conn = self._training_db()
+                now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                if result['passed'] and result['cert_no']:
+                    conn.execute('INSERT OR REPLACE INTO certificates (cert_no, user_name, user_phone, user_role, course_id, course_title, score, honor, issued_at) VALUES (?,?,?,?,?,?,?,?,?)',
+                        (result['cert_no'], user, phone, role, cid, result['course_title'], result['score'], result['honor'], now))
+                conn.execute('''INSERT INTO progress (user_name, user_phone, course_id, sections_read, sections_total, best_score, attempts, updated_at)
+                    VALUES (?,?,?,?,?,?,?,?)
+                    ON CONFLICT(user_name, course_id) DO UPDATE SET
+                        best_score=MAX(best_score, excluded.best_score),
+                        attempts=attempts+1,
+                        updated_at=excluded.updated_at''',
+                    (user, phone, cid, len(result.get('results', [])), len(result.get('results', [])), result['score'], 1, now))
+                conn.commit()
+                conn.close()
+            except Exception as db_err:
+                import traceback; traceback.print_exc()
+                # 判分结果不受落库失败影响，但证书状态如实告知
+                result['cert_persisted'] = False
+                result['cert_warning'] = f'证书落库异常: {db_err}'
+            else:
+                result['cert_persisted'] = True
+            self._send_json(result)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'判分失败: {e}'}, code=500)
+
+    def _handle_training_certificates(self):
+        """GET /api/training/certificates?user=xxx — 证书查询/验真"""
+        try:
+            parsed = urlparse(self.path)
+            params = {self._qval(k): self._qval(v) for k, v in (q.split('=', 1) for q in parsed.query.split('&') if '=' in q)}
+            user = params.get('user', '')
+            cert_no = params.get('cert_no', '')
+            conn = self._training_db()
+            if cert_no:
+                rows = conn.execute('SELECT * FROM certificates WHERE cert_no=?', (cert_no,)).fetchall()
+            elif user:
+                rows = conn.execute('SELECT * FROM certificates WHERE user_name=? ORDER BY issued_at DESC', (user,)).fetchall()
+            else:
+                rows = conn.execute('SELECT * FROM certificates ORDER BY issued_at DESC LIMIT 50').fetchall()
+            certs = [dict(r) for r in rows]
+            conn.close()
+            self._send_json({'ok': True, 'certificates': certs})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'证书查询失败: {e}'}, code=500)
+
+
+    def _handle_research_apply(self):
+        """POST /api/research/apply — 科研/脱敏数据申请提交（独立审批流）"""
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) or b'{}')
+            dataset = (data.get('dataset') or '').strip()[:60]
+            org = (data.get('org') or '').strip()[:120]
+            name = (data.get('name') or data.get('applicant_name') or '').strip()[:40]
+            phone = (data.get('phone') or data.get('applicant_phone') or '').strip()[:20]
+            role = (data.get('role') or data.get('applicant_role') or '').strip()[:40]
+            purpose = (data.get('purpose') or '').strip()[:500]
+            commit = 1 if (data.get('usage_commit') in (True, 1, '1', 'true', 'on')) else 0
+            for k, v, lim in [('数据集', dataset, 60), ('单位/学校', org, 120), ('姓名', name, 40)]:
+                if not v:
+                    self._send_json({'ok': False, 'error': f'{k}不能为空'}, code=400); return
+                if len(v) > lim:
+                    self._send_json({'ok': False, 'error': f'{k}超长（上限{lim}字）'}, code=400); return
+            if not commit:
+                self._send_json({'ok': False, 'error': '请先勾选《数据使用承诺》'}, code=400); return
+            conn = self._training_db()
+            apply_id = 'RD-' + datetime.now().strftime('%Y%m%d%H%M%S') + '-' + uuid.uuid4().hex[:4].upper()
+            conn.execute(
+                'INSERT INTO research_applications (apply_id, dataset, org, applicant_name, applicant_phone, applicant_role, purpose, usage_commit, status, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                (apply_id, dataset, org, name, phone, role, purpose, commit, 'pending', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            conn.commit()
+            conn.close()
+            self._send_json({'ok': True, 'apply_id': apply_id, 'status': 'pending',
+                             'message': '申请已受理，3 个工作日内由数据治理专员审批，结果以短信/站内信送达。'})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'申请提交失败: {e}'}, code=500)
+
+    @staticmethod
+    def _qval(s):
+        """query 参数混合解码：兼容 %XX 编码（浏览器）与原始 UTF-8 字节（curl/直连）两种输入。
+        http.server 的 self.path 按 latin-1 解码，非 ASCII 原始字节会变 mojibake，这里统一还原。"""
+        s = (s or '').strip()
+        if not s:
+            return ''
+        try:
+            b = s.encode('latin-1')  # 纯 ASCII/%XX 编码 → 可还原字节
+        except UnicodeEncodeError:
+            return unquote(s)  # 已是真实 str（含中文）→ 常规 unquote
+        try:
+            return unquote(b.decode('utf-8'))
+        except UnicodeDecodeError:
+            return unquote(b.decode('latin-1', errors='replace'))
+
+    def _handle_research_list(self):
+        """GET /api/research/list?status=&org=&applicant= — 申请列表（按状态/单位/申请人过滤）"""
+        try:
+            parsed = urlparse(self.path)
+            params = {self._qval(k): self._qval(v) for k, v in (q.split('=', 1) for q in parsed.query.split('&') if '=' in q)}
+            status = (params.get('status') or '').strip()
+            org = (params.get('org') or '').strip()
+            applicant = (params.get('applicant') or '').strip()
+            sql = 'SELECT * FROM research_applications WHERE 1=1'
+            args = []
+            if status in ('pending', 'approved', 'rejected', 'fulfilled'):
+                sql += ' AND status = ?'
+                args.append(status)
+            if org:
+                sql += ' AND org = ?'
+                args.append(org)
+            if applicant:
+                sql += ' AND applicant_name = ?'
+                args.append(applicant)
+            sql += ' ORDER BY id DESC LIMIT 200'
+            conn = self._training_db()
+            rows = conn.execute(sql, args).fetchall()
+            apps = [dict(r) for r in rows]
+            stats = {'pending': 0, 'approved': 0, 'rejected': 0, 'fulfilled': 0, 'total': len(apps)}
+            for a in apps:
+                st = a.get('status') or 'pending'
+                stats[st] = stats.get(st, 0) + 1
+            conn.close()
+            self._send_json({'ok': True, 'applications': apps, 'stats': stats})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'申请列表加载失败: {e}'}, code=500)
+
+    def _handle_research_review(self):
+        """POST /api/research/review — 审批动作 {apply_id, action(approve|reject|fulfill), reason}"""
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) or b'{}')
+            apply_id = (data.get('apply_id') or '').strip()
+            action = (data.get('action') or '').strip()
+            reason = (data.get('reason') or '').strip()[:300]
+            if not apply_id:
+                self._send_json({'ok': False, 'error': 'apply_id 不能为空'}, code=400); return
+            if action not in ('approve', 'reject', 'fulfill'):
+                self._send_json({'ok': False, 'error': 'action 必须是 approve/reject/fulfill'}, code=400); return
+            conn = self._training_db()
+            row = conn.execute('SELECT apply_id FROM research_applications WHERE apply_id = ?', (apply_id,)).fetchone()
+            if not row:
+                conn.close()
+                self._send_json({'ok': False, 'error': '申请不存在'}, code=404); return
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            if action == 'approve':
+                conn.execute('UPDATE research_applications SET status = ?, approved_at = ? WHERE apply_id = ?', ('approved', now, apply_id))
+            elif action == 'reject':
+                if not reason:
+                    conn.close()
+                    self._send_json({'ok': False, 'error': '驳回必须填写原因'}, code=400); return
+                conn.execute('UPDATE research_applications SET status = ?, reject_reason = ? WHERE apply_id = ?', ('rejected', reason, apply_id))
+            elif action == 'fulfill':
+                conn.execute('UPDATE research_applications SET status = ?, fulfilled_at = ? WHERE apply_id = ?', ('fulfilled', now, apply_id))
+            conn.commit()
+            conn.close()
+            self._send_json({'ok': True, 'apply_id': apply_id, 'action': action,
+                             'status': {'approve': 'approved', 'reject': 'rejected', 'fulfill': 'fulfilled'}[action]})
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'审批失败: {e}'}, code=500)
+
+    def _handle_inspection_checklist(self):
+        """POST /api/inspection/checklist — 步骤1：根据企业+检查类型生成检查清单（KB驱动）"""
+        try:
+            if inspection_flow is None:
+                self._send_json({'ok': False, 'error': '执法检查流水线未加载，请联系管理员'}, code=503); return
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) or b'{}')
+            r, code = inspection_flow.gen_checklist(data)
+            self._send_json(r, code=code)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'清单生成失败: {e}'}, code=500)
+
+    def _handle_inspection_submit(self):
+        """POST /api/inspection/submit — 步骤2：现场检查结果提交 → 智能分析+法条匹配+文书生成+案件落库（端到端）"""
+        try:
+            if inspection_flow is None:
+                self._send_json({'ok': False, 'error': '执法检查流水线未加载，请联系管理员'}, code=503); return
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) or b'{}')
+            r, code = inspection_flow.submit_inspection(data)
+            self._send_json(r, code=code)
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            self._send_json({'ok': False, 'error': f'检查提交失败: {e}'}, code=500)
+
     def _handle_knowledge_items(self):
         """"知识条目列表 API"""
         try:
@@ -2049,8 +2426,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
         try:
             parsed = urlparse(self.path)
             params = dict(item.split('=') for item in parsed.query.split('&') if '=' in item)
-            phone = unquote(params.get('phone', ''))
-            status = unquote(params.get('status', ''))
+            phone = self._qval(params.get('phone', ''))
+            status = self._qval(params.get('status', ''))
 
             reports = self._load_reports()
 
@@ -2187,7 +2564,7 @@ class EPBHandler(SimpleHTTPRequestHandler):
         try:
             parsed = urlparse(self.path)
             params = dict(item.split('=') for item in parsed.query.split('&') if '=' in item)
-            q = unquote(params.get('q', ''))
+            q = self._qval(params.get('q', ''))
             print(f"[DEBUG] global_search: q={q}, path={self.path}")
             
             if not q or len(q) < 2:
