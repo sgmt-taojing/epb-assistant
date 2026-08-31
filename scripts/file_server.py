@@ -152,8 +152,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = unquote(parsed.path)
-        # 根路径 → 托管 index.html
-        if path == '/' or path == '' or path == '/index.html':
+        # 根路径 → LP 落地页（对外门户）· /index.html 保留内部门户
+        if path == '/' or path == '':
+            self._serve_static(os.path.join(WEB_DIR, 'landing.html'))
+        elif path == '/index.html' or path == '/portal':
             self._serve_static(os.path.join(WEB_DIR, 'index.html'))
         # 现场执法终端
         elif path == '/field-terminal.html':
@@ -205,6 +207,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'research-data.html'))
         elif path == '/my-certificates.html':
             self._serve_static(os.path.join(WEB_DIR, 'my-certificates.html'))
+        elif path == '/landing.html' or path == '/':
+            self._serve_static(os.path.join(WEB_DIR, 'landing.html'))
         elif path == '/epb-roles.js':
             self._serve_static(os.path.join(WEB_DIR, 'epb-roles.js'))
         elif path == '/device-mgmt.html':
