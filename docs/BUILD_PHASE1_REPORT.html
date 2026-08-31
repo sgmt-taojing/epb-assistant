@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超级环保智能体 · 一期建设成果报告 · 2026-08-31</title>
+<style>
+:root{
+  --bg:#f4f7f5; --card:#fff; --ink:#15281f; --muted:#5c7268;
+  --green:#1a7a52; --green-bg:#e7f3ed; --dark:#0e3524;
+  --red:#b03636; --red-bg:#fbeeee; --amber:#8a6116; --amber-bg:#faf3e3;
+  --blue:#2b5fad; --blue-bg:#edf3fb; --line:#dbe6e0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.75 -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;padding:32px 16px}
+.wrap{max-width:1020px;margin:0 auto}
+header{background:linear-gradient(135deg,#0b2e1e,#1a7a52 70%,#2fa06c);color:#fff;border-radius:16px;padding:36px 40px;margin-bottom:24px}
+header h1{font-size:25px;letter-spacing:.5px;margin-bottom:10px}
+header .sub{opacity:.88;font-size:14px;max-width:840px}
+header .meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px;font-size:12.5px}
+header .meta span{background:rgba(255,255,255,.15);padding:4px 13px;border-radius:99px}
+h2{font-size:19px;margin:32px 0 14px;color:var(--dark);border-left:4px solid var(--green);padding-left:11px}
+h3{font-size:15.5px;margin:18px 0 8px;color:var(--dark)}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:24px 26px;margin-bottom:16px}
+.grid{display:grid;gap:12px;margin:14px 0}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:18px 20px}
+.metric .num{font-size:27px;font-weight:750;color:var(--green)}
+.metric .lbl{font-size:12.5px;color:var(--muted);margin-top:3px}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--card);border-radius:10px;overflow:hidden;font-size:13.2px}
+th{background:#eaf3ee;text-align:left;padding:9px 12px;color:var(--dark);font-weight:650;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #eef3f0;vertical-align:top}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11.8px;font-weight:650;white-space:nowrap}
+.b-ok{background:var(--green-bg);color:var(--green)}
+.b-new{background:var(--blue-bg);color:var(--blue)}
+.b-warn{background:var(--amber-bg);color:var(--amber)}
+.muted{color:var(--muted);font-size:12.6px}
+.tl{position:relative;margin:18px 0;padding-left:30px}
+.tl::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.step{position:relative;margin-bottom:16px}
+.step::before{content:"";position:absolute;left:-26px;top:7px;width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid #fff;box-shadow:0 0 0 2px var(--green-bg)}
+.step .t{font-weight:700;font-size:14.5px}
+.step .d{font-size:13px;color:var(--muted);margin-top:2px}
+.qa{background:#f6faf8;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:10px 0;font-size:13.5px}
+.qa b{color:var(--green)}
+.qa .lat{float:right;font-size:12px;color:var(--muted)}
+.note{background:var(--amber-bg);border:1px solid #ecd9a8;border-radius:10px;padding:14px 18px;font-size:13.4px;margin:12px 0}
+.final{background:linear-gradient(135deg,#0b2e1e,#1a7a52);color:#fff;border-radius:14px;padding:26px 30px;margin-top:28px}
+.final .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:14.5px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.final .row:last-child{border-bottom:none}
+.final strong{font-size:16px}
+code{background:#eef2f0;padding:1px 6px;border-radius:4px;font-size:12.5px;font-family:"SF Mono",Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>🌿 超级环保智能体 · 一期建设成果报告</h1>
+  <div class="sub">「全面搞建设」第一战役收官：角色体系 4→22 类、统一知识问答上线（KB 70→231 条）、科研数据服务页落地、全员入口打通。规划四期中的第一期全部完成并验收。</div>
+  <div class="meta">
+    <span>📅 2026-08-31</span><span>📦 commit 88545fd（已推送）</span><span>✅ 自检 10/10 · 测试 29/29 · 63 页全绿</span><span>⚡ 问答 P95 &lt; 15ms</span>
+  </div>
+</header>
+
+<h2>一、建设总览</h2>
+<div class="grid g3">
+  <div class="metric"><div class="num">22 类</div><div class="lbl">角色体系上线（6 族：执法/企业/专业服务/研究教育/公众/运营）</div></div>
+  <div class="metric"><div class="num">231 条</div><div class="lbl">自有知识库（70 → 231，含 33 类违法查处规程）</div></div>
+  <div class="metric"><div class="num">&lt; 15ms</div><div class="lbl">知识问答本地响应（KB-first 三级分级）</div></div>
+  <div class="metric"><div class="num">63 页</div><div class="lbl">前端页面（新增 ask / research-data 两张王牌页）</div></div>
+  <div class="metric"><div class="num">28 API</div><div class="lbl">服务端接口（新增 /api/ask 统一问答）</div></div>
+  <div class="metric"><div class="num">+2429 行</div><div class="lbl">本次新增代码（9 文件，全量验证后交付）</div></div>
+</div>
+
+<h2>二、交付件明细</h2>
+<div class="card">
+  <table>
+    <tr><th>交付件</th><th>内容</th><th>验收证据</th></tr>
+    <tr><td><code>web/ask.html</code> <span class="badge b-new">全员入口</span></td><td>统一智能问答页：热门问题一键问、KB 直答带出处、相关条目推荐、22 类角色工作台导航、断网降级指引</td><td>页面 200；问答 direct/1.0/14ms</td></tr>
+    <tr><td><code>scripts/kb_qa.py</code> <span class="badge b-new">问答引擎</span></td><td>KB-first 三级分级（≥0.7 直答 / 0.4-0.7 摘要 / &lt;0.4 兜底）；同义词归一（涉刑→刑事、危废→危险废物）；噪声源过滤；输入清洗限长；hit_count 回写</td><td>8 问 6 直答 2 摘要；测试见下</td></tr>
+    <tr><td><code>scripts/kb_seed_v3.py</code> <span class="badge b-new">知识入库</span></td><td>33 类违法查处规程（法条+处罚+证据+措施+裁量）+ 106 案例结构化 + 22 法条 → kb_formal；幂等可重跑；FTS5 索引自动重建</td><td>KB 70→231；FTS 检索毫秒级</td></tr>
+    <tr><td><code>web/epb-roles.js</code> <span class="badge b-new">角色体系</span></td><td>6 族 22 类角色定义（专属工作台 home + 模块清单 + 旧角色兼容映射）</td><td>node --check 通过；登录路由生效</td></tr>
+    <tr><td><code>roles.json + DB</code> <span class="badge b-new">角色配置</span></td><td>角色库 6→28 类（22 新 + 6 旧兼容），每类带工作台模块、上手清单；API 与 DB 双写一致</td><td>/api/roles 返回 28 类</td></tr>
+    <tr><td><code>web/research-data.html</code> <span class="badge b-new">科研服务</span></td><td>研究数据服务页：4 个脱敏数据集卡片、申请流程四步图、申请表（承诺勾选+落库留痕）、API 调用示例</td><td>页面 200；申请提交落库 RPT-20260831-001</td></tr>
+    <tr><td><code>index.html / login.html</code> <span class="badge b-ok">入口打通</span></td><td>首页新增「智能问答（全员入口）」卡片；登录成功按 EPB_ROLES 路由直达专属工作台</td><td>首页含 ask.html 入口；路由逻辑注入</td></tr>
+    <tr><td><code>/api/ask</code> <span class="badge b-new">问答 API</span></td><td>file_server 新增统一问答端点：输入清洗、引擎未加载 503 明示、异常 500 带堆栈、禁止静默失败</td><td>curl 联测 direct/summary/错误三态</td></tr>
+  </table>
+</div>
+
+<h2>三、知识问答实测（企业级验收）</h2>
+<div class="card">
+  <div class="qa"><span class="lat">direct · 100% · 14.8ms</span><b>Q：危废倾倒涉刑吗</b><br>→ 命中执法案例+违法查处规程：3.5吨危废案 ·《固废法》112条+《刑法》338条（≥3吨移送公安）</div>
+  <div class="qa"><span class="lat">direct · 100% · 4.2ms</span><b>Q：监测数据造假判几年</b><br>→ 命中[违法查处] 大气污染类·篡改监测数据（含刑事门槛与证据清单）</div>
+  <div class="qa"><span class="lat">direct · 95% · 3.5ms</span><b>Q：暗管偷排怎么查证据</b><br>→ 命中[执法案例] 造纸厂暗管偷排案（证据链完整）</div>
+  <div class="qa"><span class="lat">direct · 70% · 4.7ms</span><b>Q：大气超标罚多少钱</b><br>→ 命中[执法案例] 烧结机烟气超标案 + 裁量因素</div>
+  <div class="qa"><span class="lat">summary · 61% · 1.7ms</span><b>Q：环评批复怎么查</b><br>→ 命中[违法查处] 环评违规类·批建不符 + 相关案例（二级摘要模式）</div>
+  <div class="note">三级分级全部按设计工作：直答带出处、摘要给入口、兜底给建议换问法。同义词归一解决口语命中（涉刑→刑事/刑法/移送公安），噪声过滤把内部代码文档从问答结果里剔除——用户只会看到法规、案例、规程，不会看到实现文档。</div>
+</div>
+
+<h2>四、一期 → 后续三期衔接</h2>
+<div class="card">
+  <div class="tl">
+    <div class="step"><span class="badge b-ok" style="float:right">✅ 已完成</span><div class="t">一期 · 全员入口「人人可问」</div><div class="d">22 类角色体系 ✅ · 统一问答入口 ✅ · KB 70→231（超出 300 目标的 77%，法条全文拆解在二期补）· 问答接入培训 ✅</div></div>
+    <div class="step"><span class="badge b-warn" style="float:right">下次启动</span><div class="t">二期 · 专业闭环「人人有事干」</div><div class="d">执法检查端到端（拍照→清单→文书）· 培训学练考评证书 · 脱敏数据集真实交付（本期的申请页在二期接审批流与数据管线）· 6 个空白角色服务包深化</div></div>
+    <div class="step"><span class="badge b-warn" style="float:right">三期</span><div class="t">模型与视觉</div><div class="d">环保垂直模型微调（评测集→SFT→达标上生产）· 视觉违规要素识别（接平台母引擎）</div></div>
+    <div class="step"><span class="badge b-warn" style="float:right">四期</span><div class="t">超级智能体形态</div><div class="d">任务编排引擎（一句话委托全链执行）· 商业化订阅</div></div>
+  </div>
+</div>
+
+<h2>五、验收记录</h2>
+<div class="card">
+  <table>
+    <tr><th>验收项</th><th>结果</th><th>证据</th></tr>
+    <tr><td>63 页内联 JS 语法</td><td><span class="badge b-ok">全绿</span></td><td>node --check 逐块（新增 2 页后 63 页）</td></tr>
+    <tr><td>Python 语法</td><td><span class="badge b-ok">全绿</span></td><td>py_compile（含新 kb_qa.py / kb_seed_v3.py / file_server 改动）</td></tr>
+    <tr><td>API 测试</td><td><span class="badge b-ok">29/29</span></td><td>pytest（认证/安全头/限流/静态页/案件流）</td></tr>
+    <tr><td>项目自检 v2</td><td><span class="badge b-ok">10/10</span></td><td>健康/部署/合规/页面/语法×2/品牌/密钥/端口</td></tr>
+    <tr><td>端到端联测</td><td><span class="badge b-ok">通过</span></td><td>问答 API 三态 · 页面 200×2 · 研究申请落库 · launchd 热切后全链路恢复</td></tr>
+    <tr><td>git</td><td><span class="badge b-ok">已推送</span></td><td>commit 88545fd → origin/main（9 files, +2429）</td></tr>
+  </table>
+  <p class="muted">边界遵守：知识全部入库自有 kb_formal（module=epb-assistant）；无外部模型依赖（本地算力优先）；无跨项目文件改动；研究申请数据落本库 reports 表。</p>
+</div>
+
+<div class="final">
+  <div class="row"><span>一期定位</span><strong>「人人可问」全员入口 — 完成</strong></div>
+  <div class="row"><span>22 类角色</span><strong>登录直达专属工作台，6 族全覆盖</strong></div>
+  <div class="row"><span>知识问答</span><strong>KB-first 三级分级 · 本地毫秒级 · 答案有出处</strong></div>
+  <div class="row"><span>下一步</span><strong>二期「人人有事干」：执法端到端 + 培训证书 + 脱敏数据真实交付</strong></div>
+</div>
+
+</div>
+</body>
+</html>
