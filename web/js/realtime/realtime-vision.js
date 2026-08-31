@@ -13,7 +13,7 @@
  *  6. 降级路径：摄像头不可用 → 提示并允许上传图片单帧识别
  *  7. 严格容错：所有分支 try/catch，任何异常都有可读输出
  *
- * 后端契约（默认，mingli-baojian face-ocr-server /api/camera/upload）：
+ * 后端契约（默认指向本项目可配置的识别服务，如 face-ocr-server /api/camera/upload）：
  *  POST multipart/form-data { image: <blob>, mode: 'face' }
  *  返回 { kb_matches: [...], kb_features: [...], ... }
  *  （其他项目可配置 endpoint 指向各自的识别服务；响应字段可通过 mapResult 适配）

@@ -7,11 +7,8 @@ APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 start() {
   echo "▶ 启动 epb-assistant @ :${PORT}"
-  if [ -d "$APP_DIR/server" ]; then
-    (cd "$APP_DIR/server" && PORT="$PORT" nohup node api-server.js > ../logs/server.log 2>&1 &)
-  elif [ -d "$APP_DIR/app" ]; then
-    (cd "$APP_DIR/app" && PORT="$PORT" nohup python3 -m http.server "$PORT" --bind 127.0.0.1 > ../logs/static.log 2>&1 &)
-  fi
+  # 统一入口：scripts/file_server.py（支持 PORT 环境变量；绑定 127.0.0.1）
+  (cd "$APP_DIR" && PORT="$PORT" nohup python3 scripts/file_server.py > logs/server.log 2>&1 &)
   sleep 1
   status
 }

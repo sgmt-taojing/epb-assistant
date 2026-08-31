@@ -18,7 +18,7 @@
  * 后端契约（默认）：
  *  GET {apiBase}?q={query}&limit={n}&offset=0
  *  返回 { results: [ { entry_id, module, title, content, trust_score, hit_count, score, boosted_score } ] }
- *  （mingli-baojian 的 /api/public/kb/search-fts 即此契约；其他项目可配置各自端点）
+ *  （epb-assistant 部署时把 apiBase 指向本项目的 KB 检索端点；默认契约参考共享层规范）
  *
  * 使用方式：
  *  const kb = new RealtimeKB({

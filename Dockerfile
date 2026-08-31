@@ -13,8 +13,8 @@ COPY api-data/ ./api-data/
 COPY scraper/ ./scraper/
 COPY docs/ ./docs/
 
-# 安装依赖
-RUN pip install --no-cache-dir
+# 安装依赖（本项目 Python 侧零第三方依赖，标准库即可运行；此处仅刷新索引层）
+RUN pip install --no-cache-dir --upgrade pip
 
 # 暴露端口
 EXPOSE 8900

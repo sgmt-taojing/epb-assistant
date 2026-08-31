@@ -75,23 +75,23 @@ class TestRoles:
 
 class TestAuth:
     def test_login_success(self, client):
-        r = client.post('/api/auth/login', json={'username': 'admin', 'password': 'admin123'})
+        r = client.post('/api/auth/login', json={'username': '13300000000', 'password': 'Adm1n@2026'})
         assert r.status_code == 200
         data = r.get_json()
         assert data['ok'] == True
         assert 'token' in data
     
     def test_login_wrong_password(self, client):
-        r = client.post('/api/auth/login', json={'username': 'admin', 'password': 'wrong'})
+        r = client.post('/api/auth/login', json={'username': '13300000000', 'password': 'wrong'})
         assert r.status_code == 401
     
     def test_login_no_user(self, client):
         r = client.post('/api/auth/login', json={'username': 'nobody', 'password': 'x'})
-        assert r.status_code == 404
+        assert r.status_code == 401
     
     def test_register(self, client):
         import time as _t
-        r = client.post('/api/auth/register', json={'username': f'testuser_{int(_t.time())}', 'password': 'test123', 'role': 'public'})
+        r = client.post('/api/auth/register', json={'phone': f'139{int(_t.time())%100000000:08d}', 'password': 'test123', 'role': 'public'})
         assert r.status_code == 200
         assert r.get_json()['ok'] == True
 

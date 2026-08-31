@@ -10,6 +10,14 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, unquote, parse_qs
 from datetime import datetime
 
+# ---- 上传安全基线（2026-08-31 修真）----
+MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 单文件上限 50MB
+ALLOWED_UPLOAD_EXT = {  # 扩展名白名单：现场执法证据类文件
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.heic',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.txt', '.csv', '.md', '.json', '.mp3', '.mp4', '.wav', '.m4a', '.mov',
+}
+
 SKILL_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(SKILL_DIR)
 
@@ -837,13 +845,26 @@ class EPBHandler(SimpleHTTPRequestHandler):
     def _handle_upload(self):
         try:
             content_type = self.headers.get('Content-Type', '')
+            # 上传大小硬限制（防止恶意大请求拖垮单线程服务器）
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            if length <= 0:
+                self._send_json({'ok': False, 'error': 'empty body'}, code=400)
+                return
+            if length > MAX_UPLOAD_BYTES + 64 * 1024:  # 留 multipart 开销余量
+                self._send_json({'ok': False, 'error': f'文件超过大小限制({MAX_UPLOAD_BYTES // 1024 // 1024}MB)'}, code=413)
+                return
             if 'multipart/form-data' not in content_type:
-                length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(length)
                 data = json.loads(body)
                 filename = data.get('name', f'image_{uuid.uuid4().hex[:8]}.png')
                 file_data = base64.b64decode(data.get('data', ''))
-                ext = os.path.splitext(filename)[1] or '.png'
+                if len(file_data) > MAX_UPLOAD_BYTES:
+                    self._send_json({'ok': False, 'error': f'文件超过大小限制({MAX_UPLOAD_BYTES // 1024 // 1024}MB)'}, code=413)
+                    return
+                ext = os.path.splitext(filename)[1].lower() or '.png'
+                if ext not in ALLOWED_UPLOAD_EXT:
+                    self._send_json({'ok': False, 'error': f'不支持的文件类型: {ext}'}, code=415)
+                    return
                 safe_name = f'{datetime.now().strftime("%Y%m%d%H%M%S")}_{uuid.uuid4().hex[:6]}{ext}'
                 path = os.path.join(UPLOAD_DIR, safe_name)
                 with open(path, 'wb') as f:
@@ -876,9 +897,14 @@ class EPBHandler(SimpleHTTPRequestHandler):
                     fn_match = re.search(r'filename="?([^";\r\n]+)"?', header)
                     if not fn_match:
                         continue
-                    orig_filename = fn_match.group(1)
+                    # 路径穿越防护：只留文件名，剥掉一切目录成分与特殊字符
+                    orig_filename = os.path.basename(fn_match.group(1).replace('\\', '/')).strip()
+                    orig_filename = re.sub(r'[\r\n\t\"\'\;\|\&\$\`<>]', '', orig_filename)[:120] or 'upload.bin'
+                    ext = os.path.splitext(orig_filename)[1].lower()
+                    if ext not in ALLOWED_UPLOAD_EXT:
+                        continue  # 跳过白名单外文件，不中断其余分片
                     safe_name = (f'{datetime.now().strftime("%Y%m%d%H%M%S")}_'
-                                 f'{uuid.uuid4().hex[:6]}_{orig_filename}')
+                                 f'{uuid.uuid4().hex[:6]}{ext}')
                     path = os.path.join(UPLOAD_DIR, safe_name)
                     with open(path, 'wb') as f:
                         f.write(file_content)
@@ -2267,8 +2293,13 @@ def _forward_to_flask(self):
 
 
 def run(port=None):
+    # 端口优先级：显式传参 > 环境变量 PORT（Docker/部署用）> db/config.json > 默认 8899
     if port is None:
-        port = _config.get('server', {}).get('port', 8899)
+        env_port = os.environ.get('PORT', '').strip()
+        if env_port.isdigit() and 1 <= int(env_port) <= 65535:
+            port = int(env_port)
+        else:
+            port = _config.get('server', {}).get('port', 8899)
     # 启动时构建路由表
     _build_flask_routes()
     if _FLASK_ROUTES:
