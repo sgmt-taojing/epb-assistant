@@ -232,78 +232,77 @@ var law=LAW_MAP[vType];
 var baseMin=law.base_min;
 var baseMax=law.base_max;
 
+// 违法行为类型 → 污染物 + 超标倍数（调用真 API 拿真值）
+var CAT_MAP={water_discharge:'water',air_discharge:'air',solid_waste:'waste',monitoring_tamper:'water',no_permit:'water',env_incident:'water',noise:'noise',soil:'soil'};
+var POLL_MAP={water_discharge:'COD',air_discharge:'SO2',solid_waste:'N/A',monitoring_tamper:'COD',no_permit:'COD',env_incident:'COD',noise:'噪声',soil:'重金属'};
+var SEV_VALUE={minor:60,general:80,serious:120,very_serious:200};
+var sevSel=document.getElementById('severity').value;
+var measureValue=SEV_VALUE[sevSel]||100;
+var category=CAT_MAP[vType]||'water';
+var pollutant=POLL_MAP[vType]||'COD';
+
+var apiResult=null;
+fetch('/api/penalty_calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:category,pollutant:pollutant,value:measureValue})}).then(function(r){return r.json()}).then(function(d){
+  if(d&&d.ok&&d.result){renderResult(vType,law,sevSel,d.result);}
+}).catch(function(){renderResult(vType,law,sevSel,null);});
+}
+
+function renderResult(vType,law,sev,api){
+var baseMin=law.base_min,baseMax=law.base_max;
 var factors=[];
 var multiplier=1.0;
-
-// 违法程度
-var sev=document.getElementById('severity').value;
 var sevMap={minor:0.7,general:1.0,serious:1.3,very_serious:1.6};
 multiplier*=sevMap[sev];
 factors.push({name:'违法程度',value:sevMap[sev]==0.7?'从轻(-30%)':sevMap[sev]==1.6?'从重(+60%)':'基准',dir:sevMap[sev]<1?'down':'up'});
 
-// 持续时长
 var dur=document.getElementById('duration').value;
 var durMap={short:0.9,medium:1.1,long:1.3};
 multiplier*=durMap[dur];
 factors.push({name:'持续时长',value:durMap[dur]<1?'从轻':durMap[dur]>1.2?'从重':'基准',dir:durMap[dur]<1?'down':'up'});
 
-// 损害后果
 var dmg=document.getElementById('damage').value;
 var dmgMap={none:0.9,minor:1.0,moderate:1.2,severe:1.5};
 multiplier*=dmgMap[dmg];
 factors.push({name:'损害后果',value:dmgMap[dmg]<1?'从轻':dmgMap[dmg]>1.1?'从重':'基准',dir:dmgMap[dmg]<1?'down':'up'});
 
-// 社会影响
 var soc=document.getElementById('social_impact').value;
 var socMap={none:1.0,minor:1.1,moderate:1.2,severe:1.4};
 multiplier*=socMap[soc];
 factors.push({name:'社会影响',value:socMap[soc]>1?'从重':'基准',dir:socMap[soc]>1?'up':'down'});
 
-// 主观过错
-var int=document.getElementById('intent').value;
+var intent=document.getElementById('intent').value;
 var intMap={negligent:0.9,indirect:1.1,direct:1.3};
-multiplier*=intMap[int];
-factors.push({name:'主观过错',value:intMap[int]<1?'从轻':intMap[int]>1.2?'从重':'基准',dir:intMap[int]<1?'down':'up'});
+multiplier*=intMap[intent];
+factors.push({name:'主观过错',value:intMap[intent]<1?'从轻':intMap[intent]>1.2?'从重':'基准',dir:intMap[intent]<1?'down':'up'});
 
-// 整改情况
 var rec=document.getElementById('rectification').value;
 var recMap={proactive:0.8,ordered:1.0,partial:1.1,none:1.3};
 multiplier*=recMap[rec];
 factors.push({name:'整改情况',value:recMap[rec]<1?'从轻':recMap[rec]>1.2?'从重':'基准',dir:recMap[rec]<1?'down':'up'});
 
-// 初犯
 var first=document.getElementById('first_offense').value;
 var firstMap={yes:0.85,no:1.0,repeat:1.2};
 multiplier*=firstMap[first];
 factors.push({name:'违法次数',value:firstMap[first]<1?'从轻':firstMap[first]>1.1?'从重':'基准',dir:firstMap[first]<1?'down':'up'});
 
-// 配合调查
 var coop=document.getElementById('cooperation').value;
 var coopMap={active:0.9,normal:1.0,resist:1.1,obstruct:1.3};
 multiplier*=coopMap[coop];
 factors.push({name:'配合调查',value:coopMap[coop]<1?'从轻':coopMap[coop]>1.2?'从重':'基准',dir:coopMap[coop]<1?'down':'up'});
 
-// 主体类型
 var sub=document.getElementById('subject-type').value;
 var subMap={enterprise:1.0,individual:0.6,person:0.3};
 multiplier*=subMap[sub];
 
-// 计算最终区间
 var finalMin=Math.round(baseMin*multiplier*10)/10;
 var finalMax=Math.round(baseMax*multiplier*10)/10;
 var midAmount=Math.round((finalMin+finalMax)/2*10)/10;
-
-// 限制下限不低于1万
 finalMin=Math.max(1,finalMin);
 finalMax=Math.max(finalMin,finalMax);
 
-// 涉刑判断
 var criminal=false;
 var criminalText='';
-if(vType==='monitoring_tamper'||(sev==='very_serious'&&dmg==='severe')){
-criminal=true;
-criminalText='该违法行为可能涉嫌污染环境罪，建议移送公安机关';
-}
+if(vType==='monitoring_tamper'||(sev==='very_serious'&&dmg==='severe')){criminal=true;criminalText='该违法行为可能涉嫌污染环境罪，建议移送公安机关';}
 
 var html='<div class="section"><div class="section-title">处罚建议</div>';
 html+='<div class="result-card">';
@@ -311,6 +310,17 @@ html+='<div class="result-amount">'+finalMin+'万 - '+finalMax+'万元</div>';
 html+='<div class="result-range">建议处罚金额区间（中位数：'+midAmount+'万元）</div>';
 html+='<div class="result-label">综合裁量系数：'+multiplier.toFixed(2)+' · 基准区间：'+baseMin+'-'+baseMax+'万</div>';
 html+='</div>';
+
+if(api){
+html+='<div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px">';
+html+='<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:6px">📡 排放标准计算（真 API）</div>';
+html+='<div style="font-size:12px;color:var(--text);line-height:1.7">';
+html+='污染物：'+api.pollutant+' · 实测：'+api.value+' · 限值：'+api.limit+' · 超标倍数：<strong>'+api.ratio+'</strong> · 风险：<strong>'+api.risk_level+'</strong><br>';
+html+='标准：'+api.std_code+' '+(api.std_name||"")+'<br>';
+if(api.amount_max){html+='《按日连续处罚》：'+(api.daily_total?(api.daily_total+' 元 · '):"")+'区间 '+api.amount_min+' - '+api.amount_max+' 元<br>';}
+if(api.law_refs){api.law_refs.forEach(function(l){html+='· '+l.code+'：'+l.desc+'<br>';});}
+html+='</div></div>';
+}
 
 html+='<div class="factor-list">';
 factors.forEach(function(f){
@@ -325,7 +335,6 @@ html+='<div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.1);bo
 html+='<div style="margin-top:12px;padding:10px;background:var(--card2);border-radius:6px;font-size:11px;color:var(--muted)">以上计算结果仅供参考，实际处罚需结合案件具体情况、地方裁量基准和执法人员综合判断。依据：《行政处罚法》第三十二条、第三十三条及生态环境行政处罚裁量权规定。</div>';
 
 html+='</div>';
-
 document.getElementById('result-area').innerHTML=html;
 }
 

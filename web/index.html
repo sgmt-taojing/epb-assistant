@@ -560,9 +560,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">128</span> 法规</span>
-<span class="dept-ind"><span class="di-n">46</span> 标准</span>
-<span class="dept-ind"><span class="di-n">15</span> 待审</span>
+<span class="dept-ind"><span class="di-n" data-stat="laws">--</span> 法规</span>
+<span class="dept-ind"><span class="di-n" data-stat="standards">--</span> 标准</span>
+<span class="dept-ind"><span class="di-n" data-stat="kb_pending">--</span> 待审</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -602,9 +602,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">38</span> 监测点</span>
-<span class="dept-ind"><span class="di-n">126</span> 企业</span>
-<span class="dept-ind" style="color:var(--red)">🔴 3</span>
+<span class="dept-ind"><span class="di-n" data-stat="stations">--</span> 监测点</span>
+<span class="dept-ind"><span class="di-n" data-stat="enterprises">--</span> 企业</span>
+<span class="dept-ind" style="color:var(--red)">🔴 <span class="di-n" data-stat="alerts_24h">--</span></span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -637,9 +637,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">52</span> 监测点</span>
-<span class="dept-ind"><span class="di-n">89</span> 企业</span>
-<span class="dept-ind"><span class="di-n">良</span> AQI</span>
+<span class="dept-ind"><span class="di-n" data-stat="stations">--</span> 监测点</span>
+<span class="dept-ind"><span class="di-n" data-stat="enterprises">--</span> 企业</span>
+<span class="dept-ind"><span class="di-n" data-stat="aqi_text">--</span> AQI</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -672,9 +672,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">64</span> 危废企业</span>
-<span class="dept-ind"><span class="di-n">28</span> 地块</span>
-<span class="dept-ind"><span class="di-n">5</span> 修复中</span>
+<span class="dept-ind"><span class="di-n">--</span> 危废企业</span>
+<span class="dept-ind"><span class="di-n">--</span> 地块</span>
+<span class="dept-ind"><span class="di-n">--</span> 修复中</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -707,9 +707,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">234</span> 许可证</span>
-<span class="dept-ind"><span class="di-n">18</span> 待审</span>
-<span class="dept-ind"><span class="di-n">89%</span> 报告率</span>
+<span class="dept-ind"><span class="di-n">--</span> 许可证</span>
+<span class="dept-ind"><span class="di-n">--</span> 待审</span>
+<span class="dept-ind"><span class="di-n">--</span> 报告率</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -742,9 +742,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">128</span> 本月检查</span>
-<span class="dept-ind"><span class="di-n">23</span> 在办案件</span>
-<span class="dept-ind"><span class="di-n">3</span> 涉刑</span>
+<span class="dept-ind"><span class="di-n" data-stat="cases_month">--</span> 本月立案</span>
+<span class="dept-ind"><span class="di-n" data-stat="cases_active">--</span> 在办案件</span>
+<span class="dept-ind"><span class="di-n" data-stat="criminal">--</span> 涉刑</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -777,9 +777,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">312</span> 监测设备</span>
-<span class="dept-ind"><span class="di-n">99.2%</span> 在线率</span>
-<span class="dept-ind" style="color:var(--red)">⚠️ 7</span>
+<span class="dept-ind"><span class="di-n" data-stat="devices">--</span> 监测设备</span>
+<span class="dept-ind"><span class="di-n" data-stat="device_online_rate">--</span> 在线率</span>
+<span class="dept-ind" style="color:var(--red)">⚠️ <span class="di-n" data-stat="devices_offline">--</span></span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -812,8 +812,8 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">89</span> 本月举报</span>
-<span class="dept-ind"><span class="di-n">94%</span> 办结率</span>
+<span class="dept-ind"><span class="di-n" data-stat="reports">--</span> 举报总量</span>
+<span class="dept-ind"><span class="di-n" data-stat="report_done_rate">--</span> 办结率</span>
 <span class="dept-ind"><span class="di-n">3.2天</span> 均办结</span>
 </div>
 <span class="dept-expand">▼</span>
@@ -847,9 +847,9 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 </div>
 </div>
 <div class="dept-indicators">
-<span class="dept-ind"><span class="di-n">26</span> 视频</span>
-<span class="dept-ind"><span class="di-n">5.6万</span> 观看</span>
-<span class="dept-ind"><span class="di-n">1280</span> 参与</span>
+<span class="dept-ind"><span class="di-n">--</span> 视频</span>
+<span class="dept-ind"><span class="di-n">--</span> 观看</span>
+<span class="dept-ind"><span class="di-n">--</span> 参与</span>
 </div>
 <span class="dept-expand">▼</span>
 </div>
@@ -1384,5 +1384,33 @@ document.addEventListener('click',function(e){
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
 </div>
+
+<script>
+// 部门指标真值拉取（修真 #11：原全硬编码）
+fetch('/api/dept_stats').then(r=>r.json()).then(j=>{
+  if(!j.ok)return;
+  const st=j.stats;
+  // 派生指标
+  if(st.devices&&st.devices_offline!=null){
+    st.device_online_rate=(((st.devices-st.devices_offline)/st.devices)*100).toFixed(1)+'%';
+  }
+  if(st.reports){
+    // 举报办结率粗算：reports 总数 - 已办结（status='closed'/'已办结'）
+    fetch('/api/reports/recent').then(r=>r.json()).then(rr=>{
+      if(rr.ok){
+        const done=rr.reports.filter(x=>['closed','已办结'].includes(x.status)).length;
+        st.report_done_rate=done+'/'+rr.reports.length;
+      }
+      applyStats(st);
+    }).catch(()=>applyStats(st));
+  }else{applyStats(st);}
+});
+function applyStats(st){
+  document.querySelectorAll('[data-stat]').forEach(el=>{
+    const k=el.dataset.stat;
+    if(st[k]!=null)el.textContent=st[k];
+  });
+}
+</script>
 </body>
 </html>

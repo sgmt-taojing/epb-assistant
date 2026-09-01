@@ -120,25 +120,25 @@ window.fetch = function(url, opts) {
     <div class="card-title"><span class="icon">📁</span>执法案例</div>
     <div class="stat-value" id="stat-cases">--</div>
     <div class="stat-label">累计案例总数</div>
-    <div class="stat-trend trend-up">↑ 本月新增 12 件</div>
+    <div class="stat-trend trend-up" id="trend-cases">↑ --</div>
   </div>
   <div class="card">
     <div class="card-title"><span class="icon">⚖️</span>法规库</div>
     <div class="stat-value" id="stat-laws">--</div>
     <div class="stat-label">法律法规数量</div>
-    <div class="stat-trend trend-down">本季度新增 7 部</div>
+    <div class="stat-trend trend-down" id="trend-laws">↓ --</div>
   </div>
   <div class="card">
     <div class="card-title"><span class="icon">🚨</span>群众举报</div>
     <div class="stat-value" id="stat-reports">--</div>
     <div class="stat-label">累计举报工单</div>
-    <div class="stat-trend trend-up">↑ 待处理 3 件</div>
+    <div class="stat-trend trend-up" id="trend-reports">↑ --</div>
   </div>
   <div class="card">
     <div class="card-title"><span class="icon">🔄</span>协同任务</div>
     <div class="stat-value" id="stat-tasks">--</div>
     <div class="stat-label">在办任务数</div>
-    <div class="stat-trend trend-down">本周完成 8 件</div>
+    <div class="stat-trend trend-down" id="trend-tasks">↓ --</div>
   </div>
 </div>
 
@@ -245,6 +245,19 @@ fetch('/api/health').then(r=>r.json()).then(d=>{
   document.getElementById('stat-laws').textContent=s.law_index||0;
   document.getElementById('stat-reports').textContent=s.reports||0;
   document.getElementById('stat-tasks').textContent=s.tasks||0;
+  // 趋势位（修真：原硬编码 "12 件/8 件" 全部接 dept_stats 真值）
+  fetch('/api/dept_stats').then(r=>r.json()).then(j=>{
+    if(!j.ok)return;
+    var st=j.stats;
+    var tc=document.getElementById('trend-cases');
+    if(tc) tc.textContent='↑ 本月新增 '+st.cases_month+' 件';
+    var tl=document.getElementById('trend-laws');
+    if(tl) tl.textContent='↓ 法规库 '+st.laws+' 部 · 待审 '+st.kb_pending;
+    var tr=document.getElementById('trend-reports');
+    if(tr) tr.textContent='↑ 累计 '+st.reports+' 件举报';
+    var tt=document.getElementById('trend-tasks');
+    if(tt) tt.textContent='↓ 在办 '+st.tasks_open+' / 办结 '+(s.tasks||0);
+  });
 });
 
 // Load case type distribution

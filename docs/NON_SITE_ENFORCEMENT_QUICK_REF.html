@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>非现场监管执法 · 快速取数与闭环指南</title>
+<style>
+  :root{--g:#1a7a52;--gd:#0f5132;--a:#2980b9;--r:#c0392b;--o:#e67e22;--bg:#f7faf7;--card:#fff;--border:#e2eee5;--muted:#5a6b62}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#1f2a23;margin:0;padding:32px;line-height:1.65}
+  h1{font-size:24px;margin:0 0 6px;color:var(--gd)}
+  .sub{color:var(--muted);margin-bottom:24px;font-size:13px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:18px}
+  .panel-title{font-size:15px;font-weight:700;color:var(--gd);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g)}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .card{background:#fbfdfb;border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .card h4{margin:0 0 6px;font-size:14px;color:var(--gd)}
+  .card .src{font-size:11px;color:var(--a);font-family:"SF Mono",monospace;background:#eef5ff;padding:2px 6px;border-radius:3px;display:inline-block;margin-top:4px}
+  .card p{margin:6px 0 0;font-size:12.5px;color:#3a4a40}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+  th{background:#f0f5f0;color:var(--gd);font-weight:600}
+  tr:last-child td{border-bottom:0}
+  code{background:#f0f5f0;padding:1px 6px;border-radius:3px;font-size:12px;color:#0f5132;font-family:"SF Mono",monospace}
+  .flow{display:flex;gap:0;align-items:stretch;margin:8px 0}
+  .flow-step{flex:1;background:#fbfdfb;border:1px solid var(--border);padding:10px 12px;font-size:12.5px;position:relative;text-align:center}
+  .flow-step:first-child{border-radius:6px 0 0 6px}
+  .flow-step:last-child{border-radius:0 6px 6px 0}
+  .flow-step+ .flow-step{border-left:0}
+  .flow-step .n{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+  .flow-step .t{font-weight:600;color:var(--gd)}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600}
+  .b-g{background:#e8f5ee;color:var(--g)}
+  .b-a{background:#e8f0fa;color:var(--a)}
+  .b-r{background:#fce8e6;color:var(--r)}
+  .b-o{background:#fdf0e0;color:var(--o)}
+  .muted{color:var(--muted);font-size:12px}
+  .timeline{position:relative;padding-left:24px}
+  .timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--border)}
+  .tl-item{position:relative;margin-bottom:14px;padding-left:8px}
+  .tl-item::before{content:"";position:absolute;left:-22px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--g);border:2px solid var(--card);box-shadow:0 0 0 2px var(--g)}
+  .tl-title{font-weight:600;color:var(--gd);font-size:13.5px}
+  .tl-text{font-size:12.5px;color:#3a4a40;margin-top:2px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+  .legend span::before{content:"■";margin-right:4px}
+  .leg-g::before{color:var(--g)}.leg-a::before{color:var(--a)}.leg-o::before{color:var(--o)}.leg-r::before{color:var(--r)}
+</style>
+</head>
+<body>
+
+<h1>非现场监管执法 · 快速取数与闭环</h1>
+<div class="sub">面向执法人员：8 类非现场手段 × 现有 API × 端到端闭环 · 2026-09-01 修定</div>
+
+<!-- 1. 政策依据 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>政策依据与定义边界</div>
+  <p style="margin:0 0 8px">生态环境部《关于加强排污许可执法监管的指导意见》（环规财函〔2022〕23号）明确：<strong>大力拓展非现场监管手段及应用，将其作为日常执法检查的重要方式</strong>。基层非现场监管指执法人员不到排污单位现场，依托<strong>自动监控、视频监控、用电监控、遥感、走航车、无人机、走航监测车、走航监测船</strong>等技术，对排污行为进行远程取证、识别异常线索的执法方式。</p>
+  <table>
+    <thead><tr><th style="width:160px">维度</th><th>现场执法</th><th>非现场执法</th></tr></thead>
+    <tbody>
+      <tr><td>取数方式</td><td>人工检查、笔录、采样</td><td>在线监测、视频、电力、遥感、走航</td></tr>
+      <tr><td>触发条件</td><td>计划 / 举报 / 投诉</td><td>数据异常 / 模型识别 / 风险画像</td></tr>
+      <tr><td>取证强度</td><td>笔录 + 物证为主</td><td>电子数据为主（需证据效力衔接）</td></tr>
+      <tr><td>频率</td><td>季度/月度有限</td><td>7×24 实时</td></tr>
+      <tr><td>本平台覆盖</td><td><code>field-terminal.html</code> · 执法工作台</td><td><code>sensor-dashboard.html</code> · 告警中心 · 智能眼镜</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 2. 八类非现场手段矩阵 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>八类非现场手段 · 本平台覆盖矩阵</div>
+  <table>
+    <thead>
+      <tr><th style="width:60px">序号</th><th>手段</th><th>取证类型</th><th>本平台接口 / 入口</th><th>实时性</th><th>证据强度</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>①</td><td>自动在线监测</td><td>COD/氨氮/PM2.5/SO₂ 等数值</td><td><code>GET /api/emission_standards</code> · <code>POST /api/quick_check</code> · <code>iot_data</code>（112 万条）</td><td><span class="badge b-g">秒级</span></td><td><span class="badge b-g">高</span></td></tr>
+      <tr><td>②</td><td>工况/用电监控</td><td>生产负荷与治污设施同步</td><td><code>GET /api/alert_devices</code> · <code>devices</code>（30 台）</td><td><span class="badge b-g">分钟级</span></td><td><span class="badge b-a">中高</span></td></tr>
+      <tr><td>③</td><td>视频监控</td><td>排污口/工况画面</td><td><code>POST /api/av_capture</code> · 智能眼镜音视频采集</td><td><span class="badge b-g">秒级</span></td><td><span class="badge b-g">高</span></td></tr>
+      <tr><td>④</td><td>无人机/卫星遥感</td><td>面源、黑臭水体、固废堆</td><td><code>POST /api/av_capture</code>（视频链路复用）· KB <code>remote_sensing</code></td><td><span class="badge b-a">小时级</span></td><td><span class="badge b-a">中</span></td></tr>
+      <tr><td>⑤</td><td>走航监测车/船</td><td>移动断面 VOCs、恶臭</td><td><code>POST /api/av_capture</code> + <code>POST /api/alert_emit</code></td><td><span class="badge b-a">分钟级</span></td><td><span class="badge b-a">中高</span></td></tr>
+      <tr><td>⑥</td><td>污染源普查/许可数据</td><td>静态档案、许可证台账</td><td><code>GET /api/cases</code> · <code>cases</code>（120）· <code>enterprises</code>（50）</td><td><span class="badge b-o">静态</span></td><td><span class="badge b-g">高</span></td></tr>
+      <tr><td>⑦</td><td>举报/信访数据</td><td>群众线索、网格员报告</td><td><code>GET /api/reports/recent</code>（12 条）· <code>POST /api/report</code></td><td><span class="badge b-a">日级</span></td><td><span class="badge b-a">中</span></td></tr>
+      <tr><td>⑧</td><td>融合告警/风险画像</td><td>多源数据交叉打分</td><td><code>POST /api/fusion_alert</code> · <code>POST /api/risk_profile</code> · <code>GET /api/alerts/recent</code></td><td><span class="badge b-g">实时</span></td><td><span class="badge b-g">高</span></td></tr>
+    </tbody>
+  </table>
+  <div class="legend">
+    <span class="leg-g">秒级/实时</span><span class="leg-a">分钟-小时</span><span class="leg-o">日级/静态</span><span class="leg-r">低频/留痕</span>
+  </div>
+</div>
+
+<!-- 3. 端到端闭环 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>非现场监管端到端闭环</div>
+  <div class="flow">
+    <div class="flow-step"><span class="n">数据层</span><span class="t">多源采集</span></div>
+    <div class="flow-step"><span class="n">研判层</span><span class="t">融合告警</span></div>
+    <div class="flow-step"><span class="n">决策层</span><span class="t">风险画像</span></div>
+    <div class="flow-step"><span class="n">处置层</span><span class="t">智能推送</span></div>
+    <div class="flow-step"><span class="n">回查层</span><span class="t">执法复核</span></div>
+  </div>
+  <table style="margin-top:14px">
+    <thead><tr><th style="width:90px">阶段</th><th>动作</th><th>调用接口</th><th>典型耗时</th></tr></thead>
+    <tbody>
+      <tr><td>1. 数据层</td><td>i 设备读数 ii 视频截图 iii 举报/案例更新</td><td><code>GET /api/alert_devices</code> · <code>POST /api/av_capture</code> · <code>GET /api/reports/recent</code></td><td>&lt;500ms</td></tr>
+      <tr><td>2. 研判层</td><td>超标判定 + 法条匹配 + 案例匹配</td><td><code>POST /api/quick_check</code> · KB 直答优先</td><td>P95 &lt; 1.5s</td></tr>
+      <tr><td>3. 决策层</td><td>融合打分 → 红/黄/蓝/绿四档</td><td><code>POST /api/fusion_alert</code> · <code>POST /api/risk_profile</code></td><td>&lt;1s</td></tr>
+      <tr><td>4. 处置层</td><td>推穿戴/扬声器/手机三通道</td><td><code>POST /api/alert_emit</code></td><td>&lt;300ms</td></tr>
+      <tr><td>5. 回查层</td><td>立案 → 现场笔录 → 处罚</td><td><code>POST /api/inspection/submit</code> · <code>POST /api/penalty_calculate</code></td><td>人工 + P95 &lt; 1.5s 辅助</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 4. 快速取数三招 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>三招快速取数</div>
+  <div class="grid3">
+    <div class="card">
+      <h4>① 数据接警 <span class="badge b-g">秒级</span></h4>
+      <p><strong>关键调用：</strong></p>
+      <p><code>POST /api/quick_check</code> {category, pollutant, value}</p>
+      <p class="muted">返回：limit / ratio / risk_level / 标准条款 / 案例</p>
+      <span class="src">最常用</span>
+    </div>
+    <div class="card">
+      <h4>② 融合告警 <span class="badge b-a">分钟级</span></h4>
+      <p><strong>关键调用：</strong></p>
+      <p><code>POST /api/fusion_alert</code> {location?, hours?}</p>
+      <p class="muted">返回：按评分排序的预警列表，标注来源（举报/案例/监测）</p>
+      <span class="src">全网扫描</span>
+    </div>
+    <div class="card">
+      <h4>③ 风险画像 <span class="badge b-o">企业维度</span></h4>
+      <p><strong>关键调用：</strong></p>
+      <p><code>POST /api/risk_profile</code> {enterprise, category}</p>
+      <p class="muted">返回：score / level 红黄蓝绿 + 因素分解 + 整改建议</p>
+      <span class="src">靶向定位</span>
+    </div>
+  </div>
+</div>
+
+<!-- 5. 时间线 · 处置演练 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>典型处置演练：化工厂 COD 超标 → 智能推送 → 现场执法</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-title">T0 · 设备采数</div>
+      <div class="tl-text">30 台 device 中 1 台发送 iot_data：COD 实测 280mg/L。系统判定超 GB 8978-1996 表 4 二级标准（100mg/L）。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">T+1s · 融合告警</div>
+      <div class="tl-text"><code>POST /api/quick_check</code> 触发，自动写入 <code>alerts</code> 表；<code>POST /api/fusion_alert</code> 交叉案例库，发现该厂近 6 月有 1 起高风险违法记录。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">T+2s · 风险画像</div>
+      <div class="tl-text"><code>POST /api/risk_profile</code> → score=68，level=黄牌，标签 #f59e0b，建议书第 3 类：列入专项检查名单。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">T+3s · 智能推送</div>
+      <div class="tl-text"><code>POST /api/alert_emit</code> 同时投送：① 智能眼镜镜片叠加提示（推送+语音）② 值班室扬声器 TTS 播报 ③ 责任人手机微信。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">T+30min · 现场处置</div>
+      <div class="tl-text">执法人员到达现场 → 眼镜直连平台取证 → <code>POST /api/inspection/submit</code> 上传清单 → <code>POST /api/penalty_calculate</code> 给出 200 万-1000 万区间。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-title">T+1d · 闭环回查</div>
+      <div class="tl-text">系统持续监控同点位 iot_data，发现连续 3 日低于标准 → 解除预警、归档 <code>alerts.status=resolved</code>。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. 取数卡顿点 & 修真指引 -->
+<div class="panel">
+  <div class="panel-title"><span class="dot"></span>常见卡点 & 修真指引</div>
+  <table>
+    <thead><tr><th>卡点</th><th>原因</th><th>修真方式</th></tr></thead>
+    <tbody>
+      <tr><td>设备接入不上</td><td>采样频率不一致、鉴权不通过</td><td><code>POST /api/av_capture</code> 上传 + <code>device_data_log</code> 留痕</td></tr>
+      <tr><td>阈值误报</td><td>标准版本号错位（GB vs HJ）</td><td><code>GET /api/emission_standards</code> 校表，限值区间解析用正则取上限</td></tr>
+      <tr><td>案件转化难</td><td>非现场证据链不完整</td><td><code>POST /api/inspection/submit</code> 双录：电子数据 + 现场确认</td></tr>
+      <tr><td>推送未达</td><td>眼镜/手机通道离线</td><td><code>POST /api/alert_emit</code> 返回 <code>pushed_to</code> 标记失败通道</td></tr>
+      <tr><td>取证责任不清</td><td>现场签字滞后</td><td><code>POST /api/penalty_calculate</code> 输出裁量区间作为参考</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel" style="background:#fbfdfb">
+  <div class="muted">适用对象：执法人员 · 监督员 · 监测中心 · 应急处置。文档随 API 演进同步更新，遇到接口变更请同步修订本页。</div>
+</div>
+
+</body>
+</html>

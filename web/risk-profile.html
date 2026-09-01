@@ -173,6 +173,22 @@ return '<div class="ent-card" onclick="showDetail(\''+e.id+'\')">'+
 function showDetail(eid){
 var e=ENTERPRISES.filter(function(x){return x.id===eid})[0];
 if(!e)return;
+// 异步补真 API：拉 SQLite alerts 表 + 评分 + 建议
+fetch('/api/risk_profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enterprise:e.name,category:e.industry})}).then(function(r){return r.json()}).then(function(d){
+  if(!d||!d.ok)return;
+  var p=d.profile;
+  if(p){
+    var sc=document.getElementById('live-score');
+    if(sc){
+      sc.textContent=p.score;
+      sc.style.color=p.color;
+    }
+    var lvl=document.getElementById('live-level');
+    if(lvl){lvl.textContent=p.level;lvl.className='risk-level '+(p.score>=80?'high':p.score>=60?'medium':'low');}
+    var adv=document.getElementById('live-advice');
+    if(adv){adv.innerHTML=p.advice.map(function(a){return '<div>• '+a+'</div>'}).join('');}
+  }
+}).catch(function(){});
 var riskColor=e.risk_level==='high'?'var(--danger)':e.risk_level==='medium'?'var(--warn)':'var(--accent)';
 var riskText=e.risk_level==='high'?'高风险':e.risk_level==='medium'?'中风险':'低风险';
 var dimNames={compliance:'合规评分',monitoring:'监测评分',history:'历史记录',rectification:'整改进度',emergency:'应急管理'};
@@ -182,8 +198,8 @@ var html='<div class="container">';
 
 // 风险评分卡
 html+='<div class="risk-score-card">'+
-'<div class="risk-score" style="color:'+riskColor+'">'+e.risk_score+'</div>'+
-'<div class="risk-level '+e.risk_level+'">'+riskText+'</div>'+
+'<div id="live-score" class="risk-score" style="color:'+riskColor+'">'+e.risk_score+'</div>'+
+'<div id="live-level" class="risk-level '+e.risk_level+'">'+riskText+'</div>'+
 '<div class="risk-desc">'+e.name+' · '+e.industry+' · '+e.location+'</div>'+
 '</div>';
 
@@ -205,11 +221,13 @@ html+='<li class="event-item"><div class="event-dot '+dotCls+'"></div><div class
 html+='</ul></div>';
 
 // 执法建议
-html+='<div class="section"><div class="section-title">执法建议</div><div class="advice-box"><div class="advice-title">基于风险画像的精准执法建议</div>';
+html+='<div class="section"><div class="section-title">执法建议</div><div class="advice-box"><div class="advice-title">本地执法建议</div>';
 e.advice.forEach(function(a){
 html+='<div class="advice-item">'+a+'</div>';
 });
 html+='</div></div>';
+// 实时计算结果（真 API）
+html+='<div class="section"><div class="section-title">实时计算补充建议（API）</div><div id="live-advice" class="advice-box"><div class="advice-item">拉取中…</div></div></div>';
 
 // 基本信息
 html+='<div class="section"><div class="section-title">企业基本信息</div>'+

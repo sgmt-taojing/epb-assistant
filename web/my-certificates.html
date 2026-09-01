@@ -193,7 +193,10 @@ function printCert(no){
         +'<div class="score">'+c.score+'<span style="font-size:18px;color:#8a6116"> 分</span></div>'
         +'<div class="honor">'+(c.honor||'合格')+'</div>'
         +'<div class="meta">证书编号：'+c.cert_no+'<br>发证日期：'+(c.issued_at||'').substring(0,10)+'<br>本证书可通过超级环保智能体平台验真</div>'
-        +'</div><script>setTimeout(function(){window.print()},400)<\/script></body></html>');
+        +'</div><script>setTimeout(function(){window.print()},400)<\/script><script src="global-sidebar.js"></script>
+<script src="voice-assistant.js"></script>
+<script src="ai-assistant.js"></script>
+</body></html>');
       w.document.close();
     });
 }

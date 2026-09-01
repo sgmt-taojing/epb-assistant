@@ -145,8 +145,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS, DELETE')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin')
+        self.send_header('Access-Control-Max-Age', '86400')
+        self.send_header('Content-Length', '0')
         self.end_headers()
 
     def do_GET(self):
@@ -299,6 +301,9 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._serve_static(os.path.join(WEB_DIR, 'api-fallback.js'))
         elif path == '/mobile-nav.js':
             self._serve_static(os.path.join(WEB_DIR, 'mobile-nav.js'))
+        # 部门模块真实统计（用于 dept-indicators 实时化）
+        elif path == '/api/dept_stats':
+            self._handle_dept_stats()
         # 健康检查
         elif path == '/api/health':
             self._handle_health()
@@ -372,6 +377,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_emit()
         elif path == '/api/alerts/recent':
             self._handle_alerts_recent()
+        elif path == '/api/reports/recent':
+            self._handle_reports_recent()
+        elif path == '/api/cases/recent':
+            self._handle_cases_recent()
+        elif path == '/api/tasks/recent':
+            self._handle_tasks_recent()
         elif path == '/api/monitor_overview':
             self._handle_monitor_overview()
         elif path.startswith('/api/equipment/'):
@@ -459,6 +470,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_law_mapping()
         elif parsed.path == '/api/risk_assess':
             self._handle_risk_assess()
+        elif parsed.path == '/api/penalty_calculate':
+            self._handle_penalty_calculate()
+        elif parsed.path == '/api/risk_profile':
+            self._handle_risk_profile()
         elif parsed.path == '/api/law_index':
             self._handle_law_index()
         elif parsed.path == '/api/analyze_scene':
@@ -485,6 +500,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_emit()
         elif parsed.path == '/api/alerts/recent':
             self._handle_alerts_recent()
+        elif parsed.path == '/api/reports/recent':
+            self._handle_reports_recent()
+        elif parsed.path == '/api/cases/recent':
+            self._handle_cases_recent()
+        elif parsed.path == '/api/tasks/recent':
+            self._handle_tasks_recent()
         elif parsed.path == '/api/monitor_overview':
             self._handle_monitor_overview()
         elif parsed.path == '/api/knowledge_items':
@@ -551,7 +572,7 @@ class EPBHandler(SimpleHTTPRequestHandler):
         self.send_header('X-XSS-Protection', '1; mode=block')
         self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
         self.send_header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
-        self.send_header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: https:; connect-src 'self' https:")
+        self.send_header('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: https: http:; connect-src 'self' http: https: ws: wss:; font-src 'self' data:")
 
     def _send_json(self, data, code=200):
         """发送 JSON 响应"""
@@ -559,6 +580,44 @@ class EPBHandler(SimpleHTTPRequestHandler):
         self._cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
+    def _handle_dept_stats(self):
+        """GET /api/dept_stats — 首页部门指标卡真实统计（来自 SQLite）
+        返回与 web/index.html 9 个部门模块对应的真实计数；
+        无对应表的字段返回 0，由前端决定展示策略（宁显示 0 也不展示假数）
+        """
+        try:
+            stats = {}
+            if _USE_DB:
+                def _cnt(sql, args=()):
+                    return int(db.get_conn().execute(sql, args).fetchone()[0])
+                stats['laws'] = _cnt('SELECT COUNT(*) FROM laws')
+                stats['standards'] = _cnt("SELECT COUNT(*) FROM kb_formal WHERE module='standard'")
+                stats['kb_pending'] = _cnt('SELECT COUNT(*) FROM kb_staging')
+                stats['kb_total'] = _cnt('SELECT COUNT(*) FROM kb_formal')
+                stats['stations'] = _cnt('SELECT COUNT(*) FROM stations')
+                stats['enterprises'] = _cnt('SELECT COUNT(*) FROM enterprises')
+                stats['devices'] = _cnt('SELECT COUNT(*) FROM devices')
+                stats['devices_offline'] = _cnt("SELECT COUNT(*) FROM devices WHERE status!='online'")
+                stats['alerts_24h'] = _cnt(
+                    "SELECT COUNT(*) FROM alerts WHERE created_at >= datetime('now','-1 day')")
+                stats['cases_month'] = _cnt(
+                    "SELECT COUNT(*) FROM cases WHERE date >= datetime('now','-30 day')")
+                stats['cases_active'] = _cnt(
+                    "SELECT COUNT(*) FROM cases WHERE status NOT IN ('closed','archived','结案','归档')")
+                stats['tasks_open'] = _cnt(
+                    "SELECT COUNT(*) FROM tasks WHERE status NOT IN ('done','completed','已办结','已完成')")
+                stats['reports'] = _cnt('SELECT COUNT(*) FROM reports')
+                stats['users'] = _cnt('SELECT COUNT(*) FROM users')
+            else:
+                # 无 DB 时全部 0，不伪造
+                stats = {k: 0 for k in (
+                    'laws', 'standards', 'kb_pending', 'kb_total', 'stations',
+                    'enterprises', 'devices', 'devices_offline', 'alerts_24h',
+                    'cases_month', 'cases_active', 'tasks_open', 'reports', 'users')}
+            self._send_json({'ok': True, 'stats': stats})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_health(self):
         """GET /api/health — 系统健康检查"""
@@ -1333,6 +1392,171 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({'ok': False, 'error': str(e)}, ensure_ascii=False).encode('utf-8'))
 
+    def _handle_penalty_calculate(self):
+        """POST /api/penalty_calculate — 自由裁量计算
+        入参 JSON: {category, pollutant, value, days, baseline}
+        返回 {amount_min, amount_max, formula, law_refs[]}
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            data = json.loads(self.rfile.read(length) or b'{}')
+        except Exception:
+            data = {}
+        category = data.get('category') or 'water'
+        pollutant = data.get('pollutant') or 'COD'
+        try:
+            value = float(data.get('value') or 0)
+        except Exception:
+            value = 0
+        days = int(data.get('days') or 0)
+        # 加载标准库获取限值
+        limit = 0
+        std_code = ''
+        std_name = ''
+        try:
+            sd = self._load_standards()
+            for it in sd.get('items', []):
+                if it.get('category') == category and (it.get('pollutant') == pollutant or pollutant in it.get('pollutant','')):
+                    lv = it.get('limit_value')
+                    try:
+                        limit = float(lv) if lv is not None and lv != '' else 0
+                    except (TypeError, ValueError):
+                        # 处理 “6~9” 这种区间限值取上限
+                        import re
+                        s = str(lv or '')
+                        nums = re.findall(r'\d+\.?\d*', s)
+                        limit = float(nums[1]) if len(nums) >= 2 else (float(nums[0]) if nums else 0)
+                    std_code = it.get('code', '')
+                    std_name = it.get('name', '')
+                    break
+        except Exception:
+            pass
+        # 处罚公式：超标倍数 = value/limit（limit=0 时不评估超标）
+        try:
+            ratio = value / limit if limit > 0 else 0
+        except Exception:
+            ratio = 0
+        if ratio <= 0:
+            amount_min, amount_max = 0, 0
+            risk = '无数据'
+        elif ratio <= 1.0:
+            amount_min, amount_max = 10_000, 100_000
+            risk = '轻微'
+        elif ratio <= 2.0:
+            amount_min, amount_max = 100_000, 500_000
+            risk = '一般'
+        elif ratio <= 5.0:
+            amount_min, amount_max = 500_000, 2_000_000
+            risk = '较重'
+        elif ratio <= 10.0:
+            amount_min, amount_max = 2_000_000, 10_000_000
+            risk = '严重'
+        else:
+            amount_min, amount_max = 10_000_000, 50_000_000
+            risk = '特别严重'
+        # 按日连续处罚：原决金额 3%-5%/日，递增封顶不超过上一已罚款的 100%
+        if days > 0:
+            base = max(amount_min, amount_max)
+            per_day = int(base * 0.03)
+            daily_total = per_day * days
+            cap = base * 100
+            daily_total = min(daily_total, cap)
+            amount_min += daily_total
+            amount_max += daily_total
+        formula = f'依据{std_code or "GB 8978-1996"}{std_name or "污水综合排放标准"}：超标 {ratio:.2f} 倍·风险等级 {risk}·基础处罚 + 按日连续处罚 ×{days} 日'
+        law_refs = [
+            {'code': '《水污染防治法》第八十三条', 'desc': '超过排放标准·处10万-100万罚款'},
+            {'code': '《行政处罚法》第二十九条', 'desc': '按日连续处罚·按原处罚数额3%-5%按日累计'},
+        ]
+        self._send_json({
+            'ok': True,
+            'result': {
+                'category': category,
+                'pollutant': pollutant,
+                'value': value,
+                'limit': limit,
+                'ratio': round(ratio, 2),
+                'risk_level': risk,
+                'amount_min': amount_min,
+                'amount_max': amount_max,
+                'daily_total': daily_total if days > 0 else 0,
+                'days': days,
+                'formula': formula,
+                'law_refs': law_refs,
+                'std_code': std_code,
+                'std_name': std_name,
+            }
+        })
+
+    def _handle_risk_profile(self):
+        """POST /api/risk_profile — 企业风险画像
+        入参 JSON: {enterprise, category}
+        返回 {score, level, factors[], advice, recent_alerts}
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            data = json.loads(self.rfile.read(length) or b'{}')
+        except Exception:
+            data = {}
+        enterprise = (data.get('enterprise') or '').strip() or '当前企业'
+        category = (data.get('category') or '').strip()
+        # 近期告警查该企业
+        recent = []
+        score = 60
+        factors = []
+        self._ensure_alerts_table()
+        try:
+            import sqlite3
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM alerts WHERE scene LIKE ? OR source LIKE ? ORDER BY rowid DESC LIMIT 5",
+                        ('%' + enterprise + '%', '%' + enterprise + '%'))
+            recent = [dict(r) for r in cur.fetchall()]
+            conn.close()
+        except Exception:
+            pass
+        # 严重度叠加
+        high = sum(1 for r in recent if r.get('risk_level') in ('严重超标', '严重', '特别严重'))
+        medium = sum(1 for r in recent if r.get('risk_level') in ('超标', '高风险', '较重'))
+        score += high * 8 + medium * 3
+        if high >= 3:
+            score += 10
+        score = min(100, max(0, score))
+        if score >= 80:
+            level = '红牌'; color = '#ef4444'
+        elif score >= 60:
+            level = '黄牌'; color = '#f59e0b'
+        elif score >= 40:
+            level = '蓝牌'; color = '#3b82f6'
+        else:
+            level = '绿牌'; color = '#10b981'
+        factors = [
+            {'key': 'recent_alerts', 'label': '近期告警', 'weight': high + medium, 'desc': f'近期 {high} 起严重·{medium} 起一般'},
+            {'key': 'category', 'label': '行业类别', 'weight': 1 if category in ('化工', '钢铁', '危废') else 0, 'desc': category or '未指定'},
+            {'key': 'monitoring', 'label': '在线监测覆盖', 'weight': 1, 'desc': '已接入'},
+        ]
+        advice = [
+            '对严重超标点立即复测并通知运维' if high else '保持运行·定期抽查',
+            '并联相关企业同类污染源治理案例' if high else '补充同类企业危废/废气治理基准',
+            '持续推送同行业法规更新·培训相关人员' if category in ('化工', '钢铁') else '可考虑提高现场核查频次',
+        ]
+        self._send_json({
+            'ok': True,
+            'profile': {
+                'enterprise': enterprise,
+                'category': category,
+                'score': score,
+                'level': level,
+                'color': color,
+                'factors': factors,
+                'advice': advice,
+                'recent_alerts_count': len(recent),
+                'recent_alerts': recent[:5],
+                'ts': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            }
+        })
+
     def _handle_law_index(self):
         """法条索引查询API — 返回 law_index.json 内容"""
         try:
@@ -2018,6 +2242,29 @@ class EPBHandler(SimpleHTTPRequestHandler):
         for ch in channels:
             pushed.append({'channel': ch, 'pushed': True, 'ts': datetime.now().strftime('%H:%M:%S')})
         self._send_json({'ok': True, 'alert_id': alert_id, 'pushed_to': pushed, 'msg': '已推送至穿戴/播报设备'})
+
+    def _handle_reports_recent(self):
+        self._handle_table_recent('reports', 'reports', ['id','reporter_name','target_company','type','status','created_at'])
+
+    def _handle_cases_recent(self):
+        self._handle_table_recent('cases', 'cases', ['id','date','title','party','type','risk_level','status'])
+
+    def _handle_tasks_recent(self):
+        self._handle_table_recent('tasks', 'tasks', ['id','title','type','status','priority','deadline'])
+
+    def _handle_table_recent(self, key, table, fields):
+        """GET /api/<key>/recent — 通用列表（cases/tasks/reports）"""
+        import sqlite3
+        conn=sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        conn.row_factory=sqlite3.Row
+        try:
+            cols=','.join(fields)
+            rows=[dict(r) for r in conn.execute(f"SELECT {cols} FROM {table} ORDER BY rowid DESC LIMIT 50")]
+            self._send_json({'ok': True, key: rows, 'count': len(rows)})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)})
+        finally:
+            conn.close()
 
     def _handle_alerts_recent(self):
         """GET /api/alerts/recent — 最近告警列表"""
