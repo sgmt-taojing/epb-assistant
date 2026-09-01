@@ -22,9 +22,8 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.path.join(BASE, 'db', 'epb.db')
 
 MAX_Q_LEN = 200
-STOP_WORDS = set('的了和与及或在为对由从被将怎么如何什么请问一下是不是有哪些这个那个'
-                 '按照规定以下以上其他相关情况进行应当不得可以依法予以违反关于现在'
-                 '处罚裁量标准证据清单情形'.split())
+STOP_WORDS = set('的了和与及或在为对由从被将怎么如何什么是什么请问一下是不是有哪些这个那个')
+STOP_WORDS |= {'什么是', '什么是呀', '什么是啊', '什么是呢', '怎么算', '怎么样', '是什么', '这是啥', '请问', '什么', '咋', '咋办', '请问一下', '何为', '怎么', '如何'}
 # 同义/缩写归一：口语词 → KB 标准用语（提升口语问题命中率）
 SYNONYMS = {
     '涉刑': ['刑事', '刑法', '移送公安', '犯罪'],
@@ -53,8 +52,14 @@ def clean_query(q):
 
 def extract_terms(q):
     """粗分词：连续汉字段 + 英文/数字词，去停用词；同义归一扩充"""
+    # 1) 剥疑问前缀（什么是/怎么/如何/何为 等）
+    q_clean = q
+    for prefix in ('什么是', '什么是呀', '什么是呢', '什么是啊', '怎么算', '怎么样', '是如何', '是啥', '是啥呀', '是什么', '怎么', '如何', '何为', '请问', '请告知', '请说明', '这算什么'):
+        if q_clean.startswith(prefix):
+            q_clean = q_clean[len(prefix):]
+            break
     terms = []
-    for seg in re.findall(r'[\u4e00-\u9fa5]+|[A-Za-z0-9]+', q):
+    for seg in re.findall(r'[\u4e00-\u9fa5]+|[A-Za-z0-9]+', q_clean):
         if seg.lower() in STOP_WORDS or len(seg) < 1:
             continue
         terms.append(seg)
@@ -113,6 +118,13 @@ def score_row(row, terms, raw_q):
     # 原始问题整串命中（长问句直接匹配到内容，强信号）
     if raw_q and raw_q in text:
         score += 0.25
+    # 标题精确包含原问（去疑问前缀后）→ 最强信号（按日连续处罚 案例 vs 按日连续处罚·拒不改正 条目）
+    if raw_q and len(raw_q) >= 4 and raw_q in (title or ''):
+        score += 0.55
+    # 类别加权：违法查处 / 法规条文 / 执法案例 优先
+    cat = (category or '').strip()
+    if cat in ('violation', 'law', 'case'):
+        score += 0.10
     # 类别先验：违法查处与法规条文是最常问的
     if category in ('violation', 'law'):
         score += 0.03 * min(hits, 2)

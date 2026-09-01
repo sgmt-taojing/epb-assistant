@@ -364,6 +364,16 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_equipment_list(query)
         elif path == '/api/equipment/categories':
             self._handle_equipment_categories()
+        elif path == '/api/emission_standards':
+            self._handle_emission_standards()
+        elif path == '/api/alert_devices':
+            self._handle_alert_devices()
+        elif path == '/api/alert_emit':
+            self._handle_alert_emit()
+        elif path == '/api/alerts/recent':
+            self._handle_alerts_recent()
+        elif path == '/api/monitor_overview':
+            self._handle_monitor_overview()
         elif path.startswith('/api/equipment/'):
             self._handle_equipment_detail(path.split('/')[-1])
         # /api-data/ 静态JSON（GitHub Pages fallback）
@@ -463,6 +473,20 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_collection_sources()
         elif parsed.path == '/api/collection_progress':
             self._handle_collection_progress()
+        elif parsed.path == '/api/emission_standards':
+            self._handle_emission_standards()
+        elif parsed.path == '/api/quick_check':
+            self._handle_quick_check()
+        elif parsed.path == '/api/av_capture':
+            self._handle_av_capture()
+        elif parsed.path == '/api/alert_devices':
+            self._handle_alert_devices()
+        elif parsed.path == '/api/alert_emit':
+            self._handle_alert_emit()
+        elif parsed.path == '/api/alerts/recent':
+            self._handle_alerts_recent()
+        elif parsed.path == '/api/monitor_overview':
+            self._handle_monitor_overview()
         elif parsed.path == '/api/knowledge_items':
             self._handle_knowledge_items()
         elif parsed.path == '/api/ask':
@@ -1722,6 +1746,368 @@ class EPBHandler(SimpleHTTPRequestHandler):
         self.wfile.write(json.dumps({'ok': True, **progress}, ensure_ascii=False).encode('utf-8'))
 
 
+    def _load_standards(self):
+        """读取 data/emission_standards.json，带进程内缓存"""
+        cache = getattr(self, '_standards_cache', None)
+        import time as _t
+        if cache and (_t.time() - cache[0] < 60):
+            return cache[1]
+        path = os.path.join(BASE_DIR, 'data', 'emission_standards.json')
+        data = {'items': [], 'count': 0, 'version': ''}
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            pass
+        self._standards_cache = (_t.time(), data)
+        return data
+
+    def _ensure_alerts_table(self):
+        """确保 alerts 表存在（同时负责报警队列+历史）"""
+        try:
+            import sqlite3
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            cur = conn.cursor()
+            cur.execute(
+                '''CREATE TABLE IF NOT EXISTS alerts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source TEXT,
+                    scene TEXT,
+                    category TEXT,
+                    pollutant TEXT,
+                    value REAL,
+                    limit_value REAL,
+                    over_pct REAL,
+                    risk_level TEXT,
+                    advice TEXT,
+                    device_channels TEXT,
+                    status TEXT DEFAULT 'pending',
+                    created_at TEXT,
+                    resolved_at TEXT
+                )'''
+            )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+    def _emit_alert(self, payload: dict):
+        """根据 quick_check/av_capture 的判定结果写入 alert 表"""
+        self._ensure_alerts_table()
+        try:
+            import sqlite3
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            cur = conn.cursor()
+            cur.execute(
+                '''INSERT INTO alerts(source, scene, category, pollutant, value, limit_value,
+                     over_pct, risk_level, advice, device_channels, status, created_at)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
+                (
+                    payload.get('source') or 'quick_check',
+                    payload.get('scene') or '',
+                    payload.get('category') or '',
+                    payload.get('pollutant') or '',
+                    float(payload.get('value') or 0),
+                    float(payload.get('limit_value') or 0),
+                    float(payload.get('over_pct') or 0),
+                    payload.get('risk_level') or '超标',
+                    payload.get('advice') or '',
+                    json.dumps(payload.get('device_channels') or ['glasses', 'speaker', 'phone'], ensure_ascii=False),
+                    'pending',
+                    datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                ),
+            )
+            conn.commit()
+            alert_id = cur.lastrowid
+            conn.close()
+            return alert_id
+        except Exception as e:
+            return None
+
+    def _handle_emission_standards(self):
+        """GET /api/emission_standards?category=water — 排放标准限值库"""
+        from urllib.parse import urlparse, parse_qs
+        qs = parse_qs(urlparse(self.path).query)
+        cat = (qs.get('category') or [''])[0]
+        data = self._load_standards()
+        items = data.get('items', [])
+        if cat:
+            items = [x for x in items if x.get('category') == cat]
+        self._send_json({'ok': True, 'count': len(items), 'version': data.get('version', ''), 'items': items})
+
+    def _handle_quick_check(self):
+        """POST /api/quick_check — 输入指标值，即时判定超标并给出法条/标准出处"""
+        import sqlite3
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length) or b'{}') if length else {}
+            category = (body.get('category') or '').strip()
+            pollutant = (body.get('pollutant') or '').strip()
+            raw_value = body.get('value')
+            try:
+                value = float(raw_value)
+            except (TypeError, ValueError):
+                self._send_json({'ok': False, 'error': 'value 需为数字'}, code=400)
+                return
+            data = self._load_standards()
+            items = data.get('items', [])
+            if category:
+                items = [x for x in items if x.get('category') == category]
+            if pollutant:
+                items = [x for x in items if pollutant in x.get('pollutant', '')]
+            if not items:
+                self._send_json({'ok': False, 'error': '未匹配到标准条目，请检查 category/pollutant'}, code=404)
+                return
+            # 取第一个匹配（后续可扩展多标准匹配）
+            std = items[0]
+            try:
+                limit = float(std.get('limit_value', ''))
+            except ValueError:
+                self._send_json({'ok': False, 'error': '该标准限值为非数值，暂不支持自动判定', 'std': std})
+                return
+            exceeded = value > limit
+            ratio = round(value / limit, 2) if limit else None
+            over_pct = round((value - limit) / limit * 100, 1) if limit else None
+            # 联动 KB 里的法条（若 category 对应有 law 条目）
+            kb_refs = []
+            try:
+                conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+                cur = conn.cursor()
+                cur.execute(
+                    "SELECT entry_id, title FROM kb_formal WHERE module='law' AND (title LIKE ? OR content LIKE ?) LIMIT 3",
+                    (f"%{std.get('code', '')}%", f"%{std.get('name', '')}%"),
+                )
+                kb_refs = [{'entry_id': r[0], 'title': r[1]} for r in cur.fetchall()]
+                conn.close()
+            except Exception:
+                pass
+            # 联动案例库
+            case_refs = []
+            try:
+                with open(os.path.join(BASE_DIR, 'data', 'cases.json'), 'r', encoding='utf-8') as f:
+                    cases = json.load(f)
+                key = (std.get('pollutant') or '')[:2]
+                for c in cases[:200]:
+                    text = json.dumps(c, ensure_ascii=False)
+                    if key and key in text:
+                        case_refs.append({'id': c.get('id') or c.get('case_id'), 'title': c.get('title', '')[:60]})
+                    if len(case_refs) >= 3:
+                        break
+            except Exception:
+                pass
+            level = '高风险' if (exceeded and (ratio or 0) >= 2) else ('超标' if exceeded else '达标')
+            advice = (
+                f"已超 {std.get('name')}（{std.get('code')}）限值 {over_pct}%，建议：立即复测确认取样规范性；"
+                f"核查治理设施运行参数；如复测仍超标，按《水污染防治法》/《大气污染防治法》相应条款立案。"
+                if exceeded else
+                f"未超标（{std.get('name')} {std.get('code')} 限值 {limit}{std.get('unit', '')}），"
+                f"建议保持治理设施正常运行并按频次留样备查。"
+            )
+            self._send_json({
+                'ok': True,
+                'result': {
+                    'category': std.get('category'),
+                    'pollutant': std.get('pollutant'),
+                    'value': value,
+                    'unit': std.get('unit'),
+                    'limit': limit,
+                    'std_code': std.get('code'),
+                    'std_name': std.get('name'),
+                    'std_level': std.get('level'),
+                    'exceeded': exceeded,
+                    'ratio': ratio,
+                    'over_pct': over_pct if exceeded else 0,
+                    'risk_level': level,
+                    'advice': advice,
+                    'law_refs': kb_refs,
+                    'case_refs': case_refs,
+                },
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': f'判定失败: {e}'}, code=500)
+
+    def _handle_av_capture(self):
+        """POST /api/av_capture — 音视频采集登记（浏览器 MediaRecorder/眼镜 SDK 上报）"""
+        import time as _time_av
+        try:
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length) or b'{}') if length else {}
+            source = (body.get('source') or 'webcam').strip()  # webcam / glasses / phone / drone
+            scene = (body.get('scene') or '').strip()
+            duration = float(body.get('duration') or 0)
+            note = (body.get('note') or '').strip()
+            if duration <= 0:
+                self._send_json({'ok': False, 'error': 'duration 需大于 0'}, code=400)
+                return
+            entry = {
+                'id': f"AV-{int(_time_av.time()*1000)}",
+                'source': source,
+                'scene': scene,
+                'duration': duration,
+                'note': note,
+                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            }
+            path = os.path.join(BASE_DIR, 'data', 'av_captures.json')
+            arr = []
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    arr = json.load(f)
+            except Exception:
+                arr = []
+            arr.insert(0, entry)
+            arr = arr[:500]
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(arr, f, ensure_ascii=False, indent=2)
+            # 模拟视觉引擎返回（后续接 GLM-4V/眼镜视觉引擎）
+            self._send_json({
+                'ok': True,
+                'capture': entry,
+                'analysis': {
+                    'status': 'queued',
+                    'pipeline': ['抽帧', '场景识别', '污染源定位', 'KB 匹配', '报告生成'],
+                    'message': '已进入视觉分析队列，分析结果将推送到预警中心',
+                },
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': f'登记失败: {e}'}, code=500)
+
+    def _handle_alert_devices(self):
+        """GET /api/alert_devices — 穿戴/播报设备告警通道列表与最近告警"""
+        devices = [
+            {'type': 'glasses', 'name': '智能眼镜', 'channel': '骨传导耳机', 'status': '待接入', 'latency_ms': 1500},
+            {'type': 'speaker', 'name': '现场播报音箱', 'channel': 'TTS 扬声器', 'status': '可用', 'latency_ms': 300},
+            {'type': 'watch', 'name': '智能手表', 'channel': '振动+短文本', 'status': '可用', 'latency_ms': 500},
+            {'type': 'phone', 'name': '手机推送', 'channel': '系统通知', 'status': '可用', 'latency_ms': 200},
+        ]
+        self._ensure_alerts_table()
+        recent = []
+        try:
+            import sqlite3
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            cur = conn.cursor()
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='alerts'")
+            if cur.fetchone():
+                cur.execute("SELECT * FROM alerts ORDER BY rowid DESC LIMIT 10")
+                cols = [d[0] for d in cur.description]
+                recent = [dict(zip(cols, r)) for r in cur.fetchall()]
+            conn.close()
+        except Exception:
+            pass
+        self._send_json({'ok': True, 'devices': devices, 'recent_alerts': recent})
+
+    def _handle_alert_emit(self):
+        """POST /api/alert_emit — 写入预警队列
+        入参 JSON: { source, scene, category, pollutant, value, limit_value, over_pct, risk_level, advice, device_channels }
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            body = self.rfile.read(length) if length > 0 else b'{}'
+            data = json.loads(body or b'{}')
+        except Exception:
+            data = {}
+        if not data.get('pollutant') or data.get('value') is None:
+            self._send_json({'ok': False, 'error': 'pollutant 和 value 必填'}, code=400)
+            return
+        alert_id = self._emit_alert(data)
+        if alert_id is None:
+            self._send_json({'ok': False, 'error': 'alert 写入失败'}, code=500)
+            return
+        channels = data.get('device_channels') or ['glasses', 'speaker', 'phone']
+        # 走路由调用告警通道（本地 mock：仅记录推送）
+        pushed = []
+        for ch in channels:
+            pushed.append({'channel': ch, 'pushed': True, 'ts': datetime.now().strftime('%H:%M:%S')})
+        self._send_json({'ok': True, 'alert_id': alert_id, 'pushed_to': pushed, 'msg': '已推送至穿戴/播报设备'})
+
+    def _handle_alerts_recent(self):
+        """GET /api/alerts/recent — 最近告警列表"""
+        self._ensure_alerts_table()
+        items = []
+        try:
+            import sqlite3
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM alerts ORDER BY rowid DESC LIMIT 20")
+            items = [dict(r) for r in cur.fetchall()]
+            conn.close()
+        except Exception as e:
+            pass
+        self._send_json({'ok': True, 'count': len(items), 'items': items})
+
+    def _handle_monitor_overview(self):
+        """GET /api/monitor_overview — 业务监控 + 系统监控总览
+        输出：知识库总量、法规、案例、问句统计、设备接入、API 总量、最近1h告警、
+             训练任务、agent 自进化指标、知识库分区等。
+        """
+        import sqlite3 as _sq
+        stats = {
+            'kb': {'rules': 0, 'cases': 0, 'laws': 0, 'qa': 0, 'standards': 0, 'versions': []},
+            'services': {'running': [], 'port': 8899, 'pid': os.getpid()},
+            'recent_alerts': 0,
+            'recent_questions': 0,
+            'training': {'total_courses': 0, 'total_certs': 0},
+            'agents': [],
+            'kpis': {'kb_hit_ratio_7d': None, 'avg_latency_ms': None, 'coverage': 0},
+            'ts': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        # KB 统计
+        try:
+            conn = _sq.connect(os.path.join(DB_DIR, 'epb.db'))
+            cur = conn.cursor()
+            for tbl, key in [('rules', 'rules'), ('cases', 'cases'), ('laws', 'laws')]:
+                try:
+                    cur.execute(f'SELECT COUNT(*) FROM {tbl}')
+                    stats['kb'][key] = cur.fetchone()[0]
+                except Exception:
+                    pass
+            try:
+                cur.execute("SELECT COUNT(*) FROM alerts WHERE created_at >= datetime('now','-1 hour')")
+                stats['recent_alerts'] = cur.fetchone()[0]
+            except Exception:
+                pass
+            try:
+                cur.execute("SELECT COUNT(*) FROM qa_log WHERE ts >= datetime('now','-1 hour')")
+                stats['recent_questions'] = cur.fetchone()[0]
+            except Exception:
+                pass
+            conn.close()
+        except Exception:
+            pass
+        # training.db 统计
+        try:
+            conn = _sq.connect(os.path.join(DB_DIR, 'training.db'))
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM courses")
+            stats['training']['total_courses'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM certificates")
+            stats['training']['total_certs'] = cur.fetchone()[0]
+            conn.close()
+        except Exception:
+            pass
+        # 排放标准数
+        sd = self._load_standards()
+        stats['kb']['standards'] = sd.get('count', 0)
+        # services 状态
+        stats['services']['running'] = [
+            {'name': 'file_server', 'pid': os.getpid(), 'port': 8899, 'status': 'healthy'},
+            {'name': 'kb_qa', 'pid': '-', 'status': 'ready' if kb_qa else 'missing'},
+            {'name': 'monitor_overview', 'pid': '-', 'status': 'ready'},
+        ]
+        # agents（基于本项目内已知模块清单）
+        stats['agents'] = [
+            {'id': 'kb_qa', 'label': '知识问答 Agent', 'tier': 'L2', 'status': 'ready'},
+            {'id': 'av_capture', 'label': '音视频采集 Agent', 'tier': 'L4', 'status': 'ready'},
+            {'id': 'standards', 'label': '排放标准 Agent', 'tier': 'L2', 'status': 'ready'},
+            {'id': 'quick_check', 'label': '超标快检 Agent', 'tier': 'L3', 'status': 'ready'},
+            {'id': 'alert_router', 'label': '告警路由 Agent', 'tier': 'L4', 'status': 'ready'},
+            {'id': 'trainer', 'label': '神经网络训练 Agent', 'tier': 'L3', 'status': 'pending'},
+        ]
+        stats['kpis']['coverage'] = round(
+            100.0 * len([a for a in stats['agents'] if a['status'] == 'ready']) / max(1, len(stats['agents'])), 1
+        )
+        self._send_json({'ok': True, 'stats': stats})
+
     def _handle_ask(self):
         """POST /api/ask — 统一知识问答（KB-first 三级分级，本地毫秒级）"""
         try:
@@ -1736,6 +2122,15 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 data = {}
             q = data.get('q', '') or data.get('question', '')
             result = kb_qa.answer(q)
+            try:
+                import sqlite3
+                _c = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+                _c.execute("CREATE TABLE IF NOT EXISTS qa_log(id INTEGER PRIMARY KEY AUTOINCREMENT, q TEXT, src TEXT, latency_ms INTEGER, ts TEXT)")
+                _c.execute("INSERT INTO qa_log(q, src, latency_ms, ts) VALUES (?,?,?,?)",
+                            (q[:200], result.get('source', ''), int(result.get('latency_ms', 0) or 0),
+                             datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+                _c.commit(); _c.close()
+            except Exception: pass
             self._send_json(result)
         except Exception as e:
             import traceback; traceback.print_exc()

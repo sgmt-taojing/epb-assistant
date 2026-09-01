@@ -1,0 +1,377 @@
+{
+  "version": "2026.0901.1319",
+  "generated_at": "2026-09-01T05:19:44Z",
+  "count": 37,
+  "items": [
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "pH",
+      "limit_value": "6~9",
+      "unit": "无量纲",
+      "source": "第一类/第二类污染物最高允许排放浓度",
+      "category": "water",
+      "level": "通用"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "COD",
+      "limit_value": "100",
+      "unit": "mg/L",
+      "source": "一级标准",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "氨氮(NH3-N)",
+      "limit_value": "15",
+      "unit": "mg/L",
+      "source": "一级标准",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总磷",
+      "limit_value": "0.5",
+      "unit": "mg/L",
+      "source": "一级标准（磷含量）",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总氮",
+      "limit_value": "20",
+      "unit": "mg/L",
+      "source": "一级标准（参照）",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "悬浮物(SS)",
+      "limit_value": "70",
+      "unit": "mg/L",
+      "source": "一级标准",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "石油类",
+      "limit_value": "5",
+      "unit": "mg/L",
+      "source": "一级标准",
+      "category": "water",
+      "level": "一级"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总汞",
+      "limit_value": "0.05",
+      "unit": "mg/L",
+      "source": "第一类污染物最高允许排放浓度",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总镉",
+      "limit_value": "0.1",
+      "unit": "mg/L",
+      "source": "第一类污染物",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总铬",
+      "limit_value": "1.5",
+      "unit": "mg/L",
+      "source": "第一类污染物",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "六价铬",
+      "limit_value": "0.5",
+      "unit": "mg/L",
+      "source": "第一类污染物",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总铅",
+      "limit_value": "1.0",
+      "unit": "mg/L",
+      "source": "第一类污染物",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 8978-1996",
+      "name": "污水综合排放标准",
+      "pollutant": "总砷",
+      "limit_value": "0.5",
+      "unit": "mg/L",
+      "source": "第一类污染物",
+      "category": "water",
+      "level": "第一类"
+    },
+    {
+      "code": "GB 16297-1996",
+      "name": "大气污染物综合排放标准",
+      "pollutant": "二氧化硫(SO2)",
+      "limit_value": "550",
+      "unit": "mg/m³",
+      "source": "最高允许排放浓度（二级）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 16297-1996",
+      "name": "大气污染物综合排放标准",
+      "pollutant": "氮氧化物(NOx)",
+      "limit_value": "420",
+      "unit": "mg/m³",
+      "source": "最高允许排放浓度（二级）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 16297-1996",
+      "name": "大气污染物综合排放标准",
+      "pollutant": "颗粒物",
+      "limit_value": "120",
+      "unit": "mg/m³",
+      "source": "最高允许排放浓度（二级）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 16297-1996",
+      "name": "大气污染物综合排放标准",
+      "pollutant": "VOCs(参照非甲烷总烃)",
+      "limit_value": "120",
+      "unit": "mg/m³",
+      "source": "最高允许排放浓度",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "PM2.5",
+      "limit_value": "75",
+      "unit": "μg/m³",
+      "source": "二级浓度限值（24h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "PM10",
+      "limit_value": "150",
+      "unit": "μg/m³",
+      "source": "二级浓度限值（24h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "SO2",
+      "limit_value": "150",
+      "unit": "μg/m³",
+      "source": "二级浓度限值（1h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "NO2",
+      "limit_value": "80",
+      "unit": "μg/m³",
+      "source": "二级浓度限值（1h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "O3",
+      "limit_value": "160",
+      "unit": "μg/m³",
+      "source": "二级浓度限值（1h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 3095-2012",
+      "name": "环境空气质量标准",
+      "pollutant": "CO",
+      "limit_value": "4",
+      "unit": "mg/m³",
+      "source": "二级浓度限值（1h 平均）",
+      "category": "air",
+      "level": "二级"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "镉",
+      "limit_value": "20",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "汞",
+      "limit_value": "8",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "砷",
+      "limit_value": "20",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "铅",
+      "limit_value": "400",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "铬",
+      "limit_value": "250",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "六价铬",
+      "limit_value": "3.0",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 36600-2018",
+      "name": "土壤环境质量 建设用地土壤污染风险管控标准",
+      "pollutant": "苯",
+      "limit_value": "1.0",
+      "unit": "mg/kg",
+      "source": "筛选值（第一类用地）",
+      "category": "soil",
+      "level": "筛选值"
+    },
+    {
+      "code": "GB 12348-2008",
+      "name": "工业企业厂界环境噪声排放标准",
+      "pollutant": "昼间噪声",
+      "limit_value": "65",
+      "unit": "dB(A)",
+      "source": "3 类区",
+      "category": "noise",
+      "level": "3 类"
+    },
+    {
+      "code": "GB 12348-2008",
+      "name": "工业企业厂界环境噪声排放标准",
+      "pollutant": "夜间噪声",
+      "limit_value": "55",
+      "unit": "dB(A)",
+      "source": "3 类区",
+      "category": "noise",
+      "level": "3 类"
+    },
+    {
+      "code": "GB 12348-2008",
+      "name": "工业企业厂界环境噪声排放标准",
+      "pollutant": "昼间噪声",
+      "limit_value": "60",
+      "unit": "dB(A)",
+      "source": "4 类区（道路交通）",
+      "category": "noise",
+      "level": "4 类"
+    },
+    {
+      "code": "GB 12348-2008",
+      "name": "工业企业厂界环境噪声排放标准",
+      "pollutant": "夜间噪声",
+      "limit_value": "50",
+      "unit": "dB(A)",
+      "source": "4 类区（道路交通）",
+      "category": "noise",
+      "level": "4 类"
+    },
+    {
+      "code": "GB 18599-2020",
+      "name": "一般工业固体废物贮存和填埋污染控制标准",
+      "pollutant": "II 类固废入场含水率",
+      "limit_value": "30",
+      "unit": "%",
+      "source": "入场控制要求",
+      "category": "solid_waste",
+      "level": "II 类"
+    },
+    {
+      "code": "GB 18599-2020",
+      "name": "一般工业固体废物贮存和填埋污染控制标准",
+      "pollutant": "II 类固废浸出液 COD",
+      "limit_value": "100",
+      "unit": "mg/L",
+      "source": "浸出液污染物浓度限值",
+      "category": "solid_waste",
+      "level": "II 类"
+    },
+    {
+      "code": "GB 18599-2020",
+      "name": "一般工业固体废物贮存和填埋污染控制标准",
+      "pollutant": "II 类固废浸出液氨氮",
+      "limit_value": "25",
+      "unit": "mg/L",
+      "source": "浸出液污染物浓度限值",
+      "category": "solid_waste",
+      "level": "II 类"
+    }
+  ]
+}
