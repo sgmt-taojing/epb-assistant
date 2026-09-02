@@ -129,9 +129,9 @@ body{padding-bottom:20px}
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card blue"><div class="num">101</div><div class="label">案例库</div></div>
-<div class="stat-card green"><div class="num">28</div><div class="label">法条库</div></div>
-<div class="stat-card amber"><div class="num">15</div><div class="label">违法类型</div></div>
+<div class="stat-card blue"><div class="num" id="ca-cases">--</div><div class="label">案例库</div></div>
+<div class="stat-card green"><div class="num" id="ca-laws">--</div><div class="label">法条库</div></div>
+<div class="stat-card amber"><div class="num" id="ca-vtypes">--</div><div class="label">违法类型</div></div>
 </div>
 
 <div class="section">
@@ -161,6 +161,73 @@ if(!text){epbToast('请输入案情描述');return}
 var btn=document.getElementById('analyze-btn');
 btn.disabled=true;btn.textContent='AI分析中...';
 
+// 修真 2026-09-02：优先走后端智能分析引擎（smart_analyzer），失败降级本地规则
+fetch('/api/smart_analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text})})
+.then(function(r){return r.json()})
+.then(function(d){
+if(d&&d.ok&&d.report){
+renderApiReport(d.report,d.analysis,text);
+btn.disabled=false;btn.textContent='重新分析';
+document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}else{
+throw new Error(d&&d.error?d.error:'分析失败');
+}
+})
+.catch(function(){
+// 降级：本地规则分析（原有逻辑保留作兜底）
+localAnalyze(text,btn);
+});
+}
+
+function renderApiReport(report,analysis,text){
+var html='';
+var a=analysis||{};
+// 1. 违法识别
+var vios=a.law_recommendations||[];
+html+='<div class="result-card violation"><div class="result-title">🔍 违法行为识别（引擎分析）</div><div class="result-content">';
+if(vios.length){
+vios.forEach(function(v){
+var law=v.law_name||v.law||'';
+var art=v.article||'';
+var sev=v.risk||v.severity||'一般';
+html+='<div style="margin-bottom:6px"><span class="result-tag '+(sev.indexOf('严重')>=0?'red':sev.indexOf('高')>=0?'red':'amber')+'">'+sev+'</span> <b>'+(v.violation||v.name||'违法行为')+'</b> → '+(law?law+(art?' '+art:''):'待匹配')+'</div>';
+});
+}else{
+html+='<div>未识别到明确违法行为，建议补充案情细节</div>';
+}
+html+='</div></div>';
+// 2. 风险评估
+var risk=a.risk_assessment||{};
+html+='<div class="result-card law"><div class="result-title">📖 风险评估</div><div class="result-content">';
+html+='<div>风险等级：<b>'+(risk.level||risk.risk_level||'中')+'</b>'+(risk.score!==undefined?('（'+risk.score+'分）'):'')+'</div>';
+if(risk.reasons&&risk.reasons.length){risk.reasons.forEach(function(r){html+='<div style="color:var(--muted)">· '+r+'</div>'})}
+html+='</div></div>';
+// 3. 证据清单
+var ev=a.evidence_checklist||[];
+html+='<div class="result-card evidence"><div class="result-title">✅ 证据清单（引擎生成）</div><div class="result-content">';
+if(ev.length){ev.forEach(function(e){html+='<span class="result-tag green">✓ '+(typeof e==='string'?e:(e.name||e.item||''))+'</span>'})}
+else{html+='<span class="result-tag amber">按案情自动生成清单为空，参照标准清单补证</span>'}
+html+='</div></div>';
+// 4. 相似案例（真实库）
+var sim=a.similar_cases||[];
+html+='<div class="result-card similar"><div class="result-title">📚 相似案例（案例库检索）</div><div class="result-content">';
+if(sim.length){
+sim.forEach(function(c){
+var t=typeof c==='string'?c:(c.title||c.name||'');
+var m=c.match_score||c.score||'';
+html+='<div style="margin-bottom:4px">'+(m?'<span class="result-tag blue">'+(typeof m==='number'?Math.round(m*100)+'%':m)+'</span> ':'')+t+(c.result?' → '+c.result:'')+'</div>';
+});
+}else{
+html+='<div style="color:var(--muted)">案例库中未检索到高相似案例</div>';
+}
+html+='<div style="margin-top:8px"><a href="m-cases.html" style="color:var(--primary2)">→ 查看全部案例库</a></div>';
+html+='</div></div>';
+// 5. 引擎报告全文
+html+='<div class="result-card" style="border-left-color:var(--primary2)"><div class="result-title" style="color:var(--primary2)">🧠 分析报告全文</div><div class="result-content" style="white-space:pre-wrap">'+report+'</div></div>';
+document.getElementById('results').innerHTML=html;
+}
+
+function localAnalyze(text,btn){
 setTimeout(function(){
 var html='';
 
@@ -255,8 +322,22 @@ html+='</div></div>';
 document.getElementById('results').innerHTML=html;
 btn.disabled=false;btn.textContent='重新分析';
 document.getElementById('results').scrollIntoView({behavior:'smooth'});
-},800);
+},400);
 }
+</script>
+<script>
+// 修真：统计卡接真数据（案例库 120 / 法条库 35 / 违法类型 33）
+function loadCaStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var s=d.stats;
+var e1=document.getElementById('ca-cases');if(e1)e1.textContent=s.cases_total||'--';
+var e2=document.getElementById('ca-laws');if(e2)e2.textContent=s.laws;
+var e3=document.getElementById('ca-vtypes');if(e3)e3.textContent=s.violation_types||'--';
+}
+}).catch(function(){});
+}
+loadCaStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

@@ -177,9 +177,9 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card green"><div class="num">7</div><div class="label">已采集证据</div></div>
-<div class="stat-card amber"><div class="num">3</div><div class="label">待采集</div></div>
-<div class="stat-card blue"><div class="num">2</div><div class="label">已生成文书</div></div>
+<div class="stat-card green"><div class="num" id="et-captured">--</div><div class="label">已采集证据</div></div>
+<div class="stat-card amber"><div class="num" id="et-pending">--</div><div class="label">待采集任务</div></div>
+<div class="stat-card blue"><div class="num" id="et-docs">--</div><div class="label">已生成文书</div></div>
 </div>
 
 <div class="tool-grid">
@@ -257,6 +257,24 @@ el.classList.add('done');el.innerHTML='✓';item.classList.add('done')
 }
 }
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+<script>
+// 修真 2026-09-02：取证统计接真数据（av_captures 采集数 + tasks 表 + 文书目录）
+function loadEtStats(){
+fetch('/api/av_captures/recent').then(function(r){return r.json()}).then(function(d){
+var e1=document.getElementById('et-captured');
+if(e1)e1.textContent=d&&d.ok&&d.captures?d.captures.length:'0';
+}).catch(function(){var e1=document.getElementById('et-captured');if(e1)e1.textContent='0';});
+fetch('/api/tasks/recent').then(function(r){return r.json()}).then(function(d){
+var e2=document.getElementById('et-pending');
+if(e2)e2.textContent=d&&d.ok&&d.tasks?d.tasks.filter(function(t){return t.status==='pending'}).length:'0';
+}).catch(function(){var e2=document.getElementById('et-pending');if(e2)e2.textContent='0';});
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+var e3=document.getElementById('et-docs');
+if(e3&&d&&d.ok&&d.stats)e3.textContent=d.stats.reports||'0';
+}).catch(function(){var e3=document.getElementById('et-docs');if(e3)e3.textContent='0';});
+}
+loadEtStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

@@ -378,6 +378,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_equipment_categories()
         elif path == '/api/emission_standards':
             self._handle_emission_standards()
+        elif path == '/api/av_captures/recent':
+            self._handle_av_captures_recent()
         elif path == '/api/alert_devices':
             self._handle_alert_devices()
         elif path == '/api/alert_emit':
@@ -515,6 +517,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_quick_check()
         elif parsed.path == '/api/av_capture':
             self._handle_av_capture()
+        elif parsed.path == '/api/av_captures/recent':
+            self._handle_av_captures_recent()
         elif parsed.path == '/api/alert_devices':
             self._handle_alert_devices()
         elif parsed.path == '/api/alert_emit':
@@ -642,6 +646,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
                     "SELECT COUNT(*) FROM tasks WHERE status NOT IN ('done','completed','已办结','已完成')")
                 stats['reports'] = _cnt('SELECT COUNT(*) FROM reports')
                 stats['users'] = _cnt('SELECT COUNT(*) FROM users')
+                stats['cases_total'] = _cnt('SELECT COUNT(*) FROM cases')
+                stats['violation_types'] = _cnt('SELECT COUNT(*) FROM violation_types')
             else:
                 # 无 DB 时全部 0，不伪造
                 stats = {k: 0 for k in (
@@ -2591,6 +2597,25 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': str(e)})
         finally:
             conn.close()
+
+    def _handle_av_captures_recent(self):
+        """GET /api/av_captures/recent — 音视频采集记录（data/av_captures.json）"""
+        try:
+            path_json = os.path.join(BASE_DIR, 'data', 'av_captures.json')
+            arr = []
+            if os.path.exists(path_json):
+                with open(path_json, 'r', encoding='utf-8') as f:
+                    arr = json.load(f)
+            limit = 50
+            try:
+                q = parse_qs(urlparse(self.path).query)
+                limit = max(1, min(int(q.get('limit', ['50'])[0] or 50), 200))
+            except Exception:
+                pass
+            arr = arr[:limit]
+            self._send_json({'ok': True, 'captures': arr, 'count': len(arr)})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_alerts_stats(self):
         """GET /api/alerts/stats — 预警统计（供 smart-alert 页四张统计卡）"""
