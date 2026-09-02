@@ -2985,7 +2985,7 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 data = json.loads(body or b'{}')
             except Exception:
                 data = {}
-            q = data.get('q', '') or data.get('question', '')
+            q = data.get('q', '') or data.get('question', '') or data.get('query', '')
             result = kb_qa.answer(q)
             try:
                 import sqlite3

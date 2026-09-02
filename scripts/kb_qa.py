@@ -136,22 +136,37 @@ def search_kb(conn, q, limit=5):
     if not terms:
         return [], terms
     cur = conn.cursor()
-    # 1) FTS OR 匹配（毫秒级），排除内部代码/文档噪声源（问答场景不透出实现文档）
-    match_expr = ' OR '.join('"%s"' % t.replace('"', '') for t in terms[:12])
-    try:
-        rows = cur.execute(
-            'SELECT entry_id, title, content, keywords, summary, category FROM kb_fts WHERE kb_fts MATCH ? LIMIT 60',
-            (match_expr,)).fetchall()
-    except Exception:
-        rows = []
     NOISE = ('[环保监管-代码]', '[环保监管]')
+    # 修真 2026-09-02：FTS 已重建为 trigram 分词（273 条全同步）
+    # 混合检索：≥3字词走 trigram FTS（毫秒级子串匹配）；2字词走 LIKE（trigram 不支持 <3 字查询）
+    _COLS = 'entry_id, title, content, keywords, summary, category'  # kb_fts 重建后含 category（trigram）
+    long_terms = [t for t in terms if len(t) >= 3][:8]
+    short_terms = [t for t in terms if len(t) < 3][:6]
+    fts_rows, like_rows = [], []
+    if long_terms:
+        match_expr = ' OR '.join('"%s"' % t.replace('"', '') for t in long_terms)
+        try:
+            fts_rows = cur.execute(
+                f'SELECT {_COLS} FROM kb_fts WHERE kb_fts MATCH ? LIMIT 60',
+                (match_expr,)).fetchall()
+        except Exception:
+            fts_rows = []
+    for t in short_terms:
+        try:
+            like_rows.extend(cur.execute(
+                f'SELECT {_COLS} FROM kb_formal '
+                'WHERE (title LIKE ? OR content LIKE ? OR keywords LIKE ?) LIMIT 15',
+                (f'%{t}%', f'%{t}%', f'%{t}%')).fetchall())
+        except Exception:
+            pass
+    rows = fts_rows + like_rows
     rows = [r for r in rows if not (r[1] or '').startswith(NOISE)]
-    # 2) FTS 不可用时 LIKE 兜底（断网/索引损坏场景）；同样排噪声
+    # 2) 全空时 LIKE 全词兜底（断网/索引损坏场景）
     if not rows:
         like = '%' + (terms[0] if terms else q)[:30] + '%'
         try:
             rows = cur.execute(
-                'SELECT entry_id, title, content, keywords, summary, category FROM kb_formal '
+                f'SELECT {_COLS} FROM kb_formal '
                 'WHERE (title LIKE ? OR content LIKE ?) AND title NOT LIKE ? AND title NOT LIKE ? LIMIT 60',
                 (like, like, '[环保监管-代码]%', '[环保监管]%')).fetchall()
         except Exception:
