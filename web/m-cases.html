@@ -293,6 +293,26 @@ function renderCases(){
 function showDetail(idx){
   var c=window._filtered[idx];
   if(!c)return;
+  // 修真闭环（断尾①）：异步拉取 /api/cases/{id} 关联数据（任务/法条）
+  if(c.id){
+    fetch('/api/cases/'+encodeURIComponent(c.id)).then(function(r){return r.json()}).then(function(d){
+      if(!d||!d.ok)return;
+      var ext=d.case||d.cases||d.detail;
+      if(!ext)return;
+      var extra=document.getElementById('detail-ext-related');
+      if(!extra)return;
+      var htmls=[];
+      if(ext.related_tasks&&ext.related_tasks.length){
+        htmls.push('<div class="detail-section"><div class="detail-label">关联任务（数据库实时）</div><ul class="law-list">'
+          +ext.related_tasks.map(function(t){return '<li>'+t.title+' ['+(t.status||'')+']</li>'}).join('')+'</ul></div>');
+      }
+      if(ext.related_laws&&ext.related_laws.length){
+        htmls.push('<div class="detail-section"><div class="detail-label">关联法规（数据库实时）</div><ul class="law-list">'
+          +ext.related_laws.map(function(l){return '<li>'+(l.code||'')+' '+(l.name||'')+'</li>'}).join('')+'</ul></div>');
+      }
+      extra.innerHTML=htmls.join('');
+    }).catch(function(){});
+  }
   var laws=(c.law||[]).map(function(l){return '<li>'+l+'</li>';}).join('');
   var tags=(c.tags||[]).map(function(t){return '<span class="case-tag tag-other">#'+t+'</span>';}).join(' ');
   document.getElementById('detail-panel').innerHTML=
@@ -305,6 +325,7 @@ function showDetail(idx){
     '<div class="detail-section"><div class="detail-label">处罚结果</div><div class="detail-text">'+c.result+'</div></div>'+
     '<div class="detail-section"><div class="detail-label">标签</div><div class="detail-text">'+tags+'</div></div>'+
     '<div class="detail-section"><div class="detail-label">来源 / 日期</div><div class="detail-text">'+(c.source||'')+' | '+(c.date||'')+'</div></div>'+
+    '<div id="detail-ext-related"></div>'+
     '</div>';
   document.getElementById('detail-overlay').classList.add('show');
 }

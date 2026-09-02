@@ -2594,16 +2594,58 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 self._send_json({'ok': False, 'error': 'not found', key: None}, 404)
                 return
             item = dict(row)
-            # 关联注入：cases 拉取关联任务/举报
-            if key == 'cases':
-                item['related_tasks'] = [dict(r) for r in conn.execute("SELECT id,title,status,priority FROM tasks WHERE title LIKE ? LIMIT 5", (f"%{item.get('party','')}%",)).fetchall()]
-                item['related_laws'] = [dict(r) for r in conn.execute("SELECT code,name FROM laws WHERE name LIKE ? OR code LIKE ? LIMIT 5", (f"%{item.get('type','')}%", f"%{item.get('type','')}%")).fetchall()] if item.get('type') else []
-            if key == 'tasks':
-                # 任务关联案例（按标题模糊）
-                item['related_cases'] = [dict(r) for r in conn.execute("SELECT id,date,title,status FROM cases WHERE title LIKE ? OR party LIKE ? LIMIT 5", (f"%{item.get('title','')}%", f"%{item.get('title','')}%")).fetchall()]
-            if key == 'reports':
-                # 举报关联案例
-                item['related_cases'] = [dict(r) for r in conn.execute("SELECT id,date,title,party,status FROM cases WHERE title LIKE ? OR party LIKE ? LIMIT 5", (f"%{item.get('target_company','')}%", f"%{item.get('target_company','')}%")).fetchall()]
+            # 修真（断尾闭环）：key 兼容单复数；三组关联各自独立 try，禁止互相吞错
+            _k = key if key.endswith('s') else key + 's'
+            if _k == 'cases':
+                try:
+                    item['related_tasks'] = [dict(r) for r in conn.execute(
+                        "SELECT id,title,status,priority FROM tasks WHERE title LIKE ? LIMIT 5",
+                        (f"%{item.get('party','')}%",)).fetchall()]
+                except Exception:
+                    item['related_tasks'] = []
+                try:
+                    # laws 表实际列为 law_name（无 code 列，修真）
+                    item['related_laws'] = [dict(r) for r in conn.execute(
+                        "SELECT law_name AS name, article FROM laws WHERE law_name LIKE ? OR full_text LIKE ? LIMIT 5",
+                        (f"%{item.get('type','')}%", f"%{item.get('type','')}%")).fetchall()] if item.get('type') else []
+                except Exception:
+                    item['related_laws'] = []
+            if _k == 'tasks':
+                try:
+                    # 修真：任务标题通常含企业名（如"[预警核查] 山东某化工厂…"）——提取有效片段反查 cases.party
+                    import re as _re
+                    t_title = item.get('title', '') or ''
+                    # 去掉前缀标签和动作词，提取企业名片段
+                    frag = _re.sub(r'^\[.*?\]\s*', '', t_title)
+                    frag = _re.sub(r'(COD|氨氮|SO2|VOCs|PM10|PM2\.5|达标|超标|核查|检查|预警|污水|排口|废水|废气|固废|危废).*$', '', frag).strip()
+                    related = []
+                    # 策略1：全片段精确模糊
+                    if frag and len(frag) >= 3:
+                        related = [dict(r) for r in conn.execute(
+                            "SELECT id,date,title,status FROM cases WHERE party LIKE ? OR title LIKE ? LIMIT 5",
+                            (f"%{frag}%", f"%{frag}%")).fetchall()]
+                    # 策略2：切词（去地名，用"行业+厂"核心词，如"化工厂""电镀厂"）再查
+                    if not related and frag:
+                        core = _re.sub(r'^(山东|济南|青岛|烟台|潍坊|临沂|威海|济宁|东营|淄博|日照|泰安|德州|聊城|滨州|菏泽|枣庄|江苏|浙江|广东|辽宁)\s*', '', frag)
+                        if core and len(core) >= 2:
+                            related = [dict(r) for r in conn.execute(
+                                "SELECT id,date,title,status FROM cases WHERE party LIKE ? OR title LIKE ? LIMIT 5",
+                                (f"%{core}%", f"%{core}%")).fetchall()]
+                    # 策略3：任务标题前 12 字兜底
+                    if not related and t_title:
+                        related = [dict(r) for r in conn.execute(
+                            "SELECT id,date,title,status FROM cases WHERE title LIKE ? LIMIT 3",
+                            (f"%{t_title[:12]}%",)).fetchall()]
+                    item['related_cases'] = related
+                except Exception:
+                    item['related_cases'] = []
+            if _k == 'reports':
+                try:
+                    item['related_cases'] = [dict(r) for r in conn.execute(
+                        "SELECT id,date,title,party,status FROM cases WHERE title LIKE ? OR party LIKE ? LIMIT 5",
+                        (f"%{item.get('target_company','')}%", f"%{item.get('target_company','')}%")).fetchall()]
+                except Exception:
+                    item['related_cases'] = []
             self._send_json({'ok': True, key: item})
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)})
@@ -2639,6 +2681,19 @@ class EPBHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)}, 500)
 
+    def _tts_broadcast(self, text):
+        """语音真投送（8912 TTS→现场音箱/眼镜骨传导）；失败降级待播报，不阻塞主流程"""
+        import urllib.request, urllib.parse as _up
+        try:
+            if not text or not text.strip():
+                return {'pushed': False, 'error': 'empty text'}
+            tts_url = 'http://127.0.0.1:8912/api/tts?text=' + _up.quote(text[:180])
+            req = urllib.request.Request(tts_url, method='GET')
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                return {'pushed': resp.status == 200, 'audio_bytes': int(resp.headers.get('Content-Length', 0) or 0)}
+        except Exception as e:
+            return {'pushed': False, 'error': f'TTS 不可达({e.__class__.__name__})'}
+
     def _handle_voice_coach(self):
         """POST /api/voice_coach — 实时语音指导（意图识别 + 播报文案生成）
         入参 {text, context?} → {intent, reply, card?, action}
@@ -2668,6 +2723,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
                     'action': 'tts_now',
                 }
             r['ok'] = True
+            # 断尾⑥闭环：speaker 通道真投送（智能眼镜骨传导/现场音箱）——复用 TTS 8912
+            # 仅在请求方主动要求时投送（push_to_speaker=1），浏览器端自己有本地 TTS 不重复播
+            if data.get('push_to_speaker'):
+                r['speaker_push'] = self._tts_broadcast(r.get('reply', ''))
             self._send_json(r)
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)}, 500)

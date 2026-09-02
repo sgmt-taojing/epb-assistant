@@ -47,6 +47,12 @@ panel.innerHTML = `
   <div id="vc-state" style="font-size:11px;color:#10b981;margin-bottom:8px">● 待命（点击开始连续聆听）</div>
   <div id="vc-live" style="font-size:12px;color:#94a3b8;margin-bottom:10px;min-height:34px;background:#1a2332;border-radius:8px;padding:8px;display:none">您说：…</div>
   <div id="vc-reply" style="font-size:13px;color:#e2e8f0;margin-bottom:10px;min-height:50px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px;line-height:1.6">教练待命。说"这项怎么查""拍什么""问什么话术""紧急情况"即可获得实时指导。</div>
+  <div style="margin-bottom:8px;font-size:11px">
+    <label style="display:flex;align-items:center;gap:6px;color:#94a3b8;cursor:pointer">
+      <input type="checkbox" id="vc-speaker-push" style="accent-color:#10b981">
+      📻 同步推送到现场音箱/眼镜（骨传导）
+    </label>
+  </div>
   <div style="font-size:11px;color:#64748b;line-height:1.7">
     <b style="color:#94a3b8">可以这样问：</b><br>
     • "这项怎么查" / "指导 暗管检查"<br>
@@ -131,16 +137,20 @@ function onHeard(text){
   var ctxEl = document.querySelector('.item.current .name, .item.active .name, #current-check-point');
   CONTEXT.checkPoint = ctxEl ? ctxEl.textContent.replace(/^\d+\.\s*/, '') : '';
 
+  var speakerEl = document.getElementById('vc-speaker-push');
   fetch('/api/voice_coach', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ text: text, context: CONTEXT.checkPoint })
+    body: JSON.stringify({ text: text, context: CONTEXT.checkPoint, push_to_speaker: speakerEl && speakerEl.checked ? 1 : 0 })
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
     if (d && d.ok && d.reply) {
-      showReply('🧭 ' + d.reply);
-      speakLocal(d.reply);
+      var sp = d.speaker_push;
+      var spTag = sp ? (sp.pushed ? ' <span style="color:#10b981;font-size:11px">📻 已推音箱' + (sp.audio_bytes ? '(' + Math.round(sp.audio_bytes/1024) + 'KB)' : '') + '</span>' : ' <span style="color:#f59e0b;font-size:11px">📻 音箱不可达</span>') : '';
+      showReply('🧭 ' + d.reply + spTag);
+      // 音箱已推就不本地重复播（防双声）；音箱未开/失败才本地播
+      if (!(sp && sp.pushed)) speakLocal(d.reply);
     } else {
       showReply('教练暂时没听懂，可以换种说法。');
     }
