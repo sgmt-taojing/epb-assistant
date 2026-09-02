@@ -32,3 +32,11 @@
 - my-certificates.html：document.write 内嵌套 </script> 提前截断内联脚本（历史遗留语法错误）
 - admin.html：loadMonitorStats then 链缺闭合括号（历史遗留）
 - 全站 69 页 JS 语法 100% 全绿（含历史遗留 2 处修复）
+
+## 2026-09-02 · 断尾闭环（前序任务全部收口）
+
+- **① 详情端点关联注入修真**：路由 key 单复数不一致（'case' vs 'cases'）导致关联永不触发 + laws 表列名错误（code→law_name）——修复后 cases 详情带关联任务 1 条 + 关联法条 4 条；tasks 三级企业名匹配（全片段→去地名核心词→标题兜底）；m-cases.html 详情面板接 API 异步渲染关联数据
+- **② monitor-overview 业务流水卡**：案件/任务/举报三列实时数据（cases/recent + tasks/recent + reports/recent）
+- **③ landing 真数据入口**：案件库/任务池/举报台三卡（120 案例·14 任务·12 举报）
+- **④ kb_seed_v4_glasses 幂等入库确认**：5/6 条已在库（第 6 条为标准条目已在 formal），跳过确认
+- **⑥ 眼镜教练同步投送**：voice_coach 支持 push_to_speaker → 8912 TTS 真合成播报（实测 102-237KB 音频）；voice-coach.js 加「同步推音箱/眼镜」开关，音箱已推则浏览器不重复播（防双声）
