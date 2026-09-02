@@ -195,6 +195,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <script>
+var _kbLaws={};// 修真：从 /api/search_laws 加载的真实法条原文
 var LAWS=[
 {name:'《中华人民共和国环境保护法》',level:'national',levelText:'国家法律',date:'2014-04-24修订',cat:'综合',desc:'环境保护的基本法，规定环境保护的基本原则、管理制度和法律责任。第六十三条规定了通过暗管、渗井等逃避监管方式排放污染物的行政拘留条款。',tags:['基本法','行政拘留','逃避监管','热门'],hot:true,related:'关联案例：海润电镀监测数据篡改案、运达金属危废倾倒案'},
 {name:'《中华人民共和国水污染防治法》',level:'national',levelText:'国家法律',date:'2017-06-27修订',cat:'水',desc:'水污染防治的专项法律，第八十三条规定超标排放水污染物的处罚标准（10万-100万元）。涵盖排污许可、监测、应急处置等制度。',tags:['水污染','超标排放','10-100万','热门'],hot:true,related:'关联案例：华源化工COD超标案、渤海印染氨氮超标案'},
@@ -265,11 +266,15 @@ html='<div class="empty">未找到匹配的法规<br>试试其他关键词</div>
 }else{
 list.forEach(function(l){
 var tagsHtml=l.tags.map(function(t){return '<span class="law-tag'+(l.hot?' hot':'')+'">'+t+'</span>'}).join('');
+var arts=_kbLaws[l.name]||[];
+var artsHtml='';
+if(arts.length){artsHtml='<div class="law-related">原文条款（KB·实时）：'+arts.join(' · ')+'</div>';}
 html+='<div class="law-card" onclick="showDetail(\''+l.name.replace(/'/g,"\\'")+'\')">'+
 '<div class="law-header"><span class="law-name">'+l.name+'</span><span class="law-level '+l.level+'">'+l.levelText+'</span></div>'+
 '<div class="law-meta">颁布/修订：'+l.date+' · 分类：'+l.cat+'</div>'+
 '<div class="law-desc">'+l.desc+'</div>'+
 '<div class="law-tags">'+tagsHtml+'</div>'+
+artsHtml+
 (l.related?'<div class="law-related">'+l.related+'</div>':'')+
 '</div>';
 });
@@ -280,10 +285,38 @@ document.getElementById('law-list').innerHTML=html;
 function showDetail(name){
 var l=LAWS.filter(function(x){return x.name===name})[0];
 if(!l)return;
-epbToast(l.name+' | '+l.date+' | '+l.levelText);
+var msg=l.name+' | '+l.date+' | '+l.levelText;
+var arts=_kbLaws[l.name]||[];
+if(arts.length){msg+='\n原文条款：'+arts.join(' · ');}
+epbToast(msg);
 }
 
-function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:12px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+function initKBLaws(){
+fetch('/api/search_laws',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:''})})
+.then(function(r){return r.json()})
+.then(function(d){if(d&&d.ok&&d.laws){_kbLaws=d.laws;renderList();}})
+.catch(function(){});
+}
+function loadRelatedCases(){
+fetch('/api/cases?limit=200').then(function(r){return r.json()}).then(function(d){
+var cases=(d&&d.cases)||[];
+// 修真：先按 type（案例的业务类型，含"水/大气/固废/噪声"等）关联，无 type 的按 title 关键字
+var CAT_KW={'水':['水','污水','废水'],'大气':['大气','废气','VOCs','粉尘'],'固废':['危废','固废','废机'],'噪声':['噪声'],'许可':['许可'],'应急':['应急']};
+LAWS.forEach(function(l){
+var kws=CAT_KW[l.cat]||[];
+var matched=cases.filter(function(c){
+var hay=((c.type||'')+' '+(c.title||'')+' '+(c.fact||''));
+return kws.some(function(k){return hay.indexOf(k)>=0;});
+}).slice(0,3);
+if(matched.length>0){l.related='关联案例：'+matched.map(function(c){return c.title||c.id}).join('、');}
+});
+renderList();
+}).catch(function(){});
+}
+
+function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:12px;max-width:90%;white-space:pre-line';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+
+renderCats();renderList();initKBLaws();loadRelatedCases();
 
 renderCats();
 renderList();

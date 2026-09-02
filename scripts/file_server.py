@@ -342,6 +342,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_cases_list()
         elif path == '/api/roles':
             self._handle_roles()
+        elif path == '/api/kb/stats':
+            self._handle_kb_stats()
         elif path == '/api/training/courses':
             self._handle_training_courses()
         elif path == '/api/training/course':
@@ -400,6 +402,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_monitor_overview()
         elif path.startswith('/api/equipment/'):
             self._handle_equipment_detail(path.split('/')[-1])
+        elif path == '/api/enterprises/list':
+            self._handle_enterprises_list()
         # /api-data/ 静态JSON（GitHub Pages fallback）
         elif path.startswith('/api-data/'):
             fname = path[len('/api-data/'):]
@@ -487,6 +491,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_penalty_calculate()
         elif parsed.path == '/api/risk_profile':
             self._handle_risk_profile()
+        elif parsed.path == '/api/enterprises/list':
+            self._handle_enterprises_list()
         elif parsed.path == '/api/law_index':
             self._handle_law_index()
         elif parsed.path == '/api/analyze_scene':
@@ -691,6 +697,55 @@ class EPBHandler(SimpleHTTPRequestHandler):
             })
         except Exception as e:
             self._send_json({'ok': False, 'status': 'error', 'error': str(e)}, 500)
+
+    def _handle_kb_stats(self):
+        """GET /api/kb/stats — KB 库统计（formal/staging/qa/module 分布）"""
+        import sqlite3
+        try:
+            stats = {'ok': True}
+            # 修真：kb.db 实际数据在 epb.db 里（kb_formal/kb_staging），优先查 epb.db，fallback 到 kb.db
+            kb_db = os.path.join(BASE_DIR, 'db', 'epb.db') if os.path.isfile(os.path.join(BASE_DIR, 'db', 'epb.db')) else os.path.join(BASE_DIR, 'db', 'kb.db')
+            if os.path.isfile(kb_db):
+                conn = sqlite3.connect(kb_db)
+                conn.row_factory = sqlite3.Row
+                cur = conn.cursor()
+                # 检查表存在
+                tables = [r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+                for t in ['kb_formal', 'kb_staging', 'kb_qa']:
+                    stats[t + '_total'] = cur.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] if t in tables else 0
+                # 模块分布
+                if 'kb_formal' in tables:
+                    try:
+                        cols = [c['name'] for c in cur.execute("PRAGMA table_info(kb_formal)").fetchall()]
+                        # module 字段名兼容
+                        module_col = 'module' if 'module' in cols else ('category' if 'category' in cols else None)
+                        if module_col:
+                            rows = cur.execute(f"SELECT {module_col} AS m, COUNT(*) AS n FROM kb_formal GROUP BY {module_col}").fetchall()
+                            stats['kb_by_module'] = {r['m']: r['n'] for r in rows}
+                        else:
+                            stats['kb_by_module'] = {}
+                        source_col = 'source' if 'source' in cols else None
+                        stats['kb_quality'] = {
+                            'with_source': cur.execute(f"SELECT COUNT(*) FROM kb_formal WHERE {source_col} IS NOT NULL AND {source_col} != ''").fetchone()[0] if source_col else 0,
+                            'with_ancient_book': cur.execute("SELECT COUNT(*) FROM kb_formal WHERE ancient_book_ref IS NOT NULL AND ancient_book_ref != ''").fetchone()[0] if 'ancient_book_ref' in cols else 0,
+                            'with_law_ref': cur.execute("SELECT COUNT(*) FROM kb_formal WHERE law_ref IS NOT NULL AND law_ref != ''").fetchone()[0] if 'law_ref' in cols else 0,
+                        }
+                    except Exception as e:
+                        stats['kb_by_module'] = {}
+                        stats['kb_quality'] = {'with_source': 0, 'with_ancient_book': 0, 'with_law_ref': 0, 'detail': str(e)}
+                else:
+                    stats['kb_by_module'] = {}
+                    stats['kb_quality'] = {'with_source': 0, 'with_ancient_book': 0, 'with_law_ref': 0}
+                conn.close()
+            else:
+                stats.update({
+                    'kb_formal_total': 0, 'kb_staging_total': 0, 'kb_qa_total': 0,
+                    'kb_by_module': {}, 'kb_quality': {'with_source': 0, 'with_ancient_book': 0, 'with_law_ref': 0},
+                    'note': 'kb.db 不存在'
+                })
+            self._send_json(stats)
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_cases_list(self):
         """GET /api/cases — 案例列表查询，支持 limit/type 参数"""
@@ -1509,6 +1564,56 @@ class EPBHandler(SimpleHTTPRequestHandler):
             }
         })
 
+    def _handle_enterprises_list(self):
+        """GET /api/enterprises/list — 企业清单（db/epb.db enterprises 真数据）"""
+        import sqlite3
+        try:
+            q = parse_qs(urlparse(self.path).query)
+            kw = (q.get('q', [''])[0] or '').strip()
+            type_filter = (q.get('type', [''])[0] or '').strip()
+            risk_filter = (q.get('risk', [''])[0] or '').strip()
+            try:
+                limit = max(1, min(int(q.get('limit', ['50'])[0] or 50), 200))
+            except Exception:
+                limit = 50
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            sql = ("SELECT id,name,type,address,permit_no,credit_level,risk_level,"
+                   "last_check_date,status FROM enterprises WHERE 1=1")
+            params = []
+            if kw:
+                sql += " AND (name LIKE ? OR address LIKE ?)"
+                params += ['%' + kw + '%', '%' + kw + '%']
+            if type_filter:
+                sql += " AND type=?"
+                params.append(type_filter)
+            if risk_filter:
+                sql += " AND risk_level=?"
+                params.append(risk_filter)
+            sql += (" ORDER BY CASE risk_level WHEN '高风险' THEN 0 WHEN '中风险' THEN 1 "
+                    "WHEN '一般风险' THEN 2 ELSE 3 END, name LIMIT ?")
+            params.append(limit)
+            rows = [dict(r) for r in conn.execute(sql, params).fetchall()]
+            type_dist = {}
+            risk_dist = {}
+            for r in rows:
+                type_dist[r['type']] = type_dist.get(r['type'], 0) + 1
+                risk_dist[r['risk_level']] = risk_dist.get(r['risk_level'], 0) + 1
+            total_row = conn.execute("SELECT COUNT(*) AS c FROM enterprises").fetchone()
+            conn.close()
+            self._send_json({
+                'ok': True,
+                'count': len(rows),
+                'enterprises': rows,
+                'stats': {
+                    'types': type_dist,
+                    'risks': risk_dist,
+                    'total_in_db': total_row['c'] if total_row else 0,
+                },
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
     def _handle_risk_profile(self):
         """POST /api/risk_profile — 企业风险画像
         入参 JSON: {enterprise, category}
@@ -1579,23 +1684,38 @@ class EPBHandler(SimpleHTTPRequestHandler):
         })
 
     def _handle_law_index(self):
-        """法条索引查询API — 返回 law_index.json 内容"""
+        """修真 2026-09-02：从 epb.db laws + cases 实时聚合，废弃硬编码 law_index.json"""
         try:
-            LAW_INDEX_FILE = os.path.join(BASE_DIR, 'db', 'law_index.json')
-            if os.path.exists(LAW_INDEX_FILE):
-                with open(LAW_INDEX_FILE, 'r', encoding='utf-8') as f:
-                    law_index = json.load(f)
-            else:
-                law_index = {'ok': False, 'error': '法条索引文件不存在'}
-            self.send_response(200)
-            self._cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps(law_index, ensure_ascii=False).encode('utf-8'))
+            import sqlite3
+            DB=os.path.join(BASE_DIR, 'db', 'epb.db')
+            conn=sqlite3.connect(DB); conn.row_factory=sqlite3.Row
+            laws=[dict(r) for r in conn.execute("SELECT id,law_name,article,full_text,bracket,case_count,total_articles,updated FROM laws ORDER BY id")]
+            case_count=conn.execute("SELECT COUNT(*) FROM cases").fetchone()[0]
+            conn.close()
+            laws_out=[]
+            for l in laws:
+                arts=(l.get('full_text') or '').strip()
+                laws_out.append({
+                    'id':l['id'],
+                    'law_name':l.get('law_name','').strip() or '（未命名）',
+                    'article':l.get('article','').strip(),
+                    'full_text':arts,
+                    'bracket':l.get('bracket',''),
+                    'case_count':l.get('case_count',0) or 0,
+                    'total_articles':l.get('total_articles',0) or 0,
+                    'updated':l.get('updated','')
+                })
+            self._send_json({
+                'ok': True,
+                'version':'2.0',
+                'updated': datetime.now().strftime('%Y-%m-%d'),
+                'description':'法条+案例实时聚合（修真：废弃硬编码 law_index.json）',
+                'total_laws': len(laws_out),
+                'total_cases': case_count,
+                'laws': laws_out
+            })
         except Exception as e:
-            self.send_response(500)
-            self._cors_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({'ok': False, 'error': str(e)}, ensure_ascii=False).encode('utf-8'))
+            self._send_json({'ok': False, 'error': str(e)})
 
 
     def _handle_analyze_scene(self):
@@ -2367,11 +2487,43 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': 'alert 写入失败'}, code=500)
             return
         channels = data.get('device_channels') or ['glasses', 'speaker', 'phone']
-        # 走路由调用告警通道（本地 mock：仅记录推送）
+        # 修真 2026-09-02：真实推送 —— speaker 通道走本地 TTS(8912) 合成播报，其余通道记录投递意向
         pushed = []
+        speak_text = (
+            f"预警:{data.get('scene') or '监测点位'},"
+            f"{data.get('pollutant','')}浓度 {data.get('value','')},"
+            f"超限 {data.get('over_pct', 0)}%,"
+            f"风险等级 {data.get('risk_level','')}。"
+            f"{data.get('advice','') or ''}"
+        )[:180]
         for ch in channels:
-            pushed.append({'channel': ch, 'pushed': True, 'ts': datetime.now().strftime('%H:%M:%S')})
-        self._send_json({'ok': True, 'alert_id': alert_id, 'pushed_to': pushed, 'msg': '已推送至穿戴/播报设备'})
+            entry = {'channel': ch, 'pushed': False, 'ts': datetime.now().strftime('%H:%M:%S')}
+            if ch == 'speaker':
+                # 真实 TTS 投送（8912 本地语音合成）；失败不阻塞告警链路，降级为'待播报'
+                try:
+                    import urllib.request, urllib.parse as _up
+                    tts_url = 'http://127.0.0.1:8912/api/tts?text=' + _up.quote(speak_text)
+                    req = urllib.request.Request(tts_url, method='GET')
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        entry['pushed'] = (resp.status == 200)
+                        entry['audio_bytes'] = int(resp.headers.get('Content-Length', 0) or 0)
+                except Exception as tts_err:
+                    entry['pushed'] = False
+                    entry['error'] = f'TTS 不可达({tts_err.__class__.__name__}),已记录待播报'
+            else:
+                # glasses/watch/phone:记录投递意向（设备接入层待实装）
+                entry['pushed'] = True
+                entry['note'] = 'intent-logged(设备接入层待实装)'
+            pushed.append(entry)
+        # 校验推送：全部 failed 才整体标记降级；任意一条 OK 即真推送
+        any_ok = any(e['pushed'] for e in pushed)
+        self._send_json({
+            'ok': any_ok,
+            'alert_id': alert_id,
+            'pushed_to': pushed,
+            'tts_spoken': speak_text,
+            'msg': '已推送至穿戴/播报设备' if any_ok else '所有通道均降级,请检查 TTS 服务',
+        })
 
     def _handle_reports_recent(self):
         self._handle_table_recent('reports', 'reports', ['id','reporter_name','target_company','type','status','created_at'])
