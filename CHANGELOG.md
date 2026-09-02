@@ -40,3 +40,10 @@
 - **③ landing 真数据入口**：案件库/任务池/举报台三卡（120 案例·14 任务·12 举报）
 - **④ kb_seed_v4_glasses 幂等入库确认**：5/6 条已在库（第 6 条为标准条目已在 formal），跳过确认
 - **⑥ 眼镜教练同步投送**：voice_coach 支持 push_to_speaker → 8912 TTS 真合成播报（实测 102-237KB 音频）；voice-coach.js 加「同步推音箱/眼镜」开关，音箱已推则浏览器不重复播（防双声）
+
+## 2026-09-02 · 商用必补四件套（审计后续任务闭环）
+
+1. **Token 鉴权**：sessions 表（12h 过期）+ login 签发 + 7 个高危写操作 API 强制 Bearer token（无/假 token 401，浏览/问答保持开放）；前端 auth-guard 自动附 token
+2. **角色脱敏**：/api/enterprises 联系人信息——匿名「林** / 150****0202」、执法角色完整可见（contact_masked 标志）
+3. **问答质量监控**：/api/qa/health（miss 率 + 24h 窗口 + top miss 问题 + 阈值告警）；qa_log 增 tier 列；历史脏数据归档后基线 healthy 0%
+4. **HTTPS 方案**：deploy/HTTPS_SETUP.md（Caddy 反代自动 TLS + 上线检查单）

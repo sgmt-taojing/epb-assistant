@@ -342,6 +342,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_cases_list()
         elif path == '/api/roles':
             self._handle_roles()
+        elif path == '/api/qa/health':
+            self._handle_qa_health()
         elif path == '/api/kb/stats':
             self._handle_kb_stats()
         elif path == '/api/training/courses':
@@ -476,6 +478,16 @@ class EPBHandler(SimpleHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
+        # 商用必补①：高危写操作强制 token（浏览/问答保持开放）
+        try:
+            _p = urlparse(self.path).path
+            if _p in self.PROTECTED_APIS:
+                _ok, _sess = self._check_auth()
+                if not _ok:
+                    self._send_json({'ok': False, 'error': '未授权：' + _sess.get('error','') + '（请先登录获取 token）'}, 401)
+                    return
+        except Exception:
+            pass
         parsed = urlparse(self.path)
         if parsed.path == '/api/upload':
             self._handle_upload()
@@ -722,6 +734,50 @@ class EPBHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({'ok': False, 'status': 'error', 'error': str(e)}, 500)
 
+    def _handle_qa_health(self):
+        """GET /api/qa/health — 问答质量监控（商用必补③：miss 率告警）
+        miss 率 = tier=miss 占比；>30% 触发 alert 状态（应补 KB）
+        """
+        import sqlite3
+        try:
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            total = cur.execute("SELECT COUNT(*) FROM qa_log").fetchone()[0]
+            # src 字段存的是 tier（answer 返回 source）——统计各档
+            tiers = {}
+            for r in cur.execute("SELECT COALESCE(NULLIF(tier,''),'(未分级)') AS t, COUNT(*) AS n FROM qa_log GROUP BY t").fetchall():
+                tiers[r['t']] = r['n']
+            miss_n = tiers.get('miss', 0)
+            # 近 24h
+            recent = cur.execute(
+                "SELECT COUNT(*) FROM qa_log WHERE ts >= datetime('now','-1 day')").fetchone()[0]
+            recent_miss = cur.execute(
+                "SELECT COUNT(*) FROM qa_log WHERE ts >= datetime('now','-1 day') AND tier='miss'").fetchone()[0]
+            # 平均延迟
+            avg_lat = cur.execute("SELECT AVG(latency_ms) FROM qa_log").fetchone()[0] or 0
+            # 高频 miss 问题（补 KB 候选）
+            top_miss = [dict(r) for r in cur.execute(
+                "SELECT q, COUNT(*) AS n FROM qa_log WHERE tier='miss' GROUP BY q ORDER BY n DESC LIMIT 10").fetchall()]
+            conn.close()
+            miss_rate = round(miss_n / total * 100, 1) if total else 0
+            recent_rate = round(recent_miss / recent * 100, 1) if recent else 0
+            alert = miss_rate > 30 or recent_rate > 40
+            self._send_json({
+                'ok': True,
+                'status': 'alert' if alert else 'healthy',
+                'total_q': total,
+                'tier_dist': tiers,
+                'miss_rate': miss_rate,
+                'miss_rate_24h': recent_rate,
+                'avg_latency_ms': round(avg_lat, 1),
+                'top_miss_questions': top_miss,
+                'threshold': {'miss_rate': '30%', 'miss_rate_24h': '40%'},
+                'advice': 'miss 率超阈值：按 top_miss_questions 补 KB 条目' if alert else '问答质量正常',
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
     def _handle_kb_stats(self):
         """GET /api/kb/stats — KB 库统计（formal/staging/qa/module 分布）"""
         import sqlite3
@@ -865,6 +921,15 @@ class EPBHandler(SimpleHTTPRequestHandler):
             phone = req.get('phone', '')
             if _USE_DB:
                 result = db.db_login_user(phone)
+                if result.get('ok'):
+                    # 商用必补①：登录成功签发 12h 会话 token
+                    try:
+                        u = result.get('user') or {}
+                        token, exp = self._issue_token(phone, u.get('role', ''), u.get('name', ''))
+                        result['token'] = token
+                        result['token_expires_at'] = exp
+                    except Exception as _te:
+                        result['token_error'] = str(_te)
                 code = 200 if result.get('ok') else 404
                 self._send_json(result, code)
                 return
@@ -881,7 +946,7 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 user['lastLogin'] = datetime.now().isoformat()
                 with open(users_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
-                self._send_json({
+                _login_resp = {
                     'ok': True,
                     'message': '登录成功',
                     'user': {
@@ -894,7 +959,14 @@ class EPBHandler(SimpleHTTPRequestHandler):
                         'permissions': user.get('permissions', []),
                         'registeredAt': user.get('registeredAt', '')
                     }
-                })
+                }
+                try:
+                    token, exp = self._issue_token(user.get('phone',''), user.get('role',''), user.get('name',''))
+                    _login_resp['token'] = token
+                    _login_resp['token_expires_at'] = exp
+                except Exception:
+                    pass
+                self._send_json(_login_resp)
             else:
                 self._send_json({'ok': False, 'message': '该手机号尚未注册，请先注册账号'}, 404)
         except Exception as e:
@@ -951,11 +1023,38 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_enterprises(self):
-        """GET /api/enterprises — 辖区企业名录"""
+        """GET /api/enterprises — 辖区企业名录（商用必补②：联系人信息按角色脱敏）
+        执法/监管角色（带有效 token）可见完整联系人；匿名/公众端只见掩码
+        """
+        def _mask_ent(e, privileged):
+            if privileged:
+                return e
+            # 公众视角：联系人姓名保留姓、电话掩码中间四位
+            out = dict(e)
+            cp = (out.get('contact_person') or '').strip()
+            if cp:
+                out['contact_person'] = cp[0] + '**'
+            ph = (out.get('contact_phone') or '').strip()
+            if len(ph) >= 7:
+                out['contact_phone'] = ph[:3] + '****' + ph[-4:]
+            return out
+
         try:
+            # 判定请求方是否执法/监管角色（有有效 token 且角色在白名单）
+            privileged = False
+            try:
+                _ok, _sess = self._check_auth()
+                if _ok and (_sess.get('role') or '') in (
+                        'gov_enforcement', 'gov_monitor', 'gov_supervisor', 'admin',
+                        '监管执法人员', '监测站运维', '管理员'):
+                    privileged = True
+            except Exception:
+                privileged = False
             if _USE_DB:
                 enterprises = db.db_list_enterprises()
-                self._send_json({'ok': True, 'enterprises': enterprises, 'total': len(enterprises)})
+                enterprises = [_mask_ent(e, privileged) for e in (enterprises or [])]
+                self._send_json({'ok': True, 'enterprises': enterprises,
+                                 'total': len(enterprises), 'contact_masked': not privileged})
                 return
             ent_file = os.path.join(DB_DIR, 'enterprises.json')
             if os.path.exists(ent_file):
@@ -964,7 +1063,9 @@ class EPBHandler(SimpleHTTPRequestHandler):
             else:
                 data = {'enterprises': []}
             enterprises = data.get('enterprises', [])
-            self._send_json({'ok': True, 'enterprises': enterprises, 'total': len(enterprises)})
+            enterprises = [_mask_ent(e, privileged) for e in enterprises]
+            self._send_json({'ok': True, 'enterprises': enterprises,
+                             'total': len(enterprises), 'contact_masked': not privileged})
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)}, 500)
 
@@ -2681,6 +2782,56 @@ class EPBHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)}, 500)
 
+    # ═══════════ 鉴权层（商用必补①2026-09-02） ═══════════
+    def _ensure_sessions_table(self):
+        import sqlite3
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        conn.execute("""CREATE TABLE IF NOT EXISTS sessions (
+            token TEXT PRIMARY KEY, phone TEXT, role TEXT, name TEXT,
+            created_at TEXT, expires_at TEXT)""")
+        conn.commit(); conn.close()
+
+    def _issue_token(self, phone, role, name=''):
+        import sqlite3, secrets as _sec
+        self._ensure_sessions_table()
+        token = _sec.token_hex(24)
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        from datetime import timedelta
+        exp = (datetime.now() + timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:%S')
+        conn.execute("INSERT INTO sessions(token,phone,role,name,created_at,expires_at) VALUES(?,?,?,?,?,?)",
+                     (token, phone, role, name, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), exp))
+        # 顺手清理过期会话
+        conn.execute("DELETE FROM sessions WHERE expires_at < datetime('now')")
+        conn.commit(); conn.close()
+        return token, exp
+
+    def _check_auth(self):
+        """校验 Authorization: Bearer <token>；返回 (ok, session_dict)"""
+        import sqlite3
+        hdr = self.headers.get('Authorization', '')
+        if not hdr.startswith('Bearer '):
+            return False, {'error': 'missing token'}
+        token = hdr[7:].strip()
+        if not token or len(token) > 128:
+            return False, {'error': 'invalid token'}
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        conn.row_factory = sqlite3.Row
+        try:
+            row = conn.execute(
+                "SELECT token,phone,role,name FROM sessions WHERE token=? AND expires_at > datetime('now')",
+                (token,)).fetchone()
+        finally:
+            conn.close()
+        if not row:
+            return False, {'error': 'token 无效或已过期'}
+        return True, dict(row)
+
+    # 高危 API 清单（写操作/案件流转/文书生成——必须带 token；浏览类保持开放）
+    PROTECTED_APIS = {
+        '/api/alerts/action', '/api/inspection/submit', '/api/generate_doc',
+        '/api/crawl', '/api/av_capture', '/api/alert_emit', '/api/research/review',
+    }
+
     def _tts_broadcast(self, text):
         """语音真投送（8912 TTS→现场音箱/眼镜骨传导）；失败降级待播报，不阻塞主流程"""
         import urllib.request, urllib.parse as _up
@@ -2991,8 +3142,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 import sqlite3
                 _c = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
                 _c.execute("CREATE TABLE IF NOT EXISTS qa_log(id INTEGER PRIMARY KEY AUTOINCREMENT, q TEXT, src TEXT, latency_ms INTEGER, ts TEXT)")
-                _c.execute("INSERT INTO qa_log(q, src, latency_ms, ts) VALUES (?,?,?,?)",
-                            (q[:200], result.get('source', ''), int(result.get('latency_ms', 0) or 0),
+                try:
+                    _c.execute("ALTER TABLE qa_log ADD COLUMN tier TEXT DEFAULT ''")
+                except Exception:
+                    pass
+                _c.execute("INSERT INTO qa_log(q, src, tier, latency_ms, ts) VALUES (?,?,?,?,?)",
+                            (q[:200], result.get('source', ''), result.get('tier', ''), int(result.get('latency_ms', 0) or 0),
                              datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
                 _c.commit(); _c.close()
             except Exception: pass

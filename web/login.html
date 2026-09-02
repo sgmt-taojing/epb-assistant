@@ -394,6 +394,7 @@ function toStep3(){
   .then(r=>r.json()).then(data=>{
     if(data.ok){
       localStorage.setItem('epb_user',JSON.stringify(userData));
+      if(d.token){localStorage.setItem('epb_token',d.token);localStorage.setItem('epb_token_exp',d.token_expires_at||'');}
       showResult(r,org||name);
       toStep(3);
     }else{

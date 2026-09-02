@@ -89,3 +89,16 @@
     }
   };
 })();
+
+// 商用必补①：自动为 API 请求附加会话 token（高危写操作需要）
+(function(){
+  var _of = window.fetch;
+  window.fetch = function(url, opts){
+    opts = opts || {};
+    var tk = localStorage.getItem('epb_token');
+    if (tk && typeof url === 'string' && url.indexOf('/api/') === 0 && (opts.method || 'GET').toUpperCase() !== 'GET') {
+      opts.headers = Object.assign({}, opts.headers || {}, {'Authorization': 'Bearer ' + tk});
+    }
+    return _of(url, opts);
+  };
+})();
