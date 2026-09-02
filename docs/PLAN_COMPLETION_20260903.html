@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>规划任务完成总结 · 2026-09-03</title>
+<style>
+:root{--g:#059669;--r:#ef4444;--a:#f59e0b;--b:#3b82f6;--bg:#f8fafc;--line:#e2e8f0;--txt:#0f172a;--muted:#64748b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--txt);line-height:1.7;padding:24px}
+.wrap{max-width:960px;margin:0 auto}
+h1{font-size:24px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px}
+h3{font-size:16px;margin-bottom:12px;padding-left:10px;border-left:4px solid var(--g)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f1f5f9;text-align:left;padding:7px 10px;font-size:12px;color:var(--muted)}
+td{padding:7px 10px;border-bottom:1px solid var(--line)}
+.ok{color:var(--g);font-weight:600}.part{color:var(--a);font-weight:600}.bad{color:var(--r);font-weight:600}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:10px 0}
+.metric{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.metric .n{font-size:24px;font-weight:800;color:var(--g)}
+.metric .l{font-size:11px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>规划任务完成总结</h1>
+<div class="sub">2026-09-03 · 平台状态：81 API · 69 页面 · 服务 healthy</div>
+
+<section>
+<h3>一、本期规划线完成状态</h3>
+<table>
+<tr><th>规划任务</th><th>状态</th><th>落地证据</th></tr>
+<tr><td>一期·人人可问（KB 问答）</td><td class="ok">✔ 完成</td><td>trigram FTS 273 条全同步，直答 P95&lt;10ms</td></tr>
+<tr><td>二期·人人有事干（三项任务）</td><td class="ok">✔ 完成</td><td>执法检查/培训落证/科研数据端到端</td></tr>
+<tr><td>科研数据集目录</td><td class="ok">✔ 本轮完成</td><td>8 套真实脱敏资产目录（/api/research/datasets），research-data 页接入</td></tr>
+<tr><td>LP 营销动线</td><td class="ok">✔ 完成</td><td>CTA 五按钮 + 商用能力清单 + 真数据入口三卡 + 数据卡全真值</td></tr>
+<tr><td>AI 现场教练（外行变专业）</td><td class="ok">✔ 完成</td><td>coach 引擎 + 语音意图 7 类 + 69 页全站注入 + 眼镜/音箱同步投送</td></tr>
+<tr><td>商用三要素（认证/授权/脱敏）</td><td class="ok">✔ 完成</td><td>token 会话 + RBAC 16 角色 + 联系人分级脱敏（六族矩阵实测）</td></tr>
+<tr><td>问答质量监控</td><td class="ok">✔ 完成</td><td>/api/qa/health miss 率告警（30%/40% 双阈值）</td></tr>
+<tr><td>HTTPS 方案</td><td class="ok">✔ 完成</td><td>deploy/HTTPS_SETUP.md（Caddy 自动 TLS）</td></tr>
+<tr><td>智能眼镜接入层</td><td class="part">◐ speaker 通道真投送完成</td><td>TTS 真合成（100-240KB/次）；眼镜 SDK 待选型实装</td></tr>
+<tr><td>多模态视觉</td><td class="part">◐ 管线通</td><td>拍照→分析→KB 匹配；云端引擎额度尽，现离线兜底</td></tr>
+</table>
+</section>
+
+<section>
+<h3>二、本期修真战役总账</h3>
+<div class="metrics">
+<div class="metric"><div class="n">27+6</div><div class="l">空壳页清零（真数据/标注）</div></div>
+<div class="metric"><div class="n">3</div><div class="l">P0/P1 级事故修复</div></div>
+<div class="metric"><div class="n">81</div><div class="l">API 端点（全真路由）</div></div>
+<div class="metric"><div class="n">12/12</div><div class="l">角色业务链全绿</div></div>
+<div class="metric"><div class="n">69/69</div><div class="l">页面 JS 语法全绿</div></div>
+</div>
+<p style="font-size:13px">P0：KB 问答引擎全量 miss（unicode61 分词缺陷+列错位静默吞错）——trigram 重建后 6/7 直答。<br>
+P1：高危 API 无 RBAC（企业 token 可闭环执法告警）——16 角色白名单门。<br>
+另修：landing.html 文件截断损坏（python 文本模式写入异常）——git 恢复+二进制安全重写。</p>
+</section>
+
+<section>
+<h3>三、遗留项（下期规划）</h3>
+<table>
+<tr><th>事项</th><th>优先级</th><th>前置条件</th></tr>
+<tr><td>智能眼镜 SDK 实装（Rokid 等）</td><td>高</td><td>设备选型采购</td></tr>
+<tr><td>云端视觉引擎额度恢复/切换</td><td>高</td><td>API 充值或换供应商</td></tr>
+<tr><td>HTTPS 正式上线</td><td>高</td><td>域名 + Caddy 部署（方案已就绪）</td></tr>
+<tr><td>LP A/B 测试 / SEO / CDN</td><td>中</td><td>公网上线后</td></tr>
+<tr><td>证书 PDF 版式生成</td><td>中</td><td>当前 docx 已可用</td></tr>
+</table>
+</section>
+
+<footer>超级环保智能体 · 规划完成总结 · commit e666f0b</footer>
+</div>
+</body>
+</html>
