@@ -377,12 +377,20 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_emit()
         elif path == '/api/alerts/recent':
             self._handle_alerts_recent()
+        elif path.startswith('/api/alerts/') and path != '/api/alerts/recent':
+            self._handle_table_detail('alert', 'alerts', path.rsplit('/', 1)[-1])
         elif path == '/api/reports/recent':
             self._handle_reports_recent()
+        elif path.startswith('/api/reports/') and path != '/api/reports/recent':
+            self._handle_table_detail('report', 'reports', path.rsplit('/', 1)[-1])
         elif path == '/api/cases/recent':
             self._handle_cases_recent()
+        elif path.startswith('/api/cases/') and path != '/api/cases/recent':
+            self._handle_table_detail('case', 'cases', path.rsplit('/', 1)[-1])
         elif path == '/api/tasks/recent':
             self._handle_tasks_recent()
+        elif path.startswith('/api/tasks/') and path != '/api/tasks/recent':
+            self._handle_table_detail('task', 'tasks', path.rsplit('/', 1)[-1])
         elif path == '/api/monitor_overview':
             self._handle_monitor_overview()
         elif path.startswith('/api/equipment/'):
@@ -500,12 +508,20 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_emit()
         elif parsed.path == '/api/alerts/recent':
             self._handle_alerts_recent()
+        elif parsed.path.startswith('/api/alerts/') and parsed.path != '/api/alerts/recent':
+            self._handle_table_detail('alert', 'alerts', parsed.path.rsplit('/', 1)[-1])
         elif parsed.path == '/api/reports/recent':
             self._handle_reports_recent()
+        elif parsed.path.startswith('/api/reports/') and parsed.path != '/api/reports/recent':
+            self._handle_table_detail('report', 'reports', parsed.path.rsplit('/', 1)[-1])
         elif parsed.path == '/api/cases/recent':
             self._handle_cases_recent()
+        elif parsed.path.startswith('/api/cases/') and parsed.path != '/api/cases/recent':
+            self._handle_table_detail('case', 'cases', parsed.path.rsplit('/', 1)[-1])
         elif parsed.path == '/api/tasks/recent':
             self._handle_tasks_recent()
+        elif parsed.path.startswith('/api/tasks/') and parsed.path != '/api/tasks/recent':
+            self._handle_table_detail('task', 'tasks', parsed.path.rsplit('/', 1)[-1])
         elif parsed.path == '/api/monitor_overview':
             self._handle_monitor_overview()
         elif parsed.path == '/api/knowledge_items':
@@ -2261,6 +2277,44 @@ class EPBHandler(SimpleHTTPRequestHandler):
             cols=','.join(fields)
             rows=[dict(r) for r in conn.execute(f"SELECT {cols} FROM {table} ORDER BY rowid DESC LIMIT 50")]
             self._send_json({'ok': True, key: rows, 'count': len(rows)})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)})
+        finally:
+            conn.close()
+
+    def _handle_table_detail(self, key, table, record_id):
+        """GET /api/<key>/<id> — 通用详情（cases/tasks/reports/alerts）；id 兼容字符串（如 AUTH-20260518-001）与整数"""
+        import sqlite3
+        rid = (record_id or '').strip()
+        if not rid or len(rid) > 64:
+            self._send_json({'ok': False, 'error': 'invalid id'}, 400)
+            return
+        # 告警表 id 是 INTEGER 主键，其余表是字符串编号
+        if table == 'alerts':
+            try:
+                rid = int(rid)
+            except (TypeError, ValueError):
+                self._send_json({'ok': False, 'error': 'invalid id'}, 400)
+                return
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        conn.row_factory = sqlite3.Row
+        try:
+            row = conn.execute(f"SELECT * FROM {table} WHERE id=? LIMIT 1", (rid,)).fetchone()
+            if not row:
+                self._send_json({'ok': False, 'error': 'not found', key: None}, 404)
+                return
+            item = dict(row)
+            # 关联注入：cases 拉取关联任务/举报
+            if key == 'cases':
+                item['related_tasks'] = [dict(r) for r in conn.execute("SELECT id,title,status,priority FROM tasks WHERE title LIKE ? LIMIT 5", (f"%{item.get('party','')}%",)).fetchall()]
+                item['related_laws'] = [dict(r) for r in conn.execute("SELECT code,name FROM laws WHERE name LIKE ? OR code LIKE ? LIMIT 5", (f"%{item.get('type','')}%", f"%{item.get('type','')}%")).fetchall()] if item.get('type') else []
+            if key == 'tasks':
+                # 任务关联案例（按标题模糊）
+                item['related_cases'] = [dict(r) for r in conn.execute("SELECT id,date,title,status FROM cases WHERE title LIKE ? OR party LIKE ? LIMIT 5", (f"%{item.get('title','')}%", f"%{item.get('title','')}%")).fetchall()]
+            if key == 'reports':
+                # 举报关联案例
+                item['related_cases'] = [dict(r) for r in conn.execute("SELECT id,date,title,party,status FROM cases WHERE title LIKE ? OR party LIKE ? LIMIT 5", (f"%{item.get('target_company','')}%", f"%{item.get('target_company','')}%")).fetchall()]
+            self._send_json({'ok': True, key: item})
         except Exception as e:
             self._send_json({'ok': False, 'error': str(e)})
         finally:

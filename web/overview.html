@@ -91,24 +91,24 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <h1>环保智慧执法 <span>平台总览</span></h1>
 <p>知识驱动 · AI闭环 · 天地一体 · 开源开放</p>
 <div class="hero-stats">
-<div class="hero-stat"><div class="num">32</div><div class="label">功能页面</div></div>
-<div class="hero-stat"><div class="num">19</div><div class="label">API端点</div></div>
-<div class="hero-stat"><div class="num">101</div><div class="label">执法案例</div></div>
-<div class="hero-stat"><div class="num">28</div><div class="label">环保法规</div></div>
-<div class="hero-stat"><div class="num">14</div><div class="label">设备产品</div></div>
-<div class="hero-stat"><div class="num">7</div><div class="label">环保领域</div></div>
+<div class="hero-stat"><div class="num" id="hs-pages">--</div><div class="label">功能页面</div></div>
+<div class="hero-stat"><div class="num" id="hs-apis">--</div><div class="label">API端点</div></div>
+<div class="hero-stat"><div class="num" id="hs-cases">--</div><div class="label">执法案例</div></div>
+<div class="hero-stat"><div class="num" id="hs-laws">--</div><div class="label">环保法规</div></div>
+<div class="hero-stat"><div class="num" id="hs-devices">--</div><div class="label">接入设备</div></div>
+<div class="hero-stat"><div class="num" id="hs-stds">--</div><div class="label">排放标准</div></div>
 </div>
 </div>
 
 <div class="container">
 
 <div class="stat-row">
-<div class="stat-card green"><div class="num">32</div><div class="label">HTML页面</div></div>
-<div class="stat-card blue"><div class="num">19</div><div class="label">API端点</div></div>
-<div class="stat-card amber"><div class="num">14</div><div class="label">Python脚本</div></div>
-<div class="stat-card green"><div class="num">13</div><div class="label">静态JSON</div></div>
-<div class="stat-card blue"><div class="num">3</div><div class="label">部署通道</div></div>
-<div class="stat-card green"><div class="num">100%</div><div class="label">自检通过率</div></div>
+<div class="stat-card green"><div class="num" id="st-pages">--</div><div class="label">HTML页面</div></div>
+<div class="stat-card blue"><div class="num" id="st-apis">--</div><div class="label">API端点</div></div>
+<div class="stat-card amber"><div class="num" id="st-reports">--</div><div class="label">本月举报</div></div>
+<div class="stat-card green"><div class="num" id="st-cases">--</div><div class="label">累计案件</div></div>
+<div class="stat-card blue"><div class="num" id="st-devices">--</div><div class="label">设备在线</div></div>
+<div class="stat-card green"><div class="num" id="st-kb">--</div><div class="label">KB总量</div></div>
 </div>
 
 <div class="section">
@@ -190,5 +190,27 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
+<script>
+fetch('/api/health').then(r=>r.json()).then(function(d){
+  var s=d.data_stats||{};
+  function set(id,v){var el=document.getElementById(id);if(el&&v!=null)el.textContent=v;}
+  set('hs-pages', d.web_page_count);
+  set('hs-apis', d.api_endpoints);
+  set('hs-cases', s.cases);
+  set('hs-laws', s.law_index);
+  set('hs-devices', s.devices);
+  set('st-pages', d.web_page_count);
+  set('st-apis', d.api_endpoints);
+  set('st-reports', s.reports);
+  set('st-cases', s.cases);
+  set('st-devices', s.devices);
+});
+fetch('/api/dept_stats').then(r=>r.json()).then(function(j){
+  if(!j.ok)return;
+  function set(id,v){var el=document.getElementById(id);if(el&&v!=null)el.textContent=v;}
+  set('hs-stds', j.stats.standards);
+  set('st-kb', j.stats.kb_total);
+});
+</script>
 </body>
 </html>

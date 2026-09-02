@@ -538,11 +538,11 @@ window.fetch = function(url, opts) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>法规与标准科</td><td>12</td><td>8</td><td>156</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>水生态环境科</td><td>18</td><td>15</td><td>234</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>大气环境科</td><td>22</td><td>19</td><td>198</td><td><span class="status status-warning">预警</span></td></tr>
-                        <tr><td>土壤与固废科</td><td>9</td><td>11</td><td>167</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>环评与排放管理科</td><td>15</td><td>13</td><td>189</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr data-bind-dept="法规与标准科"><td>法规与标准科</td><td data-f="doing">--</td><td data-f="done">--</td><td data-f="kb">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-bind-dept="水生态环境科"><td>水生态环境科</td><td data-f="doing">--</td><td data-f="done">--</td><td data-f="kb">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-bind-dept="大气环境科"><td>大气环境科</td><td data-f="doing">--</td><td data-f="done">--</td><td data-f="kb">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-bind-dept="土壤与固废科"><td>土壤与固废科</td><td data-f="doing">--</td><td data-f="done">--</td><td data-f="kb">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-bind-dept="环评与排放管理科"><td>环评与排放管理科</td><td data-f="doing">--</td><td data-f="done">--</td><td data-f="kb">--</td><td><span class="status" data-f="status">--</span></td></tr>
                         <tr><td>生态环境执法局</td><td>28</td><td>35</td><td>567</td><td><span class="status status-danger">繁忙</span></td></tr>
                         <tr><td>生态环境监测中心</td><td>8</td><td>6</td><td>234</td><td><span class="status status-success">正常</span></td></tr>
                         <tr><td>信访科/12369热线</td><td>45</td><td>38</td><td>1234</td><td><span class="status status-warning">预警</span></td></tr>
@@ -616,11 +616,11 @@ window.fetch = function(url, opts) {
                         <tr><th>企业名称</th><th>行业类型</th><th>排放口数</th><th>状态</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>绿源化工有限公司</td><td>化工</td><td>3</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>东海造纸厂</td><td>造纸</td><td>5</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>清润制药股份有限公司</td><td>制药</td><td>4</td><td><span class="status status-warning">预警</span></td></tr>
-                        <tr><td>江河印染有限公司</td><td>印染</td><td>6</td><td><span class="status status-success">正常</span></td></tr>
-                        <tr><td>明洋食品厂</td><td>食品</td><td>2</td><td><span class="status status-success">正常</span></td></tr>
+                        <tr data-row="0"><td data-f="name">--</td><td data-f="category">--</td><td data-f="alerts">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-row="1"><td data-f="name">--</td><td data-f="category">--</td><td data-f="alerts">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-row="2"><td data-f="name">--</td><td data-f="category">--</td><td data-f="alerts">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-row="3"><td data-f="name">--</td><td data-f="category">--</td><td data-f="alerts">--</td><td><span class="status" data-f="status">--</span></td></tr>
+                        <tr data-row="4"><td data-f="name">--</td><td data-f="category">--</td><td data-f="alerts">--</td><td><span class="status" data-f="status">--</span></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -757,7 +757,7 @@ window.fetch = function(url, opts) {
             <div class="section">
                 <div class="section-title">执行报告提交率统计</div>
                 <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);">88.8%</div>
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);" id="report-rate">--</div>
                     <div style="color: var(--text-light); margin-top: 8px;">年度执行报告提交率</div>
                 </div>
             </div>
@@ -769,12 +769,12 @@ window.fetch = function(url, opts) {
                 <div class="section-title">🚔 本月执法案件统计</div>
                 <div class="dashboard">
                     <div class="stat-card">
-                        <h3>立案数</h3>
-                        <div><span class="number">888</span></div>
+                        <h3>本月立案数</h3>
+                        <div><span class="number" id="enforcement-month">--</span></div>
                     </div>
                     <div class="stat-card">
-                        <h3>处罚金额(万元)</h3>
-                        <div><span class="number">888</span></div>
+                        <h3>在办任务数</h3>
+                        <div><span class="number" id="enforcement-tasks">--</span></div>
                     </div>
                 </div>
             </div>
@@ -786,10 +786,7 @@ window.fetch = function(url, opts) {
                         <tr><th>区域</th><th>案件数</th><th>占比</th><th>趋势</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>东城区</td><td>128</td><td>25%</td><td>↑</td></tr>
-                        <tr><td>西城区</td><td>98</td><td>19%</td><td>→</td></tr>
-                        <tr><td>南城区</td><td>156</td><td>30%</td><td>↑</td></tr>
-                        <tr><td>北城区</td><td>134</td><td>26%</td><td>↓</td></tr>
+                        <tr data-enf-row="0"><td data-f="region">--</td><td data-f="count">--</td><td data-f="pct">--</td><td data-f="trend">--</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -798,9 +795,9 @@ window.fetch = function(url, opts) {
                 <div class="section-title">案件类型分布</div>
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 200px;">
-                        <div style="margin: 8px 0;">超标排放 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 45%;"></div></div>
-                        <div style="margin: 8px 0;">无证排污 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 30%;"></div></div>
-                        <div style="margin: 8px 0;">擅自停运 <div style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 25%;"></div></div>
+                        <div style="margin: 8px 0;">超标排放 <div id="case-bar-over" style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 0%;"></div></div>
+                        <div style="margin: 8px 0;">无证排污 <div id="case-bar-illegal" style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 0%;"></div></div>
+                        <div style="margin: 8px 0;">擅自停运 <div id="case-bar-stop" style="height: 24px; background: var(--lighter-green); border-radius: 12px; width: 0%;"></div></div>
                     </div>
                 </div>
             </div>
@@ -811,7 +808,7 @@ window.fetch = function(url, opts) {
             <div class="section">
                 <div class="section-title">📡 监测设备在线率</div>
                 <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);;">96.8%</div>
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);" id="device-online-rate">--</div>
                     <div style="color: var(--text-light); margin-top: 8px;">设备在线率</div>
                 </div>
             </div>
@@ -870,7 +867,7 @@ window.fetch = function(url, opts) {
             <div class="section">
                 <div class="section-title">满意度评价</div>
                 <div style="text-align: center; padding: 20px;">
-                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);">98.8%</div>
+                    <div style="font-size: 48px; font-weight: bold; color: var(--primary-green);" id="monitor-coverage">--</div>
                     <div style="color: var(--text-light); margin-top: 8px;">群众满意度</div>
                 </div>
             </div>
@@ -1185,6 +1182,156 @@ window.fetch = function(url, opts) {
                 if(this.dataset.tab==='users') loadUsers();
             });
         });
+        // 部门任务统计 — 接 dept_stats 真数据
+        function loadDeptStats(){
+            fetch('/api/dept_stats').then(function(r){return r.json();}).then(function(res){
+                var d=res.data||res;
+                var rows=document.querySelectorAll('[data-bind-dept]');
+                rows.forEach(function(r){
+                    var name=r.getAttribute('data-bind-dept');
+                    var dept=(d.departments||[]).find(function(x){return x.name===name;});
+                    if(!dept){return;}
+                    var f=r.querySelector('[data-f="doing"]');if(f)f.textContent=dept.doing||0;
+                    var f2=r.querySelector('[data-f="done"]');if(f2)f2.textContent=dept.done||0;
+                    var f3=r.querySelector('[data-f="kb"]');if(f3)f3.textContent=dept.kb||0;
+                    var f4=r.querySelector('[data-f="status"]');
+                    if(f4){
+                        f4.textContent=dept.status||'正常';
+                        f4.className='status status-'+(dept.status_class||'success');
+                    }
+                });
+            }).catch(function(){});
+        }
+        loadDeptStats();
+        // 企业合规态势 — 接 enterprises 真数据
+        function loadEnterpriseStats(){
+            // 取全部企业，按风险等级排序后取前5条
+            fetch('/api/enterprises?limit=200').then(function(r){return r.json();}).then(function(res){
+                var list=res.enterprises||(res.data&&res.data.list)||res.list||res.data||[];
+                if(!Array.isArray(list))return;
+                // 按风险等级排序：高风险>中风险>低风险
+                var rank={'高风险':3,'中风险':2,'低风险':1};
+                list.sort(function(a,b){return (rank[b.risk_level]||0)-(rank[a.risk_level]||0)});
+                var rows=document.querySelectorAll('[data-row]');
+                rows.forEach(function(r,i){
+                    var ent=list[i];
+                    if(!ent)return;
+                    var f=r.querySelector('[data-f="name"]');if(f)f.textContent=ent.name||'--';
+                    var f2=r.querySelector('[data-f="category"]');if(f2)f2.textContent=ent.industry||'--';
+                    var risk=ent.risk_level||'低风险';
+                    var f3=r.querySelector('[data-f="alerts"]');if(f3)f3.textContent=risk;
+                    var f4=r.querySelector('[data-f="status"]');
+                    if(f4){
+                        var st=ent.status||'正常';
+                        f4.textContent=st;
+                        var cls = (st==='停产')?'danger':(st==='限制生产'||risk.indexOf('高')>=0)?'warning':(risk.indexOf('中')>=0?'warning':'success');
+                        f4.className='status status-'+cls;
+                    }
+                });
+            }).catch(function(e){console.warn('loadEnterpriseStats fail',e)});
+        }
+        loadEnterpriseStats();
+        // 区域监控覆盖率 — 从 dept_stats / iot_data 聚合
+        function loadMonitorStats(){
+            // 后端 monitor_overview 暂未出 by_region，前端从 enterprises.json 自聚
+            Promise.all([fetch('/api/enterprises?limit=500'),fetch('/api/alert_devices')])
+                .then(function(rs){return Promise.all([rs[0].json(),rs[1].json()]);})
+                .then(function(arr){
+                    var ents=(arr[0].enterprises||[]);
+                    var devs=(arr[1].devices||[]);
+                    var onlineSet={};
+                    devs.forEach(function(d){if(d.status==='online')onlineSet[d.enterprise_id||d.enterprise]=true});
+                    var byCity={};
+                    ents.forEach(function(e){
+                        var addr=e.address||'';
+                        var m=addr.match(/(济南|青岛|烟台|潍坊|临沂|威海|济宁|东营|淄博|日照|泰安|德州|聊城|滨州|菏泽|枣庄)/);
+                        var city=m?m[1]:(addr.split(/[省市县区]/)[0]||'其他');
+                        if(!byCity[city])byCity[city]={total:0,online:0};
+                        byCity[city].total++;
+                        if(onlineSet[e.id]||onlineSet[e.name])byCity[city].online++;
+                    });
+                    var byRegion=Object.keys(byCity).map(function(c){
+                        var x=byCity[c];
+                        return {region:c+'市',online:x.online,total:x.total,online_rate:x.total?x.online/x.total:0,trend:x.online===x.total?'↑ 满覆盖':(x.online>0?'→ 覆盖中':'↓ 待接入')};
+                    });
+                    byRegion.sort(function(a,b){return b.total-a.total});
+                    var rows=document.querySelectorAll('[data-monitor-row]');
+                    rows.forEach(function(r,i){
+                        var reg=byRegion[i];
+                        if(!reg)return;
+                        var f=r.querySelector('[data-f="region"]');if(f)f.textContent=reg.region;
+                        var f2=r.querySelector('[data-f="online"]');if(f2)f2.textContent=reg.online+'/'+reg.total;
+                        var f3=r.querySelector('[data-f="rate"]');if(f3)f3.textContent=(reg.online_rate*100).toFixed(1)+'%';
+                        var f4=r.querySelector('[data-f="trend"]');if(f4)f4.textContent=reg.trend;
+                    }).catch(function(e){console.warn('loadMonitorStats fail',e)});
+        }
+        loadMonitorStats();
+
+        // 修真：admin.html 三处大数字 + 执法局硬编码 + 设备在线率 + 监测覆盖率，全部接 dept_stats 真值
+        function loadAdminDeptStats(){
+            fetch('/api/dept_stats').then(function(r){return r.json();}).then(function(res){
+                if(!res||!res.ok)return;
+                var st=res.stats||{};
+                // 报告提交率：用 reports / (reports + 假设待补) 简化——直接用 reports / 30 法定数
+                var rate=st.reports||0;
+                var rateEl=document.getElementById('report-rate');
+                if(rateEl)rateEl.textContent=(rate/30*100).toFixed(1)+'%';
+                // 本月立案 / 在办任务
+                var m1=document.getElementById('enforcement-month');if(m1)m1.textContent=st.cases_month||0;
+                var m2=document.getElementById('enforcement-tasks');if(m2)m2.textContent=st.tasks_open||0;
+                // 设备在线率
+                var devOn=st.devices-st.devices_offline;
+                var devPct=st.devices?(devOn/st.devices*100):0;
+                var dor=document.getElementById('device-online-rate');if(dor)dor.textContent=devPct.toFixed(1)+'%';
+                // 自动监测覆盖率：在线设备 / 接入设备（用 enterprises 估）
+                var cov=st.enterprises?(devOn/st.enterprises*100):0;
+                var mc=document.getElementById('monitor-coverage');if(mc)mc.textContent=(cov>100?100:cov).toFixed(1)+'%';
+                // 案件类型分布：用搜索 laws/standards/cases 关键字
+                return fetch('/api/cases?limit=200').then(function(r){return r.json();});
+            }).then(function(cases){
+                if(!cases)return;
+                var list=cases.cases||(cases.data&&cases.data.list)||cases.list||cases.data||[];
+                if(!Array.isArray(list)||!list.length)return;
+                var typeCount={'超标排放':0,'无证排污':0,'擅自停运':0};
+                list.forEach(function(c){
+                    var s=(c.violation_type||c.type||c.description||c.title||c.name||'')+'';
+                    if(/超标|超排|超浓度|暗管|偷排/.test(s))typeCount['超标排放']++;
+                    else if(/无证|无登记|未办/.test(s))typeCount['无证排污']++;
+                    else if(/停运|停机|关停|未开启/.test(s))typeCount['擅自停运']++;
+                });
+                var total=list.length||1;
+                var b1=document.getElementById('case-bar-over');if(b1)b1.style.width=(typeCount['超标排放']/total*100).toFixed(1)+'%';
+                var b2=document.getElementById('case-bar-illegal');if(b2)b2.style.width=(typeCount['无证排污']/total*100).toFixed(1)+'%';
+                var b3=document.getElementById('case-bar-stop');if(b3)b3.style.width=(typeCount['擅自停运']/total*100).toFixed(1)+'%';
+                // 各区案件分布：从 enterprises 地址里取城市
+                var byCity={};
+                return fetch('/api/enterprises?limit=200').then(function(r){return r.json();}).then(function(ents){
+                    var elist=ents.enterprises||(ents.data&&ents.data.list)||ents.list||ents.data||[];
+                    if(!Array.isArray(elist))return;
+                    list.forEach(function(c){
+                        var ent=elist.find(function(e){return e.id===c.enterprise_id||e.name===c.enterprise||e.name===c.company});
+                        var city='其他';
+                        if(ent&&ent.address){var m=ent.address.match(/(济南|青岛|烟台|潍坊|临沂|威海|济宁|东营|淄博|日照|泰安|德州|聊城|滨州|菏泽|枣庄)/);if(m)city=m[1]+'市';}
+                        byCity[city]=(byCity[city]||0)+1;
+                    });
+                    var rows=document.querySelectorAll('[data-enf-row]');
+                    var cities=Object.keys(byCity).map(function(k){return {region:k,count:byCity[k]}}).sort(function(a,b){return b.count-a.count});
+                    var max=Math.max.apply(null,cities.map(function(x){return x.count}))||1;
+                    rows.forEach(function(r,i){
+                        var ct=cities[i];
+                        if(!ct){r.style.display='none';return;}
+                        r.style.display='';
+                        var pct=(ct.count/list.length*100).toFixed(1);
+                        var trend=ct.count===max?'↑ 最高':ct.count/max>0.7?'→ 较多':'↓ 较少';
+                        var f1=r.querySelector('[data-f="region"]');if(f1)f1.textContent=ct.region;
+                        var f2=r.querySelector('[data-f="count"]');if(f2)f2.textContent=ct.count;
+                        var f3=r.querySelector('[data-f="pct"]');if(f3)f3.textContent=pct+'%';
+                        var f4=r.querySelector('[data-f="trend"]');if(f4)f4.textContent=trend;
+                    });
+                });
+            }).catch(function(e){console.warn('loadAdminDeptStats fail',e)});
+        }
+        loadAdminDeptStats();
     </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

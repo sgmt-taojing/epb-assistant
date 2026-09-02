@@ -212,7 +212,7 @@ window.fetch = function(url, opts) {
 
 <div class="mgmt-section show" id="mg-overview">
 <input class="form-input" placeholder="搜索设备ID/位置/负责人..." style="margin-bottom:10px" oninput="filterDev(this.value)">
-<table><thead><tr><th>ID</th><th>类型</th><th>位置</th><th>状态</th><th>上报</th><th>负责人</th></tr></thead><tbody id="devTable">
+<table><thead><tr><th>ID</th><th>类型</th><th>位置</th><th>状态</th><th>上报</th><th>负责人</th></tr></thead><tbody id="devTable"><tr><td colspan="6" style="text-align:center;color:#64748b;padding:16px">设备数据加载中...</td></tr>
 <tr><td>C-01</td><td>摄像头</td><td>化工园区正门</td><td><span class="dev-status on">在线</span></td><td>2分钟前</td><td>张明</td></tr>
 <tr><td>C-02</td><td>摄像头</td><td>排污管出口</td><td><span class="dev-status warn">预警</span></td><td>1分钟前</td><td>张明</td></tr>
 <tr><td>D-01</td><td>无人机</td><td>基地</td><td><span class="dev-status busy">待命</span></td><td>09:30</td><td>王飞</td></tr>
@@ -345,5 +345,17 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(loadAlerts,50
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
+
+<script>
+fetch('/api/alert_devices').then(r=>r.json()).then(function(j){
+  var tb=document.getElementById('devTable');
+  if(!tb||!j.ok||!j.devices)return;
+  tb.innerHTML=j.devices.slice(0,12).map(function(d){
+    var st=d.status==='online'?'on':d.status==='warning'?'warn':d.status==='standby'?'busy':'off';
+    var stTxt=d.status==='online'?'在线':d.status==='warning'?'预警':d.status==='standby'?'待命':'离线';
+    return '<tr><td>'+(d.id||'')+'</td><td>'+(d.type||'')+'</td><td>'+(d.location||'')+'</td><td><span class="dev-status '+st+'">'+stTxt+'</span></td><td>'+(d.last_report||'')+'</td><td>'+(d.owner||'')+'</td></tr>';
+  }).join('');
+}).catch(function(){var tb=document.getElementById('devTable');if(tb)tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:#64748b;padding:16px">设备数据暂不可用</td></tr>';});
+</script>
 </body>
 </html>
