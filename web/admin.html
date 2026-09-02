@@ -1263,7 +1263,8 @@ window.fetch = function(url, opts) {
                         var f2=r.querySelector('[data-f="online"]');if(f2)f2.textContent=reg.online+'/'+reg.total;
                         var f3=r.querySelector('[data-f="rate"]');if(f3)f3.textContent=(reg.online_rate*100).toFixed(1)+'%';
                         var f4=r.querySelector('[data-f="trend"]');if(f4)f4.textContent=reg.trend;
-                    }).catch(function(e){console.warn('loadMonitorStats fail',e)});
+                    });
+                }).catch(function(e){console.warn('loadMonitorStats fail',e)});
         }
         loadMonitorStats();
 
@@ -1335,6 +1336,7 @@ window.fetch = function(url, opts) {
     </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
+<script src="voice-coach.js"></script>
 <script src="ai-assistant.js"></script>
 </body>
 </html>

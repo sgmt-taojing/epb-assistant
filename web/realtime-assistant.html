@@ -92,6 +92,23 @@ footer{color:var(--ink2);font-size:11px;text-align:center;padding:16px 0}
     </div>
   </header>
 
+<!-- AI 现场教练入口（全面 AI 化 · 外行变专业） -->
+<div style="max-width:860px;margin:12px auto;padding:16px;background:linear-gradient(135deg,rgba(16,185,129,.08),rgba(59,130,246,.06));border:1px solid rgba(16,185,129,.3);border-radius:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#10b981">🧭 AI 现场教练 · 外行变专业</div>
+      <div style="font-size:12px;color:var(--muted,#64748b);margin-top:4px">说"这项怎么查 / 拍什么 / 问什么话术 / 泄漏了怎么办"，实时语音手把手指导，无专业知识也能闭环完成检查</div>
+    </div>
+    <button onclick="window.__VC_TOGGLE&&window.__VC_TOGGLE()" style="padding:10px 20px;border:none;border-radius:10px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:14px;font-weight:600;cursor:pointer">🧭 启动教练</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:12px">
+    <a href="inspection-workbench.html" style="padding:10px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;text-decoration:none;color:var(--primary2,#3b82f6);font-size:12px;text-align:center"><b>📋 检查工作台</b><br>清单+手把手指导卡</a>
+    <a href="ask.html" style="padding:10px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:8px;text-decoration:none;color:var(--primary2,#3b82f6);font-size:12px;text-align:center"><b>🧠 智能问答</b><br>KB 直答 P95&lt;50ms</a>
+    <a href="emergency-center.html" style="padding:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;text-decoration:none;color:#ef4444;font-size:12px;text-align:center"><b>🚨 应急指导</b><br>突发情况四步法</a>
+  </div>
+</div>
+
+
   <div class="tabs" role="tablist">
     <button class="tab active" id="tabVoice" type="button">🗣 实时语音问询</button>
     <button class="tab" id="tabVision" type="button">📷 实时视觉诊察</button>
@@ -405,6 +422,7 @@ if (location.search.includes('debug')) console.log('[realtime-assistant] 就绪 
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
+<script src="voice-coach.js"></script>
 <script src="ai-assistant.js"></script>
 </body>
 </html>

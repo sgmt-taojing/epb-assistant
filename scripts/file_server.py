@@ -378,6 +378,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_equipment_categories()
         elif path == '/api/emission_standards':
             self._handle_emission_standards()
+        elif path == '/api/coach/point' or path == '/api/coach/checklist':
+            self._handle_coach()
+        elif path == '/api/voice_coach':
+            self._handle_voice_coach()
         elif path == '/api/credit/rating_stats':
             self._handle_credit_rating_stats()
         elif path == '/api/av_captures/recent':
@@ -519,6 +523,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_quick_check()
         elif parsed.path == '/api/av_capture':
             self._handle_av_capture()
+        elif parsed.path == '/api/coach/point' or parsed.path == '/api/coach/checklist':
+            self._handle_coach()
+        elif parsed.path == '/api/voice_coach':
+            self._handle_voice_coach()
         elif parsed.path == '/api/credit/rating_stats':
             self._handle_credit_rating_stats()
         elif parsed.path == '/api/av_captures/recent':
@@ -2601,6 +2609,68 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': str(e)})
         finally:
             conn.close()
+
+    def _handle_coach(self):
+        """POST /api/coach/point — 单检查项 → 外行 5 步指导卡
+        POST /api/coach/checklist — 整单 → 逐项指导 + 路线建议（body 带 checklist_data）
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+        except Exception:
+            data = {}
+        try:
+            import coach_engine
+            mode = (data.get('mode') or 'point').strip()
+            if mode == 'checklist':
+                cl = data.get('checklist_data') or {}
+                if not cl.get('check_items'):
+                    self._send_json({'ok': False, 'error': 'checklist_data.check_items 必填'}, 400)
+                    return
+                result = coach_engine.coach_checklist(cl)
+                self._send_json(result)
+            else:
+                cp = (data.get('check_point') or '').strip()
+                if not cp:
+                    self._send_json({'ok': False, 'error': 'check_point 必填'}, 400)
+                    return
+                card = coach_engine.coach_check_point(cp, data.get('risk_level', ''), data.get('inspection_type', ''))
+                self._send_json({'ok': True, 'card': card})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_voice_coach(self):
+        """POST /api/voice_coach — 实时语音指导（意图识别 + 播报文案生成）
+        入参 {text, context?} → {intent, reply, card?, action}
+        前端拿到 reply 后走本地 TTS 立即播报（P95 < 300ms）
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+        except Exception:
+            data = {}
+        try:
+            import coach_engine
+            text = (data.get('text') or '').strip()
+            if not text:
+                self._send_json({'ok': False, 'error': 'text 必填'}, 400)
+                return
+            r = coach_engine.coach_voice_intent(text)
+            # 附带上下文（当前检查项）时优先用上下文匹配
+            ctx = (data.get('context') or '').strip()
+            if ctx and r.get('intent') in ('how_to', 'next_step', 'fallback'):
+                card = coach_engine.coach_check_point(ctx)
+                r = {
+                    'intent': 'coach_ctx',
+                    'reply': ('当前检查项「%s」指导：第一，去这里看：%s。第二，这样查：%s。第三，拍：%s。' % (
+                        ctx[:30], card['where'], '；'.join(card['how'][:2]), '、'.join(card['shots'][:2]))),
+                    'card': card,
+                    'action': 'tts_now',
+                }
+            r['ok'] = True
+            self._send_json(r)
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_credit_rating_stats(self):
         """GET /api/credit/rating_stats — 环保信用评级统计（enterprises.credit_level 真数据）

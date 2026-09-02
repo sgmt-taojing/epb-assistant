@@ -151,7 +151,9 @@ async function genChecklist(){
     d.check_items.forEach(function(it,i){
       var cls=it.risk_level==='高风险'?'b-high':it.risk_level==='中风险'?'b-mid':'b-low';
       h+='<div class="item" data-i="'+i+'">'
-        +'<div class="top"><div class="name">'+(i+1)+'. '+it.check_point+'</div><span class="badge '+cls+'">'+it.risk_level+'</span></div>'
+        +'<div class="top"><div class="name" onclick="loadCoach('+i+',this)">'+(i+1)+'. '+it.check_point+'</div><span class="badge '+cls+'">'+it.risk_level+'</span></div>'
+        +'<div class="coach-btn" style="margin:6px 0"><button onclick="loadCoach('+i+')" style="padding:4px 12px;font-size:12px;border:1px solid var(--primary,#3b82f6);border-radius:6px;background:transparent;color:var(--primary,#3b82f6);cursor:pointer">🧭 手把手指导</button></div>'
+        +'<div class="coach-card" id="coach-'+i+'" style="display:none"></div>'
         +'<div class="radios">'
         +'<label><input type="radio" name="r'+i+'" value="normal" checked>正常</label>'
         +'<label><input type="radio" name="r'+i+'" value="abnormal">异常</label>'
@@ -209,6 +211,55 @@ async function submitInspection(){
   }
 }
 
+async function loadCoach(i, nameEl){
+  var it=CHK.check_items[i];
+  var box=document.getElementById('coach-'+i);
+  // 折叠切换
+  if(box.style.display==='block'){box.style.display='none';return}
+  // 高亮当前项（语音教练上下文联动）
+  document.querySelectorAll('#items .item').forEach(function(el){el.classList.remove('current')});
+  box.closest('.item').classList.add('current');
+  if(window.__VC_SET_CONTEXT)window.__VC_SET_CONTEXT(it.check_point);
+  box.innerHTML='<div style="padding:8px;color:var(--muted,#64748b);font-size:12px">指导加载中…</div>';
+  box.style.display='block';
+  try{
+    var r=await fetch('/api/coach/point',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({check_point:it.check_point,risk_level:it.risk_level,inspection_type:CHK.inspection_type})});
+    var d=await r.json();
+    if(!d.ok){box.innerHTML='<div style="padding:8px;color:#ef4444;font-size:12px">指导加载失败：'+(d.error||'')+'</div>';return}
+    var c=d.card;
+    var how=c.how.map(function(x,n){return '<li>'+x+'</li>'}).join('');
+    var shots=c.shots.map(function(x){return '<li>'+x+'</li>'}).join('');
+    var asks=c.ask.map(function(x){return '<li>'+x+'</li>'}).join('');
+    var todos=c.abnormal_todo.map(function(x){return '<li>'+x+'</li>'}).join('');
+    var laws=c.law_refs.length?c.law_refs.join(' · '):'未匹配（提交后系统自动检索）';
+    box.innerHTML=
+      '<div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px;font-size:13px;line-height:1.7">'
+      +'<div style="font-weight:600;color:#3b82f6;margin-bottom:6px">🧭 「'+it.check_point+'」手把手指导</div>'
+      +'<div><b>📍 去哪看：</b>'+c.where+'</div>'
+      +'<div style="margin-top:6px"><b>👀 这样查：</b><ul style="margin:4px 0 0 18px;padding:0">'+how+'</ul></div>'
+      +'<div style="margin-top:6px"><b>📷 拍这些：</b><ul style="margin:4px 0 0 18px;padding:0">'+shots+'</ul></div>'
+      +'<div style="margin-top:6px"><b>💬 照着问：</b><ul style="margin:4px 0 0 18px;padding:0">'+asks+'</ul></div>'
+      +'<div style="margin-top:6px"><b>⚖️ 涉及法条：</b>'+laws+'</div>'
+      +'<div style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(59,130,246,.3)"><b>🚨 发现异常时：</b><ul style="margin:4px 0 0 18px;padding:0">'+todos+'</ul></div>'
+      +'<div style="margin-top:8px"><button onclick="speakCoach('+i+')" style="padding:4px 12px;font-size:12px;border:1px solid #10b981;border-radius:6px;background:rgba(16,185,129,.1);color:#10b981;cursor:pointer">🔊 语音播报指导</button></div>'
+      +'</div>';
+    // 缓存指导卡（供语音播报）
+    box.dataset.coachText='检查'+it.check_point+'。去这里看：'+c.where+'。这样查：'+c.how.join('。')+'。拍这些：'+c.shots.join('、')+'。';
+  }catch(e){
+    box.innerHTML='<div style="padding:8px;color:#ef4444;font-size:12px">网络异常：指导暂不可达</div>';
+  }
+}
+function speakCoach(i){
+  var box=document.getElementById('coach-'+i);
+  if(!box||!box.dataset.coachText)return;
+  try{
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(box.dataset.coachText.slice(0,300));
+    u.lang='zh-CN';u.rate=1.05;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
 function renderResult(d){
   var s=d.summary;
   document.getElementById('sum').innerHTML=
@@ -233,6 +284,7 @@ function renderResult(d){
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
+<script src="voice-coach.js"></script>
 <script src="ai-assistant.js"></script>
 </body>
 </html>
