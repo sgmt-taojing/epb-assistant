@@ -183,10 +183,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card red"><div class="num">3</div><div class="label">未整改(紧急)</div></div>
-<div class="stat-card amber"><div class="num">5</div><div class="label">整改中</div></div>
-<div class="stat-card green"><div class="num">12</div><div class="label">已销号</div></div>
-<div class="stat-card blue"><div class="num">80%</div><div class="label">整改完成率</div></div>
+<div class="stat-card red"><div class="num" id="ins-urgent">--</div><div class="label">待处理预警</div></div>
+<div class="stat-card amber"><div class="num" id="ins-doing">--</div><div class="label">在办任务</div></div>
+<div class="stat-card green"><div class="num" id="ins-done">--</div><div class="label">已闭环预警</div></div>
+<div class="stat-card blue"><div class="num" id="ins-rate">--</div><div class="label">预警闭环率</div></div>
 </div>
 
 <div class="filter-bar">
@@ -283,6 +283,26 @@ document.getElementById('issue-list').innerHTML=html||'<div style="text-align:ce
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 renderIssues();
+</script>
+<script>
+// 修真 2026-09-02：督察统计接 alerts/tasks 真数据
+function loadInsStats(){
+Promise.all([
+fetch('/api/alerts/stats').then(function(r){return r.json()}).catch(function(){return{ok:false}}),
+fetch('/api/dept_stats').then(function(r){return r.json()}).catch(function(){return{ok:false}})
+]).then(function(arr){
+var a=arr[0]||{},d=arr[1]||{};
+if(a.ok&&a.stats){
+var e1=document.getElementById('ins-urgent');if(e1)e1.textContent=a.stats.urgent;
+var e3=document.getElementById('ins-done');if(e3)e3.textContent=a.stats.resolved;
+var e4=document.getElementById('ins-rate');if(e4)e4.textContent=a.stats.resolve_rate+'%';
+}
+if(d.ok&&d.stats){
+var e2=document.getElementById('ins-doing');if(e2)e2.textContent=d.stats.tasks_open;
+}
+});
+}
+loadInsStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

@@ -174,11 +174,12 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card green"><div class="num">3.2亿</div><div class="label">绿色信贷余额(元)</div></div>
-<div class="stat-card blue"><div class="num">8款</div><div class="label">金融产品</div></div>
-<div class="stat-card amber"><div class="num">5条</div><div class="label">融资需求</div></div>
-<div class="stat-card green"><div class="num">6800万</div><div class="label">补贴已发放(元)</div></div>
+<div class="stat-card green"><div class="num">3.2亿*</div><div class="label">绿色信贷余额(演示)</div></div>
+<div class="stat-card blue"><div class="num" id="gf-ents">--</div><div class="label">对接企业池</div></div>
+<div class="stat-card amber"><div class="num">5条*</div><div class="label">融资需求(演示)</div></div>
+<div class="stat-card green"><div class="num">6800万*</div><div class="label">补贴已发放(演示)</div></div>
 </div>
+<div style="background:rgba(245,158,12,.08);border:1px solid rgba(245,158,12,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--warn)">部分演示数据 · 金融接口规划中（绿色信贷/补贴 API 待金融机构对接）；企业池为辖区真实企业数</div>
 
 <div class="section">
 <div class="section-title">绿色金融产品</div>
@@ -275,6 +276,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <script>
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+<script>
+// 修真：企业池接真数据
+function loadGfStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var e1=document.getElementById('gf-ents');if(e1)e1.textContent=d.stats.enterprises;
+}
+}).catch(function(){});
+}
+loadGfStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

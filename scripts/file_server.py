@@ -378,6 +378,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_equipment_categories()
         elif path == '/api/emission_standards':
             self._handle_emission_standards()
+        elif path == '/api/credit/rating_stats':
+            self._handle_credit_rating_stats()
         elif path == '/api/av_captures/recent':
             self._handle_av_captures_recent()
         elif path == '/api/alert_devices':
@@ -517,6 +519,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_quick_check()
         elif parsed.path == '/api/av_capture':
             self._handle_av_capture()
+        elif parsed.path == '/api/credit/rating_stats':
+            self._handle_credit_rating_stats()
         elif parsed.path == '/api/av_captures/recent':
             self._handle_av_captures_recent()
         elif parsed.path == '/api/alert_devices':
@@ -2597,6 +2601,44 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': str(e)})
         finally:
             conn.close()
+
+    def _handle_credit_rating_stats(self):
+        """GET /api/credit/rating_stats — 环保信用评级统计（enterprises.credit_level 真数据）
+        映射：A→绿牌(诚信) B→蓝牌(良好) C→蓝牌(良好) D→黄牌(警示)；红牌来自停产整治企业
+        """
+        import sqlite3
+        try:
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            rows = cur.execute("SELECT credit_level, status, COUNT(*) AS n FROM enterprises GROUP BY credit_level, status").fetchall()
+            conn.close()
+            green = blue = yellow = red = 0
+            for r in rows:
+                lv, st, n = r['credit_level'] or 'B', r['status'] or '', r['n']
+                if '停产整治' in st:
+                    # 停产整治 → 红牌（环保不良）
+                    red += n
+                elif '限制生产' in st:
+                    # 限制生产 → 黄牌（警示）
+                    yellow += n
+                elif 'A' in lv:
+                    green += n
+                elif 'B' in lv or 'C' in lv:
+                    blue += n
+                else:
+                    yellow += n
+            total = green + blue + yellow + red
+            self._send_json({
+                'ok': True,
+                'stats': {
+                    'green': green, 'blue': blue, 'yellow': yellow, 'red': red,
+                    'total': total,
+                    'map_note': 'A→绿牌 B/C→蓝牌 D→黄牌；停产整治/限制生产→红牌',
+                },
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_av_captures_recent(self):
         """GET /api/av_captures/recent — 音视频采集记录（data/av_captures.json）"""

@@ -143,11 +143,12 @@ body{padding-bottom:20px}
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card blue"><div class="num">3</div><div class="label">在飞</div></div>
-<div class="stat-card green"><div class="num">12</div><div class="label">本周架次</div></div>
-<div class="stat-card amber"><div class="num">5</div><div class="label">发现问题</div></div>
-<div class="stat-card red"><div class="num">2</div><div class="label">紧急发现</div></div>
+<div class="stat-card blue"><div class="num" title="无人机接入层待实装">3*</div><div class="label">在飞(演示)</div></div>
+<div class="stat-card green"><div class="num" title="无人机接入层待实装">12*</div><div class="label">本周架次(演示)</div></div>
+<div class="stat-card amber"><div class="num" id="dp-found">--</div><div class="label">预警发现</div></div>
+<div class="stat-card red"><div class="num" id="dp-urgent">--</div><div class="label">紧急预警</div></div>
 </div>
+<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--warn)">演示数据 · 无人机机队接入层待实装（Rokid 眼镜/大疆 SDK 对接规划中）；预警两卡为真实告警库数据</div>
 
 <div class="section">
 <div class="section-title">无人机机队</div>
@@ -265,6 +266,18 @@ body{padding-bottom:20px}
 
 <script>
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
+</script>
+<script>
+// 修真：预警两卡接真数据（告警库）
+function loadDpStats(){
+fetch('/api/alerts/stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var e1=document.getElementById('dp-found');if(e1)e1.textContent=d.stats.total;
+var e2=document.getElementById('dp-urgent');if(e2)e2.textContent=d.stats.urgent;
+}
+}).catch(function(){});
+}
+loadDpStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

@@ -160,10 +160,10 @@ body{padding-bottom:20px}
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card green"><div class="num">3</div><div class="label">绿牌(环保诚信)</div></div>
-<div class="stat-card blue"><div class="num">2</div><div class="label">蓝牌(环保良好)</div></div>
-<div class="stat-card yellow"><div class="num">2</div><div class="label">黄牌(环保警示)</div></div>
-<div class="stat-card red"><div class="num">3</div><div class="label">红牌(环保不良)</div></div>
+<div class="stat-card green"><div class="num" id="cr-green">--</div><div class="label">绿牌(环保诚信)</div></div>
+<div class="stat-card blue"><div class="num" id="cr-blue">--</div><div class="label">蓝牌(环保良好)</div></div>
+<div class="stat-card yellow"><div class="num" id="cr-yellow">--</div><div class="label">黄牌(环保警示)</div></div>
+<div class="stat-card red"><div class="num" id="cr-red">--</div><div class="label">红牌(环保不良)</div></div>
 </div>
 <div id="ent-list"></div>
 </div>
@@ -181,6 +181,7 @@ body{padding-bottom:20px}
 </div>
 
 <script>
+// 修真 2026-09-02：8 家为评级示范卡（含五维分解演示），辖区 50 家真实评级分布由 /api/credit/rating_stats 加载
 var ENTERPRISES=[
 {id:'EQ-008',name:'泰安泰山玻璃制品有限公司',industry:'玻璃制造',location:'泰安市',score:95,grade:'green',gradeText:'绿牌（环保诚信）',dims:{compliance:96,monitoring:94,emission:97,management:93,public:95},factors:[{name:'排污许可证合规',val:'+10',dir:'pos'},{name:'在线监测稳定达标',val:'+8',dir:'pos'},{name:'环保信用AA级保持',val:'+5',dir:'pos'},{name:'主动公开环境信息',val:'+3',dir:'pos'},{name:'环保违规投诉',val:'0',dir:'pos'}],incentive:['优先安排环保专项资金','银行信贷绿色通道','减少检查频次','环境影响评价审批绿色通道']},
 {id:'EQ-004',name:'淄博新华制药股份有限公司',industry:'制药',location:'淄博市',score:88,grade:'green',gradeText:'绿牌（环保诚信）',dims:{compliance:90,monitoring:85,emission:89,management:87,public:88},factors:[{name:'排污许可证合规',val:'+10',dir:'pos'},{name:'自行监测全部达标',val:'+6',dir:'pos'},{name:'环保信用AA级',val:'+5',dir:'pos'},{name:'VOCs偶有波动',val:'-3',dir:'neg'}],incentive:['优先安排环保专项资金','银行信贷绿色通道','减少检查频次']},
@@ -243,6 +244,21 @@ document.getElementById('detail-overlay').classList.add('show');
 function closeDetail(ev){if(ev&&ev.target!==document.getElementById('detail-overlay'))return;document.getElementById('detail-overlay').classList.remove('show')}
 
 renderList();
+</script>
+<script>
+// 修真：辖区真实评级分布（50 家 enterprises：A→绿 B/C→蓝 D→黄 停产整治→红）
+function loadCrStats(){
+fetch('/api/credit/rating_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var s=d.stats;
+var e1=document.getElementById('cr-green');if(e1)e1.textContent=s.green;
+var e2=document.getElementById('cr-blue');if(e2)e2.textContent=s.blue;
+var e3=document.getElementById('cr-yellow');if(e3)e3.textContent=s.yellow;
+var e4=document.getElementById('cr-red');if(e4)e4.textContent=s.red;
+}
+}).catch(function(){});
+}
+loadCrStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
