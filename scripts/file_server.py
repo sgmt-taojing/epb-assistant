@@ -342,6 +342,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_cases_list()
         elif path == '/api/roles':
             self._handle_roles()
+        elif path == '/api/voice_intake':
+            self._handle_voice_intake()
+        elif path == '/api/ledger/recent':
+            self._handle_ledger_recent()
         elif path == '/api/research/datasets':
             self._handle_research_datasets()
         elif path == '/api/qa/health':
@@ -545,6 +549,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_coach()
         elif parsed.path == '/api/voice_coach':
             self._handle_voice_coach()
+        elif parsed.path == '/api/voice_intake':
+            self._handle_voice_intake()
+        elif parsed.path == '/api/enterprise_report':
+            self._handle_enterprise_report()
+        elif parsed.path == '/api/ledger/recent':
+            self._handle_ledger_recent()
         elif parsed.path == '/api/credit/rating_stats':
             self._handle_credit_rating_stats()
         elif parsed.path == '/api/av_captures/recent':
@@ -739,6 +749,216 @@ class EPBHandler(SimpleHTTPRequestHandler):
             })
         except Exception as e:
             self._send_json({'ok': False, 'status': 'error', 'error': str(e)}, 500)
+
+    def _handle_enterprise_report(self):
+        """POST /api/enterprise_report — 企业环保运行报告（专业四部分）
+        数据源：env_ledger 台账 + alerts 告警 + 检查案件 → docx 报告
+        """
+        try:
+            import sqlite3, time as _t
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+        except Exception:
+            data = {}
+        try:
+            enterprise = (data.get('enterprise') or '').strip()
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            # 台账聚合
+            ledger = [dict(r) for r in conn.execute(
+                "SELECT * FROM env_ledger WHERE enterprise LIKE ? ORDER BY id DESC LIMIT 100",
+                (f"%{enterprise}%" if enterprise else "%",)).fetchall()]
+            # 该企业告警
+            alerts = [dict(r) for r in conn.execute(
+                "SELECT * FROM alerts WHERE scene LIKE ? ORDER BY id DESC LIMIT 10",
+                (f"%{enterprise}%" if enterprise else "%",)).fetchall()]
+            # 检查案件
+            cases = [dict(r) for r in conn.execute(
+                "SELECT id,date,title,status,risk_level FROM cases WHERE party LIKE ? ORDER BY date DESC LIMIT 5",
+                (f"%{enterprise}%" if enterprise else "%",)).fetchall()]
+            conn.close()
+
+            # ── 报告四部分 ──
+            ent_name = enterprise or (ledger[0]['enterprise'] if ledger else '本企业')
+            now = _t.strftime('%Y年%m月%d日')
+            report_id = 'RPT-ENT-' + _t.strftime('%Y%m%d%H%M%S')
+
+            # 1. 运行台账汇总
+            by_cat = {}
+            for l in ledger:
+                by_cat.setdefault(l['category'], []).append(l)
+            part1 = ['一、环保设施运行台账汇总']
+            part1.append(f"  台账记录共 {len(ledger)} 条（最近100条窗口）。")
+            for cat, items in by_cat.items():
+                part1.append(f"  · {cat}：{len(items)} 条")
+                for it in items[:5]:
+                    part1.append(f"    - {it['ts'][:16]} {it['item']} {it['value']}{it['unit']}")
+
+            # 2. 监测数据汇总（含达标评估）
+            part2 = ['二、监测数据汇总与达标评估']
+            monitor = [l for l in ledger if l['category'] == '排放监测']
+            if monitor:
+                from importlib import import_module as _im
+                try:
+                    _std = json.load(open(os.path.join(BASE_DIR, 'data', 'emission_standards.json'), encoding='utf-8'))
+                    std_data = _std.get('items') or [] if isinstance(_std, dict) else (_std or [])
+                except Exception:
+                    std_data = []
+                for m in monitor:
+                    item_name = (m['item'] or '').split('·')[-1]
+                    val = None
+                    try:
+                        val = float(m['value'])
+                    except Exception:
+                        pass
+                    limit = None
+                    for s in std_data:
+                        if s.get('pollutant') and item_name and s['pollutant'].upper() in item_name.upper():
+                            try:
+                                nums = [float(x) for x in str(s.get('limit_value', '')).replace('~', ' ').split() if x.replace('.','').isdigit()]
+                                limit = max(nums) if nums else None
+                            except Exception:
+                                pass
+                            break
+                    verdict = ''
+                    if val is not None and limit:
+                        verdict = f"（限值 {limit}mg/L，{'✓ 达标' if val <= limit else '✗ 超标 ' + str(round((val-limit)/limit*100,1)) + '%'}）"
+                    part2.append(f"  · {m['ts'][:16]} {item_name} {m['value']}{m['unit']}{verdict}")
+            else:
+                part2.append('  本期无监测数据记录（建议按自行监测方案频次填报）')
+
+            # 3. 合规风险评估
+            part3 = ['三、合规风险评估']
+            risk_points = []
+            for a in alerts:
+                risk_points.append(f"预警：{a.get('scene','')} {a.get('pollutant','')}（{a.get('risk_level','')}，状态：{a.get('status','')}）")
+            for c in cases:
+                if c.get('risk_level') and '低' not in c['risk_level']:
+                    risk_points.append(f"案件：{c['title'][:30]}（{c['risk_level']}）")
+            if risk_points:
+                part3.append(f"  发现 {len(risk_points)} 项风险点：")
+                part3.extend(['  · ' + r for r in risk_points[:8]])
+            else:
+                part3.append('  当前无未闭环预警与高风险案件。')
+
+            # 4. 整改建议
+            part4 = ['四、整改建议与管理提升']
+            sugg = []
+            if not monitor:
+                sugg.append('按自行监测方案补齐监测频次并录入台账（监测数据是执法检查核心）')
+            chem = by_cat.get('治污设施运行', [])
+            if len(chem) < 3:
+                sugg.append('药剂投加记录偏少：治污设施运行台账建议按班次记录（执法三查之一）')
+            if alerts:
+                sugg.append(f'有 {len(alerts)} 条预警未全部闭环：按"复测→整改→反馈"流程处置并留痕')
+            sugg.append('台账保存不少于 5 年（《排污许可管理条例》第21条），纸质+电子双轨')
+            sugg.append('每季度对照排污许可证执行报告要求自查一次（12 项内容）')
+            part4.extend(['  · ' + s for s in sugg])
+
+            full_text = '\n'.join(part1 + [''] + part2 + [''] + part3 + [''] + part4)
+            summary = f"台账 {len(ledger)} 条 · 监测 {len(monitor)} 条 · 风险点 {len(risk_points)} 项 · 建议 {len(sugg)} 条"
+
+            # 生成 docx
+            import doc_generator
+            out_dir = os.path.join(BASE_DIR, 'outputs')
+            os.makedirs(out_dir, exist_ok=True)
+            safe_name = f"enterprise_report_{_t.strftime('%Y%m%d%H%M%S')}.docx"
+            out_path = os.path.join(out_dir, safe_name)
+            try:
+                from docx import Document
+                doc = Document()
+                doc.add_heading(f'{ent_name} 环保运行报告', 0)
+                doc.add_paragraph(f'报告编号：{report_id}　生成日期：{now}')
+                for section in [part1, part2, part3, part4]:
+                    for line in section:
+                        p = doc.add_paragraph(line)
+                doc.save(out_path)
+                doc_ok = True
+            except Exception:
+                doc_ok = False
+
+            self._send_json({
+                'ok': True,
+                'report_id': report_id,
+                'enterprise': ent_name,
+                'summary': summary,
+                'sections': {
+                    'ledger_summary': len(part1) - 1,
+                    'monitor_assessment': len(part2) - 1,
+                    'risk_points': len(risk_points),
+                    'suggestions': len(sugg),
+                },
+                'download_url': f'/outputs/{safe_name}' if doc_ok else None,
+                'preview': full_text[:600],
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_voice_intake(self):
+        """POST /api/voice_intake — 入企语音结构化采集（说话即台账）
+        入参 {text, enterprise?, recorder?, save?} → 结构化记录（save=1 时落台账表）
+        """
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+        except Exception:
+            data = {}
+        try:
+            import intake_engine
+            text = (data.get('text') or '').strip()
+            if not text:
+                self._send_json({'ok': False, 'error': 'text 必填'}, 400)
+                return
+            result = intake_engine.parse_intake(text)
+            # 落库（save=1 时写 env_ledger 表）
+            saved = 0
+            if data.get('save') and result.get('ok'):
+                import sqlite3, time as _t
+                conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+                conn.execute("""CREATE TABLE IF NOT EXISTS env_ledger (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    enterprise TEXT, ts TEXT, category TEXT, item TEXT,
+                    value TEXT, unit TEXT, recorder TEXT, raw_text TEXT, created_at TEXT)""")
+                now = _t.strftime('%Y-%m-%d %H:%M:%S')
+                for r in result['records']:
+                    conn.execute("""INSERT INTO env_ledger(enterprise,ts,category,item,value,unit,recorder,raw_text,created_at)
+                        VALUES(?,?,?,?,?,?,?,?,?)""",
+                        (data.get('enterprise', ''), now, r['category'],
+                         f"{r['type']}·{r['item']}", str(r['value']), r.get('unit', ''),
+                         data.get('recorder', '语音采集'), text[:200], now))
+                    saved += 1
+                conn.commit(); conn.close()
+            result['saved'] = saved
+            self._send_json(result)
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_ledger_recent(self):
+        """GET /api/ledger/recent — 台账最近记录（企业填报历史）"""
+        import sqlite3
+        try:
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            conn.execute("""CREATE TABLE IF NOT EXISTS env_ledger (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                enterprise TEXT, ts TEXT, category TEXT, item TEXT,
+                value TEXT, unit TEXT, recorder TEXT, raw_text TEXT, created_at TEXT)""")
+            ent = ''
+            try:
+                q = parse_qs(urlparse(self.path).query)
+                ent = (q.get('enterprise', [''])[0] or '').strip()
+            except Exception:
+                pass
+            if ent:
+                rows = [dict(r) for r in conn.execute(
+                    "SELECT * FROM env_ledger WHERE enterprise=? ORDER BY id DESC LIMIT 50", (ent,)).fetchall()]
+            else:
+                rows = [dict(r) for r in conn.execute(
+                    "SELECT * FROM env_ledger ORDER BY id DESC LIMIT 50").fetchall()]
+            conn.close()
+            self._send_json({'ok': True, 'records': rows, 'count': len(rows)})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_research_datasets(self):
         """GET /api/research/datasets — 科研数据集目录（8 套真实脱敏资产）"""

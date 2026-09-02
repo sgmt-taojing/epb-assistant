@@ -121,13 +121,19 @@ def score_row(row, terms, raw_q):
     # 标题精确包含原问（去疑问前缀后）→ 最强信号（按日连续处罚 案例 vs 按日连续处罚·拒不改正 条目）
     if raw_q and len(raw_q) >= 4 and raw_q in (title or ''):
         score += 0.55
-    # 类别加权：违法查处 / 法规条文 / 执法案例 优先
+    # 类别加权：违法查处 / 法规条文 / 执法案例 / 企业管理 优先
     cat = (category or '').strip()
-    if cat in ('violation', 'law', 'case'):
+    if cat in ('violation', 'law', 'case', 'enterprise', 'public_service'):
         score += 0.10
     # 类别先验：违法查处与法规条文是最常问的
     if category in ('violation', 'law'):
         score += 0.03 * min(hits, 2)
+    # 核心词强信号：2字以上词在标题命中 ≥2 个（如「台账」+「指南」）→ 追加
+    title_hits = sum(1 for t in terms if len(t) >= 2 and t in (title or ''))
+    if title_hits >= 2:
+        score += 0.25
+    elif title_hits == 1 and len(terms[0]) >= 2 and terms[0] in (title or ''):
+        score += 0.15  # 首切词即标题词（「台账怎么记」→台账）
     return min(score, 1.0)
 
 

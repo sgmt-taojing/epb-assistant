@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色工作台 · 按身份直达闭环工具</title>
+<style>
+:root{--g:#059669;--b:#3b82f6;--a:#f59e0b;--r:#ef4444;--bg:#f6f8f7;--card:#fff;--line:#e2e8f0;--txt:#0f172a;--muted:#64748b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
+.hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:32px 20px;text-align:center}
+.hero h1{font-size:22px}
+.hero p{font-size:13px;opacity:.8;margin-top:4px}
+.container{max-width:1000px;margin:-18px auto 0;padding:0 14px 80px}
+.role-banner{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.role-banner .who{font-size:15px;font-weight:700}
+.role-banner .who small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:16px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-decoration:none;color:var(--txt);transition:all .2s;display:block}
+.tool:hover{border-color:var(--g);box-shadow:0 4px 12px rgba(5,150,105,.12);transform:translateY(-2px)}
+.tool .ic{font-size:26px}
+.tool h4{font-size:14px;margin:8px 0 4px}
+.tool p{font-size:12px;color:var(--muted)}
+.tool .loop{font-size:11px;color:var(--g);margin-top:6px;font-weight:600}
+.family{font-size:14px;font-weight:700;margin:18px 0 10px;padding-left:10px;border-left:4px solid var(--g)}
+.hint{font-size:12px;color:var(--muted);text-align:center;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>🧭 角色工作台</h1>
+<p>登录后按身份直达专属工具链——每个角色都能闭环完成工作</p>
+</div>
+<div class="container">
+
+<div class="role-banner">
+<div class="who" id="who">👤 未登录（按下方角色入口使用）<small>登录后自动显示你的专属工具集</small></div>
+<a href="login.html" style="padding:8px 20px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;text-decoration:none;cursor:pointer">登录</a>
+</div>
+
+<div class="family">🏛️ 监管执法族</div>
+<div class="grid">
+<a class="tool" href="inspection-workbench.html"><span class="ic">📋</span><h4>执法检查工作台</h4><p>清单生成→手把手指导→提交→文书→落库</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="field-terminal.html"><span class="ic">📷</span><h4>现场执法终端</h4><p>拍照取证+语音记录+采样登记</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="remote-enforcement.html"><span class="ic">🛰️</span><h4>非现场执法</h4><p>在线监测分析+预警派单+闭环</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="smart-alert.html"><span class="ic">🚨</span><h4>智能预警</h4><p>派单→升级→闭环全流程落库</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="doc-generator.html"><span class="ic">📄</span><h4>执法文书生成</h4><p>6 种文书 docx 正式版</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="case-analysis.html"><span class="ic">🧠</span><h4>案情智能分析</h4><p>违法识别+法条+证据+相似案例</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="penalty-calculator.html"><span class="ic">⚖️</span><h4>自由裁量计算</h4><p>罚款区间计算+涉刑预警</p><div class="loop">✓ 全闭环</div></a>
+</div>
+
+<div class="family">🏭 企业环保族</div>
+<div class="grid">
+<a class="tool" href="env-ledger.html"><span class="ic">🎤</span><h4>环保台账·语音采集</h4><p>说一句话自动记台账（药剂/水量/监测/设备/危废）</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="env-ledger.html" onclick="localStorage.setItem('el_tab','report')"><span class="ic">📊</span><h4>环保运行报告</h4><p>台账→达标评估→风险→建议 四部分专业报告</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="self-check.html"><span class="ic">✅</span><h4>环保自查</h4><p>对照执法清单自主合规检查</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="quick-check.html"><span class="ic">🔬</span><h4>排放快检</h4><p>浓度 vs 国标限值秒判达标</p><div class="loop">✓ 即用</div></a>
+<a class="tool" href="ask.html"><span class="ic">🧠</span><h4>环保问答</h4><p>台账/危废/许可/应急专业知识直答</p><div class="loop">✓ 即用</div></a>
+</div>
+
+<div class="family">🔧 运维检测族</div>
+<div class="grid">
+<a class="tool" href="iot.html"><span class="ic">📡</span><h4>物联监测</h4><p>设备台账+数据流</p><div class="loop">✓ 数据闭环</div></a>
+<a class="tool" href="iot-diagnostic.html"><span class="ic">🩺</span><h4>设备诊断</h4><p>多协议设备接入诊断</p><div class="loop">✓ 即用</div></a>
+</div>
+
+<div class="family">👥 公众与第三方族</div>
+<div class="grid">
+<a class="tool" href="report.html"><span class="ic">📢</span><h4>环境举报</h4><p>在线/匿名举报+进度查询</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="research-data.html"><span class="ic">🔬</span><h4>科研数据申请</h4><p>8套脱敏数据集+审批流转</p><div class="loop">✓ 全闭环</div></a>
+<a class="tool" href="training.html"><span class="ic">🎓</span><h4>培训考证</h4><p>10门课程→考试→发证→验真</p><div class="loop">✓ 全闭环</div></a>
+</div>
+
+<div class="hint">所有工具本地运行 · 数据实时 · 语音教练全站可用（右下角🧭）</div>
+</div>
+<script src="api-fallback.js"></script>
+<script>
+// 登录态感知：显示当前角色
+(function(){
+try{
+  var u = JSON.parse(localStorage.getItem('epb_user')||'{}');
+  if(u && u.role){
+    var who = document.getElementById('who');
+    who.innerHTML = '👤 '+(u.name||u.phone)+' <span style="color:var(--g)">['+(u.roleName||u.role)+']</span><small>'+(u.org||'')+' · 已登录，专属工具已就绪</small>';
+  }
+}catch(e){}
+})();
+</script>
+<script src="voice-assistant.js"></script>
+<script src="voice-coach.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>

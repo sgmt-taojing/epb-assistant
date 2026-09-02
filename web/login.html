@@ -429,7 +429,8 @@ function enterSystem(){
     if(home && home !== '/index.html'){ location.href=home; return; }
   }
   var p1=(r&&r.modules||[]).find(m=>m.priority===1);
-  location.href=p1?p1.url:'/index.html';
+  // 修真 2026-09-03：默认落地角色工作台（按身份直达闭环工具）
+  location.href=p1?p1.url:'/role-hub.html';
 }
 
 function doLogin(){
