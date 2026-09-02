@@ -382,6 +382,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_devices()
         elif path == '/api/alert_emit':
             self._handle_alert_emit()
+        elif path == '/api/alerts/stats':
+            self._handle_alerts_stats()
         elif path == '/api/alerts/recent':
             self._handle_alerts_recent()
         elif path.startswith('/api/alerts/') and path != '/api/alerts/recent':
@@ -517,6 +519,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_alert_devices()
         elif parsed.path == '/api/alert_emit':
             self._handle_alert_emit()
+        elif parsed.path == '/api/alerts/stats':
+            self._handle_alerts_stats()
+        elif parsed.path == '/api/alerts/action':
+            self._handle_alerts_action()
         elif parsed.path == '/api/alerts/recent':
             self._handle_alerts_recent()
         elif parsed.path.startswith('/api/alerts/') and parsed.path != '/api/alerts/recent':
@@ -2585,6 +2591,102 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._send_json({'ok': False, 'error': str(e)})
         finally:
             conn.close()
+
+    def _handle_alerts_stats(self):
+        """GET /api/alerts/stats — 预警统计（供 smart-alert 页四张统计卡）"""
+        import sqlite3
+        try:
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            self._ensure_alerts_table()
+            total = cur.execute("SELECT COUNT(*) FROM alerts").fetchone()[0]
+            red = cur.execute("SELECT COUNT(*) FROM alerts WHERE risk_level IN ('严重超标','严重','特别严重','高风险') AND status='pending'").fetchone()[0]
+            amber = cur.execute("SELECT COUNT(*) FROM alerts WHERE risk_level IN ('超标','较重') AND status='pending'").fetchone()[0]
+            blue = cur.execute("SELECT COUNT(*) FROM alerts WHERE status!='pending'").fetchone()[0]
+            resolved = blue
+            rate = round(resolved / total * 100) if total else 0
+            # 近 7 天趋势
+            trend = []
+            try:
+                rows = cur.execute(
+                    "SELECT date(created_at) AS d, COUNT(*) AS n FROM alerts "
+                    "WHERE created_at >= datetime('now','-7 day') GROUP BY date(created_at) ORDER BY d").fetchall()
+                trend = [{'date': r['d'], 'count': r['n']} for r in rows]
+            except Exception:
+                trend = []
+            conn.close()
+            self._send_json({
+                'ok': True,
+                'stats': {
+                    'total': total,
+                    'urgent': red,       # 紧急（待处理且严重级）
+                    'normal': amber,     # 一般（待处理超标级）
+                    'resolved': resolved, # 已闭环
+                    'resolve_rate': rate,
+                    'trend_7d': trend,
+                },
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_alerts_action(self):
+        """POST /api/alerts/action — 预警三动作真闭环（派单/升级/闭环）
+        入参 {alert_id, action: 'dispatch'|'escalate'|'resolve', operator?}
+        派单 → 写 tasks 表 + alerts 状态置 dispatched
+        升级 → alerts.risk_level 提升 + 写 audit 记录
+        闭环 → alerts.status=resolved + resolved_at 落时间
+        """
+        import sqlite3
+        try:
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            body = self.rfile.read(length) if length > 0 else b'{}'
+            data = json.loads(body or b'{}')
+        except Exception:
+            data = {}
+        alert_id = data.get('alert_id')
+        action = (data.get('action') or '').strip()
+        operator = (data.get('operator') or '系统').strip()[:32]
+        if alert_id is None or action not in ('dispatch', 'escalate', 'resolve'):
+            self._send_json({'ok': False, 'error': 'alert_id 和 action(dispatch/escalate/resolve) 必填'}, 400)
+            return
+        conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        try:
+            row = cur.execute("SELECT * FROM alerts WHERE id=?", (alert_id,)).fetchone()
+            if not row:
+                self._send_json({'ok': False, 'error': f'告警 {alert_id} 不存在'}, 404)
+                return
+            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            if action == 'dispatch':
+                # 真派单：写 tasks 表
+                task_id = f"TASK-{datetime.now().strftime('%Y%m%d')}-{alert_id}"
+                cur.execute(
+                    "INSERT OR IGNORE INTO tasks (id,title,type,status,priority,deadline) VALUES (?,?,?,?,?,?)",
+                    (task_id,
+                     f"[预警核查] {row['scene'] or ''} {row['pollutant'] or ''}超标核查",
+                     '预警核查', 'pending', 'high',
+                     datetime.now().strftime('%Y-%m-%d')))
+                cur.execute("UPDATE alerts SET status='dispatched' WHERE id=?", (alert_id,))
+                msg = f'已派发核查任务 {task_id}（{row["scene"] or "监测点位"}）'
+            elif action == 'escalate':
+                lv_map = {'低风险': '中风险', '中风险': '高风险', '高风险': '严重超标', '超标': '严重超标', '严重超标': '严重超标'}
+                new_lv = lv_map.get(row['risk_level'] or '', '高风险')
+                cur.execute("UPDATE alerts SET risk_level=?, status='escalated' WHERE id=?", (new_lv, alert_id))
+                msg = f'预警 {alert_id} 已升级为 {new_lv}，已通知值班领导'
+            else:  # resolve
+                cur.execute("UPDATE alerts SET status='resolved', resolved_at=? WHERE id=?", (now, alert_id))
+                msg = f'预警 {alert_id} 已闭环（{now}）'
+            conn.commit()
+            # 回读最新状态
+            row2 = cur.execute("SELECT * FROM alerts WHERE id=?", (alert_id,)).fetchone()
+            conn.close()
+            self._send_json({'ok': True, 'action': action, 'alert_id': alert_id, 'msg': msg,
+                             'alert': dict(row2) if row2 else None, 'operator': operator})
+        except Exception as e:
+            conn.close()
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_alerts_recent(self):
         """GET /api/alerts/recent — 最近告警列表"""

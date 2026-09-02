@@ -186,15 +186,15 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card red"><div class="num">1</div><div class="label">进行中事件</div></div>
-<div class="stat-card amber"><div class="num">2</div><div class="label">待响应事件</div></div>
-<div class="stat-card blue"><div class="num">8</div><div class="label">应急人员就位</div></div>
-<div class="stat-card green"><div class="num">95%</div><div class="label">资源就绪率</div></div>
+<div class="stat-card red"><div class="num" id="ec-active">--</div><div class="label">进行中预警</div></div>
+<div class="stat-card amber"><div class="num" id="ec-dispatched">--</div><div class="label">已派单核查</div></div>
+<div class="stat-card blue"><div class="num" id="ec-tasks">--</div><div class="label">在办任务</div></div>
+<div class="stat-card green"><div class="num" id="ec-rate">--</div><div class="label">预警闭环率</div></div>
 </div>
 
 <!-- 当前事件 -->
 <div class="alert banner">
-<div class="alert-title">⚠️ 当前应急事件：华源化工废水泄漏</div>
+<div class="alert-title">⚠️ 当前应急事件：华源化工废水泄漏 <span style="font-size:11px;background:rgba(239,68,68,.15);padding:2px 8px;border-radius:4px;margin-left:8px">演练案例</span></div>
 <div class="alert-info">
 时间：2026-07-14 06:30 · 级别：Ⅱ级（较大环境突发事件）<br>
 位置：济南市历下区工业南路88号华源化工厂区<br>
@@ -264,5 +264,26 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
+<script>
+// 修真 2026-09-02：应急统计接 /api/alerts/stats + /api/dept_stats 真数据
+function loadEmStats(){
+Promise.all([
+fetch('/api/alerts/stats').then(function(r){return r.json()}).catch(function(){return{ok:false}}),
+fetch('/api/dept_stats').then(function(r){return r.json()}).catch(function(){return{ok:false}})
+]).then(function(arr){
+var a=arr[0]||{},d=arr[1]||{};
+if(a.ok&&a.stats){
+var s=a.stats;
+var e1=document.getElementById('ec-active');if(e1)e1.textContent=s.urgent;
+var e2=document.getElementById('ec-dispatched');if(e2)e2.textContent=s.normal;
+var e4=document.getElementById('ec-rate');if(e4)e4.textContent=s.resolve_rate+'%';
+}
+if(d.ok&&d.stats){
+var e3=document.getElementById('ec-tasks');if(e3)e3.textContent=d.stats.tasks_open;
+}
+});
+}
+loadEmStats();
+</script>
 </body>
 </html>

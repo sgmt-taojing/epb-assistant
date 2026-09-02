@@ -95,10 +95,10 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFo
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card red"><div class="num">7</div><div class="label">紧急预警</div></div>
-<div class="stat-card amber"><div class="num">15</div><div class="label">一般预警</div></div>
-<div class="stat-card blue"><div class="num">23</div><div class="label">提示信息</div></div>
-<div class="stat-card green"><div class="num">96%</div><div class="label">处置率</div></div>
+<div class="stat-card red"><div class="num" id="sa-urgent">--</div><div class="label">紧急预警</div></div>
+<div class="stat-card amber"><div class="num" id="sa-normal">--</div><div class="label">一般预警</div></div>
+<div class="stat-card blue"><div class="num" id="sa-resolved">--</div><div class="label">已闭环</div></div>
+<div class="stat-card green"><div class="num" id="sa-rate">--</div><div class="label">处置率</div></div>
 </div>
 
 <div class="filter-bar">
@@ -148,7 +148,8 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <script>
-var ALERTS=[
+// 修真 2026-09-02：DEMO_ALERTS 为示范预警池（演练用），真实预警从 /api/alerts/recent 加载合并
+var DEMO_ALERTS=[
 {id:'WRN-001',level:'red',title:'华源化工COD连续3天超标升级',sources:['在线监测','趋势预测'],detail:'7月12日160→7月13日172→7月14日185mg/L，持续上升趋势，已从一般预警升级为紧急预警。结合卫星遥感发现该区域水体颜色异常。',time:'2026-07-14 06:35',area:'济南市历下区'},
 {id:'WRN-002',level:'red',title:'海润电镀监测数据恒值疑似篡改',sources:['数据异常','视频AI'],detail:'Cr⁶⁺数据7天恒定在0.47-0.49mg/L，标准差仅0.008。视频AI识别到监测站房有人进入操作。',time:'2026-07-14 05:10',area:'青岛市城阳区'},
 {id:'WRN-003',level:'red',title:'运达金属治污设施夜间停运2小时',sources:['用电监控','噪声监测'],detail:'酸雾塔循环泵2:00-4:00停运，期间噪声站记录到异常金属撞击声。',time:'2026-07-14 04:00',area:'济宁市任城区'},
@@ -168,11 +169,11 @@ renderAlerts();
 }
 
 function renderAlerts(){
-var list=ALERTS;
-if(currentFilter==='red'){list=ALERTS.filter(function(a){return a.level==='red'})}
-else if(currentFilter==='amber'){list=ALERTS.filter(function(a){return a.level==='amber'})}
-else if(currentFilter==='blue'){list=ALERTS.filter(function(a){return a.level==='blue'})}
-else if(currentFilter==='fusion'){list=ALERTS.filter(function(a){return a.sources.length>1})}
+var list=LIVE_ALERTS;
+if(currentFilter==='red'){list=LIVE_ALERTS.filter(function(a){return a.level==='red'})}
+else if(currentFilter==='amber'){list=LIVE_ALERTS.filter(function(a){return a.level==='amber'})}
+else if(currentFilter==='blue'){list=LIVE_ALERTS.filter(function(a){return a.level==='blue'})}
+else if(currentFilter==='fusion'){list=LIVE_ALERTS.filter(function(a){return a.sources.length>1})}
 
 var levelText={red:'紧急',amber:'一般',blue:'提示'};
 var html='';
@@ -188,12 +189,58 @@ html+='<div class="alert-item '+a.level+'">'+
 document.getElementById('alert-list').innerHTML=html||'<div style="text-align:center;padding:20px;color:#64748b">暂无预警</div>';
 }
 
-function handleAlert(id){epbToast('已派发核查任务：'+id+'，执法人员将在30分钟内到达')}
-function escalate(id){epbToast('预警'+id+'已升级，已通知分管领导')}
-function closeAlert(id){epbToast('预警'+id+'已标记闭环')}
+// 修真：三动作真闭环，POST /api/alerts/action 落库（派单写 tasks 表/升级改风险级/闭环落时间戳）
+function _alertAction(id,action){
+epbToast('处理中...');
+fetch('/api/alerts/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({alert_id:parseInt(String(id).replace(/[^0-9]/g,''))||id,action:action})})
+.then(function(r){return r.json()})
+.then(function(d){
+epbToast(d.ok?(d.msg||'操作成功'):('操作失败：'+(d.error||'未知错误')));
+loadLiveAlerts();
+})
+.catch(function(){epbToast('网络异常，操作未送达')});
+}
+function handleAlert(id){_alertAction(id,'dispatch')}
+function escalate(id){_alertAction(id,'escalate')}
+function closeAlert(id){_alertAction(id,'resolve')}
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 renderAlerts();
+
+// 修真：真实预警从 alerts 表加载（API 告警 + 示范池合并渲染），统计卡接 /api/alerts/stats
+var LIVE_ALERTS=DEMO_ALERTS.slice();
+function loadLiveAlerts(){
+fetch('/api/alerts/recent').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.alerts&&d.alerts.length){
+var lvMap={'严重超标':'red','严重':'red','特别严重':'red','高风险':'red','超标':'amber','较重':'amber','中风险':'amber','低风险':'blue'};
+var apiAlerts=d.alerts.map(function(a){
+var lv=lvMap[a.risk_level]||'blue';
+var stMap={pending:'待处理',dispatched:'已派单',escalated:'已升级',resolved:'已闭环'};
+return {id:a.id,level:lv,
+title:(a.scene||'监测点位')+' '+(a.pollutant||'')+(a.value?' '+a.value+(a.over_pct?'（超限'+a.over_pct+'%）':''):''),
+sources:(a.source?a.source.split(/[,，]/):['在线监测']).concat(['告警库']),
+detail:(a.advice||'')+' ｜ 状态：'+(stMap[a.status]||a.status||'待处理'),
+time:a.created_at||'',area:a.scene||'',
+_status:a.status};
+});
+LIVE_ALERTS=apiAlerts.concat(DEMO_ALERTS);
+renderAlerts();
+}
+}).catch(function(){});
+}
+function loadAlertStats(){
+fetch('/api/alerts/stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var s=d.stats;
+var e1=document.getElementById('sa-urgent');if(e1)e1.textContent=s.urgent;
+var e2=document.getElementById('sa-normal');if(e2)e2.textContent=s.normal;
+var e3=document.getElementById('sa-resolved');if(e3)e3.textContent=s.resolved;
+var e4=document.getElementById('sa-rate');if(e4)e4.textContent=s.resolve_rate+'%';
+}
+}).catch(function(){});
+}
+loadLiveAlerts();
+loadAlertStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

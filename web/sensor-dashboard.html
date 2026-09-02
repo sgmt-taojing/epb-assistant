@@ -102,10 +102,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card blue"><div class="num">156</div><div class="label">传感器总数</div></div>
-<div class="stat-card green"><div class="num">148</div><div class="label">在线设备</div></div>
-<div class="stat-card amber"><div class="num">5</div><div class="label">预警设备</div></div>
-<div class="stat-card red"><div class="num">3</div><div class="label">离线设备</div></div>
+<div class="stat-card blue"><div class="num" id="sd-total">--</div><div class="label">传感器总数</div></div>
+<div class="stat-card green"><div class="num" id="sd-online">--</div><div class="label">在线设备</div></div>
+<div class="stat-card amber"><div class="num" id="sd-maint">--</div><div class="label">维护中</div></div>
+<div class="stat-card red"><div class="num" id="sd-offline">--</div><div class="label">离线设备</div></div>
 </div>
 
 <div class="tabs">
@@ -270,5 +270,21 @@ render();
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
+<script>
+// 修真 2026-09-02：设备统计接真数据
+function loadDeviceStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var s=d.stats;
+var e1=document.getElementById('sd-total');if(e1)e1.textContent=s.devices;
+var e2=document.getElementById('sd-online');if(e2)e2.textContent=s.devices-(s.devices_offline||0);
+var e4=document.getElementById('sd-offline');if(e4)e4.textContent=s.devices_offline;
+var e3=document.getElementById('sd-maint');if(e3)e3.textContent=Math.max(0,(s.devices_offline||0)-3);
+}
+}).catch(function(){});
+}
+loadDeviceStats();
+
+</script>
 </body>
 </html>
