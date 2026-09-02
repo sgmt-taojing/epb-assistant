@@ -33,6 +33,15 @@ def db_register_user(user_data):
     c = conn.cursor()
     now = datetime.now().isoformat()
     phone = user_data.get('phone', '')
+    # 商用修真：roleName 兜底（API 直调注册未传时按 roles 表补全）
+    if not user_data.get('roleName'):
+        try:
+            _rn = c.execute('SELECT name FROM roles WHERE role_id=?',
+                            (user_data.get('role', ''),)).fetchone()
+            if _rn:
+                user_data['roleName'] = _rn[0]
+        except Exception:
+            pass
     # 检查是否已存在
     c.execute('SELECT id FROM users WHERE phone=?', (phone,))
     existing = c.fetchone()
@@ -68,10 +77,21 @@ def db_login_user(phone):
     row = c.fetchone()
     if row:
         now = datetime.now().isoformat()
+        # 商用修真：roleName 空时按 roles 表兜底并回写
+        role_name = row['role_name']
+        if not role_name:
+            try:
+                _rn = c.execute('SELECT name FROM roles WHERE role_id=?',
+                                (row['role'],)).fetchone()
+                if _rn:
+                    role_name = _rn[0]
+                    c.execute('UPDATE users SET role_name=? WHERE phone=?', (role_name, phone))
+            except Exception:
+                pass
         c.execute('UPDATE users SET last_login=? WHERE phone=?', (now, phone))
         conn.commit()
         user = {
-            'role': row['role'], 'roleName': row['role_name'],
+            'role': row['role'], 'roleName': role_name,
             'roleIcon': row['role_icon'], 'name': row['name'],
             'org': row['org'], 'phone': row['phone'],
             'permissions': from_json(row['permissions']) or [],

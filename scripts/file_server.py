@@ -486,6 +486,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 if not _ok:
                     self._send_json({'ok': False, 'error': '未授权：' + _sess.get('error','') + '（请先登录获取 token）'}, 401)
                     return
+                # RBAC：角色不在白名单 → 403
+                if (_sess.get('role') or '') not in self.RBAC_WHITELIST:
+                    self._send_json({'ok': False, 'error': '权限不足：当前角色（%s）无此操作权限' % (_sess.get('role') or '未知'), 'required_roles': '执法/监管/管理类'}, 403)
+                    return
         except Exception:
             pass
         parsed = urlparse(self.path)
@@ -1045,8 +1049,10 @@ class EPBHandler(SimpleHTTPRequestHandler):
             try:
                 _ok, _sess = self._check_auth()
                 if _ok and (_sess.get('role') or '') in (
-                        'gov_enforcement', 'gov_monitor', 'gov_supervisor', 'admin',
-                        '监管执法人员', '监测站运维', '管理员'):
+                        'gov_enforcement', 'gov_admin', 'gov_monitor', 'gov_supervisor',
+                        'supervisor', 'admin', 'field_officer', 'remote_monitor',
+                        '生态环境局执法', '生态环境局行政', '监管执法人员', '监管督查',
+                        '一线执法人员', '非现场监管值守', '管理员', '系统管理员'):
                     privileged = True
             except Exception:
                 privileged = False
@@ -2830,6 +2836,16 @@ class EPBHandler(SimpleHTTPRequestHandler):
     PROTECTED_APIS = {
         '/api/alerts/action', '/api/inspection/submit', '/api/generate_doc',
         '/api/crawl', '/api/av_capture', '/api/alert_emit', '/api/research/review',
+    }
+    # 商用 RBAC（2026-09-02）：高危 API 的角色白名单——执法/监管/管理员可写，企业/公众只读
+    RBAC_WHITELIST = {
+        'gov_enforcement', 'gov_admin', 'gov_supervisor', 'supervisor', 'admin',
+        'field_officer', 'legal_reviewer', 'remote_monitor', 'approval_officer',
+        'emergency_resp', 'ops_staff', 'sys_admin', 'kb_curator',
+        # 中文名称兼容
+        '生态环境局执法', '生态环境局行政', '监管执法人员', '管理员', '系统管理员',
+        '一线执法人员', '法制审核', '非现场监管', '审批与许可', '应急管理',
+        '平台运营', '知识管理员',
     }
 
     def _tts_broadcast(self, text):
