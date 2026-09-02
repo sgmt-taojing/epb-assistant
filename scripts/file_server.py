@@ -342,6 +342,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_cases_list()
         elif path == '/api/roles':
             self._handle_roles()
+        elif path == '/api/research/datasets':
+            self._handle_research_datasets()
         elif path == '/api/qa/health':
             self._handle_qa_health()
         elif path == '/api/kb/stats':
@@ -737,6 +739,19 @@ class EPBHandler(SimpleHTTPRequestHandler):
             })
         except Exception as e:
             self._send_json({'ok': False, 'status': 'error', 'error': str(e)}, 500)
+
+    def _handle_research_datasets(self):
+        """GET /api/research/datasets — 科研数据集目录（8 套真实脱敏资产）"""
+        import sqlite3
+        try:
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            rows = [dict(r) for r in conn.execute(
+                "SELECT dataset_id,name,category,description,scale,fields,license,status FROM research_datasets ORDER BY id").fetchall()]
+            conn.close()
+            self._send_json({'ok': True, 'datasets': rows, 'total': len(rows)})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_qa_health(self):
         """GET /api/qa/health — 问答质量监控（商用必补③：miss 率告警）

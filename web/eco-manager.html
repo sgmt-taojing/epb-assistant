@@ -142,11 +142,11 @@ body{padding-bottom:20px}
 </div>
 
 <div class="container">
-<div class="stat-row">
-<div class="stat-card blue"><div class="num">28</div><div class="label">服务商</div></div>
-<div class="stat-card green"><div class="num">15</div><div class="label">已认证</div></div>
-<div class="stat-card amber"><div class="num">6</div><div class="label">待对接需求</div></div>
-<div class="stat-card red"><div class="num">2</div><div class="label">紧急需求</div></div>
+<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#b45309">部分演示数据 · 环保管家服务商入驻接口规划中；任务/告警两卡为系统真实数据</div><div class="stat-row">
+<div class="stat-card blue"><div class="num">28*</div><div class="label">服务商(演示)</div></div>
+<div class="stat-card green"><div class="num">15*</div><div class="label">已认证(演示)</div></div>
+<div class="stat-card amber"><div class="num" id="em-tasks">--</div><div class="label">在办任务(真)</div></div>
+<div class="stat-card red"><div class="num" id="em-high">--</div><div class="label">高危告警(真)</div></div>
 </div>
 
 <div class="cat-bar">
@@ -235,6 +235,20 @@ document.getElementById('provider-list').innerHTML=html||'<div style="text-align
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 renderList();
+</script>
+<script>
+(function(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var e=document.getElementById('em-tasks');if(e)e.textContent=d.stats.tasks_open;
+}
+}).catch(function(){});
+fetch('/api/alerts/stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var e=document.getElementById('em-high');if(e)e.textContent=d.stats.urgent;
+}
+}).catch(function(){});
+})();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

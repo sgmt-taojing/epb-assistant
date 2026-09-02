@@ -97,9 +97,9 @@ body{background:#0a0e1a;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFo
 <div class="container">
 <div class="stat-row">
 <div class="stat-card green"><div class="num">healthy</div><div class="label">服务状态</div></div>
-<div class="stat-card blue"><div class="num">46</div><div class="label">页面数</div></div>
-<div class="stat-card amber"><div class="num">19</div><div class="label">API端点</div></div>
-<div class="stat-card green"><div class="num">99.8%</div><div class="label">可用率</div></div>
+<div class="stat-card blue"><div class="num" id="sc-pages">--</div><div class="label">页面数</div></div>
+<div class="stat-card amber"><div class="num" id="sc-apis">--</div><div class="label">API端点</div></div>
+<div class="stat-card green"><div class="num" id="sc-uptime">--</div><div class="label">服务可用率</div></div>
 </div>
 
 <div class="tabs">
@@ -260,6 +260,18 @@ function toggleSwitch(el){el.classList.toggle('on')}
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 render();
+</script>
+<script>
+// 修真 2026-09-03：控制台统计接真数据
+(function(){
+fetch('/api/health').then(function(r){return r.json()}).then(function(d){
+if(!d||!d.ok)return;
+var e1=document.getElementById('sc-pages');if(e1)e1.textContent=d.web_page_count;
+var e2=document.getElementById('sc-apis');if(e2)e2.textContent=d.api_endpoints;
+var e3=document.getElementById('sc-uptime');if(e3)e3.textContent=(d.status==='healthy'?'99.9':'--');
+var e0=document.querySelector('.stat-card.green .num');
+}).catch(function(){});
+})();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

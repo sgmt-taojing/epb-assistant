@@ -93,6 +93,7 @@ body{background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,"PingFang
 
 <!-- 1. 数据集 -->
 <div class="panel active" id="p-datasets">
+<div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#3b82f6">前 8 套为本平台真实脱敏资产（可申请）；其后为全国公开数据愿景目录（接入规划中）</div>
   <div class="flow">
     <span class="n">① 在线浏览</span><span class="ar">→</span>
     <span class="n">② 提交申请</span><span class="ar">→</span>
@@ -227,7 +228,25 @@ document.querySelectorAll('.tab').forEach(function(t){
 });
 
 // ============ 1. 数据集列表 ============
-var DATASETS = [
+// 修真 2026-09-03：平台真实资产目录（8 套脱敏数据集）从 /api/research/datasets 加载；
+// 下方 DEMO_DATASETS 为全国公开数据愿景目录（接入规划中，标注演示）
+var DATASETS = [];
+function loadRealDatasets(){
+fetch('/api/research/datasets').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.datasets&&d.datasets.length){
+var _catIcon={'监测数据':'💧','执法数据':'📋','法规数据':'⚖️','标准数据':'📐','企业数据':'🏭','知识数据':'📚'};
+DATASETS=d.datasets.map(function(x){
+return {id:x.dataset_id,name:x.name,icon:_catIcon[x.category]||'📁',
+desc:x.description+' ｜ 规模：'+x.scale+' ｜ 许可：'+x.license,
+rows:0,cols:(x.fields||'').split(',').length,time:'',size:'',update:(x.created_at||'').slice(0,7),
+tags:[[x.category,'green'],['本地资产','blue'],['脱敏','amber']],
+use:'学术研究（需审批）',_real:true};
+});
+renderDatasets();
+}
+}).catch(function(){});
+}
+var DEMO_DATASETS = [
   {id:'A_surface_water', name:'监测数据集A（地表水）', icon:'💧', desc:'覆盖全国31省364个国控断面，2018-2024年地表水水质月度监测数据。已脱敏断面名称与坐标。',
    rows:48420, cols:38, time:'2018-2024', size:'128 MB', update:'2024-12',
    tags:[['地表水','green'],['国控断面','amber'],['月度数据','blue']],
@@ -398,6 +417,7 @@ function reviewReject(applyId){
 }
 </script>
 <script src="global-sidebar.js"></script>
+<script>loadRealDatasets();</script>
 <script src="voice-assistant.js"></script>
 <script src="voice-coach.js"></script>
 <script src="ai-assistant.js"></script>
