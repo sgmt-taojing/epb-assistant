@@ -185,7 +185,13 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <div class="container">
-<div class="stat-row">
+<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#b45309">演示数据 · 环境统计数据源待接入生态环境统计公报（接入规划中）；部分统计卡为系统真实数据</div>
+<div class="stat-row" id="live-stats-bar">
+<div class="stat-card blue"><div class="num" id="es-laws">--</div><div class="label">法规库(真)</div></div>
+<div class="stat-card green"><div class="num" id="es-std">--</div><div class="label">排放标准(真)</div></div>
+<div class="stat-card amber"><div class="num" id="es-cases">--</div><div class="label">案例库(真)</div></div>
+<div class="stat-card red"><div class="num" id="es-ents">--</div><div class="label">监管企业(真)</div></div>
+</div><div class="stat-row">
 <div class="stat-card amber"><div class="num">12.5万t</div><div class="label">辖区COD年排放</div></div>
 <div class="stat-card blue"><div class="num">8.3万t</div><div class="label">SO₂年排放</div></div>
 <div class="stat-card green"><div class="num">6.2万t</div><div class="label">NOx年排放</div></div>
@@ -328,6 +334,16 @@ document.getElementById('result-val').textContent=result.toLocaleString();
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 render();
+</script>
+<script>
+function _loadLiveStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(!(d&&d.ok&&d.stats))return;var s=d.stats;
+var _set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+_set('es-laws',s.laws);_set('es-std',s.standards);_set('es-cases',s.cases_total);_set('es-ents',s.enterprises);
+}).catch(function(){});
+}
+_loadLiveStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

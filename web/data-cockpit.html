@@ -168,6 +168,7 @@ body{padding-bottom:20px}
 </div>
 
 <div class="section">
+<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#b45309">演示数据 · 执法趋势与区域排行基于案例库样本统计（接入规划中）；部分统计卡为系统真实数据</div>
 <div class="section-title">月度执法趋势（近6个月）</div>
 <div class="chart-row">
 <div class="chart-bar b1" style="height:55%"><div class="chart-bar-val">155</div><div class="chart-bar-label">2月</div></div>
@@ -216,10 +217,10 @@ body{padding-bottom:20px}
 <div class="section-title">环保信用概况</div>
 <div class="two-col">
 <div>
-<div class="progress-item"><div class="progress-header"><span>🟢 绿牌（诚信）</span><span style="color:var(--accent)">3家</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--accent)"></div></div></div>
-<div class="progress-item"><div class="progress-header"><span>🔵 蓝牌（良好）</span><span style="color:var(--primary2)">2家</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--primary)"></div></div></div>
-<div class="progress-item"><div class="progress-header"><span>🟡 黄牌（警示）</span><span style="color:var(--warn)">2家</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--warn)"></div></div></div>
-<div class="progress-item"><div class="progress-header"><span>🔴 红牌（不良）</span><span style="color:var(--danger)">3家</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--danger)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>🟢 绿牌（诚信）</span><span style="color:var(--accent)"><span id="cr-g">--</span>家</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--accent)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>🔵 蓝牌（良好）</span><span style="color:var(--primary2)"><span id="cr-b">--</span>家</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--primary)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>🟡 黄牌（警示）</span><span style="color:var(--warn)"><span id="cr-y">--</span>家</span></div><div class="progress-bar"><div class="progress-fill" style="width:20%;background:var(--warn)"></div></div></div>
+<div class="progress-item"><div class="progress-header"><span>🔴 红牌（不良）</span><span style="color:var(--danger)"><span id="cr-r">--</span>家</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%;background:var(--danger)"></div></div></div>
 </div>
 <div>
 <div class="rank-item"><div class="rank-num r1">!</div><div class="rank-info"><div class="rank-name">海润电镀</div><div class="rank-meta">信用分28 · 红牌</div></div><div class="rank-val" style="color:var(--danger)">28</div></div>
@@ -252,6 +253,16 @@ body{padding-bottom:20px}
 <a class="nav-item" href="equipment-mall.html"><span class="icon">🛒</span>商城</a>
 <a class="nav-item" href="m-workspace.html"><span class="icon">📋</span>工作台</a>
 </div>
+<script>
+function _loadLiveStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(!(d&&d.ok&&d.stats))return;var s=d.stats;
+var _set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+var _f=function(){return fetch('/api/credit/rating_stats').then(function(r){return r.json()})};_f().then(function(d){if(d&&d.ok&&d.stats){var s2=d.stats;_set('cr-g',s2.green);_set('cr-b',s2.blue);_set('cr-y',s2.yellow);_set('cr-r',s2.red);}});
+}).catch(function(){});
+}
+_loadLiveStats();
+</script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>

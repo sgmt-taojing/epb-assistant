@@ -116,7 +116,7 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 <p>支持5种通信协议接入 · 7类环境监测设备 · 6部国标自动对标 · 一键生成企业专项诊断报告</p>
 <div class="hero-stats">
 <div class="hero-stat"><div class="num">5</div><div class="label">通信协议</div></div>
-<div class="hero-stat"><div class="num">7</div><div class="label">设备类型</div></div>
+<div class="hero-stat"><div class="num" id="id-dev">--</div><div class="label">设备类型</div></div>
 <div class="hero-stat"><div class="num">6</div><div class="label">国标对标</div></div>
 <div class="hero-stat"><div class="num">20+</div><div class="label">监测参数</div></div>
 </div>
@@ -505,6 +505,16 @@ function renderStandards() {
 
 // 初始化
 renderDevices();
+</script>
+<script>
+function _loadLiveStats(){
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(!(d&&d.ok&&d.stats))return;var s=d.stats;
+var _set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+_set('id-dev', s.devices);
+}).catch(function(){});
+}
+_loadLiveStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

@@ -192,10 +192,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card red"><div class="num">3</div><div class="label">高风险企业</div></div>
-<div class="stat-card amber"><div class="num">2</div><div class="label">中风险企业</div></div>
-<div class="stat-card green"><div class="num">5</div><div class="label">低风险企业</div></div>
-<div class="stat-card blue"><div class="num">12</div><div class="label">监测点位</div></div>
+<div class="stat-card red"><div class="num" id="em-high">--</div><div class="label">高风险企业</div></div>
+<div class="stat-card amber"><div class="num" id="em-mid">--</div><div class="label">中风险企业</div></div>
+<div class="stat-card green"><div class="num" id="em-low">--</div><div class="label">低/一般风险</div></div>
+<div class="stat-card blue"><div class="num" id="em-dev">--</div><div class="label">监测设备</div></div>
 </div>
 
 <div class="map-container">
@@ -298,6 +298,29 @@ epbToast(name+' | '+e.district+' | 风险分:'+e.score+' '+riskText+' | '+e.issu
 function epbToast(msg){var t=document.createElement('div');t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1a2332;color:#e2e8f0;padding:10px 20px;border-radius:8px;border:1px solid #1e293b;z-index:9999;font-size:13px;max-width:90%';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove()},3000)}
 
 renderList();
+</script>
+<script>
+// 修真 2026-09-02：风险分布接 enterprises 真数据（50 家四档风险）
+function loadEmStats(){
+fetch('/api/enterprises/list?limit=200').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.enterprises){
+var high=0,mid=0,low=0;
+d.enterprises.forEach(function(e){
+if(e.risk_level==='高风险')high++;
+else if(e.risk_level==='中风险')mid++;
+else low++;
+});
+var _set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v};
+_set('em-high',high);_set('em-mid',mid);_set('em-low',low);
+}
+}).catch(function(){});
+fetch('/api/dept_stats').then(function(r){return r.json()}).then(function(d){
+if(d&&d.ok&&d.stats){
+var e4=document.getElementById('em-dev');if(e4)e4.textContent=d.stats.devices;
+}
+}).catch(function(){});
+}
+loadEmStats();
 </script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>

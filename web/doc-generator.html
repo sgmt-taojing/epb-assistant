@@ -270,6 +270,30 @@ lawText=lawMap[lawSel];
 var btn=document.getElementById('gen-btn');
 btn.disabled=true;btn.textContent='生成中...';
 
+// 修真 2026-09-02：真调 /api/generate_doc 生成 docx 文书（本地模板仅作即时预览）
+fetch('/api/generate_doc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+doc_type: currentType==='inspection_record'?'xcjcbl':currentType==='penalty_decision'?'xzcfjds':'xwjlb',
+case_data:{target_name:name,legal_rep:rep,credit_code:code,check_date:date,check_location:loc,inspector:inspector,violation_fact:fact,law_article:lawText,penalty_amount:amount,rectification_req:rectReq},
+format:'docx'
+})})
+.then(function(r){return r.json()})
+.then(function(d){
+if(d&&d.ok){
+var dl=document.getElementById('doc-download');
+if(!dl){
+dl=document.createElement('div');
+dl.id='doc-download';
+dl.style.cssText='margin:12px 0;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:8px;font-size:13px';
+var results=document.getElementById('doc-result')||document.querySelector('.doc-preview')||document.body;
+results.insertBefore(dl,results.firstChild);
+}
+dl.innerHTML='<b style="color:var(--accent)">✅ 正式文书已生成（编号 '+d.case_id+'）</b><br><a href="'+d.download_url+'" download="'+d.filename+'" style="color:var(--primary2)">⬇ 下载正式文书 '+d.filename+'</a><br><span style="color:var(--muted);font-size:11px">上方预览为格式参考，正式版本以此文件为准</span>';
+}else{
+epbToast('正式文书生成失败：'+(d&&d.error||'未知')+'（预览仍可用）');
+}
+})
+.catch(function(){epbToast('文书服务暂不可达，本地预览仍可用')});
+
 setTimeout(function(){
 var html='';
 var dateStr=date.replace(/-/g,'年').replace(/年(?=\d{2}$)/,'年')+'月'+'日';

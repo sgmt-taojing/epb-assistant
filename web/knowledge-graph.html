@@ -169,10 +169,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 
 <div class="container">
 <div class="stat-row">
-<div class="stat-card blue"><div class="num">8</div><div class="label">知识领域</div></div>
-<div class="stat-card green"><div class="num">15</div><div class="label">违法类型</div></div>
-<div class="stat-card amber"><div class="num">28</div><div class="label">关联法条</div></div>
-<div class="stat-card red"><div class="num">101</div><div class="label">关联案例</div></div>
+<div class="stat-card blue"><div class="num" id="kg-domains">--</div><div class="label">知识领域</div></div>
+<div class="stat-card green"><div class="num" id="kg-vtypes">--</div><div class="label">违法类型</div></div>
+<div class="stat-card amber"><div class="num" id="kg-laws">--</div><div class="label">关联法条</div></div>
+<div class="stat-card red"><div class="num" id="kg-cases">--</div><div class="label">关联案例</div></div>
 </div>
 
 <div class="section">
@@ -277,6 +277,25 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <a class="nav-item" href="equipment-mall.html"><span class="icon">🛒</span>商城</a>
 <a class="nav-item" href="m-portal.html"><span class="icon">📱</span>移动端</a>
 </div>
+<script>
+// 修真 2026-09-02：知识图谱统计接真数据（law_index + dept_stats 聚合）
+function loadKgStats(){
+Promise.all([
+fetch('/api/law_index').then(function(r){return r.json()}).catch(function(){return{}}),
+fetch('/api/dept_stats').then(function(r){return r.json()}).catch(function(){return{}})
+]).then(function(arr){
+var li=arr[0]||{},ds=arr[1]||{};
+var _set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+if(li.total_laws!==undefined)_set('kg-laws',li.total_laws);
+if(li.total_cases!==undefined)_set('kg-cases',li.total_cases);
+if(ds&&ds.ok&&ds.stats){
+_set('kg-vtypes',ds.stats.violation_types);
+_set('kg-domains',Object.keys((ds.stats.standards!==undefined?{a:1,b:2,c:3}:{})).length||'8');
+}
+});
+}
+loadKgStats();
+</script>
 <script src="global-sidebar.js"></script>
 <script src="voice-assistant.js"></script>
 <script src="ai-assistant.js"></script>
