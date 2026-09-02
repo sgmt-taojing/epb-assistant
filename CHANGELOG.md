@@ -16,3 +16,19 @@
 - 新增 COMPLIANCE.md（第三方依赖合规清单）
 - 新增 DISCLAIMER.md（服务边界免责声明）
 - 商用就绪度评分卡首评（详见 check-commercial-readiness.py）
+
+## 2026-09-02 · 全面 AI 化（AI 现场教练 · 外行变专业）
+
+### 新增核心能力
+- **coach_engine.py 指导引擎**：把 33 类专业检查项翻译成外行 5 步闭环指令（去哪看→看什么→怎么判断→拍什么→问什么），法条自动匹配（同义归一：危险废物→危废等）
+- **POST /api/coach/point**：单项 → 手把手指导卡（高风险项加急提示）
+- **POST /api/coach/checklist**：整单 → 逐项指导 + 高风险优先路线
+- **POST /api/voice_coach**：实时语音意图识别（7 类意图：coach/next_step/how_to/what_to_shoot/whom_to_ask/law/emergency），支持上下文模式（当前检查项感知）
+- **voice-coach.js 全局教练层**：69 页全站注入——连续聆听 + /api/voice_coach + 本地 TTS 播报 + 断网本地兜底
+- **inspection-workbench 指导卡**：每个检查项可展开「🧭 手把手指导」（位置/查法/拍照/话术/法条/异常处置 6 段式）+ 🔊 语音播报
+- **realtime-assistant 教练入口**：AI 现场教练主入口卡（启动教练/检查工作台/智能问答/应急指导）
+
+### 顺手修真
+- my-certificates.html：document.write 内嵌套 </script> 提前截断内联脚本（历史遗留语法错误）
+- admin.html：loadMonitorStats then 链缺闭合括号（历史遗留）
+- 全站 69 页 JS 语法 100% 全绿（含历史遗留 2 处修复）
