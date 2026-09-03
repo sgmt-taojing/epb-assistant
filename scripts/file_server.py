@@ -875,6 +875,41 @@ class EPBHandler(SimpleHTTPRequestHandler):
                         'msg': f"{d['item']} 记录停运/故障——生产期间治污设施停运涉嫌违法",
                         'ts': d['ts'], 'action': '《水污染防治法》第83条：不正常运行治污设施罚款10-100万；停运须报备并有应急措施'})
 
+            # ── 3.5 水量异常（相邻进水突增——冲击负荷预警） ──
+            flows = []
+            for l in ledger:
+                if l['category'] == '治污设施运行' and '水量' in (l['item'] or ''):
+                    try:
+                        flows.append(float(l['value']))
+                    except Exception:
+                        pass
+            if len(flows) >= 2:
+                latest_f, prev_f = flows[0], flows[1]
+                if prev_f > 0 and latest_f / prev_f >= 2:
+                    findings.append({'level': '中', 'type': '水量突增',
+                        'msg': f"进水量从 {prev_f} 突增至 {latest_f} m³（{latest_f/prev_f:.1f} 倍）——冲击负荷可能击穿生化系统",
+                        'ts': '', 'action': '核查是否生产放量或雨水混入；加大曝气与回流；记录应对措施'})
+                elif prev_f > 0 and latest_f / prev_f <= 0.2:
+                    findings.append({'level': '低', 'type': '水量骤降',
+                        'msg': f"进水量从 {prev_f} 骤降至 {latest_f} m³——减产或停产，注意保持设施最低运行负荷",
+                        'ts': '', 'action': '低负荷运行时保曝气防污泥死亡；停产检修须报备'})
+
+            # ── 3.6 监测断档（超 35 天无监测记录） ──
+            import re as _re
+            from datetime import datetime as _dt
+            if monitor:
+                try:
+                    last_ts = (monitor[0].get('ts') or '')[:19]
+                    if last_ts:
+                        last_dt = _dt.strptime(last_ts, '%Y-%m-%d %H:%M:%S')
+                        days = (_dt.now() - last_dt).days
+                        if days > 35:
+                            findings.append({'level': '中', 'type': '监测断档',
+                                'msg': f"最近监测记录距今 {days} 天——超出季度频次要求",
+                                'ts': last_ts, 'action': '按自行监测方案补测；断档期间执法检查视为未开展自行监测（罚2-20万）'})
+                except Exception:
+                    pass
+
             # ── 4. 监测频次合规提示 ──
             if monitor:
                 import time as _t
@@ -1025,6 +1060,36 @@ class EPBHandler(SimpleHTTPRequestHandler):
             except Exception:
                 doc_ok = False
 
+            # 生成 HTML 专业版（浏览器打开即可打印为 PDF）
+            html_name = f"enterprise_report_{_t.strftime('%Y%m%d%H%M%S')}.html"
+            html_path = os.path.join(out_dir, html_name)
+            try:
+                _esc = lambda s: str(s).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                _sections_html = ''
+                for sec, color in [(part1, '#3b82f6'), (part2, '#059669'), (part3, '#f59e0b'), (part4, '#8b5cf6')]:
+                    _sections_html += f'<section style="margin:24px 0"><h2 style="font-size:17px;color:{color};border-left:4px solid {color};padding-left:10px">{_esc(sec[0])}</h2>'
+                    for line in sec[1:]:
+                        _sections_html += f'<p style="margin:6px 0;font-size:13.5px;line-height:1.8">{_esc(line)}</p>'
+                    _sections_html += '</section>'
+                _html = f'''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><title>{_esc(ent_name)} 环保运行报告</title>
+<style>body{{font-family:'PingFang SC','Microsoft YaHei',sans-serif;max-width:800px;margin:0 auto;padding:40px 30px;color:#1e293b;background:#fff}}
+.cover{{text-align:center;padding:40px 0;border-bottom:3px double #059669;margin-bottom:20px}}
+.cover h1{{font-size:26px;color:#064e3b;margin:0}}.cover .meta{{font-size:13px;color:#64748b;margin-top:10px}}
+.sign{{margin-top:50px;display:flex;justify-content:space-around;font-size:14px}}
+.sign div{{border-top:1px solid #94a3b8;padding-top:6px;width:180px;text-align:center}}
+@media print{{body{{padding:10px}}}}</style></head><body>
+<div class="cover"><h1>{_esc(ent_name)}<br>环保运行报告</h1>
+<div class="meta">报告编号：{_esc(report_id)}　|　生成日期：{_esc(now)}　|　数据来源：企业环保台账（AI 采集）</div></div>
+{_sections_html}
+<div class="sign"><div>编制人</div><div>审核人</div><div>企业盖章</div></div>
+<p style="text-align:center;color:#94a3b8;font-size:11px;margin-top:30px">超级环保智能体生成 · 数据实时可溯 · 浏览器打印（⌘P）可导出 PDF</p>
+</body></html>'''
+                with open(html_path, 'w', encoding='utf-8') as f:
+                    f.write(_html)
+                html_ok = True
+            except Exception:
+                html_ok = False
+
             self._send_json({
                 'ok': True,
                 'report_id': report_id,
@@ -1037,6 +1102,7 @@ class EPBHandler(SimpleHTTPRequestHandler):
                     'suggestions': len(sugg),
                 },
                 'download_url': f'/outputs/{safe_name}' if doc_ok else None,
+                'html_url': f'/outputs/{html_name}' if html_ok else None,
                 'preview': full_text[:600],
             })
         except Exception as e:

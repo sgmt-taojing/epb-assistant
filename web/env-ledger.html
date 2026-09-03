@@ -210,11 +210,12 @@ function genReport(){
   .then(function(r){return r.json()})
   .then(function(d){
     if(!d.ok){ area.innerHTML = '<div class="empty" style="color:#ef4444">'+(d.error||'生成失败')+'</div>'; return; }
+    var htmlLink = d.html_url ? ' <a href="'+d.html_url+'" target="_blank" style="color:var(--g);font-size:13px">📄 专业版预览（可打印PDF）</a>' : '';
     area.innerHTML =
       '<div style="background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.3);border-radius:10px;padding:14px;font-size:13px">'
       + '<b style="color:var(--g)">✅ 报告已生成（'+d.report_id+'）</b><br>'
       + '<span style="color:var(--muted);font-size:12px">'+d.summary+'</span><br>'
-      + '<a href="'+d.download_url+'" download style="color:var(--b);font-size:13px">⬇ 下载完整报告（docx）</a>'
+      + '<a href="'+d.download_url+'" download style="color:var(--b);font-size:13px">⬇ 下载报告（docx）</a>' + htmlLink
       + '</div>';
   })
   .catch(function(){ area.innerHTML = '<div class="empty" style="color:#ef4444">报告服务暂不可达</div>'; });
