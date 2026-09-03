@@ -123,13 +123,20 @@ def score_row(row, terms, raw_q):
         score += 0.55
     # 类别加权：违法查处 / 法规条文 / 执法案例 / 企业管理 优先
     cat = (category or '').strip()
-    if cat in ('violation', 'law', 'case', 'enterprise', 'public_service'):
+    if cat in ('violation', 'law', 'case', 'enterprise', 'public_service', 'industry'):
         score += 0.10
     # 类别先验：违法查处与法规条文是最常问的
     if category in ('violation', 'law'):
         score += 0.03 * min(hits, 2)
     # 核心词强信号：2字以上词在标题命中 ≥2 个（如「台账」+「指南」）→ 追加
     title_hits = sum(1 for t in terms if len(t) >= 2 and t in (title or ''))
+    # 意图感知：问「怎么查/检查要点/清单」时行业指南（industry）优先于案例
+    _intent_guide = any(k in raw_q for k in ('检查什么', '怎么查', '怎么检查', '检查要点', '查什么', '检查清单', '怎么处理', '怎么办', '特点', '要求', '规范', '指南', '频次', '流程'))
+    if _intent_guide:
+        if cat == 'industry':
+            score += 0.35   # 指南型提问：行业要点优先
+        elif cat == 'case' and '案例' not in raw_q and '处罚' not in raw_q:
+            score -= 0.45   # 问指南时案例降权（问案例/处罚时案例仍优）
     if title_hits >= 2:
         score += 0.25
     elif title_hits == 1 and len(terms[0]) >= 2 and terms[0] in (title or ''):
@@ -159,12 +166,23 @@ def search_kb(conn, q, limit=5):
             fts_rows = []
     for t in short_terms:
         try:
+            # 标题命中优先排前（ORDER BY），再取窗口——防高频词把目标挤出
             like_rows.extend(cur.execute(
                 f'SELECT {_COLS} FROM kb_formal '
-                'WHERE (title LIKE ? OR content LIKE ? OR keywords LIKE ?) LIMIT 15',
-                (f'%{t}%', f'%{t}%', f'%{t}%')).fetchall())
+                'WHERE (title LIKE ? OR keywords LIKE ? OR content LIKE ?) '
+                'AND title NOT LIKE ? AND title NOT LIKE ? '
+                "ORDER BY (title LIKE ?) DESC, hit_count DESC LIMIT 15",
+                (f'%{t}%', f'%{t}%', f'%{t}%', '[环保监管-代码]%', '[环保监管]%', f'%{t}%')).fetchall())
         except Exception:
-            pass
+            # 兼容无 hit_count 列
+            try:
+                like_rows.extend(cur.execute(
+                    f'SELECT {_COLS} FROM kb_formal '
+                    'WHERE (title LIKE ? OR content LIKE ?) '
+                    'AND title NOT LIKE ? AND title NOT LIKE ? LIMIT 15',
+                    (f'%{t}%', f'%{t}%', '[环保监管-代码]%', '[环保监管]%')).fetchall())
+            except Exception:
+                pass
     rows = fts_rows + like_rows
     rows = [r for r in rows if not (r[1] or '').startswith(NOISE)]
     # 2) 全空时 LIKE 全词兜底（断网/索引损坏场景）

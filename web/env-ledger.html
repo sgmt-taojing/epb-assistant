@@ -56,6 +56,11 @@ td{padding:8px;border-bottom:1px solid var(--line)}
 
 <div class="card">
 <h3>📋 台账记录（最近 50 条 · 实时）</h3>
+<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+<button class="report-btn" onclick="analyzeLedger()">🤖 AI 异常检测</button>
+<button class="report-btn" onclick="exportLedger()">📥 导出台账（Excel）</button>
+</div>
+<div id="analyze-area"></div>
 <div id="ledger-list"><div class="empty">加载中…</div></div>
 </div>
 
@@ -163,6 +168,38 @@ function loadLedger(){
   }).catch(function(){
     document.getElementById('ledger-list').innerHTML = '<div class="empty" style="color:#ef4444">加载失败</div>';
   });
+}
+
+// ═══ AI 异常检测 + 导出 ═══
+function analyzeLedger(){
+  var area = document.getElementById('analyze-area');
+  area.innerHTML = '<div class="empty">AI 分析中…</div>';
+  var ent = document.getElementById('ent-name').value.trim();
+  fetch('/api/ledger/analyze', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({enterprise: ent})})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(!d.ok){ area.innerHTML=''; toast('分析失败：'+(d.error||'')); return; }
+    if(!d.findings_count){
+      area.innerHTML = '<div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px;font-size:13px">✅ 分析 '+d.analyzed+' 条记录，未发现异常。<div style="color:var(--muted);font-size:12px;margin-top:4px">'+(d.tips||[]).join('；')+'</div></div>';
+      return;
+    }
+    var html = '<div style="border:1px solid rgba(245,158,11,.35);border-radius:10px;padding:12px;margin-bottom:10px">'
+      + '<b style="font-size:13px;color:'+(d.high_count?'#ef4444':'#f59e0b')+'">🤖 AI 发现 '+d.findings_count+' 项异常（高危 '+d.high_count+' 项）</b>';
+    d.findings.forEach(function(f){
+      var c = f.level==='高' ? '#ef4444' : '#f59e0b';
+      html += '<div style="margin-top:8px;padding:8px;background:rgba(0,0,0,.02);border-radius:8px;font-size:12px">'
+        + '<b style="color:'+c+'">['+f.level+'·'+f.type+']</b> '+f.msg
+        + '<div style="color:var(--muted);margin-top:2px">→ '+f.action+'</div></div>';
+    });
+    html += '</div>';
+    area.innerHTML = html;
+  })
+  .catch(function(){ area.innerHTML=''; toast('网络异常'); });
+}
+function exportLedger(){
+  var ent = document.getElementById('ent-name').value.trim();
+  window.location.href = '/api/ledger/export?enterprise=' + encodeURIComponent(ent);
 }
 
 // ═══ 企业环保运行报告 ═══

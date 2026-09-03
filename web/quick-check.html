@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>排放快检 · 浓度 vs 国标秒判</title>
+<style>
+:root{--g:#059669;--b:#3b82f6;--a:#f59e0b;--r:#ef4444;--bg:#f6f8f7;--card:#fff;--line:#e2e8f0;--txt:#0f172a;--muted:#64748b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--txt);line-height:1.6}
+.hero{background:linear-gradient(135deg,#064e3b,#059669);color:#fff;padding:32px 20px;text-align:center}
+.hero h1{font-size:22px}.hero p{font-size:13px;opacity:.85;margin-top:4px}
+.container{max-width:760px;margin:-18px auto 0;padding:0 16px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px}
+.card h3{font-size:15px;margin-bottom:14px;padding-left:10px;border-left:4px solid var(--g)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-group label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:var(--card);color:var(--txt)}
+.btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.result{margin-top:16px;display:none}
+.risk-card{border-radius:12px;padding:16px;margin-bottom:10px}
+.risk-high{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3)}
+.risk-ok{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3)}
+.big-num{font-size:36px;font-weight:800}
+.law-ref{font-size:12px;color:var(--muted);background:#f8fafc;border-radius:8px;padding:10px;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px}
+.kv b{display:block;font-size:16px}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>🔬 排放快检</h1>
+<p>输入污染物浓度 → 秒级比对国标限值 → 风险判定 + 法条 + 案例</p>
+</div>
+<div class="container">
+<div class="card">
+<h3>快速判定</h3>
+<div class="form-row">
+<div class="form-group"><label>污染物</label>
+<select id="pollutant" onchange="loadStd()">
+<option value="COD">COD（化学需氧量）</option>
+<option value="氨氮">氨氮</option>
+<option value="总磷">总磷</option>
+<option value="pH">pH</option>
+<option value="SS">SS（悬浮物）</option>
+<option value="SO2">SO₂（二氧化硫）</option>
+<option value="颗粒物">颗粒物</option>
+<option value="VOCs">VOCs</option>
+</select></div>
+<div class="form-group"><label>监测浓度</label><input id="value" type="number" step="0.01" placeholder="如 38"></div>
+</div>
+<button class="btn" onclick="doCheck()">⚡ 立即判定</button>
+<div class="result" id="result"></div>
+</div>
+<div class="card">
+<h3>判定依据说明</h3>
+<p style="font-size:13px;color:var(--muted)">比对《污水综合排放标准》GB 8978-1996、《大气污染物综合排放标准》GB 16297-1996 等 37 项国标/行标限值；超标自动关联《水污染防治法》第83条 / 《大气污染防治法》第99条处罚条款（10-100万）及同类执法案例。</p>
+</div>
+</div>
+<script>
+function loadStd(){}
+function doCheck(){
+var p = document.getElementById('pollutant').value;
+var v = parseFloat(document.getElementById('value').value);
+if(!v && v !== 0){ alert('请输入浓度值'); return; }
+fetch('/api/quick_check', {method:'POST', headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({pollutant: p, value: v})})
+.then(function(r){return r.json()})
+.then(function(d){
+  var box = document.getElementById('result');
+  box.style.display = 'block';
+  if(!d.ok){ box.innerHTML = '<div class="risk-card risk-high">⚠️ '+(d.error||'判定失败')+'</div>'; return; }
+  var r = d.result;
+  var cls = r.exceeded ? 'risk-high' : 'risk-ok';
+  var color = r.exceeded ? '#ef4444' : '#10b981';
+  var html = '<div class="risk-card '+cls+'">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<div><div class="big-num" style="color:'+color+'">'+(r.exceeded?'✗ 超标':'✓ 达标')+'</div>'
+    + '<div style="font-size:13px;color:var(--muted)">'+r.std_name+'（'+r.std_code+'）'+(r.std_level?' '+r.std_level:'')+'</div></div>'
+    + '<div style="text-align:right;font-size:13px">实测 <b style="font-size:20px;color:'+color+'">'+r.value+'</b> '+r.unit+'<br>限值 '+r.limit+' '+r.unit
+    + (r.exceeded?'<br>超限 <b style="color:#ef4444">'+r.over_pct+'%</b>（'+r.ratio+' 倍）':'')+'</div></div>'
+    + (r.risk_level?'<div style="margin-top:8px;font-size:13px">风险等级：<b style="color:'+color+'">'+r.risk_level+'</b></div>':'')
+    + (r.advice?'<div style="margin-top:6px;font-size:12px;color:var(--muted)">'+r.advice+'</div>':'');
+  if(r.law_refs && r.law_refs.length){
+    html += '<div class="law-ref">⚖️ 关联法条：'+r.law_refs.map(function(l){return l.title||l.entry_id}).join(' · ')+'</div>';
+  }
+  if(r.case_refs && r.case_refs.length){
+    html += '<div class="law-ref">📚 同类案例：'+r.case_refs.map(function(c){return c.title}).slice(0,3).join(' · ')+'</div>';
+  }
+  html += '</div>';
+  box.innerHTML = html;
+})
+.catch(function(){
+  document.getElementById('result').style.display='block';
+  document.getElementById('result').innerHTML='<div class="risk-card risk-high">网络异常，请重试</div>';
+});
+}
+</script>
+<script src="voice-assistant.js"></script>
+<script src="voice-coach.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>

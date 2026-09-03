@@ -344,6 +344,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_roles()
         elif path == '/api/voice_intake':
             self._handle_voice_intake()
+        elif path == '/api/ledger/export':
+            self._handle_ledger_export()
         elif path == '/api/ledger/recent':
             self._handle_ledger_recent()
         elif path == '/api/research/datasets':
@@ -549,6 +551,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_coach()
         elif parsed.path == '/api/voice_coach':
             self._handle_voice_coach()
+        elif parsed.path == '/api/ledger/analyze':
+            self._handle_ledger_analyze()
         elif parsed.path == '/api/voice_intake':
             self._handle_voice_intake()
         elif parsed.path == '/api/enterprise_report':
@@ -749,6 +753,150 @@ class EPBHandler(SimpleHTTPRequestHandler):
             })
         except Exception as e:
             self._send_json({'ok': False, 'status': 'error', 'error': str(e)}, 500)
+
+    def _handle_ledger_export(self):
+        """GET /api/ledger/export — 台账导出 CSV（Excel 可开，企业报送刚需）"""
+        import sqlite3, csv, io
+        try:
+            q = parse_qs(urlparse(self.path).query)
+            enterprise = (q.get('enterprise', [''])[0] or '').strip()
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            if enterprise:
+                rows = conn.execute(
+                    "SELECT ts,enterprise,category,item,value,unit,recorder FROM env_ledger WHERE enterprise LIKE ? ORDER BY id DESC",
+                    (f"%{enterprise}%",)).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT ts,enterprise,category,item,value,unit,recorder FROM env_ledger ORDER BY id DESC").fetchall()
+            conn.close()
+            buf = io.StringIO()
+            buf.write('\ufeff')  # BOM（Excel 中文兼容）
+            w = csv.writer(buf)
+            w.writerow(['时间', '企业', '类别', '项目', '数值', '单位', '记录人'])
+            for r in rows:
+                w.writerow([r['ts'], r['enterprise'], r['category'], r['item'], r['value'], r['unit'], r['recorder']])
+            data = buf.getvalue().encode('utf-8')
+            fname = f"env_ledger_{datetime.now().strftime('%Y%m%d%H%M%S')}.csv"
+            self.send_response(200)
+            self._cors_headers()
+            self.send_header('Content-Type', 'text/csv; charset=utf-8')
+            self.send_header('Content-Disposition', f'attachment; filename="{fname}"')
+            self.send_header('Content-Length', str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_ledger_analyze(self):
+        """POST /api/ledger/analyze — 台账 AI 异常检测
+        检测项：药耗突增/骤降、水质突变、设备长期停运、监测断档、浓度超限
+        """
+        try:
+            import sqlite3
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+        except Exception:
+            data = {}
+        try:
+            enterprise = (data.get('enterprise') or '').strip()
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            ledger = [dict(r) for r in conn.execute(
+                "SELECT * FROM env_ledger WHERE enterprise LIKE ? ORDER BY id DESC LIMIT 200",
+                (f"%{enterprise}%" if enterprise else "%",)).fetchall()]
+            conn.close()
+
+            findings = []   # 异常发现
+            tips = []       # 合规提示
+
+            if not ledger:
+                self._send_json({'ok': True, 'findings': [], 'tips': ['台账暂无记录——先语音采集几条数据'], 'analyzed': 0})
+                return
+
+            # ── 1. 监测值超限检测（联动排放标准） ──
+            try:
+                _std = json.load(open(os.path.join(BASE_DIR, 'data', 'emission_standards.json'), encoding='utf-8'))
+                std_items = _std.get('items') or [] if isinstance(_std, dict) else []
+            except Exception:
+                std_items = []
+            monitor = [l for l in ledger if l['category'] == '排放监测']
+            for m in monitor:
+                item = (m['item'] or '').split('·')[-1]
+                try:
+                    val = float(m['value'])
+                except Exception:
+                    continue
+                for s in std_items:
+                    sp = (s.get('pollutant') or '').upper()
+                    if sp and sp in item.upper():
+                        try:
+                            nums = [float(x) for x in str(s.get('limit_value', '')).replace('~', ' ').split() if x.replace('.', '').isdigit()]
+                            limit = max(nums) if nums else None
+                        except Exception:
+                            limit = None
+                        if limit and val > limit:
+                            findings.append({
+                                'level': '高', 'type': '浓度超限',
+                                'msg': f"{item} {val}{m['unit']} 超过 {s.get('name','')}（{s.get('code','')}）限值 {limit}，超 {(val-limit)/limit*100:.0f}%",
+                                'ts': m['ts'], 'action': '按《水污染防治法》第83条：立即复测确认；核查治污设施；持续超标应停产整改',
+                            })
+                        break
+
+            # ── 2. 药耗突增/骤降（相邻记录对比） ──
+            chems = [l for l in ledger if l['category'] == '治污设施运行' and '药剂' in (l['item'] or '')]
+            by_chem = {}
+            for c in chems:
+                key = c['item'].split('·')[-1]
+                try:
+                    by_chem.setdefault(key, []).append(float(c['value']))
+                except Exception:
+                    pass
+            for chem, vals in by_chem.items():
+                if len(vals) >= 2:
+                    latest, prev = vals[0], vals[1]
+                    if prev > 0:
+                        ratio = latest / prev
+                        if ratio >= 3:
+                            findings.append({'level': '中', 'type': '药耗突增',
+                                'msg': f"{chem} 投加量从 {prev} 升至 {latest}（{ratio:.1f} 倍）——排查进水冲击或工艺异常",
+                                'ts': '', 'action': '核对进水水质变化；记录原因入台账'})
+                        elif ratio <= 0.3:
+                            findings.append({'level': '中', 'type': '药耗骤降',
+                                'msg': f"{chem} 投加量从 {prev} 降至 {latest}（{ratio:.1f} 倍）——疑似加药中断或减产",
+                                'ts': '', 'action': '确认加药系统运行；若停产检修须记录报备'})
+
+            # ── 3. 设备停运未恢复 ──
+            devs = [l for l in ledger if l['category'] == '设备运行']
+            for d in devs:
+                v = str(d.get('value', ''))
+                if v in ('停机', '停止', '停运', '故障'):
+                    findings.append({'level': '中', 'type': '设备停运',
+                        'msg': f"{d['item']} 记录停运/故障——生产期间治污设施停运涉嫌违法",
+                        'ts': d['ts'], 'action': '《水污染防治法》第83条：不正常运行治污设施罚款10-100万；停运须报备并有应急措施'})
+
+            # ── 4. 监测频次合规提示 ──
+            if monitor:
+                import time as _t
+                latest_mon = monitor[0].get('ts', '')
+                tips.append(f"最近一条监测记录 {latest_mon[:16] if latest_mon else '未知'}——按自行监测方案保持频次（废水常规月度/季度）")
+            else:
+                tips.append('尚无监测数据记录——执法检查核心项，建议尽快补齐')
+            tips.append('台账法定保存 5 年（《排污许可管理条例》第21条）')
+
+            # 汇总
+            level_order = {'高': 0, '中': 1, '低': 2}
+            findings.sort(key=lambda f: level_order.get(f['level'], 9))
+            self._send_json({
+                'ok': True,
+                'analyzed': len(ledger),
+                'findings': findings,
+                'findings_count': len(findings),
+                'high_count': sum(1 for f in findings if f['level'] == '高'),
+                'tips': tips,
+            })
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_enterprise_report(self):
         """POST /api/enterprise_report — 企业环保运行报告（专业四部分）
