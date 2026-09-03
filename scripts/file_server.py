@@ -422,6 +422,12 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_monitor_overview()
         elif path.startswith('/api/equipment/'):
             self._handle_equipment_detail(path.split('/')[-1])
+        elif path == '/api/roles/meta':
+            self._handle_roles_meta()
+        elif path == '/api/role/dashboard':
+            self._handle_role_dashboard()
+        elif path == '/api/ask':
+            self._handle_ask_role()
         elif path == '/api/enterprises/list':
             self._handle_enterprises_list()
         # /api-data/ 静态JSON（GitHub Pages fallback）
@@ -565,6 +571,8 @@ class EPBHandler(SimpleHTTPRequestHandler):
             self._handle_av_captures_recent()
         elif parsed.path == '/api/alert_devices':
             self._handle_alert_devices()
+        elif parsed.path == '/api/ask':
+            self._handle_ask_role()
         elif parsed.path == '/api/alert_emit':
             self._handle_alert_emit()
         elif parsed.path == '/api/alerts/stats':
@@ -2143,6 +2151,158 @@ class EPBHandler(SimpleHTTPRequestHandler):
                 'std_name': std_name,
             }
         })
+
+    def _handle_role_dashboard(self):
+        """GET /api/role/dashboard?role=xxx — 角色化首页数据
+        返回：角色人格 + 推荐工具 + 该角色专属指标（按 family 路由）
+        """
+        try:
+            import sys as _sys
+            _sys.path.insert(0, os.path.join(BASE_DIR, 'scripts'))
+            import role_persona, sqlite3
+            from urllib.parse import urlparse, parse_qs
+            q = parse_qs(urlparse(self.path).query)
+            role_id = (q.get('role', ['public'])[0] or 'public').strip()
+            role = role_persona.get_role(role_id)
+            family = role['family']
+
+            # 按 family 拉取指标
+            dashboard = {'role': role_id, 'family': family, 'greeting': role['greeting'],
+                'persona': role['persona'], 'favs': role['favs'],
+                'hot_actions': role.get('hot_actions', []),
+                'tip': role.get('tip', ''),
+                'family_meta': role_persona.get_families_meta().get(family, {})}
+            try:
+                conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+                conn.row_factory = sqlite3.Row
+                if family == '执法':
+                    cur = conn.execute("SELECT COUNT(*) c FROM cases WHERE date >= date('now','-30 day')")
+                    dashboard['cases_30d'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM alerts")
+                    dashboard['alerts_total'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM tasks WHERE status='open'")
+                    dashboard['tasks_open'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM reports")
+                    dashboard['reports_total'] = cur.fetchone()['c']
+                elif family == '企业':
+                    cur = conn.execute("SELECT COUNT(*) c FROM enterprises")
+                    dashboard['enterprises_total'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM env_ledger")
+                    dashboard['ledger_records'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM emission_standards")
+                    dashboard['standards_count'] = cur.fetchone()['c']
+                elif family == '服务':
+                    cur = conn.execute("SELECT COUNT(*) c FROM kb_formal")
+                    dashboard['kb_total'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM research_datasets")
+                    dashboard['datasets'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM laws")
+                    dashboard['laws_total'] = cur.fetchone()['c']
+                elif family == '公众':
+                    dashboard['hotline'] = '12369（环保举报）'
+                    dashboard['reward_hint'] = '举报属实可获 5千-5万奖励'
+                elif family == '平台':
+                    cur = conn.execute("SELECT COUNT(*) c FROM users")
+                    dashboard['users'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM cases")
+                    dashboard['cases'] = cur.fetchone()['c']
+                    cur = conn.execute("SELECT COUNT(*) c FROM tasks")
+                    dashboard['tasks'] = cur.fetchone()['c']
+                conn.close()
+            except Exception as e:
+                dashboard['stats_error'] = str(e)
+
+            # 推荐工具 HTML 锚点
+            dashboard['tool_urls'] = {
+                'field-terminal': '/field-terminal.html', 'case-analysis': '/case-analysis.html',
+                'penalty-calculator': '/penalty-calculator.html', 'doc-generator': '/doc-generator.html',
+                'smart-alert': '/smart-alert.html', 'risk-profile': '/risk-profile.html',
+                'monitor-overview': '/monitor-overview.html', 'research-data': '/research-data.html',
+                'admin': '/admin.html', 'eco-manager': '/eco-manager.html',
+                'iot': '/iot.html', 'iot-diagnostic': '/iot-diagnostic.html',
+                'law-library': '/law-library.html', 'env-ledger': '/env-ledger.html',
+                'quick-check': '/quick-check.html', 'self-check': '/self-check.html',
+                'training': '/training.html', 'remote-enforcement': '/remote-enforcement.html',
+                'ask': '/ask.html', 'report': '/report.html', 'demo': '/demo.html',
+            }
+            self._send_json(dashboard)
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_ask_role(self):
+        """POST /api/ask — 角色化问答
+        Body: {q, role, context}
+        按角色注入 persona 到 system prompt
+        """
+        try:
+            import sys as _sys
+            _sys.path.insert(0, os.path.join(BASE_DIR, 'scripts'))
+            import role_persona, kb_qa, sqlite3
+            length = int(self.headers.get('Content-Length', 0) or 0)
+            data = json.loads(self.rfile.read(length) if length > 0 else b'{}')
+            q = (data.get('q') or data.get('query') or '').strip()
+            role_id = (data.get('role') or 'public').strip()
+            role = role_persona.get_role(role_id)
+            conn = sqlite3.connect(os.path.join(DB_DIR, 'epb.db'))
+            conn.row_factory = sqlite3.Row
+            scored, t = kb_qa.search_kb(conn, q, limit=5)
+            top = scored[0] if scored else (0.0, None)
+            score, row = top
+            persona_prefix = f"[角色:{role['family']}-{role_id}] {role['persona']}\n\n"
+            if not q:
+                self._send_json({'ok': False, 'error': 'q 不能为空'}, 400); return
+            if row is None or score < 0.4:
+                # 角色化兜底
+                family_advice = {
+                    '执法': '请描述具体场景（现场/案件/对象），我帮你匹配法规与案例。',
+                    '企业': '请告诉我您企业的行业类别与具体场景，我给合规建议。',
+                    '服务': '提供项目背景与诉求，我匹配知识库与工具链。',
+                    '公众': '您可以说得更具体些，比如「附近的工厂有异响」「河水变色」等。',
+                    '平台': '请描述问题（用户/数据/系统），我调后台指标分析。',
+                }.get(role['family'], '请补充问题细节。')
+                self._send_json({
+                    'ok': True, 'tier': 'miss', 'score': score, 'query': q,
+                    'role': role_id, 'family': role['family'],
+                    'answer': persona_prefix + family_advice,
+                    'sources': [], 'related': [], 'kb_total': conn.execute("SELECT COUNT(*) FROM kb_formal").fetchone()[0],
+                })
+                conn.close(); return
+            # 命中后输出——角色化前缀
+            tier = 'direct' if score >= 0.7 else 'summary'
+            answer = (row[2] or '')[:600]
+            answer = persona_prefix + '【' + row[1] + '】\n\n' + answer
+            related = []
+            for s, r in scored[1:4]:
+                if r and r[0] != row[0]:
+                    related.append({'entry_id': r[0], 'title': r[1], 'category': r[5], 'score': round(s, 3)})
+            self._send_json({
+                'ok': True, 'tier': tier, 'score': round(score, 3), 'query': q,
+                'role': role_id, 'family': role['family'],
+                'answer': answer, 'sources': [{'entry_id': row[0], 'title': row[1], 'category': row[5]}],
+                'related': related, 'latency_ms': 0,
+                'kb_total': conn.execute("SELECT COUNT(*) FROM kb_formal").fetchone()[0],
+            })
+            conn.close()
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
+
+    def _handle_roles_meta(self):
+        """GET /api/roles/meta — 角色列表（带 family/图标/人设摘要）"""
+        try:
+            import sys as _sys
+            _sys.path.insert(0, os.path.join(BASE_DIR, 'scripts'))
+            import role_persona
+            out = []
+            for rid, r in role_persona.ROLES.items():
+                out.append({
+                    'role_id': rid, 'family': r['family'], 'greeting': r['greeting'],
+                    'persona': r['persona'][:50] + ('...' if len(r['persona']) > 50 else ''),
+                    'favs_count': len(r['favs']),
+                })
+            self._send_json({'ok': True, 'count': len(out), 'roles': out,
+                'families': role_persona.get_families()})
+        except Exception as e:
+            self._send_json({'ok': False, 'error': str(e)}, 500)
 
     def _handle_enterprises_list(self):
         """GET /api/enterprises/list — 企业清单（db/epb.db enterprises 真数据）"""

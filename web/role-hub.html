@@ -38,6 +38,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 <a href="login.html" style="padding:8px 20px;border:none;border-radius:10px;background:var(--g);color:#fff;font-size:13px;text-decoration:none;cursor:pointer">登录</a>
 </div>
 
+<!-- 登录态专属快捷动作区（role-hub 千人千面） -->
+<div id="personal-block" style="display:none;margin-bottom:16px"></div>
+
+<style>
+.personal{background:#fff;border:2px solid var(--accent,#059669);border-radius:14px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+.personal::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,#059669)}
+.personal h3{margin:0;font-size:16px;color:var(--accent,#059669);display:flex;align-items:center;gap:8px}
+.personal .ptip{font-size:13px;color:var(--muted);margin:8px 0 14px;padding:8px 12px;background:#f1f5f9;border-radius:8px}
+.personal .pacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.personal .pact{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;text-decoration:none;color:var(--txt);transition:all .2s;display:flex;gap:10px;align-items:center}
+.personal .pact:hover{border-color:var(--accent);background:#fff;transform:translateY(-1px)}
+.personal .pact .ic{font-size:24px}
+.personal .pact .nm{font-size:14px;font-weight:600}
+.personal .pact .ds{font-size:11px;color:var(--muted);margin-top:2px}
+</style>
+
 <div class="family">🏛️ 监管执法族</div>
 <div class="grid">
 <a class="tool" href="inspection-workbench.html"><span class="ic">📋</span><h4>执法检查工作台</h4><p>清单生成→手把手指导→提交→文书→落库</p><div class="loop">✓ 全闭环</div></a>
@@ -75,13 +91,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 </div>
 <script src="api-fallback.js"></script>
 <script>
-// 登录态感知：显示当前角色
+// 登录态感知 + 千人千面专属动作区
 (function(){
 try{
   var u = JSON.parse(localStorage.getItem('epb_user')||'{}');
   if(u && u.role){
     var who = document.getElementById('who');
     who.innerHTML = '👤 '+(u.name||u.phone)+' <span style="color:var(--g)">['+(u.roleName||u.role)+']</span><small>'+(u.org||'')+' · 已登录，专属工具已就绪</small>';
+
+    // 拉专属 dashboard（hot_actions + tip + family_meta）
+    fetch('/api/role/dashboard?role='+encodeURIComponent(u.role))
+      .then(function(r){return r.json()}).then(function(d){
+        if(!d || d.error) return;
+        var fm = d.family_meta || {};
+        var accent = fm.color || '#059669';
+        var acts = d.hot_actions || [];
+        if(!acts.length) return;
+        var html = '<div class="personal" style="--accent:'+accent+'">'
+          + '<h3>'+(fm.icon||'⭐')+' '+u.roleName+' · '+d.family+'族</h3>'
+          + (d.tip ? '<div class="ptip">💡 '+d.tip+'</div>' : '')
+          + '<div class="pacts">';
+        acts.forEach(function(a){
+          html += '<a class="pact" href="'+a.url+'"><span class="ic">'+a.icon+'</span><div><div class="nm">'+a.name+'</div><div class="ds">'+a.desc+'</div></div></a>';
+        });
+        html += '</div></div>';
+        var pb = document.getElementById('personal-block');
+        pb.innerHTML = html;
+        pb.style.display = 'block';
+        // 同时给页面顶部主色 accent 注入
+        document.documentElement.style.setProperty('--accent', accent);
+      }).catch(function(){});
   }
 }catch(e){}
 })();
